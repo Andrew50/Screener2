@@ -25,14 +25,17 @@ class Data:
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         screener_data = df
         numTickers = len(screener_data)
-        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
-        index = len(data_apple) - 1
+        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=3500)
+        index = len(data_apple) -1
+        print(data_apple)
+       
         if datetime.now().hour > 12:
-            last = data_apple.index[index]
+            last = data_apple.iloc[index]['Datetime']
         else:
-            last = data_apple.index[index - 1]
+            last = data_apple.iloc[index - 1]['Datetime']
         lastSplit = str(last).split(" ")
         lastDStock = lastSplit[0]
+        
         for i in range(numTickers):
 
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
@@ -59,23 +62,21 @@ class Data:
                         
                         cs['datetime'] = pd.to_datetime(cs['datetime'])
                         df1 = cs.set_index('datetime')
-
                         lastDStockval = datetime.strptime(lastDStock, '%Y-%m-%d')
                         lastDayval = datetime.strptime(lastDay, '%Y-%m-%d')
-
-
-                        lastDStockval = data_apple.index[lastDStock]
-                        lastDayval = data_apple.index[lastDay]
-
-                        requireddays =lastDStockval - lastDayval
-                        df2 = tv.get_hist(ticker, exchange, n_bars=requireddays)
-
+                        requireddays = (lastDStockval - lastDayval).days
+                        dfx = tv.get_hist(ticker, exchange, n_bars=requireddays)
+                        x = 0
+                        for bar in dfx.itertuples():
                         
-                        
+                            if bar[0] == lastDayval:
+                                break
+                            x += 1
+                        df2 = dfx.truncate(before=x)
                         cs = pd.concat([df1, df2])
                         cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                        
-                        print(f"{ticker} appended with {requireddays} days {i}")
+                      
+                        print(f"{ticker} appended with {requireddays-x + 1} bars {i}")
 
 
                         #cs['datetime'] = pd.to_datetime(cs['datetime'])
