@@ -9,9 +9,8 @@ import matplotlib as mpl
 import pathlib
 import math
 import os 
-from datetime import datetime, timedelta
 class Data:
-    def findIndex(self,df, dateTo):
+    def findIndex(df, dateTo):
         for i in range(len(df)):
             dateTimeOfDay = df.index[i]
             dateSplit = str(dateTimeOfDay).split(" ")
@@ -20,38 +19,27 @@ class Data:
                 return i
 
         return 99999
-    def isDataUpdated(self):
-        df = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+    def isDataUpdated(self, df):
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         screener_data = df
         numTickers = len(screener_data)
-        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=3500)
-        index = len(data_apple) -1
-        print(data_apple)
-       
-        if datetime.now().hour > 12:
-            last = data_apple.iloc[index]['Datetime']
-        else:
-            last = data_apple.iloc[index - 1]['Datetime']
+        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
+        last = data_apple.index[0]
         lastSplit = str(last).split(" ")
         lastDStock = lastSplit[0]
-        
         for i in range(numTickers):
 
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
                 screener_data.at[i, 'Exchange'] = "AMEX"
-
-
         for i in range(numTickers):
             ticker = screener_data.iloc[i]['Ticker']
             exchange = screener_data.iloc[i]['Exchange']
             try:
                 if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
-                   
                     data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
                     data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                    print(f"{ticker} created {i}")
-                    
+                    print(f"{ticker} created #{i}")
+        
                 else:
                     cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                     lastDayTime = cs.iloc[len(cs)-1]['datetime']
@@ -59,42 +47,29 @@ class Data:
                     lastDay = lastDaySplit[0]
           
                     if (lastDay != lastDStock):
-                        
                         cs['datetime'] = pd.to_datetime(cs['datetime'])
-                        df1 = cs.set_index('datetime')
-                        lastDStockval = datetime.strptime(lastDStock, '%Y-%m-%d')
-                        lastDayval = datetime.strptime(lastDay, '%Y-%m-%d')
-                        requireddays = (lastDStockval - lastDayval).days
-                        dfx = tv.get_hist(ticker, exchange, n_bars=requireddays)
-                        x = 0
-                        for bar in dfx.itertuples():
-                        
-                            if bar[0] == lastDayval:
-                                break
-                            x += 1
-                        df2 = dfx.truncate(before=x)
-                        cs = pd.concat([df1, df2])
+                        cs = cs.set_index('datetime')
+                        data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
+                        scrapped_data_index = self.findIndex(data_daily, lastDay)
+                        need_append_data = data_daily[scrapped_data_index+1:]
+                        print(need_append_data.head())
+                        cs = pd.concat([cs, need_append_data])
                         cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                      
-                        print(f"{ticker} appended with {requireddays-x + 1} bars {i}")
-
-
-                        #cs['datetime'] = pd.to_datetime(cs['datetime'])
-                       # cs = cs.set_index('datetime')
-                        #data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
-                      #  scrapped_data_index = (data_daily, lastDay)
-                     #   need_append_data = data_daily[scrapped_data_index+1:]
-                     #   print(need_append_data.head())
-                    #    cs = pd.concat([cs, need_append_data])
-                      #  cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                     #   numRows = len(need_append_data)
-                      #  print(f"{ticker} appended with {numRows} {i}")
+                        numRows = len(need_append_data)
+                        print(f"{ticker} appended with {numRows} #{i}")
                     else:
-                        print(f"{ticker} approved {i}")
+                        print(f"{ticker} approved #{i}")
             except TimeoutError:
                 print(ticker + " timed out")
-            except RuntimeError:
-                print(ticker + " timed out2")
-Data.isDataUpdated(Data)
+
+
+        return 'done'
+start = datetime.datetime.now()
+screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+Data.isDataUpdated(Data, screener_data)
+
+print(start)
+print(datetime.datetime.now())
+
 
 
