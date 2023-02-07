@@ -25,12 +25,13 @@ warnings.filterwarnings("ignore")
 class Daily:
 
     #def __init__(self):
-     #   print("init")
+    
     def sfindIndex(df, dateTo):
         for i in range(len(df)):
             dateTimeOfDay = df.iloc[i]['datetime']
             dateSplit = str(dateTimeOfDay).split(" ")
             date = dateSplit[0]
+        
             if(date == dateTo):
                 return i
 
@@ -42,7 +43,7 @@ class Daily:
         chartSize = 80
         rightbuffer = 20
         sMR = True
-        sEP = True
+        sEP = False
         sPivot = False
         sFlag = False
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
@@ -52,6 +53,7 @@ class Daily:
         s  = mpf.make_mpf_style(marketcolors=mc)
 
             #Loop stocks in screen
+        
         for i in range(numTickers):
             tick = str(screener_data.iloc[i]['Ticker'])
             exchange = str(screener_data.iloc[i]['Exchange'])
@@ -61,33 +63,37 @@ class Daily:
             dolVol = screener_data.iloc[i]['Volume*Price']
             # Gaps Check 
             #print(tick + f" {i}")
-            data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
+            if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
+                data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
-            if len(data_daily_full) > 50:
-                indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
-                if(indexOfDay != 99999):
-                    if (dateToSearch == "0"):
-                        pmPrice = prevClose + pmChange
-                        rightedge = len(data_daily_full)
-                    else:
-                        pmPrice = data_daily_full.iloc[indexOfDay][2]
-                        if len(data_daily_full) - indexOfDay > rightbuffer:
-                            rightedge = indexOfDay+rightbuffer
-                            currentday = chartSize-rightbuffer
-                        else:
+                if len(data_daily_full) > 50:
+                
+                    indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
+                    if(indexOfDay != 99999):
+                    
+                        if (dateToSearch == "0"):
+                            pmPrice = prevClose + pmChange
                             rightedge = len(data_daily_full)
-                            currentday = len(data_daily)-(len(data_daily_full) - rightedge)
+                        else:
+                            pmPrice = data_daily_full.iloc[indexOfDay][2]
+                            if len(data_daily_full) - indexOfDay > rightbuffer:
+                                rightedge = indexOfDay+rightbuffer
+                                currentday = chartSize-rightbuffer
+                            else:
+                                rightedge = len(data_daily_full)
+                                currentday = chartSize-(len(data_daily_full) - rightedge)
 
 
 
-                    data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
-                    data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
-                    data_daily = data_daily.set_index('Datetime')
-                    data_daily = data_daily.drop(['datetime'], axis=1)
-                    #print(rightedge)
-                    #print(len(data_daily_full))
-                    self.EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sEP, s)
-                    self.MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sMR, s)
+                        data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
+                        data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
+                        data_daily = data_daily.set_index('Datetime')
+                        data_daily = data_daily.drop(['datetime'], axis=1)
+                        #print(rightedge)
+                        #print(len(data_daily_full))
+                    
+                        self.EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sEP, s)
+                        self.MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sMR, s)
 
     def EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, EP, s):
         if(dolVol > 1000000 and volume>150000 and currPrice > 3 and EP):
@@ -128,7 +134,7 @@ class Daily:
 
                                 #MR###############################################################################
     def MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, MR, s):
-        if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
+        if(dolVol > 1000000 * 1000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
             try: 
                 
                 zfilter = 3.2
@@ -189,17 +195,18 @@ class Daily:
             except FileNotFoundError:
                 print(tick + " does not have a file")   
         return 'done'
-
-    
-
-
-    
     
 
     
 
 
-Daily.runDaily(Daily,'2022-05-12')
+    
+    
+
+    
+
+
+#Daily.runDaily(Daily,'2022-05-12')
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Pivot):
 
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Flag):

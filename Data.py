@@ -106,9 +106,6 @@ class Data:
 
         return 'done'
 
-screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-print(Data.isMarketClosed())
-Data.isDataUpdated(Data, screener_data)
 
 
 
