@@ -22,16 +22,12 @@ from discordManager import discordManager as dM
 
 
 class Screen:
-    def Daily(self):
-        def findIndex(df, dateTo):
-            for i in range(len(df)):
-                dateTimeOfDay = df.iloc[i]['datetime']
-                dateSplit = str(dateTimeOfDay).split(" ")
-                date = dateSplit[0]
-                if(date == dateTo):
-                    return i
+    def runDailyScan():
 
-            return 99999
+
+
+
+
 
 
         options = Options()
@@ -86,7 +82,7 @@ class Screen:
         print(f'Scraping {url}...')
         time.sleep(20)
         print('wait over')
-        
+
             
 
         #setting default scanner settings
