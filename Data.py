@@ -20,28 +20,32 @@ class Data:
             if(date == dateTo):
                 return i
 
-    return 99999
-def isDataUpdated(df):
-    tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-    screener_data = df
-    numTickers = len(screener_data)
-    data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
-    last = data_apple.index[0]
-    lastSplit = str(last).split(" ")
-    lastDStock = lastSplit[0]
-    for i in range(numTickers):
+        return 99999
+    def isDataUpdated():
+        df = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+        screener_data = df
+        numTickers = len(screener_data)
+        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
+        last = data_apple.index[0]
+        lastSplit = str(last).split(" ")
+        lastDStock = lastSplit[0]
+        for i in range(numTickers):
 
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
                 screener_data.at[i, 'Exchange'] = "AMEX"
+
+
         for i in range(numTickers):
             ticker = screener_data.iloc[i]['Ticker']
             exchange = screener_data.iloc[i]['Exchange']
             try:
                 if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
+                   
                     data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
                     data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     print(f"{ticker} created #{i}")
-        
+                    
                 else:
                     cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                     lastDayTime = cs.iloc[len(cs)-1]['datetime']
@@ -52,7 +56,7 @@ def isDataUpdated(df):
                         cs['datetime'] = pd.to_datetime(cs['datetime'])
                         cs = cs.set_index('datetime')
                         data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
-                        scrapped_data_index = findIndex(data_daily, lastDay)
+                        scrapped_data_index = (data_daily, lastDay)
                         need_append_data = data_daily[scrapped_data_index+1:]
                         print(need_append_data.head())
                         cs = pd.concat([cs, need_append_data])
@@ -63,13 +67,15 @@ def isDataUpdated(df):
                         print(f"{ticker} approved #{i}")
             except TimeoutError:
                 print(ticker + " timed out")
+            except RuntimeError:
+                print(ticker + " timed out2")
 
 
-    return 'done'
-start = datetime.datetime.now()
-screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-isDataUpdated(screener_data)
+         
+    start = datetime.datetime.now()
+   
+    isDataUpdated()
 
-print(start)
-print(datetime.datetime.now())
+    print(start)
+    print(datetime.datetime.now())
 
