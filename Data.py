@@ -1,4 +1,3 @@
-
 from tkinter import N
 import pandas as pd
 import datetime
@@ -21,17 +20,16 @@ class Data:
             if(date == dateTo):
                 return i
 
-        return 99999
-
-    def isDataUpdated(df):
-        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-        screener_data = df
-        numTickers = len(screener_data)
-        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
-        last = data_apple.index[0]
-        lastSplit = str(last).split(" ")
-        lastDStock = lastSplit[0]
-        for i in range(numTickers):
+    return 99999
+def isDataUpdated(df):
+    tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+    screener_data = df
+    numTickers = len(screener_data)
+    data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
+    last = data_apple.index[0]
+    lastSplit = str(last).split(" ")
+    lastDStock = lastSplit[0]
+    for i in range(numTickers):
 
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
                 screener_data.at[i, 'Exchange'] = "AMEX"
@@ -67,7 +65,11 @@ class Data:
                 print(ticker + " timed out")
 
 
-        return 'done'
+    return 'done'
+start = datetime.datetime.now()
+screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+isDataUpdated(screener_data)
 
-    screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-    isDataUpdated(screener_data)
+print(start)
+print(datetime.datetime.now())
+
