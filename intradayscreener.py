@@ -12,34 +12,14 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed, Interval
-from discordwebhook import Discord
 import statistics
 import mplfinance as mpf
 import matplotlib as mpl
 import pathlib
 import math
 
+from discordManager import discordManager as dM
 
-def sendDiscordEmbedGainers(ticker, description):
-    discordtopGainers.post(
-        embeds=[
-        {
-
-            "title": ticker,
-            "description": description,
-        }
-        ],
-    )
-def sendDiscordEmbedIntraday(ticker, description):
-    discordintraday.post(
-        embeds=[
-        {
-
-            "title": ticker,
-            "description": description,
-        }
-        ],
-    )
 user = 'cs.benliu@gmail.com'
 password = 'tltShort!1'
 options = Options()
@@ -51,8 +31,6 @@ FireFoxProfile.set_preference("General.useragent.override", user_agent)
 browser = webdriver.Firefox(options=options, executable_path=FireFoxDriverPath)
 browser.implicitly_wait(7)
 browser.maximize_window()
-discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
-discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
 url = "https://www.tradingview.com/screener/"
 browser.get(url)
 mc = mpf.make_marketcolors(up='g',down='r')
@@ -191,8 +169,8 @@ try:
                 marketCapText = round((marketCap / 1000000000), 2)
                 relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
                 mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                discordintraday.post(file={"test": open("tmp/test3.png", "rb")})
+                dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                dM.sendDiscordIntradayPost('tmp/test3.png')
             if(dayChange > 15 and volume > 500000 and volume*currPrice > 7500000 and currPrice > 1.2 and (counter % 5 == 0)): 
                 data_minute_100 = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=250)
                 print(data_minute_100.head(1))
@@ -202,11 +180,11 @@ try:
                 marketCapText = round((marketCap / 1000000000), 2)
                 relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
                 mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                discordtopGainers.post(file={"test": open("tmp/test3.png", "rb")})
+                dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                dM.sendDiscordGainersPost('tmp/test3.png')
             
         time.sleep(60)
-        sendDiscordEmbedGainers("NEW BATCH !", "Time: " + str(datetime.datetime.now()))
+        dM("NEW BATCH !", "Time: " + str(datetime.datetime.now()))
         counter = counter + 1
 
 

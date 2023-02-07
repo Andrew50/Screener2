@@ -12,26 +12,13 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed, Interval
-from discordwebhook import Discord
 import statistics
 import mplfinance as mpf
 import matplotlib as mpl
 import pathlib
 import math
 
-def sendDiscordMessage(msg): 
-    discord.post(content=msg)
-
-def sendDiscordEmbed(ticker, description):
-    discord.post(
-        embeds=[
-        {
-
-            "title": ticker,
-            "description": description,
-        }
-        ],
-    )
+from discordManager import discordManager as dM
 
 def findIndex(df, dateTo):
     for i in range(len(df)):
@@ -67,7 +54,6 @@ FireFoxProfile.set_preference("General.useragent.override", user_agent)
 browser = webdriver.Firefox(options=options, executable_path=FireFoxDriverPath)
 browser.implicitly_wait(7)
 browser.maximize_window()
-discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
 url = "https://www.tradingview.com/screener/"
 browser.get(url)
 mc = mpf.make_marketcolors(up='g',down='r')
@@ -226,15 +212,15 @@ try:
                         ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
                         todayGapValuePercent = todayGapValue*100;
                         mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                        sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▼ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
-                        discord.post(file={"test": open("tmp/test.png", "rb")})
+                        dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▼ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
+                        dM.sendDiscordPost('tmp/test.png')
                     if(z > 5):
                         z = round(z, 3)
                         ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
                         todayGapValuePercent = todayGapValue*100;
                         mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                        sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
-                        discord.post(file={"test": open("tmp/test.png", "rb")})
+                        dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
+                        dM.sendDiscordPost('tmp/test.png')
             
      
 

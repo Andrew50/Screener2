@@ -65,8 +65,10 @@ def isDataUpdated(df):
 
 
     return 'done'
-
+start = datetime.datetime.now()
 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 isDataUpdated(screener_data)
 
+print(start)
+print(datetime.datetime.now())
 
