@@ -70,7 +70,7 @@ class Data:
                         cs = pd.concat([df1, df2])
                         cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                         
-                        print(f"{ticker} appended with {requireddays} {i}")
+                        print(f"{ticker} appended with {requireddays} days {i}")
 
 
                         #cs['datetime'] = pd.to_datetime(cs['datetime'])
