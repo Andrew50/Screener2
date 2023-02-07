@@ -21,6 +21,7 @@ from Screen import Screen as screen
 from discordManager import discordManager as dM
 class Intraday:
     def runIntraday(self):
+        #screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         numTickers = len(screener_data)
         for i in range(numTickers):

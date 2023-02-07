@@ -10,4 +10,4 @@ if dail:
     daily.runDaily(daily,'2022-02-24')
     
 else:
-    intraday.Intraday(intraday)
+    intraday.runIntraday(intraday)
