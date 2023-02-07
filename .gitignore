@@ -3,3 +3,6 @@ data_csvs/
 .vs/
 Drivers/
 geckodriver.log
+tvDatafeed/__pycache__
+/tvDatafeed/__pycache__/main.cpython-311.pyc
+/tvDatafeed/__pycache__/__init__.cpython-311.pyc
