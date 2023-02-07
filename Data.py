@@ -56,16 +56,17 @@ class Data:
                     lastDay = lastDaySplit[0]
           
                     if (lastDay != lastDStock):
-                        print(lastDStock)
-                        print(lastDay)
+                        
+                        cs['datetime'] = pd.to_datetime(cs['datetime'])
+                        df1 = cs.set_index('datetime')
+
                         lastDStockval = datetime.strptime(lastDStock, '%Y-%m-%d')
                         lastDayval = datetime.strptime(lastDay, '%Y-%m-%d')
-
                         requireddays =(lastDStockval - lastDayval).days
                         df2 = tv.get_hist(ticker, exchange, n_bars=requireddays)
 
                         
-                        df1 = pd.read_csv(f"C:/Screener/data_csvs/{ticker}_data.csv")
+                        
                         cs = pd.concat([df1, df2])
                         cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                         
