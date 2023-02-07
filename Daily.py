@@ -20,23 +20,36 @@ import math
 
 from discordManager import discordManager as dM
 
-
+import warnings
+warnings.filterwarnings("ignore")
 class Daily:
-    
-    
-    
 
+    #def __init__(self):
+     #   print("init")
+    def sfindIndex(df, dateTo):
+        for i in range(len(df)):
+            dateTimeOfDay = df.iloc[i]['datetime']
+            dateSplit = str(dateTimeOfDay).split(" ")
+            date = dateSplit[0]
+            if(date == dateTo):
+                return i
 
-    def runDaily():
-        dateToSearch = '2022-05-12' # 0 is for the next session 
+        return 99999
+
+    def runDaily(self, dateToSearch):
+        
       
         chartSize = 80
-        MR = False
-        EP = True
-        Pivot = False
-        Flag = False
+        rightbuffer = 20
+        sMR = True
+        sEP = True
+        sPivot = False
+        sFlag = False
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data)
+
+        mc = mpf.make_marketcolors(up='g',down='r')
+        s  = mpf.make_mpf_style(marketcolors=mc)
 
             #Loop stocks in screen
         for i in range(numTickers):
@@ -51,36 +64,40 @@ class Daily:
             data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
             if len(data_daily_full) > 50:
-                indexOfDay = Daily.findIndex(data_daily_full, dateToSearch)
+                indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
                 if(indexOfDay != 99999):
                     if (dateToSearch == "0"):
                         pmPrice = prevClose + pmChange
                         rightedge = len(data_daily_full)
                     else:
-                        pmPrice = data_daily_full.iloc[indexOfDay][1]
-                        if len(data_daily_full) - indexOfDay > 20:
-                            rightedge = indexOfDay+20
+                        pmPrice = data_daily_full.iloc[indexOfDay][2]
+                        if len(data_daily_full) - indexOfDay > rightbuffer:
+                            rightedge = indexOfDay+rightbuffer
+                            currentday = chartSize-rightbuffer
                         else:
                             rightedge = len(data_daily_full)
+                            currentday = len(data_daily)-(len(data_daily_full) - rightedge)
 
 
 
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                     data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                     data_daily = data_daily.set_index('Datetime')
-                    currentday = len(data_daily)-(len(data_daily_full) - rightedge)
                     data_daily = data_daily.drop(['datetime'], axis=1)
+                    #print(rightedge)
+                    #print(len(data_daily_full))
+                    self.EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sEP, s)
+                    self.MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sMR, s)
 
-            Daily.EP()
-            Daily.MR()
-    def EP():
+    def EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, EP, s):
         if(dolVol > 1000000 and volume>150000 and currPrice > 3 and EP):
             try: 
                 gaps = []
-                prevClose = data_daily.iloc[currentday-1][4]
+             
+                prevClose = data_daily.iloc[currentday-1][5]
                 todayGapValue = round(((pmPrice/prevClose)-1), 2)
                 for j in range(20): 
-                        gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
+                        gaps.append((data_daily.iloc[currentday-1-j][2]/data_daily.iloc[currentday-2-j][5])-1)
 
                 z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
 
@@ -98,27 +115,28 @@ class Daily:
                     mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                     dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
                     dM.sendDiscordPost('tmp/test.png')
+                print(tick)
             except IndexError:
-                print(tick + " did not exist at the date " + dateToSearch)
+                print(tick + " doesnt exist " + dateToSearch)
             except TimeoutError:
                     print("Timeout caught")
             except FileNotFoundError:
                 print(tick + " does not have a file") 
-            except TypeError:
-                print(tick + " line 84 bs") 
+            #except TypeError:
+                #print(tick + " line 84 bs") 
      
 
                                 #MR###############################################################################
-    def MR():
+    def MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, MR, s):
         if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
             try: 
                 
-                zfilter = 1.5
+                zfilter = 3.2
                 gapzfilter0 = 8
                 gapzfilter1 = 4
                 changezfilter = 4
 			
-                prevClose = data_daily.iloc[currentday-1][4]
+                prevClose = data_daily.iloc[currentday-1][5]
                     
                 todayGapValue = round(((pmPrice/prevClose)-1), 2)
                 todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
@@ -127,14 +145,14 @@ class Daily:
                 zchange = [] # 30 currentday
                 for i in range(30):
                     n = 29-i
-                    gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
-                    changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
+                    gapvalue = abs((data_daily.iloc[currentday-n-1][2]/data_daily.iloc[currentday-2-n][5]) - 1)
+                    changevalue = abs((data_daily.iloc[currentday-1-n][5]/data_daily.iloc[currentday-1-n][2]) - 1)
                     lastCloses = 0
                     for c in range(4): 
                     
-                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][4]
+                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][5]
                     fourSMA = round((lastCloses/4), 2)
-                    datavalue = (fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                    datavalue = (fourSMA/data_daily.iloc[currentday-n-1][2] - 1)
                     if i == 29:
                         gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                     zgaps.append(gapvalue)
@@ -149,21 +167,21 @@ class Daily:
                 lastCloses = 0
                 for c in range(4): 
                     
-                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
+                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][5]
                 fourSMA = round((lastCloses/4), 2)
                 value3 = (fourSMA)/pmPrice
                 z = (value3 - statistics.mean(zdata))/statistics.stdev(zdata) 
 			
 			
-                print(f"z is = {z}, gapz is {gapz}")
+                
                 if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
                     z = round(z, 3)
                     ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
                     todayGapValuePercent = todayGapValue*100;
                     mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                    sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                    discord.post(file={"test": open("tmp/test.png", "rb")})
-
+                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
+                    dM.sendDiscordPost('tmp/test.png')
+                print(tick)
             except IndexError:
                 print(tick + " did not exist at the date " + dateToSearch)
             except TimeoutError:
@@ -172,19 +190,16 @@ class Daily:
                 print(tick + " does not have a file")   
         return 'done'
 
-
-    def findIndex(df, dateTo):
-        for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
-
-        return 99999
+    
 
 
-    runDaily()
+    
+    
+
+    
+
+
+Daily.runDaily(Daily,'2022-05-12')
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Pivot):
 
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Flag):
