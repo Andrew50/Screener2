@@ -2,7 +2,7 @@ from Daily import Daily as daily
 from Intraday import Intraday as intraday
 
 
-dail = True
+dail = False
 
 
 if dail:

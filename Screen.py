@@ -150,4 +150,34 @@ class Screen:
             if screener_data.iloc[i]['Pre-market Change'] is None:
                     screener_data.at[i, 'Pre-market Change'] = 0
 
-    #def Intraday():
+    def Intraday():
+        options = Options()
+        options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
+        FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
+        FireFoxProfile = webdriver.FirefoxProfile()
+        FireFoxProfile.set_preference("General.useragent.override", user_agent)
+        browser = webdriver.Firefox(options=options, executable_path=FireFoxDriverPath)
+        browser.implicitly_wait(7)
+        browser.maximize_window()
+        url = "https://www.tradingview.com/screener/"
+        browser.get(url)
+        mc = mpf.make_marketcolors(up='g',down='r')
+        s  = mpf.make_mpf_style(marketcolors=mc)
+        #creating the csv file
+        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
+        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
+        download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
+        download_screener_data.click()
+        time.sleep(2)
+        today = str(datetime.date.today())
+        downloaded_file = r"C:\Downloads\america_" + today + ".csv"
+        new_name = r"C:\Downloads\screener_data_intraday.csv"
+        os.rename(downloaded_file, new_name)
+        os.replace(r"C:\Downloads\screener_data_intraday.csv", r"C:\Screener\tmp\screener_data_intraday.csv")
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+        time.sleep(0.1)
+        numTickers = len(screener_data)
+        for i in range(numTickers):
+            if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
+                screener_data.at[i, 'Exchange'] = "AMEX"
