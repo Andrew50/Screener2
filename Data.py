@@ -38,7 +38,8 @@ class Data:
             return True
         
 
-    def isDataUpdated(self, df):
+    def isDataUpdated(self):
+        df = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         screener_data = df
         numTickers = len(screener_data)
@@ -55,6 +56,7 @@ class Data:
             last = data_apple.index[0]
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
+
         for i in range(numTickers):
 
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
@@ -94,9 +96,6 @@ class Data:
 
         return 'done'
 
-screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-print(Data.isMarketClosed())
-Data.isDataUpdated(Data, screener_data)
 
 
 

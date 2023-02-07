@@ -96,7 +96,7 @@ class Intraday:
             mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
             dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
             dM.sendDiscordGainersPost('tmp/test3.png')
-    screen.Daily 
-    Intraday()
+    #screen.Daily 
+    #Intraday()
 
 
