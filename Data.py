@@ -62,7 +62,12 @@ class Data:
 
                         lastDStockval = datetime.strptime(lastDStock, '%Y-%m-%d')
                         lastDayval = datetime.strptime(lastDay, '%Y-%m-%d')
-                        requireddays =(lastDStockval - lastDayval).days
+
+
+                        lastDStockval = data_apple.index[lastDStock]
+                        lastDayval = data_apple.index[lastDay]
+
+                        requireddays =lastDStockval - lastDayval
                         df2 = tv.get_hist(ticker, exchange, n_bars=requireddays)
 
                         
