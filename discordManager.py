@@ -4,8 +4,7 @@ discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858
 discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
 
 class discordManager:
-
-    def sendDiscordEmbedGainers(ticker, description):
+    def sendDiscordEmbedGainers(self, ticker, description):
         discordtopGainers.post(
             embeds=[
             {
@@ -15,7 +14,7 @@ class discordManager:
             }
             ],
         )
-    def sendDiscordEmbedIntraday(ticker, description):
+    def sendDiscordEmbedIntraday(self, ticker, description):
         discordintraday.post(
             embeds=[
             {
@@ -25,6 +24,8 @@ class discordManager:
             }
             ],
         )
+        self.sendDiscord
+        
 
     def sendDiscordEmbed(ticker, description):
         discord.post(
