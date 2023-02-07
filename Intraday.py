@@ -22,7 +22,7 @@ from Screen import Screen as screen
 
 from discordManager import discordManager as dM
 class Intraday:
-    def Intraday():
+    def runIntraday(self):
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
@@ -72,30 +72,30 @@ class Intraday:
             time.sleep(60)
             #dM("NEW BATCH !", "Time: " + str(datetime.datetime.now()))
             counter = counter + 1
-    
-            if(change > 2.5 and volume > 250000 and volume*currPrice > 750000 and currPrice > 1.2):
-                data_minute_100 = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
-                print(data_minute_100.head(1))
-                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
-                openCandlePrice = float(data_minute_100.iloc[len(data_minute_100)-1][1])
-                changePrice = round(float(currPrice - openCandlePrice), 2)
-                marketCap = float(screener_data.iloc[i]['Market Capitalization'])
-                marketCapText = round((marketCap / 1000000000), 2)
-                relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
-                mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                dM.sendDiscordIntradayPost('tmp/test3.png')
-            if(dayChange > 15 and volume > 500000 and volume*currPrice > 7500000 and currPrice > 1.2 and (counter % 5 == 0)): 
-                data_minute_100 = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=250)
-                print(data_minute_100.head(1))
-                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
+    def Gainers():
+        if(change > 2.5 and volume > 250000 and volume*currPrice > 750000 and currPrice > 1.2):
+            data_minute_100 = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
+            print(data_minute_100.head(1))
+            ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
+            openCandlePrice = float(data_minute_100.iloc[len(data_minute_100)-1][1])
+            changePrice = round(float(currPrice - openCandlePrice), 2)
+            marketCap = float(screener_data.iloc[i]['Market Capitalization'])
+            marketCapText = round((marketCap / 1000000000), 2)
+            relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
+            mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
+            dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            dM.sendDiscordIntradayPost('tmp/test3.png')
+        if(dayChange > 15 and volume > 500000 and volume*currPrice > 7500000 and currPrice > 1.2 and (counter % 5 == 0)): 
+            data_minute_100 = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=250)
+            print(data_minute_100.head(1))
+            ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
                 
-                marketCap = float(screener_data.iloc[i]['Market Capitalization'])
-                marketCapText = round((marketCap / 1000000000), 2)
-                relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
-                mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                dM.sendDiscordGainersPost('tmp/test3.png')
+            marketCap = float(screener_data.iloc[i]['Market Capitalization'])
+            marketCapText = round((marketCap / 1000000000), 2)
+            relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
+            mpf.plot(data_minute_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
+            dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            dM.sendDiscordGainersPost('tmp/test3.png')
     screen.Daily 
     Intraday()
 
