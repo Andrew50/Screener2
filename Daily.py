@@ -23,19 +23,11 @@ from discordManager import discordManager as dM
 
 class Daily:
     
-
-    def findIndex(df, dateTo):
-        for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
-
-        return 99999
+    
+    
 
 
-    def Daily():
+    def runDaily():
         dateToSearch = '2022-05-12' # 0 is for the next session 
       
         chartSize = 80
@@ -59,7 +51,7 @@ class Daily:
             data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
             if len(data_daily_full) > 50:
-                indexOfDay = findIndex(data_daily_full, dateToSearch)
+                indexOfDay = Daily.findIndex(data_daily_full, dateToSearch)
                 if(indexOfDay != 99999):
                     if (dateToSearch == "0"):
                         pmPrice = prevClose + pmChange
@@ -78,105 +70,123 @@ class Daily:
                     data_daily = data_daily.set_index('Datetime')
                     currentday = len(data_daily)-(len(data_daily_full) - rightedge)
                     data_daily = data_daily.drop(['datetime'], axis=1)
-                    if(dolVol > 1000000 and volume>150000 and currPrice > 3 and EP):
-                          try: 
-                                gaps = []
-                                prevClose = data_daily.iloc[currentday-1][4]
-                                todayGapValue = round(((pmPrice/prevClose)-1), 2)
-                                for j in range(20): 
-                                        gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
 
-                                z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+            Daily.EP()
+            Daily.MR()
+    def EP():
+        if(dolVol > 1000000 and volume>150000 and currPrice > 3 and EP):
+            try: 
+                gaps = []
+                prevClose = data_daily.iloc[currentday-1][4]
+                todayGapValue = round(((pmPrice/prevClose)-1), 2)
+                for j in range(20): 
+                        gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
 
-                                if(z < -5):
-                                    z = round(z, 3)
-                                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                                    todayGapValuePercent = todayGapValue*100;
-                                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▼ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
-                                    dM.sendDiscordPost('tmp/test.png')
-                                if(z > 5):
-                                    z = round(z, 3)
-                                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                                    todayGapValuePercent = todayGapValue*100;
-                                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
-                                    dM.sendDiscordPost('tmp/test.png')
-                          except IndexError:
-                                print(tick + " did not exist at the date " + dateToSearch)
-                          except TimeoutError:
-                                 print("Timeout caught")
-                          except FileNotFoundError:
-                                print(tick + " does not have a file") 
-                          except TypeError:
-                              print(tick + " line 84 bs") 
+                z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+
+                if(z < -5):
+                    z = round(z, 3)
+                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
+                    todayGapValuePercent = todayGapValue*100;
+                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▼ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
+                    dM.sendDiscordPost('tmp/test.png')
+                if(z > 5):
+                    z = round(z, 3)
+                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
+                    todayGapValuePercent = todayGapValue*100;
+                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
+                    dM.sendDiscordPost('tmp/test.png')
+            except IndexError:
+                print(tick + " did not exist at the date " + dateToSearch)
+            except TimeoutError:
+                    print("Timeout caught")
+            except FileNotFoundError:
+                print(tick + " does not have a file") 
+            except TypeError:
+                print(tick + " line 84 bs") 
      
 
                                 #MR###############################################################################
-
-                    if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
-                        try: 
+    def MR():
+        if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
+            try: 
                 
-                            zfilter = 1.5
-                            gapzfilter0 = 8
-                            gapzfilter1 = 4
-                            changezfilter = 4
+                zfilter = 1.5
+                gapzfilter0 = 8
+                gapzfilter1 = 4
+                changezfilter = 4
 			
-                            prevClose = data_daily.iloc[currentday-1][4]
+                prevClose = data_daily.iloc[currentday-1][4]
                     
-                            todayGapValue = round(((pmPrice/prevClose)-1), 2)
-                            todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
-                            zdata = [] # 15 currentday
-                            zgaps = [] # 30 currentday=
-                            zchange = [] # 30 currentday
-                            for i in range(30):
-                                n = 29-i
-                                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
-                                changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
-                                lastCloses = 0
-                                for c in range(4): 
+                todayGapValue = round(((pmPrice/prevClose)-1), 2)
+                todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
+                zdata = [] # 15 currentday
+                zgaps = [] # 30 currentday=
+                zchange = [] # 30 currentday
+                for i in range(30):
+                    n = 29-i
+                    gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
+                    changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
+                    lastCloses = 0
+                    for c in range(4): 
                     
-                                    lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][4]
-                                fourSMA = round((lastCloses/4), 2)
-                                datavalue = (fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
-                                if i == 29:
-                                    gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                                zgaps.append(gapvalue)
-                                zchange.append(changevalue)
-                                if i > 14:
-                                    zdata.append(datavalue)
+                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][4]
+                    fourSMA = round((lastCloses/4), 2)
+                    datavalue = (fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                    if i == 29:
+                        gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                    zgaps.append(gapvalue)
+                    zchange.append(changevalue)
+                    if i > 14:
+                        zdata.append(datavalue)
 				
 				
 				
-                            gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                            changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
-                            lastCloses = 0
-                            for c in range(4): 
+                gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
+                lastCloses = 0
+                for c in range(4): 
                     
-                                lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
-                            fourSMA = round((lastCloses/4), 2)
-                            value3 = (fourSMA)/pmPrice
-                            z = (value3 - statistics.mean(zdata))/statistics.stdev(zdata) 
+                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
+                fourSMA = round((lastCloses/4), 2)
+                value3 = (fourSMA)/pmPrice
+                z = (value3 - statistics.mean(zdata))/statistics.stdev(zdata) 
 			
 			
-                            print(f"z is = {z}, gapz is {gapz}")
-                            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
-                                z = round(z, 3)
-                                ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                                todayGapValuePercent = todayGapValue*100;
-                                mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                                sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                                discord.post(file={"test": open("tmp/test.png", "rb")})
+                print(f"z is = {z}, gapz is {gapz}")
+                if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
+                    z = round(z, 3)
+                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
+                    todayGapValuePercent = todayGapValue*100;
+                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
+                    discord.post(file={"test": open("tmp/test.png", "rb")})
 
-                        except IndexError:
-                            print(tick + " did not exist at the date " + dateToSearch)
-                        except TimeoutError:
-                            print("Timeout caught")
-                        except FileNotFoundError:
-                            print(tick + " does not have a file")   
+            except IndexError:
+                print(tick + " did not exist at the date " + dateToSearch)
+            except TimeoutError:
+                print("Timeout caught")
+            except FileNotFoundError:
+                print(tick + " does not have a file")   
         return 'done'
+
+
+    def findIndex(df, dateTo):
+        for i in range(len(df)):
+            dateTimeOfDay = df.iloc[i]['datetime']
+            dateSplit = str(dateTimeOfDay).split(" ")
+            date = dateSplit[0]
+            if(date == dateTo):
+                return i
+
+        return 99999
+
+
+    runDaily()
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Pivot):
 
             #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Flag):
 
-    Daily()
+    
