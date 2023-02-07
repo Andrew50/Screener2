@@ -12,7 +12,7 @@ import os
 import time 
 from pathlib import Path
 class Data:
-    def findIndex(df, dateTo):
+    def findIndex(self,df, dateTo):
         for i in range(len(df)):
             dateTimeOfDay = df.index[i]
             dateSplit = str(dateTimeOfDay).split(" ")
@@ -21,7 +21,7 @@ class Data:
                 return i
 
         return 99999
-    def isDataUpdated():
+    def isDataUpdated(self):
         df = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         screener_data = df
