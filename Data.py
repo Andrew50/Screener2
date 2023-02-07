@@ -1,3 +1,4 @@
+
 from tkinter import N
 import pandas as pd
 import datetime
@@ -20,6 +21,7 @@ def findIndex(df, dateTo):
             return i
 
     return 99999
+
 def isDataUpdated(df):
     tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
     screener_data = df
@@ -68,5 +70,3 @@ def isDataUpdated(df):
 
 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 isDataUpdated(screener_data)
-
-
