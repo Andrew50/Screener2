@@ -20,17 +20,22 @@ class Intraday:
             currPrice = screenbar['Price']
             dolVol = screenbar['Volume*Price']
             tick = str(screenbar['Ticker'])
-            
+            oneMinChange = screenbar['Change 1m, %']
             print(tick)
+            try:
+                if (dolVol > 7500000 and currPrice > 1.2):
+                    if(oneMinChange > 2.1 or dayChange > 15):
+                        data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
 
-            if (dolVol > 7500000 and currPrice > 1.2):
-                data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
+                        if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
+                            Intraday.Gainers(data_minute, screenbar,dayChange)
 
-                if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
-                    Intraday.Gainers(data_minute, screenbar,dayChange)
-
-                if(dolVol > 750000 and currPrice > 1.2):
-                    Intraday.Pops(data_minute, screenbar)
+                        if(dolVol > 750000 and currPrice > 1.2):
+                            Intraday.Pops(data_minute, screenbar)
+            except TypeError:
+                print(f' {tick} did not return data!')
+            except AttributeError:
+                print(' {tick} did not return data!')
             
         return tvr, br
             
@@ -38,10 +43,7 @@ class Intraday:
     def Gainers(data_minute, screenbar,dayChange):
         if(dayChange > 15):
             z = 0
-            try:
-                dM.post(data_minute,screenbar,z,"Gainer","0")
-            except TypeError:
-                print(' did not return data!')
+            dM.post(data_minute,screenbar,z,"Gainer","0")
 
     def Pops(data_minute, screenbar):
 
@@ -49,7 +51,7 @@ class Intraday:
 
         try:
             data = []
-            length = len(length)
+            length = len(data_minute)
             for i in range(len(data_minute)): 
                 x = data_minute.iloc[i][5] + data_minute.iloc[i-1][5]
                 y = ((data_minute.iloc[i][4]/data_minute.iloc[i][1]) + (data_minute.iloc[i][4]/data_minute.iloc[i][1]) - 2)
@@ -66,8 +68,7 @@ class Intraday:
             print("timeout error")
         except FileNotFoundError:
             print("file error") 
-
-        
+  
                 
                 
 
