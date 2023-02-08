@@ -29,7 +29,7 @@ while True:
     elif now.hour == 5 and now.minute == 30:
         while now.hour <= 12:
             print("screening intraday")
-            tv, browser = intraday.runIntraday()
+            tv, browser = intraday.runIntraday(tv, browser)
     else:
 
         print("waiting")
