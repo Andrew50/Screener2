@@ -2,22 +2,13 @@ import os
 import time 
 import selenium
 import selenium.webdriver as webdriver
-from selenium.webdriver.support.ui import WebDriverWait, Select 
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By 
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import ElementNotInteractableException, TimeoutException, NoSuchElementException
-from bs4 import BeautifulSoup
 import pandas as pd
 import datetime
-from tvDatafeed import TvDatafeed, Interval
-import statistics
-import mplfinance as mpf
-import matplotlib as mpl
-import pathlib
-import math
+from tvDatafeed import TvDatafeed
+
 
 from discordManager import discordManager as dM
 

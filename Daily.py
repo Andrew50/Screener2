@@ -2,9 +2,7 @@
 import pandas as pd
 import statistics
 import math
-
 from discordManager import discordManager as dM
-
 import warnings
 warnings.filterwarnings("ignore")
 class Daily:
@@ -76,8 +74,10 @@ class Daily:
             for j in range(20): 
                     gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
-            if(z < -zfilter) or (z > zfilter):
+            if(z > zfilter):
                 dM.post(data_daily,screenbar,z,"EP",currentday) 
+            elif (z < -zfilter):
+                dM.post(data_daily,screenbar,z,"NEP",currentday) 
         except IndexError:
             print("index error")
         except TimeoutError:
@@ -125,14 +125,14 @@ class Daily:
             value = (fourSMA)/pmPrice - 1
 
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
+            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 dM.post(data_daily,screenbar,z,"MR",currentday)     
             
         except IndexError:
-            print(tick + " did not exist at the date " )
+            print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
-            print(tick + " does not have a file")   
+            print(" does not have a file")   
         
     

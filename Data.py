@@ -1,13 +1,5 @@
-from tkinter import N
 import pandas as pd
 import datetime
-from tvDatafeed import TvDatafeed, Interval
-from discordwebhook import Discord
-import statistics
-import mplfinance as mpf
-import matplotlib as mpl
-import pathlib
-import math
 import os 
 class Data:
     def findIndex(df, dateTo):
