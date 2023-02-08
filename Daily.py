@@ -141,7 +141,7 @@ class Daily:
                 gapzfilter0 = 8
                 gapzfilter1 = 4
                 changezfilter = 4
-			
+			    
                 prevClose = data_daily.iloc[currentday-1][5]
                     
                 todayGapValue = round(((pmPrice/prevClose)-1), 2)
