@@ -156,7 +156,8 @@ class Screen:
             browser.close()
             browser = Screen.startFirefoxSession()
         #creating the csv file
-        
+        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
+        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
         download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
         download_screener_data.click()
         time.sleep(2)

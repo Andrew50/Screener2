@@ -82,5 +82,4 @@ class Intraday:
     #Intraday()
 
 tradingView, br = Intraday.runIntraday(None, None)
-print(tradingView)
-print(br)
+tradingView, br = Intraday.runIntraday(tradingView, br)
