@@ -28,7 +28,7 @@ while True:
         print(daily,"screening daily")
         daily.runDaily(daily, "0")
     
-    elif now.hour == 5 and now.minute == 30:
+    elif now.hour == 7 and now.minute == 2:
         while now.hour <= 12:
             screen.tryCloseLogout(browser)
             print("screening intraday")
