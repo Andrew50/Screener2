@@ -21,7 +21,7 @@ class Daily:
         chartSize = 80
         rightbuffer = 20
         sMR = True
-        sEP = False
+        sEP = True
         sPivot = False
         sFlag = False
 
@@ -30,9 +30,9 @@ class Daily:
         for i in range(numTickers):
             screenbar = screener_data.iloc[i]
             tick = str(screenbar['Ticker'])
-            pmChange = screener_data.iloc[i]['Pre-market Change']
-            prevClose = screener_data.iloc[i]['Price']
-            dolVol = screener_data.iloc[i]['Volume*Price']
+            pmChange = screenbar['Pre-market Change']
+            
+            dolVol = screenbar['Volume*Price']
             print(tick)
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -43,10 +43,12 @@ class Daily:
                     if(indexOfDay != 99999):
                     
                         if (dateToSearch == "0"):
+                            prevClose = screenbar['Price']
                             pmPrice = prevClose + pmChange
                             rightedge = len(data_daily_full)
                         else:
-                            pmPrice = data_daily_full.iloc[indexOfDay][2]#close
+                            pmPrice = data_daily_full.iloc[indexOfDay][2]#open
+                            prevClose = data_daily_full.iloc[indexOfDay-1][5]
                             if len(data_daily_full) - indexOfDay > rightbuffer:
                                 rightedge = indexOfDay+rightbuffer
                                 currentday = chartSize-rightbuffer
@@ -65,7 +67,7 @@ class Daily:
                             self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
 
     def EP(data_daily, currentday, pmPrice, prevClose, screenbar ):
-
+        
         zfilter = 5
 
         try: 
@@ -74,9 +76,12 @@ class Daily:
             for j in range(20): 
                     gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+
             if(z > zfilter):
+                #print("EP")
                 dM.post(data_daily,screenbar,z,"EP",currentday) 
             elif (z < -zfilter):
+                #print("NEP")
                 dM.post(data_daily,screenbar,z,"NEP",currentday) 
         except IndexError:
             print("index error")
@@ -86,7 +91,7 @@ class Daily:
             print("file error") 
  
     def MR(data_daily, currentday,pmPrice,prevClose,screenbar):
-
+        #print("work")
         zfilter = 3.2
         gapzfilter0 = 8
         gapzfilter1 = 4
@@ -113,8 +118,8 @@ class Daily:
                 zchange.append(changevalue)
                 if i > 14:
                     zdata.append(datavalue)
-            todayGapValue = round(((pmPrice/prevClose)-1), 2)
-            todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
+            todayGapValue = abs((pmPrice/prevClose)-1)
+            todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
             gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
             changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
             lastCloses = 0
@@ -123,9 +128,12 @@ class Daily:
                 lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
             fourSMA = round((lastCloses/4), 2)
             value = (fourSMA)/pmPrice - 1
-
+            
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
+            #print(z)
+            #print(value)
+            if ( z > zfilter and value > 0):
+                print("MR")
                 dM.post(data_daily,screenbar,z,"MR",currentday)     
             
         except IndexError:
@@ -135,4 +143,4 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")   
         
-    
+    #   gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and
