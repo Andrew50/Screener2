@@ -90,3 +90,24 @@ class discordManager:
         dM.sendDiscordPost('tmp/test.png')
 
 
+
+        ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
+                openCandlePrice = float(data_100.iloc[len(data_100)-1][1])
+                changePrice = round(float(currPrice - openCandlePrice), 2)
+            
+                marketCapText = round((marketCap / 1000000000), 2)
+            
+                mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
+                dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                dM.sendDiscordIntradayPost('tmp/test3.png')
+
+
+                changeFromOpen = screener_data.iloc[i]['Change from Open']
+            openValue = screener_data.iloc[i]['Open']
+            
+            pmChange = screener_data.iloc[i]['Pre-market Change']
+            
+            marketCap = float(screener_data.iloc[i]['Market Capitalization'])
+            relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
+
+
