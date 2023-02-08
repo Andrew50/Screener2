@@ -23,7 +23,7 @@ while True:
     elif now.hour == 5 and now.minute == 30:
         while now.hour <= 12:
             print("screening intraday")
-            intraday.Intraday()
+            intraday.runIntraday()
     else:
 
         print("waiting")
