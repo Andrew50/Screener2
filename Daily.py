@@ -8,6 +8,8 @@ warnings.filterwarnings("ignore")
 class Daily:
 
     def sfindIndex(df, dateTo):
+        if dateTo == "0":
+            return len(df)
         for i in range(len(df)):
             dateTimeOfDay = df.iloc[i]['datetime']
             dateSplit = str(dateTimeOfDay).split(" ")
@@ -33,19 +35,21 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            print(tick)
+            #print(tick)
+            
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
                 if len(data_daily_full) > 50:
-                
+                   
                     indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
                     if(indexOfDay != 99999):
-                    
+                        
                         if (dateToSearch == "0"):
                             prevClose = screenbar['Price']
                             pmPrice = prevClose + pmChange
-                            rightedge = len(data_daily_full)
+                            rightedge = len(data_daily_full) - 1
+                            currentday = chartSize
                         else:
                             pmPrice = data_daily_full.iloc[indexOfDay][2]#open
                             prevClose = data_daily_full.iloc[indexOfDay-1][5]
@@ -55,7 +59,7 @@ class Daily:
                             else:
                                 rightedge = len(data_daily_full)
                                 currentday = chartSize-(len(data_daily_full) - rightedge)
-
+                        
                         data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
@@ -78,10 +82,8 @@ class Daily:
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
 
             if(z > zfilter):
-                #print("EP")
                 dM.post(data_daily,screenbar,z,"EP",currentday) 
             elif (z < -zfilter):
-                #print("NEP")
                 dM.post(data_daily,screenbar,z,"NEP",currentday) 
         except IndexError:
             print("index error")
@@ -91,7 +93,7 @@ class Daily:
             print("file error") 
  
     def MR(data_daily, currentday,pmPrice,prevClose,screenbar):
-        #print("work")
+        
         zfilter = 3.2
         gapzfilter0 = 8
         gapzfilter1 = 4
@@ -101,6 +103,7 @@ class Daily:
             zdata = []
             zgaps = []
             zchange = []
+            
             for i in range(30):
                 n = 29-i
                 gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
@@ -123,20 +126,20 @@ class Daily:
             gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
             changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
             lastCloses = 0
-
+            
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-n-1][4]
             fourSMA = round((lastCloses/4), 2)
             value = (fourSMA)/pmPrice - 1
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-            
+    
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 
                 dM.post(data_daily,screenbar,z,"MR",currentday)     
             
         except IndexError:
-            print(" did not exist at the date " )
+           print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:

@@ -1,5 +1,6 @@
 import pandas as pd
 import datetime
+from tvDatafeed import TvDatafeed
 import os 
 class Data:
     def findIndex(df, dateTo):
