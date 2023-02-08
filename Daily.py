@@ -106,7 +106,7 @@ class Daily:
         except FileNotFoundError:
             print("file error") 
  
-    def MR(data_daily,currentday,pmPrice,prevClose,screenbar):
+    def MR(data_daily, currentday,pmPrice,prevClose,screenbar):
 
         zfilter = 3.2
         gapzfilter0 = 8

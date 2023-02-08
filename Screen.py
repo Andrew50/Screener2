@@ -84,7 +84,7 @@ class Screen:
         return browser
 
     def logInScrapper():
-        tv = TvDatafeed(username="benliu@gmail.com",password="tltShort!1")
+        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         return tv
     def startFirefoxSession():
