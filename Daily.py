@@ -38,31 +38,25 @@ class Daily:
         return 99999
 
     def runDaily(self, dateToSearch):
-        
-      
+
+
         chartSize = 80
         rightbuffer = 20
         sMR = True
         sEP = False
         sPivot = False
         sFlag = False
+
+
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data)
-
-        mc = mpf.make_marketcolors(up='g',down='r')
-        s  = mpf.make_mpf_style(marketcolors=mc)
-
-            #Loop stocks in screen
-        
         for i in range(numTickers):
-            tick = str(screener_data.iloc[i]['Ticker'])
-            exchange = str(screener_data.iloc[i]['Exchange'])
+            screenbar = screener_data.iloc[i]
+            tick = str(screenbar['Ticker'])
             pmChange = screener_data.iloc[i]['Pre-market Change']
-            currPrice = screener_data.iloc[i]['Price']
-            volume = screener_data.iloc[i]['Volume']
+            prevClose = screener_data.iloc[i]['Price']
             dolVol = screener_data.iloc[i]['Volume*Price']
-            # Gaps Check 
-            #print(tick + f" {i}")
+            print(tick)
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
@@ -75,7 +69,7 @@ class Daily:
                             pmPrice = prevClose + pmChange
                             rightedge = len(data_daily_full)
                         else:
-                            pmPrice = data_daily_full.iloc[indexOfDay][2]
+                            pmPrice = data_daily_full.iloc[indexOfDay][2]#close
                             if len(data_daily_full) - indexOfDay > rightbuffer:
                                 rightedge = indexOfDay+rightbuffer
                                 currentday = chartSize-rightbuffer
@@ -83,129 +77,85 @@ class Daily:
                                 rightedge = len(data_daily_full)
                                 currentday = chartSize-(len(data_daily_full) - rightedge)
 
-
-
                         data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
-                        #print(rightedge)
-                        #print(len(data_daily_full))
-                    
-                        self.EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sEP, s)
-                        self.MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, sMR, s)
+                        
+                        if(dolVol > 1000000  and prevClose > 3 and sEP):
+                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
+                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
+                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
 
-    def EP(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, EP, s):
-        if(dolVol > 1000000 and volume>150000 and currPrice > 3 and EP):
-            try: 
-                gaps = []
-             
-                prevClose = data_daily.iloc[currentday-1][6]
-                todayGapValue = round(((pmPrice/prevClose)-1), 2)
-                for j in range(20): 
-                        gaps.append((data_daily.iloc[currentday-1-j][2]/data_daily.iloc[currentday-2-j][5])-1)
+    def EP(data_daily, currentday, pmPrice, prevClose, screeenbar ):
 
-                z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+        zfilter = 5
 
-                if(z < -5):
-                    z = round(z, 3)
-                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                    todayGapValuePercent = todayGapValue*100;
-                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▼ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
-                    dM.sendDiscordPost('tmp/test.png')
-                if(z > 5):
-                    z = round(z, 3)
-                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                    todayGapValuePercent = todayGapValue*100;
-                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
-                    dM.sendDiscordPost('tmp/test.png')
-                print(tick)
-            except IndexError:
-                print(tick + " doesnt exist " + dateToSearch)
-            except TimeoutError:
-                    print("Timeout caught")
-            except FileNotFoundError:
-                print(tick + " does not have a file") 
-            #except TypeError:
-                #print(tick + " line 84 bs") 
-     
+        try: 
+            gaps = []
+            todayGapValue = round(((pmPrice/prevClose)-1), 2)
+            for j in range(20): 
+                    gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
+            z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+            if(z < -zfilter) or (z > zfilter):
+                dM.post(dM,screenbar,z,"EP") 
+        except IndexError:
+            print("index error")
+        except TimeoutError:
+            print("timeout error")
+        except FileNotFoundError:
+            print("file error") 
+ 
+    def MR(data_daily,currentday,pmPrice,prevClose,screenbar):
 
-                                #MR###############################################################################
-    def MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, MR, s):
-        if(dolVol > 5000000  and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
-            try: 
-                
-                zfilter = 3.2
-                gapzfilter0 = 8
-                gapzfilter1 = 4
-                changezfilter = 4
-			
-                prevClose = data_daily.iloc[currentday-1][4]
-                #print (data_daily.iloc[currentday-1][4])
-                #print (data_daily.iloc[currentday-1][1])
-                todayGapValue = round(((pmPrice/prevClose)-1), 2)
-                todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
-                zdata = [] # 15 currentday
-                zgaps = [] # 30 currentday=
-                zchange = [] # 30 currentday
-                for i in range(30):
-                    n = 29-i
-                    gapvalue = round(abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1),3)
-                    changevalue = round(abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1),3)
-                    lastCloses = 0
-                    
-                    for c in range(4): 
-                    
-                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][4]
-                    fourSMA = (lastCloses/4)
-                    datavalue = round(abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1),3)
-                    if i == 29:
-                        gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                    zgaps.append(gapvalue)
-                    zchange.append(changevalue)
-                    if i > 14:
-                        zdata.append(datavalue)
-				
-				
-				
-                gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
+        zfilter = 3.2
+        gapzfilter0 = 8
+        gapzfilter1 = 4
+        changezfilter = 4
+
+        try: 
+            zdata = []
+            zgaps = []
+            zchange = []
+            for i in range(30):
+                n = 29-i
+                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
+                changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
                 lastCloses = 0
-
-                
-               
+                    
                 for c in range(4): 
                     
-                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
-                fourSMA = round((lastCloses/4), 2)
-                value3 = (fourSMA)/pmPrice - 1
+                    lastCloses += data_daily.iloc[currentday-2-c-n][4]
+                fourSMA = (lastCloses/4)
+                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                if i == 29:
+                    gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                zgaps.append(gapvalue)
+                zchange.append(changevalue)
+                if i > 14:
+                    zdata.append(datavalue)
+            todayGapValue = round(((pmPrice/prevClose)-1), 2)
+            todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
+            gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+            changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
+            lastCloses = 0
 
+            for c in range(4): 
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
+            fourSMA = round((lastCloses/4), 2)
+            value = (fourSMA)/pmPrice - 1
 
-               
-                #print(value3)
-                #print(statistics.mean(zdata))
-                #print(statistics.stdev(zdata))
-                z = (abs(value3) - statistics.mean(zdata))/statistics.stdev(zdata) 
-			
-			
-                
-                if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
-                    z = round(z, 3)
-                    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-                    todayGapValuePercent = todayGapValue*100;
-                    mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                    dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                    dM.sendDiscordPost('tmp/test.png')
-                print(f"{tick} {z}")
-            except IndexError:
-                print(tick + " did not exist at the date " + dateToSearch)
-            except TimeoutError:
-                print("Timeout caught")
-            except FileNotFoundError:
-                print(tick + " does not have a file")   
-        return 'done'
+            z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
+            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
+                dM.post(dM,screenbar,z,"MR")     
+            
+        except IndexError:
+            print(tick + " did not exist at the date " )
+        except TimeoutError:
+            print("Timeout caught")
+        except FileNotFoundError:
+            print(tick + " does not have a file")   
+        
     
 
     
