@@ -8,3 +8,6 @@ tvDatafeed/__pycache__
 /tvDatafeed/__pycache__/__init__.cpython-311.pyc
 /__pycache__/discordManager.cpython-311.pyc
 /__pycache__/Screen.cpython-311.pyc
+/__pycache__/Daily.cpython-311.pyc
+/__pycache__/Data.cpython-311.pyc
+/__pycache__/Intraday.cpython-311.pyc
