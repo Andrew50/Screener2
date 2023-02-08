@@ -35,7 +35,7 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            print(tick)
+            #print(tick)
             
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -63,11 +63,11 @@ class Daily:
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
-                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
+                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar,tick)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
-                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
+                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar,tick)
 
-    def EP(data_daily, currentday, pmPrice, prevClose, screenbar ):
+    def EP(data_daily, currentday, pmPrice, prevClose, screenbar, tick ):
         
         zfilter = 5
 
@@ -89,7 +89,7 @@ class Daily:
         except FileNotFoundError:
             print("file error") 
  
-    def MR(data_daily, currentday,pmPrice,prevClose,screenbar):
+    def MR(data_daily, currentday,pmPrice,prevClose,screenbar, tick):
         
         zfilter = 3.2
         gapzfilter0 = 8
@@ -125,14 +125,16 @@ class Daily:
             
             for c in range(4): 
                 lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
-            fourSMA = round((lastCloses/4), 2)
+            fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
     
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
-                
-                dM.post(data_daily,screenbar,z,"MR",currentday)     
+                #print(data_daily)
+                dM.post(data_daily,screenbar,z,"MR",currentday) 
+                print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata)}")
+
             
         except IndexError:
            print(" did not exist at the date " )
