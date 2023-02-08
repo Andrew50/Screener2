@@ -14,9 +14,10 @@ from discordManager import discordManager as dM
 
 
 class Screen:
-    def runDailyScan():
-
-        browser = Screen.startFirefoxSession()
+    def runDailyScan(brows):
+        browser = brows
+        if(browser == None):
+            browser = Screen.startFirefoxSession()
 
         time.sleep(0.5) 
         browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()

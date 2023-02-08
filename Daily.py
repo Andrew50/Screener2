@@ -44,7 +44,6 @@ class Daily:
                    
                     indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
                     if(indexOfDay != 99999):
-                        
                         if (dateToSearch == "0"):
                             prevClose = screenbar['Price']
                             pmPrice = prevClose + pmChange
@@ -52,19 +51,17 @@ class Daily:
                             currentday = chartSize
                         else:
                             pmPrice = data_daily_full.iloc[indexOfDay][2]#open
-                            prevClose = data_daily_full.iloc[indexOfDay-1][5]
+                            prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
                             if len(data_daily_full) - indexOfDay > rightbuffer:
                                 rightedge = indexOfDay+rightbuffer
                                 currentday = chartSize-rightbuffer
                             else:
                                 rightedge = len(data_daily_full)
                                 currentday = chartSize-(len(data_daily_full) - rightedge)
-                        
-                        data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
+                        data_daily = data_daily_full[(rightedge - chartSize):(rightedge+1)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
-                        
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
                             self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
@@ -98,7 +95,6 @@ class Daily:
         gapzfilter0 = 8
         gapzfilter1 = 4
         changezfilter = 4
-
         try: 
             zdata = []
             zgaps = []
@@ -128,7 +124,7 @@ class Daily:
             lastCloses = 0
             
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
             fourSMA = round((lastCloses/4), 2)
             value = (fourSMA)/pmPrice - 1
             
@@ -144,5 +140,3 @@ class Daily:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")   
-        
-   
