@@ -81,5 +81,5 @@ class Intraday:
     #screen.Daily 
     #Intraday()
 
-tradingView, br = Intraday.runIntraday(None, None)
-tradingView, br = Intraday.runIntraday(tradingView, br)
+trv, brw = Intraday.runIntraday(None, None)
+Intraday.runIntraday(trv, brw)
