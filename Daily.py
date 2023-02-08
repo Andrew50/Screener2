@@ -35,7 +35,7 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            #print(tick)
+            print(tick)
             
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -122,9 +122,10 @@ class Daily:
             gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
             changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
             lastCloses = 0
-            
+            closes = []
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c][4]
+                
             fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
             
@@ -133,8 +134,8 @@ class Daily:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
                 dM.post(data_daily,screenbar,z,"MR",currentday) 
-                print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata)}")
-
+                #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
+               # print(f"{tick,closes}")
             
         except IndexError:
            print(" did not exist at the date " )
