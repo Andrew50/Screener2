@@ -101,26 +101,26 @@ class discordManager:
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                discordManager.sendDiscordyPost('tmp/test.png')
+                discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
                 datetime = str(df.index[currentDay])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                discordManager.sendDiscordyPost('tmp/test.png')
-        elif():
+                discordManager.sendDiscordPost('tmp/test.png')
+        else:
             if(type == "MR"):
                 datetime = str(df.index[currentDay])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                discordManager.sendDiscordyPost('tmp/test.png')
+                discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
                 datetime = str(df.index[currentDay])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
-                discordManager.sendDiscordyPost('tmp/test.png')
+                discordManager.sendDiscordPost('tmp/test.png')
 
 
 

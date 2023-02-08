@@ -130,10 +130,9 @@ class Daily:
             value = (fourSMA)/pmPrice - 1
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-            #print(z)
-            #print(value)
-            if ( z > zfilter and value > 0):
-                print("MR")
+            
+            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
+                
                 dM.post(data_daily,screenbar,z,"MR",currentday)     
             
         except IndexError:
@@ -143,4 +142,4 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")   
         
-    #   gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and
+   
