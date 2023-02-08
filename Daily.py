@@ -28,9 +28,9 @@ class Daily:
             sPivot = True
             sFlag = True
         else:
-            sMR = True
+            sMR = False
             sEP = False
-            sPivot = False
+            sPivot = True
             sFlag = False
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
@@ -169,11 +169,12 @@ class Daily:
             
     def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar):
         
-        zfilter = 3.3
-        gapzfilter0 = 6
-        gapzfilter1 = 6
-        changezfilter = 4
+
         
+        zfilter = 3.3
+        gapzfilter0 = 8
+        gapzfilter1 = 4
+        changezfilter = 4
         try: 
             zdata = []
             zgaps = []
@@ -181,15 +182,15 @@ class Daily:
             
             for i in range(30):
                 n = 29-i
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
-                changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
+                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+                changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
                 lastCloses = 0
                     
                 for c in range(4): 
                     
                     lastCloses += data_daily.iloc[currentday-2-c-n][4]
                 fourSMA = (lastCloses/4)
-                x = data_daily.iloc[currentday-n-1]
+                x = 
                 datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
@@ -204,21 +205,26 @@ class Daily:
             lastCloses = 0
             closes = []
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
                 
             fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-    
+            #print(f"{z, gapz, gapz1, changez}") #z debugger
+            #print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
+           # print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
+            #print(z,gapz, gapz1, changez)
+            #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
+                print("dddddddddddddddddddddddddddddddddddddddddddddddd")
                 dM.post(data_daily,screenbar,z,"MR",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             
-        except IndexError:
-           print(" did not exist at the date " )
+        #except IndexError:
+           #print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
