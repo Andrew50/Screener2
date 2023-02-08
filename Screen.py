@@ -156,17 +156,12 @@ class Screen:
             browser.close()
             browser = Screen.startFirefoxSession()
         #creating the csv file
-        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
-        browser.find_element(By.XPATH, '//div[@data-name="screener-refresh"]').click()
+        
         download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
         download_screener_data.click()
         time.sleep(2)
         today = str(datetime.date.today())
-        downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-        new_name = r"C:\Downloads\screener_data_intraday.csv"
-        os.rename(downloaded_file, new_name)
-        os.replace(r"C:\Downloads\screener_data_intraday.csv", r"C:\Screener\tmp\screener_data_intraday.csv")
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+        
         time.sleep(0.1)
         numTickers = len(screener_data)
         for i in range(numTickers):

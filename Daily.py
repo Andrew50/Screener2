@@ -100,7 +100,7 @@ class Daily:
             try: 
                 gaps = []
              
-                prevClose = data_daily.iloc[currentday-1][5]
+                prevClose = data_daily.iloc[currentday-1][6]
                 todayGapValue = round(((pmPrice/prevClose)-1), 2)
                 for j in range(20): 
                         gaps.append((data_daily.iloc[currentday-1-j][2]/data_daily.iloc[currentday-2-j][5])-1)
@@ -134,16 +134,17 @@ class Daily:
 
                                 #MR###############################################################################
     def MR(tick, dolVol, volume, currPrice, data_daily,currentday,pmPrice, pmChange, dateToSearch, MR, s):
-        if(dolVol > 1000000 * 1000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
+        if(dolVol > 5000000  and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and MR):
             try: 
                 
                 zfilter = 3.2
                 gapzfilter0 = 8
                 gapzfilter1 = 4
                 changezfilter = 4
-			    
-                prevClose = data_daily.iloc[currentday-1][5]
-                    
+			
+                prevClose = data_daily.iloc[currentday-1][4]
+                #print (data_daily.iloc[currentday-1][4])
+                #print (data_daily.iloc[currentday-1][1])
                 todayGapValue = round(((pmPrice/prevClose)-1), 2)
                 todayChangeValue = data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1
                 zdata = [] # 15 currentday
@@ -151,14 +152,15 @@ class Daily:
                 zchange = [] # 30 currentday
                 for i in range(30):
                     n = 29-i
-                    gapvalue = abs((data_daily.iloc[currentday-n-1][2]/data_daily.iloc[currentday-2-n][5]) - 1)
-                    changevalue = abs((data_daily.iloc[currentday-1-n][5]/data_daily.iloc[currentday-1-n][2]) - 1)
+                    gapvalue = round(abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1),3)
+                    changevalue = round(abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1),3)
                     lastCloses = 0
+                    
                     for c in range(4): 
                     
-                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][5]
-                    fourSMA = round((lastCloses/4), 2)
-                    datavalue = (fourSMA/data_daily.iloc[currentday-n-1][2] - 1)
+                        lastCloses = lastCloses + data_daily.iloc[currentday-2-c-n][4]
+                    fourSMA = (lastCloses/4)
+                    datavalue = round(abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1),3)
                     if i == 29:
                         gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                     zgaps.append(gapvalue)
@@ -171,12 +173,21 @@ class Daily:
                 gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                 changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
                 lastCloses = 0
+
+                
+               
                 for c in range(4): 
                     
-                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][5]
+                    lastCloses = lastCloses + data_daily.iloc[currentday-c-n][4]
                 fourSMA = round((lastCloses/4), 2)
-                value3 = (fourSMA)/pmPrice
-                z = (value3 - statistics.mean(zdata))/statistics.stdev(zdata) 
+                value3 = (fourSMA)/pmPrice - 1
+
+
+               
+                #print(value3)
+                #print(statistics.mean(zdata))
+                #print(statistics.stdev(zdata))
+                z = (abs(value3) - statistics.mean(zdata))/statistics.stdev(zdata) 
 			
 			
                 
@@ -187,7 +198,7 @@ class Daily:
                     mpf.plot(data_daily, type='candle', mav=(10, 20), volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                     dM.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
                     dM.sendDiscordPost('tmp/test.png')
-                print(tick)
+                print(f"{tick} {z}")
             except IndexError:
                 print(tick + " did not exist at the date " + dateToSearch)
             except TimeoutError:
