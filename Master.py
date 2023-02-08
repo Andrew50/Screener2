@@ -26,7 +26,7 @@ while True:
 
     elif now.hour == 4 and now.minute == 59:
         print(daily,"screening daily")
-        daily.runDaily(daily, "0")
+        daily.runDaily(daily, "0",True)
     
     elif now.hour == 7 and now.minute == 2:
         while now.hour <= 12:

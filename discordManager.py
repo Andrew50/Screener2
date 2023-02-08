@@ -108,6 +108,12 @@ class discordManager:
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
+            if(type == "NEP"):
+                datetime = str(df.index[currentDay])
+                date = datetime.split()[0]
+                mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
+                discordManager.sendDiscordPost('tmp/test.png')
         else:
             if(type == "MR"):
                 datetime = str(df.index[currentDay])
@@ -120,6 +126,12 @@ class discordManager:
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
+                discordManager.sendDiscordPost('tmp/test.png')
+            if(type == "NEP"):
+                datetime = str(df.index[currentDay])
+                date = datetime.split()[0]
+                mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
 
 
