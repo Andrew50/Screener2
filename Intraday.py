@@ -54,26 +54,30 @@ class Intraday:
     def Gainers(tvlogt, tick, dolVol, volume, currPrice, marketCap, relativeVolAtTime,change,dayChange,openValue,changeFromOpen, exchange):
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
-        if(change > 2.5 and volume > 250000 and dolVol > 750000 and currPrice > 1.2):
-            data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
-            ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
-            openCandlePrice = float(data_100.iloc[len(data_100)-1][1])
-            changePrice = round(float(currPrice - openCandlePrice), 2)
+        try:
+            if(change > 2.5 and volume > 250000 and dolVol > 750000 and currPrice > 1.2):
+                data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
+                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
+                openCandlePrice = float(data_100.iloc[len(data_100)-1][1])
+                changePrice = round(float(currPrice - openCandlePrice), 2)
             
-            marketCapText = round((marketCap / 1000000000), 2)
+                marketCapText = round((marketCap / 1000000000), 2)
             
-            mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-            dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            dM.sendDiscordIntradayPost('tmp/test3.png')
+                mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
+                dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                dM.sendDiscordIntradayPost('tmp/test3.png')
 
-        if(dayChange > 15 and volume > 500000 and dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
-            data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
-            ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
-            marketCapText = round((marketCap / 1000000000), 2)
+            if(dayChange > 15 and volume > 500000 and dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
+                data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
+                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
+                marketCapText = round((marketCap / 1000000000), 2)
             
-            mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-            dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            dM.sendDiscordGainersPost('tmp/test3.png')
+                mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
+                dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                dM.sendDiscordGainersPost('tmp/test3.png')
+        except TypeError:
+            print(f'{tick} did not return data!')
+
     #screen.Daily 
     #Intraday()
 

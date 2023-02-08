@@ -163,10 +163,6 @@ class Screen:
         today = str(datetime.date.today())
         
         time.sleep(0.1)
-        numTickers = len(screener_data)
-        for i in range(numTickers):
-            if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
-                screener_data.at[i, 'Exchange'] = "AMEX"
         
         return browser
 
@@ -186,7 +182,7 @@ class Screen:
         browser.maximize_window()
         url = "https://www.tradingview.com/screener/"
         browser.get(url)
-        time.sleep(1)
+        time.sleep(1.5)
         browser.find_element(By.XPATH, '//div[@data-set="performance"]').click()
         time.sleep(.5)
         element_tab = browser.find_element(By.XPATH, '//div[@data-set="overview"]').click()
