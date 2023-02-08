@@ -1,28 +1,12 @@
-﻿import os 
-import time 
-import selenium.webdriver as webdriver
-from selenium.webdriver.support.ui import WebDriverWait, Select 
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options 
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import ElementNotInteractableException, TimeoutException, NoSuchElementException
-from bs4 import BeautifulSoup
-import pandas as pd
-import datetime
+﻿import pandas as pd
 from tvDatafeed import TvDatafeed, Interval
 import statistics
-import mplfinance as mpf
-import matplotlib as mpl
-import pathlib
-import math
 from Screen import Screen as screen
 from discordManager import discordManager as dM
 class Intraday:
     def runIntraday(tvlog, brows):
+        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         br = brows
-        #screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         tvr = tvlog
         if(tvr == None):
             tvr = screen.logInScrapper()
@@ -30,56 +14,61 @@ class Intraday:
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         numTickers = len(screener_data)
         for i in range(numTickers):
-            tick = str(screener_data.iloc[i]['Ticker'])
-            exchange = str(screener_data.iloc[i]['Exchange'])
-            change = round(screener_data.iloc[i]["Change 1m, %"], 2)
-            dayChange = round(screener_data.iloc[i]['Change %'], 2)
-            changeFromOpen = screener_data.iloc[i]['Change from Open']
-            openValue = screener_data.iloc[i]['Open']
-            currPrice = screener_data.iloc[i]['Price']
-            volume = screener_data.iloc[i]['Volume']
-            tick = str(screener_data.iloc[i]['Ticker'])
-            pmChange = screener_data.iloc[i]['Pre-market Change']
-            currPrice = screener_data.iloc[i]['Price']
-            volume = screener_data.iloc[i]['Volume']
-            dolVol = screener_data.iloc[i]['Volume*Price']
-            marketCap = float(screener_data.iloc[i]['Market Capitalization'])
-            relativeVolAtTime = round(screener_data.iloc[i]['Relative Volume at Time'], 1)
+            screenbar = screener_data.iloc[i]
+            exchange = str(screenbar['Exchange'])
+            dayChange = round(screenbar['Change %'], 2)
+            currPrice = screenbar['Price']
+            dolVol = screenbar['Volume*Price']
+            tick = str(screenbar['Ticker'])
+            
             print(tick)
-            Intraday.Gainers(tvr, tick, dolVol, volume, currPrice, marketCap, relativeVolAtTime,change,dayChange,openValue, changeFromOpen, exchange)
+
+            if (dolVol > 7500000 and currPrice > 1.2):
+                data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
+
+                if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
+                    Intraday.Gainers(data_minute, screenbar,dayChange)
+
+                if(dolVol > 750000 and currPrice > 1.2):
+                    Intraday.Pops(data_minute, screenbar)
             
         return tvr, br
-            #dM("NEW BATCH !", "Time: " + str(datetime.datetime.now()))
+            
 
-    def Gainers(tvlogt, tick, dolVol, volume, currPrice, marketCap, relativeVolAtTime,change,dayChange,openValue,changeFromOpen, exchange):
-        mc = mpf.make_marketcolors(up='g',down='r')
-        s  = mpf.make_mpf_style(marketcolors=mc)
+    def Gainers(data_minute, screenbar,dayChange):
+        if(dayChange > 15):
+            z = 0
+            try:
+                dM.post(data_minute,screenbar,z,"Gainer","0")
+            except TypeError:
+                print(' did not return data!')
+
+    def Pops(data_minute, screenbar):
+
+        zfilter = 50
+
         try:
-            if(change > 2.5 and volume > 250000 and dolVol > 750000 and currPrice > 1.2):
-                data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
-                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
-                openCandlePrice = float(data_100.iloc[len(data_100)-1][1])
-                changePrice = round(float(currPrice - openCandlePrice), 2)
-            
-                marketCapText = round((marketCap / 1000000000), 2)
-            
-                mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                dM.sendDiscordEmbedIntraday(tick + f" {openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                dM.sendDiscordIntradayPost('tmp/test3.png')
+            data = []
+            length = len(length)
+            for i in range(len(data_minute)): 
+                x = data_minute.iloc[i][5] + data_minute.iloc[i-1][5]
+                y = ((data_minute.iloc[i][4]/data_minute.iloc[i][1]) + (data_minute.iloc[i][4]/data_minute.iloc[i][1]) - 2)
+                value = x*pow(y,2)
+                if i != length - 1:
+                    data.append(value)
+             
+            z = (value-statistics.mean(data))/statistics.stdev(data)
+            if ((z < -zfilter) or (z > zfilter)) and y > 2:
+                dM.post(data_minute,screenbar,z,"Pop","0")
+        except IndexError:
+            print("index error")
+        except TimeoutError:
+            print("timeout error")
+        except FileNotFoundError:
+            print("file error") 
 
-            if(dayChange > 15 and volume > 500000 and dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
-                data_100 = tvlogt.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=100)
-                ourpath = pathlib.Path("C:/Screener/tmp") / "test3.png"
-                marketCapText = round((marketCap / 1000000000), 2)
-            
-                mpf.plot(data_100, type='candle', volume=True, title=tick, style=s, savefig=ourpath)
-                dM.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                dM.sendDiscordGainersPost('tmp/test3.png')
-        except TypeError:
-            print(f'{tick} did not return data!')
+        
+                
+                
 
-    #screen.Daily 
-    #Intraday()
 
-trv, brw = Intraday.runIntraday(None, None)
-Intraday.runIntraday(trv, brw)

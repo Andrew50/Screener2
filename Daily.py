@@ -1,21 +1,6 @@
 ﻿import os 
-import time 
-import selenium.webdriver as webdriver
-from selenium.webdriver.support.ui import WebDriverWait, Select 
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options 
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import ElementNotInteractableException, TimeoutException, NoSuchElementException
-from bs4 import BeautifulSoup
 import pandas as pd
-import datetime
-from tvDatafeed import TvDatafeed, Interval
 import statistics
-import mplfinance as mpf
-import matplotlib as mpl
-import pathlib
 import math
 
 from discordManager import discordManager as dM
@@ -24,21 +9,16 @@ import warnings
 warnings.filterwarnings("ignore")
 class Daily:
 
-    #def __init__(self):
-    
     def sfindIndex(df, dateTo):
         for i in range(len(df)):
             dateTimeOfDay = df.iloc[i]['datetime']
             dateSplit = str(dateTimeOfDay).split(" ")
             date = dateSplit[0]
-        
             if(date == dateTo):
                 return i
-
         return 99999
 
     def runDaily(self, dateToSearch):
-
 
         chartSize = 80
         rightbuffer = 20
@@ -46,7 +26,6 @@ class Daily:
         sEP = False
         sPivot = False
         sFlag = False
-
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data)
@@ -87,7 +66,7 @@ class Daily:
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
                             self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
 
-    def EP(data_daily, currentday, pmPrice, prevClose, screeenbar ):
+    def EP(data_daily, currentday, pmPrice, prevClose, screenbar ):
 
         zfilter = 5
 
@@ -98,7 +77,7 @@ class Daily:
                     gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
             if(z < -zfilter) or (z > zfilter):
-                dM.post(dM,screenbar,z,"EP") 
+                dM.post(data_daily,screenbar,z,"EP",currentday) 
         except IndexError:
             print("index error")
         except TimeoutError:
@@ -147,7 +126,7 @@ class Daily:
 
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value3 > 0):
-                dM.post(dM,screenbar,z,"MR")     
+                dM.post(data_daily,screenbar,z,"MR",currentday)     
             
         except IndexError:
             print(tick + " did not exist at the date " )
@@ -156,20 +135,4 @@ class Daily:
         except FileNotFoundError:
             print(tick + " does not have a file")   
         
-    
-
-    
-
-
-    
-    
-
-    
-
-
-#Daily.runDaily(Daily,'2022-05-12')
-            #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Pivot):
-
-            #if(dolVol > 1000000 and volume > 150000 and currPrice > 2 and pmChange != 0 and math.isnan(pmChange) != True and Flag):
-
     
