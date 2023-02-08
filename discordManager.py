@@ -72,7 +72,7 @@ class discordManager:
         pmPrice = round((prevClose + pmChange), 2)
         if(currentDay == "0"):
             todayGapValuePercent = dayChange;
-        if(currentDay == 80):
+        else:#(currentDay == 79):
             todayGapValuePercent = round((pmPrice/currPrice), 2)
         z = round(z, 3)
         
@@ -99,21 +99,21 @@ class discordManager:
             discordManager.sendDiscordEmbedGainers(tick + f" {prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
             discordManager.sendDiscordGainersPost('tmp/test.png')
 
-        if(currentDay == (len(df)-1)):
+        if(currentDay == (len(df))):
             if(type == "MR"):
-                datetime = str(df.index[currentDay])
+                datetime = str(df.index[currentDay-1])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▲ PMC:{pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
-                datetime = str(df.index[currentDay])
+                datetime = str(df.index[currentDay-1])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"EP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "NEP"):
-                datetime = str(df.index[currentDay])
+                datetime =str(df.index[currentDay-1])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
