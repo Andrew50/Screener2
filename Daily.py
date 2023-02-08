@@ -9,7 +9,7 @@ class Daily:
 
     def sfindIndex(df, dateTo):
         if dateTo == "0":
-            return len(df)
+            return len(df)+1
         for i in range(len(df)):
             dateTimeOfDay = df.iloc[i]['datetime']
             dateSplit = str(dateTimeOfDay).split(" ")

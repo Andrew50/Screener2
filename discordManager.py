@@ -68,10 +68,14 @@ class discordManager:
         dolVol = screenbar['Volume*Price']
         marketCap = round(screenbar['Market Capitalization'], 1)
         relativeVolAtTime = round(screenbar['Relative Volume at Time'], 1)
-        todayGapValuePercent = dayChange;
-        z = round(z, 3)
         prevClose = setup_df.iloc[len(setup_df)-1][4]
         pmPrice = round((prevClose + pmChange), 2)
+        if(currentDay == "0"):
+            todayGapValuePercent = dayChange;
+        if(currentDay == 80):
+            todayGapValuePercent = round((pmPrice/currPrice), 2)
+        z = round(z, 3)
+        
         marketCapText = round((marketCap / 1000000000), 2)
         if(currentDay == "0"):
             lengthDf = len(setup_df)
@@ -100,7 +104,7 @@ class discordManager:
                 datetime = str(df.index[currentDay])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[date],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {pmPrice} ▲ {pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
+                discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▲ PMC:{pmChange} ({todayGapValuePercent}%)", f"MR Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
                 datetime = str(df.index[currentDay])
