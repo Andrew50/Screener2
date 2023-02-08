@@ -58,8 +58,8 @@ class discordManager:
         exchange = str(screenbar['Exchange'])
         change = round(screenbar["Change 1m, %"], 2)
         dayChange = round(screenbar['Change %'], 2)
-        changeFromOpen = round(screenbar['Change from Open'], 2)
-        openValue = screenbar['Open']
+        #changeFromOpen = round(screenbar['Change from Open'], 2)
+        #openValue = screenbar['Open']
         currPrice = screenbar['Price']
         volume = screenbar['Volume']
         tick = screenbar['Ticker']
@@ -93,7 +93,7 @@ class discordManager:
             openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
             changePrice = round(float(currPrice - openCandlePrice), 2)
             mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-            discordManager.sendDiscordEmbedGainers(tick + f" {openValue} >> {currPrice} ▲ {changeFromOpen} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            discordManager.sendDiscordEmbedGainers(tick + f" {prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
             discordManager.sendDiscordGainersPost('tmp/test.png')
 
         if(currentDay == (len(df)-1)):
