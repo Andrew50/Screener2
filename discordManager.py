@@ -53,7 +53,6 @@ class discordManager:
 
     def post(df, screenbar, z, type, currentDay):
         setup_df = df
-        print(setup_df.head())
         tick = str(screenbar['Ticker'])
         exchange = str(screenbar['Exchange'])
         change = round(screenbar["Change 1m, %"], 2)
