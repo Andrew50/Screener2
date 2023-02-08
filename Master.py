@@ -12,8 +12,11 @@ while True:
     now = datetime.datetime.now()
    # print(now.hour)
     #print(now.minute)
+
+    print(tv)
     if(tv == None):
         tv = screen.logInScrapper()
+    print(tv)
     if(browser == None):
         browser = screen.startFirefoxSession()
 
@@ -26,14 +29,15 @@ while True:
         print(daily,"screening daily")
         daily.runDaily("0")
     
-    elif now.hour == 5 and now.minute == 30:
-        while now.hour <= 12:
+    elif now.hour == 21 and now.minute == 38:
+        while now.hour <= 24:
+            screen.tryCloseLogout(browser)
             print("screening intraday")
             tv, browser = intraday.runIntraday(tv, browser)
     else:
 
         print("waiting")
-        time.sleep(57)
+        time.sleep(5)
 
 
 

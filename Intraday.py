@@ -5,7 +5,6 @@ from Screen import Screen as screen
 from discordManager import discordManager as dM
 class Intraday:
     def runIntraday(tvlog, brows):
-        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
         br = brows
         tvr = tvlog
         if(tvr == None):
@@ -25,7 +24,7 @@ class Intraday:
             try:
                 if (dolVol > 7500000 and currPrice > 1.2):
                     if(oneMinChange > 2.1 or dayChange > 15):
-                        data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
+                        data_minute = tvr.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
 
                         if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
                             Intraday.Gainers(data_minute, screenbar,dayChange)

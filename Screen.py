@@ -76,7 +76,6 @@ class Screen:
 
     def logInScrapper():
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         return tv
     def startFirefoxSession():
         options = Options()
@@ -165,4 +164,12 @@ class Screen:
         time.sleep(0.25)
         sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
         sortRVol.click()
+    def tryCloseLogout(browser):
+        try:
+            print('test')
+            browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
+        except AttributeError:
+            pass
+        except selenium.common.exceptions.NoSuchElementException:
+            pass
 
