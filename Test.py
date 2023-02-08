@@ -12,7 +12,7 @@ if dat:
 
 if dail:
    
-    daily.runDaily(daily,"0")
+    daily.runDaily(daily,"2022-02-24")
     
 else:
     intraday.runIntraday(intraday)

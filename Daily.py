@@ -35,7 +35,7 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            #print(tick)
+            print(tick)
             
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -128,7 +128,7 @@ class Daily:
             lastCloses = 0
             
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-n-1][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c][4]
             fourSMA = round((lastCloses/4), 2)
             value = (fourSMA)/pmPrice - 1
             
