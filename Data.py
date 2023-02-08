@@ -35,15 +35,13 @@ class Data:
             return True
         
 
-    def isDataUpdated(self, df):
-        # Log into Scrapper
-        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+    def isDataUpdated(tv):
         # Takes in some dataframe that was given to the function and renames it 
-        screener_data = df
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data) #Number of Tickers contained in the dataframe
        #Grabs the last two sessions of apple. 
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
-        isClosed = self.isMarketClosed()
+        isClosed = Data.isMarketClosed()
         last = 't' # placeholder variables for future use since variable values are created in a if statement
         lastDStock = 't' #placeholder
         # if the market is closed, its free to access the most recent day since the data is complete. This code basically finds the most recent trading day
@@ -82,7 +80,7 @@ class Data:
                         cs['datetime'] = pd.to_datetime(cs['datetime'])
                         cs = cs.set_index('datetime')
                         data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
-                        scrapped_data_index = self.findIndex(data_daily, lastDay)
+                        scrapped_data_index = Data.findIndex(data_daily, lastDay)
                         if(isClosed == False):
                             data_daily = data_daily.drop(index=data_daily.index[-1])
                         need_append_data = data_daily[scrapped_data_index+1:]
