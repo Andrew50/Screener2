@@ -23,7 +23,7 @@ class Intraday:
             print(tick)
             try:
                 if (dolVol > 7500000 and currPrice > 1.2):
-                    if(oneMinChange > 2.1 or dayChange > 15):
+                    if(oneMinChange > 1 or dayChange > 11):
                         data_minute = tvr.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
 
                         if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
