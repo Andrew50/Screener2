@@ -25,7 +25,7 @@ class Daily:
         if all:
             sMR = True
             sEP = True
-            sPivot = False
+            sPivot = True
             sFlag = True
         else:
             sMR = False
@@ -63,21 +63,22 @@ class Daily:
                                 currentday = chartSize-rightbuffer
                             else:
                                 rightedge = len(data_daily_full)
-                                currentday = chartSize-(indexOfDay - rightedge) - 2
+                                currentday = chartSize-(rightedge - indexOfDay)
                         
                         data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
-
+                        #print(indexOfDay)
+                        #print(len(data_daily_full))
                         #print(currentday)
                         #print(len(data_daily))
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
                             self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
                             self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
-                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
-                            self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar)
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
+                            self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, tick)
 
     #currentday is the day of the setup. This would be the day that the setup would be bough
     #if datetosearch is 0 then currentday is the length of daily_data
@@ -111,8 +112,8 @@ class Daily:
         
         zfilter = 3.3
         gapzfilter0 = 8
-        gapzfilter1 = 4
-        changezfilter = 4
+        gapzfilter1 = 3.5
+        changezfilter = 3.2
         try: 
             zdata = []
             zgaps = []
@@ -155,7 +156,7 @@ class Daily:
             #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
-                print("dddddddddddddddddddddddddddddddddddddddddddddddd")
+               
                 dM.post(data_daily,screenbar,z,"MR",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
@@ -167,14 +168,11 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")
             
-    def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar):
-        
-
+    def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar,tick):
         
         zfilter = 5
-        gapzfilter0 = 8
-        gapzfilter1 = 4
         changezfilter = 4
+
         try: 
             zdata = []
             zgaps = []
@@ -186,45 +184,51 @@ class Daily:
                 changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
                 lastCloses = 0
                     
-                for c in range(4): 
+                for c in range(3): 
                     
                     lastCloses += data_daily.iloc[currentday-3-c-n][4]
-                fourSMA = (lastCloses/4)
-                
-                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-2][1] - 1)
-                if i == 29:
-                    gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                fourSMA = (lastCloses/3)
+                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-2][4] - 1)
                 zgaps.append(gapvalue)
                 zchange.append(changevalue)
                 if i > 14:
                     zdata.append(datavalue)
-            todayGapValue = abs((pmPrice/prevClose)-1)
+
+
+            todayGapValue = (pmPrice/prevClose)-1
             todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
-            gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+            gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
             changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
             lastCloses = 0
             closes = []
-            for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
-                
-            fourSMA = (lastCloses/4)
-            value = (fourSMA)/pmPrice - 1
-            
+            for c in range(3): 
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-2][4]
+                closes.append(data_daily.iloc[currentday-c-2][4])
+            fourSMA = (lastCloses/3)
+            value = (fourSMA)/data_daily.iloc[currentday-1][4] - 1
+            #print(data_daily)
+            #print(f"{tick, closes }")
+            #print(data_daily.iloc[currentday-1][4] - 1)
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
             #print(f"{z, gapz, gapz1, changez}") #z debugger
             #print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
-           # print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
+            #print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
             #print(z,gapz, gapz1, changez)
             #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
-            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
+
+            z2 = z*gapz
+            #print(z2)
+            if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter:
                 #print(data_daily)
-                print("dddddddddddddddddddddddddddddddddddddddddddddddd")
-                dM.post(data_daily,screenbar,z,"MR",currentday) 
+                
+                dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
+            if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter:
+                dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
             
-        #except IndexError:
-           #print(" did not exist at the date " )
+        except IndexError:
+           print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
