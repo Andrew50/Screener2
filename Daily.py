@@ -171,7 +171,7 @@ class Daily:
         
 
         
-        zfilter = 3.3
+        zfilter = 5
         gapzfilter0 = 8
         gapzfilter1 = 4
         changezfilter = 4
@@ -188,10 +188,10 @@ class Daily:
                     
                 for c in range(4): 
                     
-                    lastCloses += data_daily.iloc[currentday-2-c-n][4]
+                    lastCloses += data_daily.iloc[currentday-3-c-n][4]
                 fourSMA = (lastCloses/4)
-                x = 
-                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                
+                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-2][1] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                 zgaps.append(gapvalue)
