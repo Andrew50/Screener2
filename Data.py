@@ -23,15 +23,16 @@ class Data:
         hour = datetime.datetime.now().hour
         minute = datetime.datetime.now().minute
         # captures the main chunk of market hour sessions between 6am - 11:59 am 
-        if(hour > 6 and hour < 12):
+       
+        if(hour > 5 and hour < 24):
             return False
         # market doesn't open until 5:30 am, has to check if its at least 5:30
         elif(hour == 5):
             if(minute >= 30):
                 return False
-        elif(hour == 12):
-            if(minute <= 15): #giving a 15 minute buffer if data is delayed due to not using paid acc, treats it as if markets open until 12:15 pm 
-               return False
+        #elif(hour == 12):
+            #if(minute <= 15): #giving a 15 minute buffer if data is delayed due to not using paid acc, treats it as if markets open until 12:15 pm 
+             #  return False
         else: 
             return True
         
@@ -68,6 +69,9 @@ class Data:
                 # If there is no file for the current ticker that the code is iterating on, request the last 3500 bars and make a file
                 if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
                     data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
+                    #print(isClosed)
+                    if isClosed == False:
+                        data_daily.drop(data_daily.tail(1).index,inplace=True)
                     data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     print(f"{ticker} created #{i}")
                 # if there is a file, we now are going to check if the data is complete
@@ -85,7 +89,7 @@ class Data:
                         if(isClosed == False):
                             data_daily = data_daily.drop(index=data_daily.index[-1])
                         need_append_data = data_daily[scrapped_data_index+1:]
-                        print(need_append_data.head())
+                        #print(need_append_data.head())
                         cs = pd.concat([cs, need_append_data])
                         cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                         numRows = len(need_append_data)

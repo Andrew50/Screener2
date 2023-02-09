@@ -28,8 +28,8 @@ class Daily:
             sPivot = True
             sFlag = True
         else:
-            sMR = False
-            sEP = False
+            sMR = True
+            sEP = True
             sPivot = True
             sFlag = False
 
@@ -86,18 +86,22 @@ class Daily:
 
     def EP(data_daily, currentday, pmPrice, prevClose, screenbar):
         
-        zfilter = 5
+        zfilter = 7
 
         try: 
             gaps = []
+            lows = []
+            highs = []
             todayGapValue = round(((pmPrice/prevClose)-1), 2)
             for j in range(20): 
-                    gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
+                gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
+                lows.append(data_daily.iloc[currentday-j-1][3])
+                highs.append(data_daily.iloc[currentday-j-1][2])
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
 
-            if(z > zfilter):
+            if(z > zfilter) and pmPrice > max(highs):
                 dM.post(data_daily,screenbar,z,"EP",currentday) 
-            elif (z < -zfilter):
+            elif (z < -zfilter) and pmPrice < min(lows):
                 dM.post(data_daily,screenbar,z,"NEP",currentday) 
         except IndexError:
             print("index error")
@@ -118,6 +122,7 @@ class Daily:
             zdata = []
             zgaps = []
             zchange = []
+            
             
             for i in range(30):
                 n = 29-i
@@ -172,6 +177,7 @@ class Daily:
         
         zfilter = 5
         changezfilter = 4
+        gapzfilter = 8
 
         try: 
             zdata = []
@@ -218,13 +224,14 @@ class Daily:
 
             z2 = z*gapz
             #print(z2)
-            if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter:
+            if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter and gapz < gapzfilter:
                 #print(data_daily)
                 
                 dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
-            if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter:
+
+            if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
                 dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
             
         except IndexError:
@@ -233,3 +240,6 @@ class Daily:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")
+
+if __name__ == '__main__':
+    Daily.runDaily(Daily, '0',False)
