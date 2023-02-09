@@ -119,8 +119,10 @@ class Data:
 
             tickers.append(f'{exchange}:{ticker}:{closed}:{numTickersLeft}:{lastDStock}')
         tickersLength = len(tickers)
-        pool = Pool(nodes=8)
-        pool.map(Data.updateTicker, tickers)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            executor.map(Data.updateTicker, tickers)
+        #pool = Pool(nodes=8)
+        #pool.map(Data.updateTicker, tickers)
         #with concurrent.futures.ProcessPoolExecutor() as executor:
 
           #  ticks = tickers
