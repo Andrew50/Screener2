@@ -25,7 +25,7 @@ class Daily:
         if all:
             sMR = True
             sEP = True
-            sPivot = True
+            sPivot = False
             sFlag = True
         else:
             sMR = False
@@ -41,7 +41,7 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            #print(tick)
+            print(tick + f"{i}")
             
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -160,8 +160,8 @@ class Daily:
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             
-        #except IndexError:
-           #print(" did not exist at the date " )
+        except IndexError:
+           print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
@@ -190,7 +190,7 @@ class Daily:
                     
                     lastCloses += data_daily.iloc[currentday-2-c-n][4]
                 fourSMA = (lastCloses/4)
-                x = 
+                #x = 
                 datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
