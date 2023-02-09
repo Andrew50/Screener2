@@ -63,20 +63,21 @@ class Daily:
                                 currentday = chartSize-rightbuffer
                             else:
                                 rightedge = len(data_daily_full)
-                                currentday = chartSize-(indexOfDay - rightedge) - 2
+                                currentday = chartSize-(rightedge - indexOfDay)
                         
                         data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
-
+                        #print(indexOfDay)
+                        #print(len(data_daily_full))
                         #print(currentday)
                         #print(len(data_daily))
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
                             self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
                             self.MR(data_daily, currentday, pmPrice, prevClose,screenbar)
-                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
                             self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, tick)
 
     #currentday is the day of the setup. This would be the day that the setup would be bough
@@ -111,8 +112,8 @@ class Daily:
         
         zfilter = 3.3
         gapzfilter0 = 8
-        gapzfilter1 = 4
-        changezfilter = 4
+        gapzfilter1 = 3.5
+        changezfilter = 3.2
         try: 
             zdata = []
             zgaps = []
@@ -220,11 +221,11 @@ class Daily:
             if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter:
                 #print(data_daily)
                 
-                dM.post(data_daily,screenbar,z,"Pivot",currentday) 
+                dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter:
-                dM.post(data_daily,screenbar,z,"Pivot",currentday) 
+                dM.post(data_daily,screenbar,z2,"Pivot",currentday) 
             
         except IndexError:
            print(" did not exist at the date " )
