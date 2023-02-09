@@ -233,3 +233,6 @@ class Daily:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")
+
+if __name__ == '__main__':
+     Daily.runDaily(Daily, "0", True)
