@@ -115,15 +115,15 @@ class discordManager:
 
         if(dateString == str(datetime.datetime.now().date())):
             if(type == "MR"):
-                mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[dateString],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
-                mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[dateString],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "NEP"):
-                mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[dateString],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
         else:
