@@ -30,7 +30,7 @@ class Data:
         hour = datetime.datetime.now().hour
         minute = datetime.datetime.now().minute
         # captures the main chunk of market hour sessions between 6am - 11:59 am 
-        if(hour > 6 and hour < 12):
+        if(hour > 5 and hour < 24):
             return False
         # market doesn't open until 5:30 am, has to check if its at least 5:30
         elif(hour == 5):
@@ -56,8 +56,17 @@ class Data:
             if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
                 tv = TvDatafeed()
                 data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
+                
+                if isClosed == "False":
+                    
+                    data_daily.drop(data_daily.tail(1).index,inplace=True)
+                    
                 data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                print(f"{ticker} created. Remaining: {numLeft}")
+                #print(f"{ticker} created. Remaining: {numLeft}")
+                message = str(f"{ticker} created")
+                #prints.sendmessage(prints,message)
+                print(message)
+
             # if there is a file, we now are going to check if the data is complete
             else:
                 # read in the ticker's file
@@ -74,19 +83,28 @@ class Data:
                     if(isClosed == "False"):
                         data_daily = data_daily.drop(index=data_daily.index[-1])
                     need_append_data = data_daily[scrapped_data_index+1:]
-                    print(need_append_data.head())
+                    #print(need_append_data.head())
                     cs = pd.concat([cs, need_append_data])
                     cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     numRows = len(need_append_data)
-                    print(f"{ticker} appended with {numRows}. Remaining: {numLeft}")
+                    message = str(f"{ticker} appended with {numRows}")
+                    print(message)
+                    #prints.sendmessage(prints,message)
+                    #print(f"{ticker} appended with {numRows}. Remaining: {numLeft}")
                 else:
-                    print(f"{ticker} approved. Remaining: {numLeft}")
+                    message = str(f"{ticker} approved")
+                    print(message)
+                    #prints.sendmessage(prints,message)
+                    #print(f"{ticker} approved. Remaining: {numLeft}")
         except TimeoutError:
             print(ticker + " timed out")
         except OSError:
             print(ticker + " couldn't save file")
         except UnboundLocalError:
             print(ticker + " had issues !!!!!!!!!!!!!")
+
+    
+
 
     def isDataUpdated(tv):
         # Takes in some dataframe that was given to the function and renames it 
@@ -107,6 +125,7 @@ class Data:
             last = data_apple.index[0]
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
+        print(lastDStock)
         tickers = []
         for i in range(numTickers):
 
@@ -124,6 +143,7 @@ class Data:
         pool.map(Data.updateTicker, tickers)
         #with concurrent.futures.ProcessPoolExecutor() as executor:
 
+
           #  ticks = tickers
           #  results = {executor.submit(Data.updateTicker, tick, repeat(tradView)) for tick in ticks}
           #  for result in results:
@@ -139,3 +159,15 @@ if __name__ == '__main__':
     Data.isDataUpdated(tv)
     print(datetime.datetime.now())
 
+
+
+class prints:
+
+    def __init__(self):
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        numTickers = len(screener_data)
+        self.remaining = numTickers
+
+    def sendmessage(self,message):
+        self.remaining -= 1
+        print(f"message : {self.remaining}")
