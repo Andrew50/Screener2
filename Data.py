@@ -94,10 +94,18 @@ class Data:
                         print(f"{ticker} approved #{i}")
             except TimeoutError:
                 print(ticker + " timed out")
+            except OSError:
+                print(ticker + 'could not save file.')
 
 
         return 'done'
 
 
+if __name__ == '__main__':
+    print(datetime.datetime.now())
+    tv = TvDatafeed()
+    Data.tradingView = tv
+    Data.isDataUpdated(tv)
+    print(datetime.datetime.now())
 
 
