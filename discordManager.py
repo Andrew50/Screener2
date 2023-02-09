@@ -116,13 +116,13 @@ class discordManager:
                 discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "EP"):
-                datetime = str(df.index[currentDay])
+                datetime = str(df.index[currentDay-1])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[dateString],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP Setup, Z-Score: {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
             if(type == "NEP"):
-                datetime = str(df.index[currentDay])
+                datetime =str(df.index[currentDay-1])
                 date = datetime.split()[0]
                 mpf.plot(df, type='candle', volume=True, title=tick, vlines=dict(vlines=[dateString],linewidths=(1), alpha=0.25), hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP Setup, Z-Score: {z}")

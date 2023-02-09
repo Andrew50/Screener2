@@ -9,7 +9,7 @@ class Daily:
 
     def sfindIndex(df, dateTo):
         if dateTo == "0":
-            return len(df)+1
+            return len(df)
         for i in range(len(df)):
             dateTimeOfDay = df.iloc[i]['datetime']
             dateSplit = str(dateTimeOfDay).split(" ")
@@ -28,9 +28,9 @@ class Daily:
             sPivot = True
             sFlag = True
         else:
-            sMR = True
+            sMR = False
             sEP = False
-            sPivot = False
+            sPivot = True
             sFlag = False
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
@@ -41,7 +41,7 @@ class Daily:
             pmChange = screenbar['Pre-market Change']
             
             dolVol = screenbar['Volume*Price']
-            print(tick)
+            #print(tick)
             
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
@@ -62,13 +62,16 @@ class Daily:
                                 rightedge = indexOfDay+rightbuffer
                                 currentday = chartSize-rightbuffer
                             else:
-                                rightedge = len(data_daily_full) - 1
-                                currentday = chartSize-(len(data_daily_full) - rightedge)
-
+                                rightedge = len(data_daily_full)
+                                currentday = chartSize-(indexOfDay - rightedge) - 2
+                        
                         data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
                         data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                         data_daily = data_daily.set_index('Datetime')
                         data_daily = data_daily.drop(['datetime'], axis=1)
+
+                        #print(currentday)
+                        #print(len(data_daily))
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
                             self.EP(data_daily, currentday, pmPrice, prevClose,screenbar)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
@@ -146,16 +149,19 @@ class Daily:
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
             #print(f"{z, gapz, gapz1, changez}") #z debugger
-            print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
-            print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
+            #print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
+           # print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
+            #print(z,gapz, gapz1, changez)
+            #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
+                print("dddddddddddddddddddddddddddddddddddddddddddddddd")
                 dM.post(data_daily,screenbar,z,"MR",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             
-        except IndexError:
-           print(" did not exist at the date " )
+        #except IndexError:
+           #print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
@@ -163,11 +169,12 @@ class Daily:
             
     def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar):
         
-        zfilter = 3.3
-        gapzfilter0 = 6
-        gapzfilter1 = 6
-        changezfilter = 4
+
         
+        zfilter = 3.3
+        gapzfilter0 = 8
+        gapzfilter1 = 4
+        changezfilter = 4
         try: 
             zdata = []
             zgaps = []
@@ -175,15 +182,15 @@ class Daily:
             
             for i in range(30):
                 n = 29-i
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-2-n][4]) - 1)
-                changevalue = abs((data_daily.iloc[currentday-1-n][4]/data_daily.iloc[currentday-1-n][1]) - 1)
+                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+                changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
                 lastCloses = 0
                     
                 for c in range(4): 
                     
                     lastCloses += data_daily.iloc[currentday-2-c-n][4]
                 fourSMA = (lastCloses/4)
-                x = data_daily.iloc[currentday-n-1]
+                x = 
                 datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
@@ -198,21 +205,26 @@ class Daily:
             lastCloses = 0
             closes = []
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c][4]
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
                 
             fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
             
             z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-    
+            #print(f"{z, gapz, gapz1, changez}") #z debugger
+            #print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
+           # print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
+            #print(z,gapz, gapz1, changez)
+            #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
+                print("dddddddddddddddddddddddddddddddddddddddddddddddd")
                 dM.post(data_daily,screenbar,z,"MR",currentday) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             
-        except IndexError:
-           print(" did not exist at the date " )
+        #except IndexError:
+           #print(" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
