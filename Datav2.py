@@ -30,7 +30,7 @@ class Data:
         hour = datetime.datetime.now().hour
         minute = datetime.datetime.now().minute
         # captures the main chunk of market hour sessions between 6am - 11:59 am 
-        if(hour > 5 and hour < 24):
+        if(hour > 5 and hour < 12):
             return False
         # market doesn't open until 5:30 am, has to check if its at least 5:30
         elif(hour == 5):
