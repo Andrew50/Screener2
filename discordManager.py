@@ -3,7 +3,7 @@ import pathlib
 import mplfinance as mpf
 import datetime
 import matplotlib as mpl
-
+from tvDatafeed import TvDatafeed
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
 discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
@@ -148,6 +148,14 @@ class discordManager:
                 discordManager.sendDiscordEmbed(tick + f" {prevClose} >> {setupDayOpen} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
                 discordManager.sendDiscordPost('tmp/test.png')
 
-
+if __name__ == "__main__":
+    tv = TvDatafeed()
+    mc = mpf.make_marketcolors(up='g',down='r')
+    s  = mpf.make_mpf_style(marketcolors=mc)
+    ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
+    data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=50)
+    print(datetime.datetime.now())
+    mpf.plot(data_apple, type='candle', volume=True, title='AAPL', style=s, savefig=ourpath)
+    print(datetime.datetime.now())
 
 
