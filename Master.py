@@ -14,21 +14,22 @@ if(tv == None):
 if(browser == None):
     browser = screen.startFirefoxSession()
 
-#if now.hour == 4 and now.minute == 00:
-print("updating data")
-screen.runDailyScan(browser)
-
-data.isDataUpdated(tv)
-
-#elif now.hour == 4 and now.minute == 59:
-print(daily,"screening daily")
-daily.runDaily(daily, "0",True)
 
 
 while True:
     now = datetime.datetime.now()
    # print(now.hour)
     #print(now.minute)
+    if now.hour == 4 and now.minute == 00:
+        print("updating data")
+        screen.runDailyScan(browser)
+
+        data.isDataUpdated(tv)
+
+    elif now.hour == 4 and now.minute == 59:
+        print(daily,"screening daily")
+        daily.runDaily(daily, "0",True)
+
     if(tv == None):
         tv = screen.logInScrapper()
     if(browser == None):
