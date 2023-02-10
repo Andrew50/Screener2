@@ -174,3 +174,7 @@ class Screen:
         except selenium.common.exceptions.NoSuchElementException:
             pass
 
+
+if __name__ == '__main__':
+    Screen.runDailyScan(None)
+

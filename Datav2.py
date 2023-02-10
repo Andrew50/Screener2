@@ -161,13 +161,3 @@ if __name__ == '__main__':
 
 
 
-class prints:
-
-    def __init__(self):
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-        numTickers = len(screener_data)
-        self.remaining = numTickers
-
-    def sendmessage(self,message):
-        self.remaining -= 1
-        print(f"message : {self.remaining}")
