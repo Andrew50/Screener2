@@ -7,9 +7,13 @@ length = 100
 
 tv = TvDatafeed()
 data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=length)
-print(data_apple)
+
 for i in range(length-20):
-    date = data_apple.iloc[i]['Datetime']
-    print(date)
+    dateTimeOfDay = data_apple.index[i]
+    dateSplit = str(dateTimeOfDay).split(" ")
+    date = dateSplit[0]
+    print(str(f"backtesting  {date}"))
+          
+    daily.runDaily(daily, date,True)
 
 
