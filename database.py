@@ -3,7 +3,8 @@ from tvDatafeed import TvDatafeed
 from Daily import Daily as daily
 
 
-length = 100
+
+length = 30
 
 tv = TvDatafeed()
 data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=length)

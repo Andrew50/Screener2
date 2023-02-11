@@ -111,7 +111,7 @@ class Daily:
 
     def EP(data_daily, currentday, pmPrice, prevClose, screenbar, dateToSearch):
         
-        zfilter = 0
+        zfilter = 7
         
         try: 
             gaps = []
@@ -130,7 +130,7 @@ class Daily:
             elif (z < -zfilter) and pmPrice < min(lows):
                 dM.post(data_daily,screenbar,z,"NEP", dateToSearch) 
                 #print("1")
-            dM.post(data_daily,screenbar,z,"NEP",currentday)
+            #dM.post(data_daily,screenbar,z,"NEP",currentday)
         except IndexError:
             print("index error")
         except TimeoutError:
@@ -190,7 +190,7 @@ class Daily:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
                 #print(data_daily)
                
-                dM.post(data_daily,screenbar,z,"MR", dateToSearchy) 
+                dM.post(data_daily,screenbar,z,"MR", dateToSearch) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             

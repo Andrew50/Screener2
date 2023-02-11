@@ -39,7 +39,7 @@ class Data:
 
     def isDataUpdated(tv):
         # Takes in some dataframe that was given to the function and renames it 
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
         numTickers = len(screener_data) #Number of Tickers contained in the dataframe
        #Grabs the last two sessions of apple. 
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)

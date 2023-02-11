@@ -5,6 +5,7 @@ import pandas as pd
 import datetime
 import matplotlib as mpl
 from tvDatafeed import TvDatafeed
+from datetime import datetime
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
 discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
@@ -136,7 +137,9 @@ class discordManager:
         else:
             tick = str(screenbar['Ticker'])
             #c = pd.read_csv(r"C:/Screener/tmp/setups.csv")
-            dateString = str(df.index[dateToSearch - 1])
+            dateString = dateToSearch
+        
+            #dateString = str(df.index[dateToSearch - 1])
             if(type == "MR"):
                 data ={'Date': [dateString],
                    'Ticker':[ tick],
