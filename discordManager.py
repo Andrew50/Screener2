@@ -56,40 +56,9 @@ class discordManager:
 
     def post(df, screenbar, z, type, dateToSearch):
 
-
-
-        
-
-        
-       
-
-
-
-
-
-
-
-
-
-
-
-
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
         ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
-        if(type == "Pop"):
-            openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
-            changePrice = round(float(currPrice - openCandlePrice), 2)
-            mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-            discordManager.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            discordManager.sendDiscordIntradayPost('tmp/test.png')
-
-        if(type == "Gainer"):
-            openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
-            changePrice = round(float(currPrice - openCandlePrice), 2)
-            mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-            discordManager.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            discordManager.sendDiscordGainersPost('tmp/test.png')
 
         if(dateToSearch == "0"):
 
@@ -116,7 +85,21 @@ class discordManager:
             prevClose = currPrice
             pmPrice = round((prevClose + pmChange), 2)
             gapValuePercent = round(((pmPrice/prevClose) - 1)*100, 2)
+            lengthDf = len(setup_df)
+            setup_df = setup_df[lengthDf - 80:]
+            if(type == "Pop"):
+                openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+                changePrice = round(float(currPrice - openCandlePrice), 2)
+                mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+                discordManager.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                discordManager.sendDiscordIntradayPost('tmp/test.png')
 
+            if(type == "Gainer"):
+                openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+                changePrice = round(float(currPrice - openCandlePrice), 2)
+                mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+                discordManager.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                discordManager.sendDiscordGainersPost('tmp/test.png')
 
             if(type == "MR"):
                 mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)

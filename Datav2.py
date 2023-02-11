@@ -102,13 +102,15 @@ class Data:
             print(ticker + " couldn't save file")
         except UnboundLocalError:
             print(ticker + " had issues !!!!!!!!!!!!!")
+        except TypeError:
+            print("caught the missing 1 required positional argument")
 
     
 
 
     def isDataUpdated(tv):
         # Takes in some dataframe that was given to the function and renames it 
-        screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data) #Number of Tickers contained in the dataframe
         #Grabs the last two sessions of apple. 
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
@@ -139,8 +141,8 @@ class Data:
             tickers.append(f'{exchange}:{ticker}:{closed}:{numTickersLeft}:{lastDStock}')
         tickersLength = len(tickers)
 
-        pool = Pool(nodes=8)
-        pool.map(Data.updateTicker, tickers)
+        with Pool(nodes=6) as pool:
+            pool.map(Data.updateTicker, tickers)
         #with concurrent.futures.ProcessPoolExecutor() as executor:
 
 

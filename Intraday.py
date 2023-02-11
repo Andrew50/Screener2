@@ -3,13 +3,14 @@ from tvDatafeed import TvDatafeed, Interval
 import statistics
 from Screen import Screen as screen
 from discordManager import discordManager as dM
+import datetime
 class Intraday:
     def runIntraday(tvlog, brows):
         br = brows
-        tvr = tvlog
-        if(tvr == None):
-            tvr = screen.logInScrapper()
-        br = screen.runIntradayScan(br)
+        tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+        #if(tvr == None):
+        #    tvr = screen.logInScrapper()
+        #br = screen.runIntradayScan(br)
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         numTickers = len(screener_data)
         for i in range(numTickers):
@@ -69,6 +70,7 @@ class Intraday:
             print("file error") 
   
                 
-                
-
-
+if __name__ == '__main__':
+    print(datetime.datetime.now())
+    Intraday.runIntraday(None, None)
+    print(datetime.datetime.now())
