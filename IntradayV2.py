@@ -7,8 +7,9 @@ from discordManager import discordManager as dM
 from functools import partial
 from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
+
 class Intraday:
-    def runTicker(screenb):
+    def runTickerList(screenb):
         screenbar = screenb
         exchange = str(screenbar['Exchange'])
         dayChange = round(screenbar['Change %'], 2)
@@ -17,22 +18,20 @@ class Intraday:
         tick = str(screenbar['Ticker'])
         print(tick)
         oneMinChange = screenbar['Change 1m, %']
-        return 'test' + f" {tick}"
         try:
             if (dolVol > 7500000 and currPrice > 1.2):
                 if(oneMinChange > 1 or dayChange > 11):
-                    tvr = TvDatafeed()
-                    data_minute = tvr.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
-
                     if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
-                        Intraday.Gainers(data_minute, screenbar,dayChange)
+                        return screenbar, "Gainers"
 
                     if(dolVol > 750000 and currPrice > 1.2):
-                        Intraday.Pops(data_minute, screenbar)
+                        return screenbar, "Pops"
         except TypeError:
             print(f' {tick} did not return data!')
         except AttributeError:
             print(' {tick} did not return data!')
+    def processTickers(tickerList):
+        pass
     def runIntraday(tvlog, brows):
         br = brows
         tvr = tvlog
@@ -47,7 +46,13 @@ class Intraday:
             screenBars.append(screener_data.iloc[i])
            
         pool = Pool(nodes=8)
-        print(pool.map(Intraday.runTicker, screenBars))
+        returnedScreenbars = pool.map(Intraday.runTickerList, screenBars)
+        setupScreenbars = []
+        for i in range(len(returnedScreenbars)):
+            if(returnedScreenbars[i] != None):
+                print('test')
+                setupScreenbars
+        print(setupScreenbars)
         print(datetime.datetime.now())
         return tvr, br
             
@@ -86,4 +91,4 @@ class Intraday:
 
 
 if __name__ == '__main__':
-    Intraday.runIntraday(None, None)
+   Intraday.runIntraday(None, None)
