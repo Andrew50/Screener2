@@ -3,7 +3,7 @@ from tvDatafeed import TvDatafeed, Interval
 import statistics
 from Screen import Screen as screen
 import datetime
-from discordManager import discordManager as dM
+from Log import log as log
 from functools import partial
 from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -77,7 +77,7 @@ class Intraday:
                 tick = str(screenbar['Ticker'])
                 data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
                 z = 0
-                dM.post(data_minute,screenbar,z,"Gainer","0")
+                log.intraday(data_minute,screenbar,z,"Gainer")
                 print(tick + " sent ")
         except PermissionError:
             print('Permission Error Caught')
@@ -103,7 +103,7 @@ class Intraday:
              
             z = (value-statistics.mean(data))/statistics.stdev(data)
             if ((z < -zfilter) or (z > zfilter)) and y > 2:
-                dM.post(data_minute,screenbar,z,"Pop","0")
+                log.intraday(data_minute,screenbar,z,"Pop")
                 #return data_minute, screenbar, z, "Pop", "0"
         except IndexError:
             print("index error")
