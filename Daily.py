@@ -45,7 +45,7 @@ class Daily:
             tick = str(screenbar['Ticker'])
             
             
-            print(tick + f" #{i}")
+            #print(tick + f" #{i}")
             if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
                 data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
@@ -67,10 +67,13 @@ class Daily:
                             dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
                             pmChange = pmPrice/prevClose - 1
     
-                        rightedge = indexOfDay + 1
-                        data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
-                        currentday = chartSize-1
+                        rightedge = indexOfDay 
+                        data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
+                        currentday = chartSize
 
+
+                        #print(len(data_daily))
+                        #print(currentday)
                             #pmPrice = data_daily_full.iloc[indexOfDay][2]#open
                             #prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
                             #if len(data_daily_full) - indexOfDay > rightbuffer:
@@ -89,17 +92,17 @@ class Daily:
                         #print(currentday)
                         #print(len(data_daily))
                         if(dolVol > 1000000  and prevClose > 3 and sEP):
-                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
                         if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
-                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
                         if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
-                            self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+                            self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
 
     #currentday is the day of the setup. This would be the day that the setup would be bough
     #if datetosearch is 0 then currentday is the length of daily_data
 
 
-    def EP(data_daily, currentday, pmPrice, prevClose, screenbar, dateToSearch):
+    def EP(data_daily, currentday, pmPrice, prevClose, screenbar, dateToSearch,tick):
         
         zfilter = 7
         
@@ -115,11 +118,12 @@ class Daily:
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
             #dM.post(data_daily,screenbar,z,"NEP", dateToSearch)
             if(z > zfilter) and pmPrice > max(highs):
-                dM.post(data_daily,screenbar,z,"EP", dateToSearch) 
-                
+                #dM.post(data_daily,screenbar,z,"EP", dateToSearch) 
+                print(str(f"{tick}  EP {z}"))
             elif (z < -zfilter) and pmPrice < min(lows):
-                dM.post(data_daily,screenbar,z,"NEP", dateToSearch) 
+                #dM.post(data_daily,screenbar,z,"NEP", dateToSearch) 
                 #print("1")
+                print(str(f"{tick}  NEP {z}"))
             #dM.post(data_daily,screenbar,z,"NEP",currentday)
         except IndexError:
             print("index error")
@@ -128,7 +132,7 @@ class Daily:
         except FileNotFoundError:
             print("file error") 
  
-    def MR(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch):
+    def MR(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
         #print(currentday)
         #print(len(data_daily))
         
@@ -178,9 +182,9 @@ class Daily:
             #print(z,gapz, gapz1, changez)
             #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
-                #print(data_daily)
+                print(str(f"{tick}  MR {z}"))
                
-                dM.post(data_daily,screenbar,z,"MR", dateToSearch) 
+                
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
             
@@ -191,9 +195,9 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")
             
-    def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch):
+    def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
         
-        zfilter = -2
+        zfilter = 3.3
         changezfilter = 4
         gapzfilter = 8
 
@@ -244,13 +248,15 @@ class Daily:
             #print(z2)
             if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter and gapz < gapzfilter:
                 #print(data_daily)
-                
-                dM.post(data_daily,screenbar,z2,"Pivot", dateToSearch) 
+                print(str(f"{tick}  Pivot {z}"))
+                #dM.post(data_daily,screenbar,z2,"Pivot", dateToSearch) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
 
             if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
-                dM.post(data_daily,screenbar,z2,"Pivot", dateToSearch) 
+                print(str(f"{tick}  Pivot {z}"))
+                #dM.post(data_daily,screenbar,z2,"Pivot", dateToSearch) 
+                
             
         except IndexError:
            print(" did not exist at the date " )
@@ -261,5 +267,5 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '2020-09-22',False)
+    Daily.runDaily(Daily, '2022-02-24',True)
     print(datetime.datetime.now())
