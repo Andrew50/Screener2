@@ -253,7 +253,7 @@ class Daily:
     def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
         
         zfilter = 5
-        changezfilter = 2.5
+        changezfilter = 2.3
         gapzfilter = 8
         tick = screenbar['Ticker']
         try: 
@@ -322,9 +322,14 @@ class Daily:
             print(" does not have a file")
 
 if __name__ == '__main__':
-    print(datetime.datetime.now())
-    start_date = date(2013, 1, 1)
-    day_count = 2500
-    for single_date in (start_date + timedelta(n) for n in range(day_count)):
+    backtest = True
+    day_count = 200
+    if backtest:
+        print(datetime.datetime.now())
+        start_date = date(2018, 1, 1)
+        
+        for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
-        Daily.runDaily(Daily, str(single_date))
+            Daily.runDaily(Daily, str(single_date))
+    else:
+        Daily.runDaily(Daily, '2022-11-03')

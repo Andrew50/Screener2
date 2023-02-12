@@ -1,20 +1,20 @@
 
 from tvDatafeed import TvDatafeed
 from Daily2 import Daily as daily
+import datetime
+from datetime import date, timedelta
 
 
 
 start = 70 #
 
-tv = TvDatafeed()
-data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=start)
 
-for i in range(start-20):
-    dateTimeOfDay = data_apple.index[i]
-    dateSplit = str(dateTimeOfDay).split(" ")
-    date = dateSplit[0]
-    print(str(f"backtesting  {date}"))
-          
-    daily.runDaily(daily, date)
+
+print(datetime.datetime.now())
+start_date = date(2013, 1, 1)
+day_count = 2500
+for single_date in (start_date + timedelta(n) for n in range(day_count)):
+
+    daily.runDaily(daily, str(single_date))
 
 
