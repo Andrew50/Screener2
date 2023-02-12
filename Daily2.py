@@ -125,6 +125,7 @@ class Daily:
             dateTimeOfDay2 = data_apple2.index[0]
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
             if not date2 == datetime.datetime.today():
                 dateToSearch = date2
                 print("weekend")
@@ -133,14 +134,14 @@ class Daily:
         if dateToSearch != "0":
             dateSplit = dateToSearch.split("-")
             x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
+
             if(x_date.weekday() >= 5):
                 print("The date given is not a weekday.")
                 return False
-
-        if (dateToSearch == "0"):
-            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-        else:
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+        
+       
+            
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
