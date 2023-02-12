@@ -12,13 +12,36 @@ class Daily:
     def sfindIndex(df, dateTo):
         if dateTo == "0":
             return len(df)
-        for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
+        lookforSplit = dateTo.split("-")
+        middle = int(len(df)/2)
+        middleDTOD = str(df.iloc[middle]['datetime'])
+        middleSplit = middleDTOD.split("-")      
+        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
+        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
+        if(monthDifference < 0):
+            yearDifference = yearDifference + 1
+            monthDifference = -12 + monthDifference
+        addInt = (yearDifference*-252) + (monthDifference*-21)
+        newRef = middle + addInt
+        dateTo = dateTo + " 05:30:00"
+        if(newRef < 0):
+            return 99999
+        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            for i in range(35):
+                dateTimeofDayAhead = str(df.iloc[len(df)-35 + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return int(2065 + i)
+        else:
+            for i in range(35):
+                dateTimeofDayBehind = str(df.iloc[newRef - i]['datetime'])
+                if(dateTimeofDayBehind == dateTo):
+                    return (newRef - i)
+                dateTimeofDayAhead = str(df.iloc[newRef + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return (newRef + i)
         return 99999
+
+
     def processTickers(sbr):
         sMR = False
         sEP = True
@@ -89,12 +112,16 @@ class Daily:
             sEP = True
             sPivot = True
             sFlag = False
-
+        dateSplit = dateToSearch.split("-")
+        x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
+        if(x_date.weekday() >= 5):
+            print("The date given is not a weekday.")
+            return False
 
         if (dateToSearch == "0"):
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         else:
-            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
@@ -269,5 +296,5 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '0',False)
+    Daily.runDaily(Daily, '2020-09-22',False)
     print(datetime.datetime.now())

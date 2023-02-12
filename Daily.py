@@ -11,11 +11,11 @@ class Daily:
     def sfindIndex(df, dateTo):
         if dateTo == "0":
             return len(df)
+        dateT = dateTo + " 05:30:00"
         for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
+            dateTimeOfDay = str(df.iloc[i]['datetime'])
+            
+            if(dateTimeOfDay == dateT):
                 return i
         return 99999
 
@@ -38,7 +38,7 @@ class Daily:
         if (dateToSearch == "0"):
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         else:
-            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data)
         for i in range(numTickers):
             screenbar = screener_data.iloc[i]
@@ -261,5 +261,5 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '0',False)
+    Daily.runDaily(Daily, '2020-09-22',False)
     print(datetime.datetime.now())
