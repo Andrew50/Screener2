@@ -3,6 +3,7 @@ import pandas as pd
 import statistics
 import math
 import datetime
+from datetime import date, timedelta
 from Log import log as log
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -301,7 +302,7 @@ class Daily:
             z2 = z*gapz
             #print(str(f"{tick} , {z} , {gapz},{fourSMA} , {data_daily.iloc[currentday-1][4] - 1}"))
             
-            #log.daily(screenbar,z2,"Pivot", dateToSearch,pmPrice)
+
             #print(z2)
             if z2 > zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
                 #print(data_daily)
@@ -322,5 +323,8 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '0')#'2022-02-24' big MR day
-    print(datetime.datetime.now())
+    start_date = date(2013, 1, 1)
+    day_count = 2500
+    for single_date in (start_date + timedelta(n) for n in range(day_count)):
+
+        Daily.runDaily(Daily, str(single_date))

@@ -145,7 +145,7 @@ class Daily:
             zgaps = []
             zchange = []
             
-            
+            print(currentday + int(len(data_daily)))
             for i in range(30):
                 n = 29-i
                 gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
