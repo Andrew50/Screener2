@@ -7,8 +7,9 @@ from discordManager import discordManager as dM
 from functools import partial
 from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
+
 class Intraday:
-    def runTicker(screenb):
+    def runTickerList(screenb):
         screenbar = screenb
         exchange = str(screenbar['Exchange'])
         dayChange = round(screenbar['Change %'], 2)
@@ -17,50 +18,79 @@ class Intraday:
         tick = str(screenbar['Ticker'])
         print(tick)
         oneMinChange = screenbar['Change 1m, %']
-        return 'test' + f" {tick}"
         try:
             if (dolVol > 7500000 and currPrice > 1.2):
                 if(oneMinChange > 1 or dayChange > 11):
-                    tvr = TvDatafeed()
-                    data_minute = tvr.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
-
                     if( dolVol > 7500000 and currPrice > 1.2 ):#and (counter % 5 == 0)): 
-                        Intraday.Gainers(data_minute, screenbar,dayChange)
+                        return screenbar, "Gainers"
 
                     if(dolVol > 750000 and currPrice > 1.2):
-                        Intraday.Pops(data_minute, screenbar)
+                        return screenbar, "Pops"
         except TypeError:
             print(f' {tick} did not return data!')
         except AttributeError:
             print(' {tick} did not return data!')
+    def processTickers(tickerList):
+        gainers = []
+        pops = []
+        for i in range(len(tickerList)):
+            if(tickerList[i][1] == "Gainers"):
+                gainers.append(tickerList[i][0])
+            if(tickerList[i][1] == "Pops"):
+                pops.append(tickerList[i][0])
+        with Pool(nodes=6) as pool:
+            pool.map(Intraday.Gainers, gainers)
+        with Pool(nodes=6) as pool:
+            test = pool.map(Intraday.Pops, pops)
+        
+        
+
     def runIntraday(tvlog, brows):
         br = brows
         tvr = tvlog
-        #if(tvr == None):
-        #    tvr = screen.logInScrapper()
-        #br = screen.runIntradayScan(br)
+        if(tvr == None):
+            tvr = screen.logInScrapper()
+        br = screen.runIntradayScan(br)
         screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         numTickers = len(screener_data)
-        print(datetime.datetime.now())
         screenBars = []
         for i in range(numTickers):
             screenBars.append(screener_data.iloc[i])
-           
-        pool = Pool(nodes=8)
-        print(pool.map(Intraday.runTicker, screenBars))
-        print(datetime.datetime.now())
+        returnedScreenbars = []
+        with Pool(nodes=8) as pool:
+            returnedScreenbars = pool.map(Intraday.runTickerList, screenBars)
+        setupScreenbars = []
+        for i in range(len(returnedScreenbars)):
+            if(returnedScreenbars[i] != None):
+                setupScreenbars.append(returnedScreenbars[i])
+        Intraday.processTickers(setupScreenbars)
         return tvr, br
             
 
-    def Gainers(data_minute, screenbar,dayChange):
-        if(dayChange > 15):
-            z = 0
-            dM.post(data_minute,screenbar,z,"Gainer","0")
+    def Gainers(screenbar):
+        try:
+            dayChange = round(screenbar['Change %'], 2)
+            if(dayChange > 15):
+                tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+            
+                exchange = str(screenbar['Exchange'])
+                tick = str(screenbar['Ticker'])
+                data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
+                z = 0
+                dM.post(data_minute,screenbar,z,"Gainer","0")
+                print(tick + " sent ")
+        except PermissionError:
+            print('Permission Error Caught')
 
-    def Pops(data_minute, screenbar):
+    def Pops(screenbar):
 
         zfilter = 50
-
+        tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+        exchange = str(screenbar['Exchange'])
+        tick = str(screenbar['Ticker'])
+        print(tick)
+        data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
+        print(data_minute)
         try:
             data = []
             length = len(data_minute)
@@ -74,6 +104,7 @@ class Intraday:
             z = (value-statistics.mean(data))/statistics.stdev(data)
             if ((z < -zfilter) or (z > zfilter)) and y > 2:
                 dM.post(data_minute,screenbar,z,"Pop","0")
+                #return data_minute, screenbar, z, "Pop", "0"
         except IndexError:
             print("index error")
         except TimeoutError:
@@ -86,4 +117,4 @@ class Intraday:
 
 
 if __name__ == '__main__':
-    Intraday.runIntraday(None, None)
+   Intraday.runIntraday(None, None)
