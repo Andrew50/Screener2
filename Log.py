@@ -88,49 +88,50 @@ class log:
             openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
             changePrice = round(float(currPrice - openCandlePrice), 2)
             mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-            Log.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            Log.sendDiscordIntradayPost('tmp/test.png')
+            log.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            log.sendDiscordIntradayPost('tmp/test.png')
 
         if(type == "Gainer"):
             openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
             changePrice = round(float(currPrice - openCandlePrice), 2)
             mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-            Log.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-            Log.sendDiscordGainersPost('tmp/test.png')
+            log.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            log.sendDiscordGainersPost('tmp/test.png')
 
         if(type == "MR"):
             mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            Log.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR {z}")
-            Log.sendDiscordPost('tmp/test.png')
+            log.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR {z}")
+            log.sendDiscordPost('tmp/test.png')
         if(type == "EP"):
             mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            Log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP {z}")
-            Log.sendDiscordPost('tmp/test.png')
+            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP {z}")
+            log.sendDiscordPost('tmp/test.png')
         if(type == "NEP"):
             mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            Log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP {z}")
-            Log.sendDiscordPost('tmp/test.png')
+            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP {z}")
+            log.sendDiscordPost('tmp/test.png')
         if(type == "Pivot"):
             mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            Log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
-            Log.sendDiscordPost('tmp/test.png')
+            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
+            log.sendDiscordPost('tmp/test.png')
 
 
 
-    def daily(screenbar, z, type, dateToSearch):
+    def daily(screenbar, z, type, dateToSearch,pmPrice):
+            
+
+        
         tick = str(screenbar['Ticker'])
-        if dateToSearch == "0":
-            data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
-            dateTimeOfDay = data_apple.index[0]
-            dateSplit = str(dateTimeOfDay).split(" ")
-            dateString = dateSplit[0]
-        else:
-            dateString = dateToSearch
+        #c = pd.read_csv(r"C:/Screener/tmp/setups.csv")
+        dateString = dateToSearch
+        
+        #dateString = str(df.index[dateToSearch - 1])
         if(type == "MR"):
             data ={'Date': [dateString],
                 'Ticker':[ tick],
                 'Setup': ["MR"],
-                'Z': [z]}
+                'Z': [z],
+                'pm':[pmPrice]}
         if(type == "EP"):
             data ={'Date': [dateString],
                 'Ticker':[ tick],
@@ -140,18 +141,24 @@ class log:
             data ={'Date': [dateString],
                 'Ticker':[ tick],
                 'Setup': ["NEP"],
-                'Z': [z]}
+                'Z': [z],
+                'pm':[pmPrice]}
         if(type == "Pivot"):
             data ={'Date': [dateString],
                 'Ticker':[ tick],
                 'Setup': ["Pivot"],
-                'Z': [z]}
+                'Z': [z],
+                'pm':[pmPrice]}
         dfadd = pd.DataFrame(data)
-       
+      
+
+
         if dateToSearch == "0":
+            dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
+        else:
             dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
-        else 
-            dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
+   
+
 
 
 

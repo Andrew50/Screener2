@@ -19,6 +19,7 @@ class UI:
         self.i = -1
         self.full_setups_data = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
         self.setups_data = self.full_setups_data
+        historical = True
         
 
         self.update(self,True)
@@ -45,6 +46,39 @@ class UI:
                 self.lookup(self,ticker,date,setup)
                 self.update(self,False)
                 
+            if event == 'Toggle':
+                if historical:
+                    try:
+                        holder = pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+                        self.full_setups_data  = holder
+                        historical = False
+                        self.window["-hist-"].update('Today')
+                        ticker = values["input-ticker"]
+                        date = values["input-date"]
+                        setup = values["input-setup"]
+                        self.lookup(self,ticker,date,setup)
+                        self.update(self,False)
+                    except pd.errors.EmptyDataError:
+                        sg.Popup('No Setups Found')
+   
+                else:
+                    try: 
+                        holder = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                        self.full_setups_data  = holder
+                        historical = True
+                        self.window["-hist-"].update('Historical')
+                        ticker = values["input-ticker"]
+                        date = values["input-date"]
+                        setup = values["input-setup"]
+                        self.lookup(self,ticker,date,setup)
+                        self.update(self,False)
+                    except pd.errors.EmptyDataError:
+                        sg.Popup('No Setups Found')
+                   
+                        
+                
+                
+
 
             if event == sg.WIN_CLOSED:
                 break
@@ -76,18 +110,14 @@ class UI:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         
-       
-       
+  
 
-        if len(scan) == 0:
+        if len(scan) < 1:
             sg.Popup('No Setups Found')
         else:
+            
             self.i = -1
             self.setups_data = scan
-
-
-       
-
 
     def update(self, init):
 
@@ -95,6 +125,8 @@ class UI:
         date = str(self.setups_data.iloc[self.i][0])
         ticker = str(self.setups_data.iloc[self.i][1])
         setup = str(self.setups_data.iloc[self.i][2])
+        z= str(self.setups_data.iloc[self.i][3])
+        zs = float(z)
         #self.window['-setup-'].update(str(self.setups_data.iloc[self.i][2]))
         #self.window['-ticker-'].update(str(self.setups_data.iloc[self.i][1]))
         #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
@@ -119,7 +151,11 @@ class UI:
             df = data_daily[(leftedge):(rightedge)]
             
             ourpath = pathlib.Path("C:/Screener/tmp") / "databaseimage.png"
-            mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)
+            if date == "0":
+                pmPrice = (self.setups_data.iloc[self.i][4])
+                mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
+            else:
+                mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
 
             image = Image.open(r"C:\Screener\tmp\databaseimage.png")
             image.thumbnail((3500, 2000))
@@ -132,11 +168,12 @@ class UI:
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-')],
                 #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
+                [(sg.Text("Historical", key = "-hist-"))],
                 [(sg.Text((str(f"{self.i + 2} of {len(self.setups_data)}")), key = '-number-'))],
                 [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
                 [(sg.Text("Date")),sg.InputText(key = 'input-date')],
                 [(sg.Text("Setup")),sg.InputText(key = 'input-setup')],
-                      [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load')] 
+                      [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load'), sg.Button('Toggle')] 
                 ]
                 sg.theme('DarkBlack')
                 self.window = sg.Window('Window Title', layout,margins = (10,10))
@@ -159,5 +196,3 @@ class UI:
 
 if __name__ == "__main__":
     UI.loop(UI)
-
-
