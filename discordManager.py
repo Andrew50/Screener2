@@ -126,19 +126,23 @@ class discordManager:
             if(type == "MR"):
                 data ={'Date': [dateString],
                    'Ticker':[ tick],
-                   'Setup': ["MR"]}
+                   'Setup': ["MR"],
+                   'Z': [z]}
             if(type == "EP"):
                 data ={'Date': [dateString],
                    'Ticker':[ tick],
-                   'Setup': ["EP"]}
+                   'Setup': ["EP"],
+                   'Z': [z]}
             if(type == "NEP"):
                 data ={'Date': [dateString],
                    'Ticker':[ tick],
-                   'Setup': ["NEP"]}
+                   'Setup': ["NEP"],
+                   'Z': [z]}
             if(type == "Pivot"):
                 data ={'Date': [dateString],
                    'Ticker':[ tick],
-                   'Setup': ["Pivot"]}
+                   'Setup': ["Pivot"],
+                   'Z': [z]}
             dfadd = pd.DataFrame(data)
            # dfadd = pd.DataFrame(data,columns = ['Date','Tick','Setup'])
             dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
