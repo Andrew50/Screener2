@@ -14,13 +14,33 @@ class Data:
     def findIndex(df, dateTo):
         #this function essentialy takes in a dataframe and a date, and returns the index of the date in the dataframe. 
         # if the date is not contained in the dataframe, it returns 99999
-        for i in range(len(df)):
-            dateTimeOfDay = df.index[i]
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
-
+        lookforSplit = dateTo.split("-")
+        middle = int(len(df)/2)
+        middleDTOD = str(df.index[middle])
+        middleSplit = middleDTOD.split("-")      
+        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
+        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
+        if(monthDifference < 0):
+            yearDifference = yearDifference + 1
+            monthDifference = -12 + monthDifference
+        addInt = (yearDifference*-252) + (monthDifference*-21)
+        newRef = middle + addInt
+        dateTo = dateTo + " 05:30:00"
+        if(newRef < 0):
+            return 99999
+        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            for i in range(35):
+                dateTimeofDayAhead = str(df.index[len(df)-35 + i])
+                if(dateTimeofDayAhead == dateTo):
+                    return int(len(df) - 35 + i)
+        else:
+            for i in range(35):
+                dateTimeofDayBehind = str(df.index[newRef - i])
+                if(dateTimeofDayBehind == dateTo):
+                    return (newRef - i)
+                dateTimeofDayAhead = str(df.index[newRef + i])
+                if(dateTimeofDayAhead == dateTo):
+                    return (newRef + i)
         return 99999
     def isMarketClosed():
         #function returns a boolean based on whether or not the market is closed. If market is open, returns false. If market is closed, returns True

@@ -297,5 +297,5 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '2023-02-01',False)
+    Daily.runDaily(Daily, '2023-02-10',False)
     print(datetime.datetime.now())

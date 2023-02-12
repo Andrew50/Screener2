@@ -176,6 +176,5 @@ class Screen:
 
 
 if __name__ == '__main__':
-    tv = Screen.logInScrapper()
-    print(tv)
+    Screen.runDailyScan(None)
 
