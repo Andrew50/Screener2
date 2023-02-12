@@ -132,6 +132,7 @@ class UI:
         #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
        
         chartsize = 80
+        chartsize2 = 500
         chartoffset = 20
 
 
@@ -139,7 +140,11 @@ class UI:
             data_daily = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
             rightedge = self.sfindIndex(data_daily,date) + chartoffset
             leftedge = rightedge - chartsize
-            
+            leftedge2 = rightedge - chartsize2
+
+            if leftedge2 < 0:
+                leftedge2 = 0
+
             data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
             data_daily = data_daily.set_index('Datetime')
             data_daily = data_daily.drop(['datetime'], axis=1)
@@ -149,24 +154,32 @@ class UI:
         
 
             df = data_daily[(leftedge):(rightedge)]
+            df2 = data_daily[(leftedge2):(rightedge)]
             
             ourpath = pathlib.Path("C:/Screener/tmp") / "databaseimage.png"
+            ourpath2 = pathlib.Path("C:/Screener/tmp") / "databaseimage2.png"
             if date == "0":
                 pmPrice = (self.setups_data.iloc[self.i][4])
                 mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
+                mpf.plot(df2, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
             else:
                 mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                mpf.plot(df2, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
 
             image = Image.open(r"C:\Screener\tmp\databaseimage.png")
             image.thumbnail((3500, 2000))
             bio = io.BytesIO()
-            # Actually store the image in memory in binary 
             image.save(bio, format="PNG")
-            # Use that image data in order to 
+
+            image2 = Image.open(r"C:\Screener\tmp\databaseimage2.png")
+            image2.thumbnail((3500, 2000))
+            bio2 = io.BytesIO()
+            image2.save(bio2, format="PNG")
+
             if init:
                 
                 layout = [  
-                [sg.Image(bio.getvalue(),key = '-IMAGE-')],
+                [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
                 [(sg.Text("Historical", key = "-hist-"))],
                 [(sg.Text((str(f"{self.i + 2} of {len(self.setups_data)}")), key = '-number-'))],
@@ -179,19 +192,40 @@ class UI:
                 self.window = sg.Window('Window Title', layout,margins = (10,10))
             else:
                 self.window["-IMAGE-"].update(data=bio.getvalue())
+                self.window["-IMAGE2-"].update(data=bio2.getvalue())
                 self.window['-number-'].update(str(f"{self.i + 2} of {len(self.setups_data)}"))
 
             
-        
     def sfindIndex(df, dateTo):
         if dateTo == "0":
             return len(df)
-        for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
+        lookforSplit = dateTo.split("-")
+        middle = int(len(df)/2)
+        middleDTOD = str(df.iloc[middle]['datetime'])
+        middleSplit = middleDTOD.split("-")      
+        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
+        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
+        if(monthDifference < 0):
+            yearDifference = yearDifference + 1
+            monthDifference = -12 + monthDifference
+        addInt = (yearDifference*-252) + (monthDifference*-21)
+        newRef = middle + addInt
+        dateTo = dateTo + " 05:30:00"
+        if(newRef < 0):
+            return 99999
+        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            for i in range(35):
+                dateTimeofDayAhead = str(df.iloc[len(df)-35 + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return int(len(df) - 35 + i)
+        else:
+            for i in range(35):
+                dateTimeofDayBehind = str(df.iloc[newRef - i]['datetime'])
+                if(dateTimeofDayBehind == dateTo):
+                    return (newRef - i)
+                dateTimeofDayAhead = str(df.iloc[newRef + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return (newRef + i)
         return 99999
 
 if __name__ == "__main__":

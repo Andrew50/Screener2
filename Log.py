@@ -136,7 +136,8 @@ class log:
             data ={'Date': [dateString],
                 'Ticker':[ tick],
                 'Setup': ["EP"],
-                'Z': [z]}
+                'Z': [z],
+                'pm':[pmPrice]}
         if(type == "NEP"):
             data ={'Date': [dateString],
                 'Ticker':[ tick],

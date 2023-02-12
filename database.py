@@ -1,20 +1,20 @@
 
 from tvDatafeed import TvDatafeed
-from Daily import Daily as daily
+from Daily2 import Daily as daily
 
 
 
-length = 25
+start = 70 #
 
 tv = TvDatafeed()
-data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=length)
+data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=start)
 
-for i in range(length-20):
+for i in range(start-20):
     dateTimeOfDay = data_apple.index[i]
     dateSplit = str(dateTimeOfDay).split(" ")
     date = dateSplit[0]
     print(str(f"backtesting  {date}"))
           
-    daily.runDaily(daily, date,True)
+    daily.runDaily(daily, date)
 
 
