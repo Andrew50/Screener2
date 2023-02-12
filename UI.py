@@ -16,55 +16,89 @@ class UI:
     
 
     def loop(self):
-        self.i = 0
-        setups_data = pd.read_csv(r"C:\Screener\tmp\copy of setups.csv", header = None)
-        date = str(setups_data.iloc[self.i][0])
-        ticker = str(setups_data.iloc[self.i][1])
-        setup = str(setups_data.iloc[self.i][2])
-        layout = [  
-            [sg.Image(key = '-IMAGE-')],
-            [(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
-            [(sg.Text("x", key = '-number-'))],
-            [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
-            [(sg.Text("Date")),sg.InputText(key = 'input-date')],
-            [(sg.Text("Setup")),sg.InputText(key = 'input-setup')],
-                  [sg.Button('Prev'), sg.Button('Next')] 
-            ]
+        self.i = -1
+        self.full_setups_data = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+        self.setups_data = self.full_setups_data
+        
 
-        # Create the Window
-        sg.theme('DarkBlack')
-        self.window = sg.Window('Window Title', layout,margins = (10,10))
-        # Event Loop to process "events" and get the "values" of the inputs
-        event, values = self.window.read()
-        self.chart(self)
+        self.update(self,True)
+
+
+        
+       
         while True:
             event, values = self.window.read()
             if event == 'Next': # if user closes window or clicks cancel
-                self.i += 1
-                self.chart(self)
+                if self.i < len(self.setups_data) - 2:
+                    self.i += 1
+                    self.update(self,False)
                 
                 
             if event == 'Prev':
-                self.i -= 1
-                self.chart(self)
-
+                if self.i > -1:
+                    self.i -= 1
+                    self.update(self,False)
+            if event == 'Load':
+                ticker = values["input-ticker"]
+                date = values["input-date"]
+                setup = values["input-setup"]
+                self.lookup(self,ticker,date,setup)
+                self.update(self,False)
+                
 
             if event == sg.WIN_CLOSED:
                 break
             
         self.window.close()
+    
+
+    def lookup(self,ticker,date,setup):
         
+      
+        scan = self.full_setups_data
+        
+        if ticker  != "":
+            scanholder = pd.DataFrame()
+            for k in range(len(scan)):
+                if scan.iloc[k][1] == ticker:
+                    scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+            scan = scanholder
+        if date  != "":
+            scanholder = pd.DataFrame()
+            for k in range(len(scan)):
+                if scan.iloc[k][0] == date:
+                    scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+            scan = scanholder
+        if setup  != "":
+            scanholder = pd.DataFrame()
+            for k in range(len(scan)):
+                if scan.iloc[k][2] == setup:
+                    scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+            scan = scanholder
+        
+       
+       
 
-    def chart(self):
+        if len(scan) == 0:
+            sg.Popup('No Setups Found')
+        else:
+            self.i = -1
+            self.setups_data = scan
 
-        setups_data = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-        date = str(setups_data.iloc[self.i][0])
-        ticker = str(setups_data.iloc[self.i][1])
-        setup = str(setups_data.iloc[self.i][2])
-        self.window['-setup-'].update(str(setups_data.iloc[self.i][2]))
-        self.window['-ticker-'].update(str(setups_data.iloc[self.i][1]))
-        self.window['-date-'].update(str(setups_data.iloc[self.i][0]))
-        self.window['-number-'].update(str(f"{self.i + 2} of {len(setups_data)}"))
+
+       
+
+
+    def update(self, init):
+
+        
+        date = str(self.setups_data.iloc[self.i][0])
+        ticker = str(self.setups_data.iloc[self.i][1])
+        setup = str(self.setups_data.iloc[self.i][2])
+        #self.window['-setup-'].update(str(self.setups_data.iloc[self.i][2]))
+        #self.window['-ticker-'].update(str(self.setups_data.iloc[self.i][1]))
+        #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
+       
         chartsize = 80
         chartoffset = 20
 
@@ -85,7 +119,7 @@ class UI:
             df = data_daily[(leftedge):(rightedge)]
             
             ourpath = pathlib.Path("C:/Screener/tmp") / "databaseimage.png"
-            mpf.plot(df, type='candle', volume=True, title=ticker, style=s, savefig=ourpath)
+            mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)
 
             image = Image.open(r"C:\Screener\tmp\databaseimage.png")
             image.thumbnail((3500, 2000))
@@ -93,7 +127,22 @@ class UI:
             # Actually store the image in memory in binary 
             image.save(bio, format="PNG")
             # Use that image data in order to 
-            self.window["-IMAGE-"].update(data=bio.getvalue())
+            if init:
+                
+                layout = [  
+                [sg.Image(bio.getvalue(),key = '-IMAGE-')],
+                #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
+                [(sg.Text((str(f"{self.i + 2} of {len(self.setups_data)}")), key = '-number-'))],
+                [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
+                [(sg.Text("Date")),sg.InputText(key = 'input-date')],
+                [(sg.Text("Setup")),sg.InputText(key = 'input-setup')],
+                      [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load')] 
+                ]
+                sg.theme('DarkBlack')
+                self.window = sg.Window('Window Title', layout,margins = (10,10))
+            else:
+                self.window["-IMAGE-"].update(data=bio.getvalue())
+                self.window['-number-'].update(str(f"{self.i + 2} of {len(self.setups_data)}"))
 
             
         

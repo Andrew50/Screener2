@@ -2,7 +2,7 @@
 import pandas as pd
 import statistics
 import math
-from discordManager import discordManager as dM
+from Log import log as dM
 import warnings
 import datetime
 warnings.filterwarnings("ignore")
@@ -113,7 +113,7 @@ class Daily:
                 lows.append(data_daily.iloc[currentday-j-1][3])
                 highs.append(data_daily.iloc[currentday-j-1][2])
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
-            
+            #dM.post(data_daily,screenbar,z,"NEP", dateToSearch)
             if(z > zfilter) and pmPrice > max(highs):
                 dM.post(data_daily,screenbar,z,"EP", dateToSearch) 
                 
@@ -193,7 +193,7 @@ class Daily:
             
     def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch):
         
-        zfilter = 5
+        zfilter = -2
         changezfilter = 4
         gapzfilter = 8
 
@@ -260,6 +260,7 @@ class Daily:
             print(" does not have a file")
 
 if __name__ == '__main__':
-    print(datetime.datetime.now())
-    Daily.runDaily(Daily, '0',False)
-    print(datetime.datetime.now())
+    
+
+    Daily.runDaily(Daily, '0',True)
+    

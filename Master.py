@@ -20,7 +20,7 @@ while True:
     now = datetime.datetime.now()
    # print(now.hour)
     #print(now.minute)
-    if now.hour == 4 and now.minute == 00:
+    if now.hour == 3 and now.minute == 59:
         print("updating data")
         screen.runDailyScan(browser)
 
