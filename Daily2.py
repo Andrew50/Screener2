@@ -1,10 +1,11 @@
-﻿import os 
+import os 
 import pandas as pd
 import statistics
 import math
+import datetime
 from discordManager import discordManager as dM
 import warnings
-import datetime
+from pathos.multiprocessing import ProcessingPool as Pool
 warnings.filterwarnings("ignore")
 class Daily:
 
@@ -18,18 +19,73 @@ class Daily:
             if(date == dateTo):
                 return i
         return 99999
-
-    def runDaily(self, dateToSearch,algl):
-
+    def processTickers(sbr):
+        sMR = False
+        sEP = True
+        sPivot = True
+        sFlag = False
         chartSize = 80
         rightbuffer = 20
+        screenbar = sbr
+        tick = str(screenbar['Ticker'])
+        dateToSearch = screenbar['dateToSearch']
+        print(tick)
+        if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
+            data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
+        
+            if len(data_daily_full) > 50:
+                   
+                indexOfDay = Daily.sfindIndex(data_daily_full, dateToSearch)
+                if(indexOfDay != 99999):
+                        
+                    if (dateToSearch == "0"):
+                        prevClose = screenbar['Price']
+                            
+                        pmChange = screenbar['Pre-market Change']
+            
+                        dolVol = screenbar['Volume*Price']
+                        pmPrice = prevClose + pmChange                 
+                    else:
+                        pmPrice = data_daily_full.iloc[indexOfDay][2]#open
+                        prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
+                        dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
+                        pmChange = pmPrice/prevClose - 1
+    
+                    rightedge = indexOfDay + 1
+                    data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
+                    currentday = chartSize-1
+
+                        #pmPrice = data_daily_full.iloc[indexOfDay][2]#open
+                        #prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
+                        #if len(data_daily_full) - indexOfDay > rightbuffer:
+                        #    rightedge = indexOfDay+rightbuffer
+                        #    currentday = chartSize-rightbuffer
+                        #else:
+                            #  rightedge = len(data_daily_full)
+                            #  currentday = chartSize-(rightedge - indexOfDay)
+                        
+                    #data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
+                    data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
+                    data_daily = data_daily.set_index('Datetime')
+                    data_daily = data_daily.drop(['datetime'], axis=1)
+                    #print(indexOfDay)
+                    #print(len(data_daily_full))
+                    #print(currentday)
+                    #print(len(data_daily))
+                    if(dolVol > 1000000  and prevClose > 3 and sEP):
+                        Daily.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+                    if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
+                        Daily.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+                    if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
+                        Daily.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
+    def runDaily(self, dateToSearch,algl):
         if algl:
             sMR = True
             sEP = True
             sPivot = True
             sFlag = True
         else:
-            sMR = False
+            sMR = True
             sEP = True
             sPivot = True
             sFlag = False
@@ -39,61 +95,13 @@ class Daily:
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         else:
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-        numTickers = len(screener_data)
-        for i in range(numTickers):
-            screenbar = screener_data.iloc[i]
-            tick = str(screenbar['Ticker'])
+        screenbars = []
+        for i in range(len(screener_data)):
+            screener_data.at[i, 'dateToSearch'] = dateToSearch
+            screenbars.append(screener_data.iloc[i])
+        with Pool(nodes=7) as pool:
+            pool.map(Daily.processTickers, screenbars)
             
-            
-            print(tick + f" #{i}")
-            if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
-                data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
-        
-                if len(data_daily_full) > 50:
-                   
-                    indexOfDay = self.sfindIndex(data_daily_full, dateToSearch)
-                    if(indexOfDay != 99999):
-                        
-                        if (dateToSearch == "0"):
-                            prevClose = screenbar['Price']
-                            
-                            pmChange = screenbar['Pre-market Change']
-            
-                            dolVol = screenbar['Volume*Price']
-                            pmPrice = prevClose + pmChange                 
-                        else:
-                            pmPrice = data_daily_full.iloc[indexOfDay][2]#open
-                            prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
-                            dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
-                            pmChange = pmPrice/prevClose - 1
-    
-                        rightedge = indexOfDay + 1
-                        data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
-                        currentday = chartSize-1
-
-                            #pmPrice = data_daily_full.iloc[indexOfDay][2]#open
-                            #prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
-                            #if len(data_daily_full) - indexOfDay > rightbuffer:
-                            #    rightedge = indexOfDay+rightbuffer
-                            #    currentday = chartSize-rightbuffer
-                            #else:
-                              #  rightedge = len(data_daily_full)
-                              #  currentday = chartSize-(rightedge - indexOfDay)
-                        
-                        #data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
-                        data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
-                        data_daily = data_daily.set_index('Datetime')
-                        data_daily = data_daily.drop(['datetime'], axis=1)
-                        #print(indexOfDay)
-                        #print(len(data_daily_full))
-                        #print(currentday)
-                        #print(len(data_daily))
-                        if(dolVol > 1000000  and prevClose > 3 and sEP):
-                            self.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
-                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
-                            self.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
-                            self.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch)
 
     #currentday is the day of the setup. This would be the day that the setup would be bough
     #if datetosearch is 0 then currentday is the length of daily_data
