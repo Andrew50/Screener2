@@ -30,7 +30,7 @@ class Daily:
             for i in range(35):
                 dateTimeofDayAhead = str(df.iloc[len(df)-35 + i]['datetime'])
                 if(dateTimeofDayAhead == dateTo):
-                    return int(2065 + i)
+                    return int(len(df) - 35 + i)
         else:
             for i in range(35):
                 dateTimeofDayBehind = str(df.iloc[newRef - i]['datetime'])
@@ -60,6 +60,7 @@ class Daily:
                    
                 indexOfDay = Daily.sfindIndex(data_daily_full, dateToSearch)
                 if(indexOfDay != 99999):
+                    print(f"{tick} {indexOfDay} {len(data_daily_full)}")
                         
                     if (dateToSearch == "0"):
                         prevClose = screenbar['Price']
@@ -231,7 +232,7 @@ class Daily:
         zfilter = 5
         changezfilter = 4
         gapzfilter = 8
-
+        tick = screenbar['Ticker']
         try: 
             zdata = []
             zgaps = []
@@ -288,7 +289,7 @@ class Daily:
                 dM.post(data_daily,screenbar,z2,"Pivot", dateToSearch) 
             
         except IndexError:
-           print(" did not exist at the date " )
+           print(f" did not exist at the date {tick}" )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
@@ -296,5 +297,5 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '2020-09-22',False)
+    Daily.runDaily(Daily, '2023-02-01',False)
     print(datetime.datetime.now())
