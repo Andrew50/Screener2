@@ -3,6 +3,7 @@ import pandas as pd
 import statistics
 import math
 import datetime
+from datetime import date, timedelta
 from Log import log as log
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -127,7 +128,7 @@ class Daily:
         if (dateToSearch == "0"):
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         else:
-            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
@@ -284,7 +285,7 @@ class Daily:
             z2 = z*gapz
             #print(str(f"{tick} , {z} , {gapz},{fourSMA} , {data_daily.iloc[currentday-1][4] - 1}"))
             
-            log.daily(screenbar,z2,"Pivot", dateToSearch,pmPrice)
+
             #print(z2)
             #if z2 < -zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter and gapz < gapzfilter:
                 #print(data_daily)
@@ -293,7 +294,8 @@ class Daily:
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
 
-            #if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
+            if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
+                pass
                 #log.daily(screenbar,z,"Pivot", dateToSearch,pmPrice) 
             
         except IndexError:
@@ -305,5 +307,8 @@ class Daily:
 
 if __name__ == '__main__':
     print(datetime.datetime.now())
-    Daily.runDaily(Daily, '2023-02-10')
-    print(datetime.datetime.now())
+    start_date = date(2013, 1, 1)
+    day_count = 2500
+    for single_date in (start_date + timedelta(n) for n in range(day_count)):
+
+        Daily.runDaily(Daily, str(single_date))

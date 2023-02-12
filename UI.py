@@ -131,7 +131,7 @@ class UI:
         #self.window['-ticker-'].update(str(self.setups_data.iloc[self.i][1]))
         #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
        
-        chartsize = 80
+        chartsize = 150
         chartoffset = 20
 
 
@@ -186,12 +186,33 @@ class UI:
     def sfindIndex(df, dateTo):
         if dateTo == "0":
             return len(df)
-        for i in range(len(df)):
-            dateTimeOfDay = df.iloc[i]['datetime']
-            dateSplit = str(dateTimeOfDay).split(" ")
-            date = dateSplit[0]
-            if(date == dateTo):
-                return i
+        lookforSplit = dateTo.split("-")
+        middle = int(len(df)/2)
+        middleDTOD = str(df.iloc[middle]['datetime'])
+        middleSplit = middleDTOD.split("-")      
+        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
+        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
+        if(monthDifference < 0):
+            yearDifference = yearDifference + 1
+            monthDifference = -12 + monthDifference
+        addInt = (yearDifference*-252) + (monthDifference*-21)
+        newRef = middle + addInt
+        dateTo = dateTo + " 05:30:00"
+        if(newRef < 0):
+            return 99999
+        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            for i in range(35):
+                dateTimeofDayAhead = str(df.iloc[len(df)-35 + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return int(len(df) - 35 + i)
+        else:
+            for i in range(35):
+                dateTimeofDayBehind = str(df.iloc[newRef - i]['datetime'])
+                if(dateTimeofDayBehind == dateTo):
+                    return (newRef - i)
+                dateTimeofDayAhead = str(df.iloc[newRef + i]['datetime'])
+                if(dateTimeofDayAhead == dateTo):
+                    return (newRef + i)
         return 99999
 
 if __name__ == "__main__":
