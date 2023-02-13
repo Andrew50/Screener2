@@ -63,6 +63,7 @@ class Intraday:
         for i in range(len(returnedScreenbars)):
             if(returnedScreenbars[i] != None):
                 setupScreenbars.append(returnedScreenbars[i])
+        print(setupScreenbars)
         Intraday.processTickers(setupScreenbars)
         return tvr, br
             
@@ -77,8 +78,9 @@ class Intraday:
                 tick = str(screenbar['Ticker'])
                 data_minute = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=1000)
                 z = 0
-                dM.post(data_minute,screenbar,z,"Gainer","0")
                 print(tick + " sent ")
+                dM.post(data_minute,screenbar,z,"Gainer","0")
+                
         except PermissionError:
             print('Permission Error Caught')
 
@@ -103,6 +105,7 @@ class Intraday:
              
             z = (value-statistics.mean(data))/statistics.stdev(data)
             if ((z < -zfilter) or (z > zfilter)) and y > 2:
+                print(tick + " sent ")
                 dM.post(data_minute,screenbar,z,"Pop","0")
                 #return data_minute, screenbar, z, "Pop", "0"
         except IndexError:
