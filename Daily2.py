@@ -128,7 +128,7 @@ class Daily:
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-            if not date2 == datetime.datetime.today():
+            if not date2 == datetime.datetime.today() and False:
                 dateToSearch = date2
                 print("weekend")
             
@@ -298,4 +298,4 @@ if __name__ == '__main__':
 
             Daily.runDaily(Daily, str(single_date))
     else:
-        Daily.runDaily(Daily, '2023-01-10')
+        Daily.runDaily(Daily, '0')
