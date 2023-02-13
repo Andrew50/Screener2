@@ -10,7 +10,6 @@ import datetime
 from tvDatafeed import TvDatafeed
 
 
-from discordManager import discordManager as dM
 
 
 class Screen:

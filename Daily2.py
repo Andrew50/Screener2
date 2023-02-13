@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from Log import log as log
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
+from tvDatafeed import TvDatafeed
 warnings.filterwarnings("ignore")
 class Daily:
 
@@ -61,10 +62,12 @@ class Daily:
             data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
             if len(data_daily_full) > 90:
-                   
-                indexOfDay = Daily.sfindIndex(data_daily_full, dateToSearch)
+                try:
+                    indexOfDay = Daily.sfindIndex(data_daily_full, dateToSearch)
+                except IndexError:
+                    indexOfDay = 99999
                 if(indexOfDay != 99999):
-                    print(f"{tick} {indexOfDay} {len(data_daily_full)}")
+                    #print(f"{tick} {indexOfDay} {len(data_daily_full)}")
                         
                     if (dateToSearch == "0"):
                         prevClose = screenbar['Price']
@@ -72,16 +75,17 @@ class Daily:
                         pmChange = screenbar['Pre-market Change']
             
                         dolVol = screenbar['Volume*Price']
-                        pmPrice = prevClose + pmChange                 
+                        pmPrice = prevClose + pmChange
+                        
                     else:
                         pmPrice = data_daily_full.iloc[indexOfDay][2]#open
                         prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
                         dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
                         pmChange = pmPrice/prevClose - 1
-                    
+                         
 
                     
-                    rightedge = indexOfDay 
+                    rightedge = indexOfDay
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                     currentday = chartSize
 
@@ -104,7 +108,7 @@ class Daily:
                     #print(len(data_daily_full))
                     #print(currentday)
                     #print(len(data_daily))
-                    if(dolVol > 1000000  and prevClose > 3 and sEP):
+                    if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
                         Daily.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
                     if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
                         Daily.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
@@ -117,23 +121,33 @@ class Daily:
         
             god = pd.DataFrame()
             god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+            tvs = TvDatafeed()
+            data_apple2 = tvs.get_hist('AAPL', 'NASDAQ', n_bars=1)
+            dateTimeOfDay2 = data_apple2.index[0]
+            dateSplit2 = str(dateTimeOfDay2).split(" ")
+            date2 = dateSplit2[0]
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+            if not date2 == datetime.datetime.today():
+                dateToSearch = date2
+                print("weekend")
+            
 
-        else:
+        if dateToSearch != "0":
             dateSplit = dateToSearch.split("-")
             x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
+
             if(x_date.weekday() >= 5):
                 print("The date given is not a weekday.")
                 return False
-
-        if (dateToSearch == "0"):
-            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-        else:
-            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+        
+       
+            
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
             screenbars.append(screener_data.iloc[i])
-        with Pool(nodes=7) as pool:
+        with Pool(nodes=6) as pool:
             pool.map(Daily.processTickers, screenbars)
             
 
@@ -143,19 +157,20 @@ class Daily:
 
     def EP(data_daily, currentday, pmPrice, prevClose, screenbar, dateToSearch,tick):
         
-        zfilter = 3
+        zfilter = 7
         
         try: 
             gaps = []
             lows = []
             highs = []
-            todayGapValue = round(((pmPrice/prevClose)-1), 2)
+            todayGapValue = ((pmPrice/prevClose)-1)
             for j in range(20): 
                 gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
                 lows.append(data_daily.iloc[currentday-j-1][3])
                 highs.append(data_daily.iloc[currentday-j-1][2])
+
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
-            
+            #print(str(f"{tick} , {z} , {todayGapValue},{statistics.mean(gaps)}, {statistics.stdev(gaps)}, {len(gaps)}"))
             if(z > zfilter) and pmPrice > max(highs):
                 log.daily(screenbar,z,"EP", dateToSearch,pmPrice) 
                 
@@ -174,57 +189,59 @@ class Daily:
         #print(currentday)
         #print(len(data_daily))
         
-        zfilter = 3.3
-        gapzfilter0 = 8
-        gapzfilter1 = 3.5
-        changezfilter = 3.2
+        zfilter = 3
+        gapzfilter0 = 5.5
+        gapzfilter1 = 4
+        changezfilter = 2.5
         try: 
             zdata = []
             zgaps = []
             zchange = []
             
-            
-            for i in range(30):
-                n = 29-i
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
-                changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
+            # if last three candles are red
+            if data_daily.iloc[currentday-1][4] < data_daily.iloc[currentday-1][1] and data_daily.iloc[currentday-2][4] < data_daily.iloc[currentday-2][1] and data_daily.iloc[currentday-3][4] < data_daily.iloc[currentday-3][1]:
+
+                #iterate through last 30 days
+                for i in range(30):
+                    n = 29-i
+                    gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+                    changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
+                    lastCloses = 0
+                    
+                    for c in range(4): 
+                    
+                        lastCloses += data_daily.iloc[currentday-2-c-n][4]
+                    fourSMA = (lastCloses/4)
+                    datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                    if i == 29:
+                        gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                    zgaps.append(gapvalue)
+                    zchange.append(changevalue)
+                    if i > 14:
+                        zdata.append(datavalue)
+
+                #calulate values of today
+                todayGapValue = abs((pmPrice/prevClose)-1)
+                todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
                 lastCloses = 0
-                    
                 for c in range(4): 
-                    
-                    lastCloses += data_daily.iloc[currentday-2-c-n][4]
-                fourSMA = (lastCloses/4)
-                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
-                if i == 29:
-                    gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                zgaps.append(gapvalue)
-                zchange.append(changevalue)
-                if i > 14:
-                    zdata.append(datavalue)
-            todayGapValue = abs((pmPrice/prevClose)-1)
-            todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
-            gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-            changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
-            lastCloses = 0
-            closes = []
-            for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+                    lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
                 
-            fourSMA = (lastCloses/4)
-            value = (fourSMA)/pmPrice - 1
-            
-            z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
-            #print(f"{z, gapz, gapz1, changez}") #z debugger
-            #print("historical" + f"{datavalue, gapvalue,changevalue}") #historical debugger
-           # print("current" + f"{value,todayGapValue ,todayChangeValue}") #current debugger
-            #print(z,gapz, gapz1, changez)
-            #print("change data" +f"{ statistics.mean(zchange), statistics.stdev(zchange) }")
-            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
-                #print(data_daily)
+                fourSMA = (lastCloses/4)
+                value = (fourSMA)/pmPrice - 1
+
+
+                #caclulate zs
+                gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
+                z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
+                
+                #requirements
+                if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
+              
                
-                log.daily(screenbar,z,"MR", dateToSearch,pmPrice) 
-                #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
-               # print(f"{tick,closes}")
+                    log.daily(screenbar,z,"MR", dateToSearch,pmPrice) 
+               
             
         except IndexError:
            print(" did not exist at the date " )
@@ -235,8 +252,8 @@ class Daily:
             
     def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
         
-        zfilter = 3.3
-        changezfilter = 4
+        zfilter = 5
+        changezfilter = 2.3
         gapzfilter = 8
         tick = screenbar['Ticker']
         try: 
@@ -287,16 +304,15 @@ class Daily:
             
 
             #print(z2)
-            #if z2 < -zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter and gapz < gapzfilter:
+            if z2 > zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
                 #print(data_daily)
                 
-                #log.daily(screenbar,z,"Pivot", dateToSearch,pmPrice) 
+                log.daily(screenbar,z2,"Pivot", dateToSearch,pmPrice) 
                 #print(f"{tick, data_daily.index[len(data_daily)-1], z, abs(value), statistics.mean(zdata),statistics.stdev(zdata), pmPrice, fourSMA}")
                # print(f"{tick,closes}")
 
-            if z2 < -zfilter and value < 0 and todayGapValue < 0 and changez < changezfilter and gapz < gapzfilter:
-                pass
-                #log.daily(screenbar,z,"Pivot", dateToSearch,pmPrice) 
+            if z2 > zfilter and value > 0 and todayGapValue > 0 and changez < changezfilter and gapz < gapzfilter:
+                log.daily(screenbar,z2,"Pivot", dateToSearch,pmPrice) 
             
         except IndexError:
            print(f" did not exist at the date {tick}" )
@@ -306,9 +322,14 @@ class Daily:
             print(" does not have a file")
 
 if __name__ == '__main__':
-    print(datetime.datetime.now())
-    start_date = date(2013, 1, 1)
-    day_count = 2500
-    for single_date in (start_date + timedelta(n) for n in range(day_count)):
+    backtest = True
+    day_count = 200
+    if backtest:
+        print(datetime.datetime.now())
+        start_date = date(2018, 1, 1)
+        
+        for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
-        Daily.runDaily(Daily, str(single_date))
+            Daily.runDaily(Daily, str(single_date))
+    else:
+        Daily.runDaily(Daily, '2022-11-03')

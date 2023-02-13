@@ -1,6 +1,6 @@
-from Data import Data as data
-from Daily import Daily as daily
-from Intraday import Intraday as intraday
+from Datav2 import Data as data
+from Daily2 import Daily as daily
+from IntradayV2 import Intraday as intraday
 from Screen import Screen as screen
 import datetime
 import time 
@@ -28,15 +28,12 @@ while True:
 
     elif now.hour == 4 and now.minute == 59:
         print(daily,"screening daily")
-        daily.runDaily(daily, "0",True)
+        daily.runDaily(daily, "0")
 
-    if(tv == None):
-        tv = screen.logInScrapper()
-    if(browser == None):
-        browser = screen.startFirefoxSession()
     
     
-    if now.hour == 5 and now.minute == 30:
+    
+    elif now.hour == 5 and now.minute == 30:
         while now.hour <= 12:
             screen.tryCloseLogout(browser)
             print("screening intraday")
@@ -46,6 +43,11 @@ while True:
         print("waiting")
         time.sleep(40)
         screen.tryCloseLogout(browser)
+
+    if(tv == None):
+        tv = screen.logInScrapper()
+    if(browser == None):
+        browser = screen.startFirefoxSession()
 
 
 
