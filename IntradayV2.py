@@ -63,6 +63,7 @@ class Intraday:
         for i in range(len(returnedScreenbars)):
             if(returnedScreenbars[i] != None):
                 setupScreenbars.append(returnedScreenbars[i])
+        print(setupScreenbars)
         Intraday.processTickers(setupScreenbars)
         return tvr, br
             

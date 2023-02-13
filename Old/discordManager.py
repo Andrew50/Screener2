@@ -59,95 +59,97 @@ class discordManager:
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
         ourpath = pathlib.Path("C:/Screener/tmp") / "test.png"
+        try:
+            if(dateToSearch == "0"):
 
-        if(dateToSearch == "0"):
-
-            z = round(z, 3)
-            setup_df = df
+                z = round(z, 3)
+                setup_df = df
             
-            change = round(screenbar["Change 1m, %"], 2)
-            dayChange = round(screenbar['Change %'], 2)
-            #changeFromOpen = round(screenbar['Change from Open'], 2)
-            #openValue = screenbar['Open']
-            currPrice = screenbar['Price']
-            volume = screenbar['Volume']
-            tick = screenbar['Ticker']
-            pmChange = screenbar['Pre-market Change']
-            currPrice = screenbar['Price']
-            volume = screenbar['Volume']
-            dolVol = screenbar['Volume*Price']
-            marketCap = round(screenbar['Market Capitalization'], 1)
-            marketCapText = round((marketCap / 1000000000), 2)
-            relativeVolAtTime = round(screenbar['Relative Volume at Time'], 1)
-            gapValuePercent = 0
-            prevClose = 0
-            pmPrice = 0
-            prevClose = currPrice
-            pmPrice = round((prevClose + pmChange), 2)
-            gapValuePercent = round(((pmPrice/prevClose) - 1)*100, 2)
-            lengthDf = len(setup_df)
-            setup_df = setup_df[lengthDf - 80:]
-            if(type == "Pop"):
-                openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
-                changePrice = round(float(currPrice - openCandlePrice), 2)
-                mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                discordManager.sendDiscordIntradayPost('tmp/test.png')
+                change = round(screenbar["Change 1m, %"], 2)
+                dayChange = round(screenbar['Change %'], 2)
+                #changeFromOpen = round(screenbar['Change from Open'], 2)
+                #openValue = screenbar['Open']
+                currPrice = screenbar['Price']
+                volume = screenbar['Volume']
+                tick = screenbar['Ticker']
+                pmChange = screenbar['Pre-market Change']
+                currPrice = screenbar['Price']
+                volume = screenbar['Volume']
+                dolVol = screenbar['Volume*Price']
+                marketCap = round(screenbar['Market Capitalization'], 1)
+                marketCapText = round((marketCap / 1000000000), 2)
+                relativeVolAtTime = round(screenbar['Relative Volume at Time'], 1)
+                gapValuePercent = 0
+                prevClose = 0
+                pmPrice = 0
+                prevClose = currPrice
+                pmPrice = round((prevClose + pmChange), 2)
+                gapValuePercent = round(((pmPrice/prevClose) - 1)*100, 2)
+                lengthDf = len(setup_df)
+                setup_df = setup_df[lengthDf - 80:]
+                if(type == "Pop"):
+                    openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+                    changePrice = round(float(currPrice - openCandlePrice), 2)
+                    mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                    discordManager.sendDiscordIntradayPost('tmp/test.png')
 
-            if(type == "Gainer"):
-                openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
-                changePrice = round(float(currPrice - openCandlePrice), 2)
-                mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
-                discordManager.sendDiscordGainersPost('tmp/test.png')
+                if(type == "Gainer"):
+                    openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+                    changePrice = round(float(currPrice - openCandlePrice), 2)
+                    mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+                    discordManager.sendDiscordGainersPost('tmp/test.png')
 
-            if(type == "MR"):
-                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR {z}")
-                discordManager.sendDiscordPost('tmp/test.png')
-            if(type == "EP"):
-                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP {z}")
-                discordManager.sendDiscordPost('tmp/test.png')
-            if(type == "NEP"):
-                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP {z}")
-                discordManager.sendDiscordPost('tmp/test.png')
-            if(type == "Pivot"):
-                mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-                discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
-                discordManager.sendDiscordPost('tmp/test.png')
-        else:
-            tick = str(screenbar['Ticker'])
-            #c = pd.read_csv(r"C:/Screener/tmp/setups.csv")
-            dateString = dateToSearch
+                if(type == "MR"):
+                    mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR {z}")
+                    discordManager.sendDiscordPost('tmp/test.png')
+                if(type == "EP"):
+                    mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP {z}")
+                    discordManager.sendDiscordPost('tmp/test.png')
+                if(type == "NEP"):
+                    mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP {z}")
+                    discordManager.sendDiscordPost('tmp/test.png')
+                if(type == "Pivot"):
+                    mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
+                    discordManager.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
+                    discordManager.sendDiscordPost('tmp/test.png')
+            else:
+                tick = str(screenbar['Ticker'])
+                #c = pd.read_csv(r"C:/Screener/tmp/setups.csv")
+                dateString = dateToSearch
         
-            #dateString = str(df.index[dateToSearch - 1])
-            if(type == "MR"):
-                data ={'Date': [dateString],
-                   'Ticker':[ tick],
-                   'Setup': ["MR"],
-                   'Z': [z]}
-            if(type == "EP"):
-                data ={'Date': [dateString],
-                   'Ticker':[ tick],
-                   'Setup': ["EP"],
-                   'Z': [z]}
-            if(type == "NEP"):
-                data ={'Date': [dateString],
-                   'Ticker':[ tick],
-                   'Setup': ["NEP"],
-                   'Z': [z]}
-            if(type == "Pivot"):
-                data ={'Date': [dateString],
-                   'Ticker':[ tick],
-                   'Setup': ["Pivot"],
-                   'Z': [z]}
-            dfadd = pd.DataFrame(data)
-           # dfadd = pd.DataFrame(data,columns = ['Date','Tick','Setup'])
-            dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
-            #cs = pd.concat([c, dfadd])
-            #cs.to_csv("C:/Screener/tmp/setups.csv")
+                #dateString = str(df.index[dateToSearch - 1])
+                if(type == "MR"):
+                    data ={'Date': [dateString],
+                       'Ticker':[ tick],
+                       'Setup': ["MR"],
+                       'Z': [z]}
+                if(type == "EP"):
+                    data ={'Date': [dateString],
+                       'Ticker':[ tick],
+                       'Setup': ["EP"],
+                       'Z': [z]}
+                if(type == "NEP"):
+                    data ={'Date': [dateString],
+                       'Ticker':[ tick],
+                       'Setup': ["NEP"],
+                       'Z': [z]}
+                if(type == "Pivot"):
+                    data ={'Date': [dateString],
+                       'Ticker':[ tick],
+                       'Setup': ["Pivot"],
+                       'Z': [z]}
+                dfadd = pd.DataFrame(data)
+               # dfadd = pd.DataFrame(data,columns = ['Date','Tick','Setup'])
+                dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
+                #cs = pd.concat([c, dfadd])
+                #cs.to_csv("C:/Screener/tmp/setups.csv")
+        except TypeError:
+            print('had issues')
 
 if __name__ == "__main__":
     tv = TvDatafeed()
