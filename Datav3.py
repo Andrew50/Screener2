@@ -9,6 +9,8 @@ from functools import partial
 from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
 import warnings
+import math
+import yfinance as yf
 warnings.filterwarnings("ignore")
 class Data:
     def findIndex(df, dateTo):
@@ -25,7 +27,7 @@ class Data:
             monthDifference = -12 + monthDifference
         addInt = (yearDifference*-252) + (monthDifference*-21)
         newRef = middle + addInt
-        dateTo = dateTo + " 05:30:00"
+        dateTo = dateTo + "00:00:00"
         if(newRef < 0):
             return 99999
         if( ((len(df) - newRef) < 20) or (newRef > len(df))):
@@ -61,7 +63,111 @@ class Data:
                 return False
         else: 
             return True
-        
+    def updatTick(tickersString):
+        tickers = tickersString.split(' ')
+        test = yf.download(tickers =  tickersString,  # list of tickers
+            period = "25y",  group_by='ticker',       # time period
+            interval = "1d",       # trading interval
+            ignore_tz = True,      # ignore timezone when aligning data from different exchanges?
+            prepost = False) # download pre/post market hours data?
+        print(test)
+        try:
+            for ticker in tickers:
+                print(f' REEEEEEEEEEEEEEEE {ticker}')
+                ticker_df = test[ticker]
+                ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
+
+                for i in range(len(ticker_df)):                 
+                    if(math.isnan(ticker_df.iloc[i]['Close']) == False):
+                        ticker_df = ticker_df[i:]
+                        break
+                if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
+                    ticker_df.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
+                    print(f"{ticker} created")
+                else:
+                    cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+                    lastDay = cs.iloc[len(cs)-1]['Date']
+                    cs['Date'] = pd.to_datetime(cs['Date'])
+                    cs = cs.set_index('Date')
+                    scrapped_data_index = Data.findIndex(ticker_df, lastDay)
+                    print(scrapped_data_index)
+                    need_append_data = ticker_df[scrapped_data_index+1:]
+                    cs = pd.concat([cs, need_append_data])
+                    cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
+                    numRows = len(need_append_data)
+                    print(f"{ticker} appended with {numRows}")
+                
+        #except KeyError:
+            #print("had issue with KeyError")
+        except TypeError:
+            pass
+
+
+    def isTickerUpdated(tickerandDate):
+        ticker = tickerandDate.split(":")[0]
+        lastDStock = tickerandDate.split(":")[1]
+        if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
+            return ticker
+        else:
+            cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+            lastDayTime = cs.iloc[len(cs)-1]['Date']
+            lastDaySplit = lastDayTime.split(" ")
+            lastDay = lastDaySplit[0]
+            if (lastDay != lastDStock):
+                return ticker
+        print(f"{ticker} is approved")
+
+    
+
+   
+    def runUpdate(tv):
+        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
+        isClosed = Data.isMarketClosed()
+        last = 't' # placeholder variables for future use since variable values are created in a if statement
+        lastDStock = 't' #placeholder
+        # if the market is closed, its free to access the most recent day since the data is complete. This code basically finds the most recent trading day
+        if(isClosed == True):
+            last = data_apple.index[1]
+            lastSplit = str(last).split(" ")
+            lastDStock = lastSplit[0]
+        # if the market is open, we should only use data from session prior to the most recent that is listed in the data. So, it takes the date for trading day T minus 1 
+        elif(isClosed == False):
+            last = data_apple.index[0]
+            lastSplit = str(last).split(" ")
+            lastDStock = lastSplit[0]
+        print(lastDStock)
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        numTickers = len(screener_data) #Number of Tickers contained in the dataframe
+        tickers = []
+        for i in range(numTickers):
+           ticker = screener_data.iloc[i]['Ticker']
+           tickers.append(f'{ticker}:{lastDStock}')
+        remaining_tickers = []
+        with Pool(nodes=6) as pool:
+            remaining_tickers = pool.map(Data.isTickerUpdated, tickers)
+        new_remaining = []
+        for t in remaining_tickers:
+            if(t != None):
+                new_remaining.append(t)
+        tickerBatches = []
+        numLeft = len(new_remaining)
+        numIterations = math.ceil(float(numLeft/50))
+        for i in range(len(new_remaining)):
+            tickerString = ""
+            if(i < numIterations-1):
+                for j in range(50):
+                    num = (i*50)+j
+                    print(new_remaining[num])
+                    tickerString = tickerString + new_remaining[num] + " "
+            else:
+                for j in range(numLeft - (50*(i)) ):
+                    num = (i*50)+j
+                    print(new_remaining[num])
+                    tickerString = tickerString + new_remaining[num] + " "
+            tickerBatches.append(tickerString)
+        with Pool(nodes=4) as pool:
+            pool.map(Data.updatTick, tickerBatches)
+
     def updateTicker(exchangeTicker):
 
         
@@ -73,7 +179,7 @@ class Data:
         lastDStock = split[4]
         try:
             # If there is no file for the current ticker that the code is iterating on, request the last 3500 bars and make a file
-            if(os.path.exists("C:/Screener/data_csvs2/" + ticker + "_data.csv") == False):
+            if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
                 tv = TvDatafeed()
                 data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
                 
@@ -81,7 +187,7 @@ class Data:
                     
                     data_daily.drop(data_daily.tail(1).index,inplace=True)
                     
-                data_daily.to_csv("C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                 #print(f"{ticker} created. Remaining: {numLeft}")
                 message = str(f"{ticker} created")
                 #prints.sendmessage(prints,message)
@@ -90,7 +196,7 @@ class Data:
             # if there is a file, we now are going to check if the data is complete
             else:
                 # read in the ticker's file
-                cs = pd.read_csv(r"C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                 lastDayTime = cs.iloc[len(cs)-1]['datetime']
                 lastDaySplit = lastDayTime.split(" ")
                 lastDay = lastDaySplit[0]
@@ -105,7 +211,7 @@ class Data:
                     need_append_data = data_daily[scrapped_data_index+1:]
                     #print(need_append_data.head())
                     cs = pd.concat([cs, need_append_data])
-                    cs.to_csv("C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                    cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     numRows = len(need_append_data)
                     message = str(f"{ticker} appended with {numRows}")
                     print(message)
@@ -125,61 +231,13 @@ class Data:
         except TypeError:
             print("caught the missing 1 required positional argument")
 
-    
-
-
-    def isDataUpdated(tv):
-        # Takes in some dataframe that was given to the function and renames it 
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-        numTickers = len(screener_data) #Number of Tickers contained in the dataframe
-        #Grabs the last two sessions of apple. 
-        data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
-        isClosed = Data.isMarketClosed()
-        last = 't' # placeholder variables for future use since variable values are created in a if statement
-        lastDStock = 't' #placeholder
-        # if the market is closed, its free to access the most recent day since the data is complete. This code basically finds the most recent trading day
-        if(isClosed == True):
-            last = data_apple.index[1]
-            lastSplit = str(last).split(" ")
-            lastDStock = lastSplit[0]
-        # if the market is open, we should only use data from session prior to the most recent that is listed in the data. So, it takes the date for trading day T minus 1 
-        elif(isClosed == False):
-            last = data_apple.index[0]
-            lastSplit = str(last).split(" ")
-            lastDStock = lastSplit[0]
-        print(lastDStock)
-        tickers = []
-        for i in range(numTickers):
-
-            if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
-                screener_data.at[i, 'Exchange'] = "AMEX"
-            ticker = screener_data.iloc[i]['Ticker']
-            exchange = screener_data.iloc[i]['Exchange']
-            numTickersLeft = (numTickers - 1) - i
-            closed = str(isClosed)
-
-            tickers.append(f'{exchange}:{ticker}:{closed}:{numTickersLeft}:{lastDStock}')
-        tickersLength = len(tickers)
-
-        pool = Pool(nodes=6)
-        pool.map(Data.updateTicker, tickers)
-        #with concurrent.futures.ProcessPoolExecutor() as executor:
-
-
-          #  ticks = tickers
-          #  results = {executor.submit(Data.updateTicker, tick, repeat(tradView)) for tick in ticks}
-          #  for result in results:
-          #      print(result.result())
-            #executor.map(Data.updateTicker, ticks, repeat(tradView))
-            #for f in concurrent.futures.as_completed(resul)
-
-        return 'done'
-
 if __name__ == '__main__':
     tv = TvDatafeed()
-   
-    Data.isDataUpdated(tv)
+    print(datetime.datetime.now())
+    Data.runUpdate(tv)
+    print(datetime.datetime.now())
     
+
 
 
 
