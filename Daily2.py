@@ -17,7 +17,7 @@ class Daily:
 
     def sfindIndex(df, dateTo):
         if dateTo == "0":
-            return len(df)
+            return len(df) 
         lookforSplit = dateTo.split("-")
         middle = int(len(df)/2)
         middleDTOD = str(df.iloc[middle]['datetime'])
@@ -77,20 +77,24 @@ class Daily:
             
                         dolVol = screenbar['Volume*Price']
                         pmPrice = prevClose + pmChange
+
+                        rightedge = indexOfDay 
                         
                     else:
                         pmPrice = data_daily_full.iloc[indexOfDay][2]#open
                         prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
                         dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
                         pmChange = pmPrice/prevClose - 1
+
+                        rightedge = indexOfDay
                          
 
                     
-                    rightedge = indexOfDay
+                    
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                     currentday = chartSize
 
-
+                   
 
                         #pmPrice = data_daily_full.iloc[indexOfDay][2]#open
                         #prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
@@ -105,6 +109,9 @@ class Daily:
                     data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                     data_daily = data_daily.set_index('Datetime')
                     data_daily = data_daily.drop(['datetime'], axis=1)
+
+
+                    print(data_daily.index[currentday - 1])
                     #print(indexOfDay)
                     #print(len(data_daily_full))
                     #print(currentday)
@@ -287,6 +294,42 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")
 
+
+    def Movers(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
+
+        zfilter = 3
+        l = 100
+       
+        try: 
+            z = []
+            for i in range(l):
+                n = l-i - 1
+                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+                zgaps.append(gapvalue)
+            
+            todayGapValue = (pmPrice/prevClose)-1
+            gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
+            lastCloses = 0
+            for c in range(4): 
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+                
+            ma3 = (lastCloses/4)
+            close1 = data_daily.iloc[currentday-1][4]
+            close2 = data_daily.iloc[currentday-2][4]
+            open1 = data_daily.iloc[currentday-1][1]
+            open2 = data_daily.iloc[currentday-2][1]
+
+            if gapz > lowergapzfilter and close1 < ma3 and pmPrice > ma3 and close1 < close2 and close2 < open2 and close1 < open1 :
+                
+                
+                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
+           
+        except IndexError:
+           print(f" did not exist at the date {tick}" )
+        except TimeoutError:
+            print("Timeout caught")
+        except FileNotFoundError:
+            print(" does not have a file")
 if __name__ == '__main__':
     backtest = False
     day_count = 200

@@ -5,7 +5,7 @@ import pathlib
 import mplfinance as mpf
 from PIL import Image
 import io
-
+import datetime
 
 
 
@@ -119,6 +119,12 @@ class UI:
             self.i = -1
             self.setups_data = scan
 
+
+
+
+  
+
+
     def update(self, init):
 
         
@@ -134,6 +140,7 @@ class UI:
         chartsize = 80
         chartsize2 = 500
         chartoffset = 20
+
 
 
         if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv")):
@@ -158,6 +165,8 @@ class UI:
             
             ourpath = pathlib.Path("C:/Screener/tmp") / "databaseimage.png"
             ourpath2 = pathlib.Path("C:/Screener/tmp") / "databaseimage2.png"
+
+            print(datetime.datetime.now())
             if date == "0":
                 pmPrice = (self.setups_data.iloc[self.i][4])
                 mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
@@ -165,17 +174,17 @@ class UI:
             else:
                 mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                 mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-
+            print(datetime.datetime.now())
             image = Image.open(r"C:\Screener\tmp\databaseimage.png")
             image.thumbnail((3500, 2000))
             bio = io.BytesIO()
             image.save(bio, format="PNG")
-
+            print(datetime.datetime.now())
             image2 = Image.open(r"C:\Screener\tmp\databaseimage2.png")
             image2.thumbnail((3500, 2000))
             bio2 = io.BytesIO()
             image2.save(bio2, format="PNG")
-
+            print(datetime.datetime.now())
             if init:
                 
                 layout = [  
@@ -229,4 +238,5 @@ class UI:
         return 99999
 
 if __name__ == "__main__":
+    
     UI.loop(UI)
