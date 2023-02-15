@@ -72,7 +72,6 @@ class Data:
             prepost = False) # download pre/post market hours data?
         try:
             for ticker in tickers:
-                print(f' {ticker}')
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
 
@@ -96,8 +95,8 @@ class Data:
                     numRows = len(need_append_data)
                     print(f"{ticker} appended with {numRows}")
                 
-        #except KeyError:
-            #print("had issue with KeyError")
+        except KeyError:
+            print("had issue with KeyError")
         except TypeError:
             pass
 
@@ -110,7 +109,6 @@ class Data:
         else:
             cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
             lastDayTime = cs.iloc[len(cs)-1]['Date']
-            print(lastDayTime + " REWRWEREW " + ticker)
             lastDaySplit = lastDayTime.split(" ")
             lastDay = lastDaySplit[0]
             if (lastDay != lastDStock):
@@ -149,87 +147,27 @@ class Data:
         for t in remaining_tickers:
             if(t != None):
                 new_remaining.append(t)
-        tickerBatches = []
         numLeft = len(new_remaining)
         numIterations = math.ceil(float(numLeft/50))
-        for i in range(len(new_remaining)):
+        tickerBatches = []
+        for i in range(numIterations):
             tickerString = ""
             if(i < numIterations-1):
                 for j in range(50):
                     num = (i*50)+j
-                    print(new_remaining[num])
+                   #print(new_remaining[num])
                     tickerString = tickerString + new_remaining[num] + " "
             else:
                 for j in range(numLeft - (50*(i)) ):
                     num = (i*50)+j
-                    print(new_remaining[num])
+                    #print(new_remaining[num])
                     tickerString = tickerString + new_remaining[num] + " "
             tickerBatches.append(tickerString)
+            print(tickerString)
         with Pool(nodes=2) as pool:
             pool.map(Data.updatTick, tickerBatches)
 
-    def updateTicker(exchangeTicker):
-
-        
-        split = exchangeTicker.split(":")
-        exchange = split[0]
-        ticker = split[1]
-        isClosed = split[2]
-        numLeft = split[3]
-        lastDStock = split[4]
-        try:
-            # If there is no file for the current ticker that the code is iterating on, request the last 3500 bars and make a file
-            if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
-                tv = TvDatafeed()
-                data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
-                
-                if isClosed == "False":
-                    
-                    data_daily.drop(data_daily.tail(1).index,inplace=True)
-                    
-                data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                #print(f"{ticker} created. Remaining: {numLeft}")
-                message = str(f"{ticker} created")
-                #prints.sendmessage(prints,message)
-                print(message)
-
-            # if there is a file, we now are going to check if the data is complete
-            else:
-                # read in the ticker's file
-                cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
-                lastDayTime = cs.iloc[len(cs)-1]['datetime']
-                lastDaySplit = lastDayTime.split(" ")
-                lastDay = lastDaySplit[0]
-                if (lastDay != lastDStock):
-                    tv = TvDatafeed()
-                    cs['datetime'] = pd.to_datetime(cs['datetime'])
-                    cs = cs.set_index('datetime')
-                    data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
-                    scrapped_data_index = Data.findIndex(data_daily, lastDay)
-                    if(isClosed == "False"):
-                        data_daily = data_daily.drop(index=data_daily.index[-1])
-                    need_append_data = data_daily[scrapped_data_index+1:]
-                    #print(need_append_data.head())
-                    cs = pd.concat([cs, need_append_data])
-                    cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                    numRows = len(need_append_data)
-                    message = str(f"{ticker} appended with {numRows}")
-                    print(message)
-                    #prints.sendmessage(prints,message)
-                    #print(f"{ticker} appended with {numRows}. Remaining: {numLeft}")
-                else:
-                    message = str(f"{ticker} approved")
-                    print(message)
-                    #prints.sendmessage(prints,message)
-                    #print(f"{ticker} approved. Remaining: {numLeft}")
-        except TimeoutError:
-            print(ticker + " timed out")
-        except OSError:
-            print(ticker + " couldn't save file")
-        except UnboundLocalError:
-            print(ticker + " had issues !!!!!!!!!!!!!")
-        except TypeError:
-            print("caught the missing 1 required positional argument")
+  
 
 if __name__ == '__main__':
     tv = TvDatafeed()
