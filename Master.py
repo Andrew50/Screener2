@@ -20,13 +20,13 @@ while True:
     now = datetime.datetime.now()
    # print(now.hour)
     #print(now.minute)
-    if now.hour == 3 and now.minute == 59:
+    if now.hour == 5 and now.minute == 1:
         print("updating data")
         screen.runDailyScan(browser)
 
         data.isDataUpdated(tv)
 
-    elif now.hour == 4 and now.minute == 59:
+    elif now.hour == 5 and now.minute == 15:
         print(daily,"screening daily")
         daily.runDaily(daily, "0")
 
