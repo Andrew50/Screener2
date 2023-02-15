@@ -11,7 +11,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from tvDatafeed import TvDatafeed
 warnings.filterwarnings("ignore")
 from collections import deque
-from Datav2 import Data as data
+from Datav4 import Data as data
 from Screen import Screen as screen
 
 
@@ -22,37 +22,7 @@ class Daily:
     
 
 
-    def sfindIndex(df, dateTo):
-        if dateTo == "0":
-            return len(df) 
-        lookforSplit = dateTo.split("-")
-        middle = int(len(df)/2)
-        middleDTOD = str(df.iloc[middle]['datetime'])
-        middleSplit = middleDTOD.split("-")      
-        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
-        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
-        if(monthDifference < 0):
-            yearDifference = yearDifference + 1
-            monthDifference = -12 + monthDifference
-        addInt = (yearDifference*-252) + (monthDifference*-21)
-        newRef = middle + addInt
-        dateTo = dateTo + " 05:30:00"
-        if(newRef < 0):
-            return 99999
-        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
-            for i in range(35):
-                dateTimeofDayAhead = str(df.iloc[len(df)-35 + i]['datetime'])
-                if(dateTimeofDayAhead == dateTo):
-                    return int(len(df) - 35 + i)
-        else:
-            for i in range(35):
-                dateTimeofDayBehind = str(df.iloc[newRef - i]['datetime'])
-                if(dateTimeofDayBehind == dateTo):
-                    return (newRef - i)
-                dateTimeofDayAhead = str(df.iloc[newRef + i]['datetime'])
-                if(dateTimeofDayAhead == dateTo):
-                    return (newRef + i)
-        return 99999
+   
 
 
     def processTickers(sbr):
@@ -72,7 +42,7 @@ class Daily:
         
             if len(data_daily_full) > 35:
                 try:
-                    indexOfDay = Daily.sfindIndex(data_daily_full, dateToSearch)
+                    indexOfDay = data.findIndex(data_daily_full, dateToSearch)
                 except IndexError:
                     indexOfDay = 99999
                 if(indexOfDay != 99999):
@@ -104,9 +74,9 @@ class Daily:
 
                    
                     
-                    data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
+                    data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
                     data_daily = data_daily.set_index('Datetime')
-                    data_daily = data_daily.drop(['datetime'], axis=1)
+                    data_daily = data_daily.drop(['Date'], axis=1)
 
 
                    
@@ -122,9 +92,9 @@ class Daily:
         if dateToSearch == "0":
             tv = TvDatafeed()
    
-            data.isDataUpdated(tv)
-
-            screen.runDailyScan(None)
+            tv = TvDatafeed()
+   
+            data.runUpdate(tv)
             print("ready")
             if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                 os.remove("C:/Screener/data_csvs/todays_setups.csv")
@@ -329,6 +299,20 @@ class Daily:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")
+            
+    def Mover(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
+
+        l = 20
+
+        #try:
+            #for i in range(l):
+
+
+
+
+
+
+
 if __name__ == '__main__':
     backtest = False
     day_count = 200

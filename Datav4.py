@@ -14,6 +14,8 @@ import yfinance as yf
 warnings.filterwarnings("ignore")
 class Data:
     def findIndex(df, dateTo):
+        if dateTo == "0":
+            return len(df)
         #this function essentialy takes in a dataframe and a date, and returns the index of the date in the dataframe. 
         # if the date is not contained in the dataframe, it returns 99999
         lookforSplit = dateTo.split("-")
@@ -80,6 +82,8 @@ class Data:
                         ticker_df = ticker_df[i:]
                         break
                 if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
+                    if not Data.isMarketClosed():
+                        ticker_df.drop(ticker_df.tail(1).index,inplace=True)
                     ticker_df.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     print(f"{ticker} created")
                 else:
