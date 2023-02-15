@@ -150,6 +150,12 @@ class log:
                 'Setup': ["Pivot"],
                 'Z': [z],
                 'pm':[pmPrice]}
+        if(type == "Mover"):
+            data ={'Date': [dateString],
+                'Ticker':[ tick],
+                'Setup': ["Mover"],
+                'Z': [z],
+                'pm':[pmPrice]}
         dfadd = pd.DataFrame(data)
       
 

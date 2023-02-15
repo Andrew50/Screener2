@@ -73,7 +73,7 @@ class Data:
         lastDStock = split[4]
         try:
             # If there is no file for the current ticker that the code is iterating on, request the last 3500 bars and make a file
-            if(os.path.exists("C:/Screener/data_csvs2/" + ticker + "_data.csv") == False):
+            if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
                 tv = TvDatafeed()
                 data_daily = tv.get_hist(ticker, exchange, n_bars=3500)
                 
@@ -81,7 +81,7 @@ class Data:
                     
                     data_daily.drop(data_daily.tail(1).index,inplace=True)
                     
-                data_daily.to_csv("C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                data_daily.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                 #print(f"{ticker} created. Remaining: {numLeft}")
                 message = str(f"{ticker} created")
                 #prints.sendmessage(prints,message)
@@ -90,7 +90,7 @@ class Data:
             # if there is a file, we now are going to check if the data is complete
             else:
                 # read in the ticker's file
-                cs = pd.read_csv(r"C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                 lastDayTime = cs.iloc[len(cs)-1]['datetime']
                 lastDaySplit = lastDayTime.split(" ")
                 lastDay = lastDaySplit[0]
@@ -105,7 +105,7 @@ class Data:
                     need_append_data = data_daily[scrapped_data_index+1:]
                     #print(need_append_data.head())
                     cs = pd.concat([cs, need_append_data])
-                    cs.to_csv("C:/Screener/data_csvs2/" + ticker + "_data.csv")
+                    cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     numRows = len(need_append_data)
                     message = str(f"{ticker} appended with {numRows}")
                     print(message)

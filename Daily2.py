@@ -10,6 +10,13 @@ import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
 from tvDatafeed import TvDatafeed
 warnings.filterwarnings("ignore")
+from collections import deque
+from Datav2 import Data as data
+from Screen import Screen as screen
+
+
+
+
 class Daily:
 
     
@@ -53,6 +60,7 @@ class Daily:
         sEP = True
         sPivot = True
         sFlag = False
+        sMover = True
         chartSize = 80
         rightbuffer = 20
         screenbar = sbr
@@ -95,35 +103,29 @@ class Daily:
                     currentday = chartSize
 
                    
-
-                        #pmPrice = data_daily_full.iloc[indexOfDay][2]#open
-                        #prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
-                        #if len(data_daily_full) - indexOfDay > rightbuffer:
-                        #    rightedge = indexOfDay+rightbuffer
-                        #    currentday = chartSize-rightbuffer
-                        #else:
-                            #  rightedge = len(data_daily_full)
-                            #  currentday = chartSize-(rightedge - indexOfDay)
-                        
-                    #data_daily = data_daily_full[(rightedge - chartSize ):(rightedge)]
+                    
                     data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
                     data_daily = data_daily.set_index('Datetime')
                     data_daily = data_daily.drop(['datetime'], axis=1)
 
 
-                    print(data_daily.index[currentday - 1])
-                    #print(indexOfDay)
-                    #print(len(data_daily_full))
-                    #print(currentday)
-                    #print(len(data_daily))
+                   
                     if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
                         Daily.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
                     if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
                         Daily.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
                     if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
                         Daily.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
+                    if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMover):
+                        Daily.Mover(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
     def runDaily(self, dateToSearch):
         if dateToSearch == "0":
+            tv = TvDatafeed()
+   
+            data.isDataUpdated(tv)
+
+            screen.runDailyScan(None)
+            print("ready")
             if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                 os.remove("C:/Screener/data_csvs/todays_setups.csv")
         
@@ -295,34 +297,31 @@ class Daily:
             print(" does not have a file")
 
 
-    def Movers(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
+    def Mover(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
 
         zfilter = 3
-        l = 100
-       
+        l2 = 10
+        l = 100 
+        q = deque([])
+        z = []
         try: 
-            z = []
-            for i in range(l):
+            for i in range(l + l2):
                 n = l-i - 1
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
-                zgaps.append(gapvalue)
-            
-            todayGapValue = (pmPrice/prevClose)-1
-            gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
-            lastCloses = 0
-            for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
-                
-            ma3 = (lastCloses/4)
-            close1 = data_daily.iloc[currentday-1][4]
-            close2 = data_daily.iloc[currentday-2][4]
-            open1 = data_daily.iloc[currentday-1][1]
-            open2 = data_daily.iloc[currentday-2][1]
-
-            if gapz > lowergapzfilter and close1 < ma3 and pmPrice > ma3 and close1 < close2 and close2 < open2 and close1 < open1 :
+                q.append(data_daily.iloc[currentday-1][4])
+                if len(q) >= l2:
+                    ma1 = statistics.mean(q)
+                    
+                    if i >= l2:
+                        value = abs(ma2/ma1 - 1)
+                        z.append(value)
+                    
+                    ma2 = ma1
+                    q.popleft()
+            z = (value - statistics.mean(z))/statistics.stdev(z)
+            if z > zfilter:
                 
                 
-                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
+                log.daily(screenbar,z,"Mover", dateToSearch,pmPrice) 
            
         except IndexError:
            print(f" did not exist at the date {tick}" )

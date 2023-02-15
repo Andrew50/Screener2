@@ -145,7 +145,7 @@ class UI:
                 shutil.rmtree("C:/Screener/tmp/charts")
             os.mkdir("C:/Screener/tmp/charts")
             self.preload(self, True)
-            sleep(5)
+            sleep(8)
 
     
     def preload(self,init):
