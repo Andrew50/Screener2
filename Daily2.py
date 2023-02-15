@@ -95,6 +95,8 @@ class Daily:
             tv = TvDatafeed()
    
             data.runUpdate(tv)
+
+            screen.runDailyScan(None)
             print("ready")
             if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                 os.remove("C:/Screener/data_csvs/todays_setups.csv")

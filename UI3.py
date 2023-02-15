@@ -22,9 +22,9 @@ class UI:
 
     def loop(self):
         self.i = 0
-        self.full_setups_data = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+        self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
         self.setups_data = self.full_setups_data
-        historical = True
+        historical = False
         
         self.preloadamount = 10
         self.preloadbuffer = self.preloadamount - 1
@@ -186,7 +186,7 @@ class UI:
                 data_daily = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
-        
+                #print(date)
                 rightedge = data.findIndex(data_daily,date) + chartoffset
                 leftedge = rightedge - chartsize
                 leftedge2 = rightedge - chartsize2
@@ -199,19 +199,19 @@ class UI:
                 ourpath2 = pathlib.Path("C:/Screener/tmp/charts") / string2
             
             
-                data_daily['Datetime'] = pd.to_datetime(data_daily['datetime'])
+                data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
                 data_daily = data_daily.set_index('Datetime')
-                data_daily = data_daily.drop(['datetime'], axis=1)
+                data_daily = data_daily.drop(['Date'], axis=1)
                 df = data_daily[(leftedge):(rightedge)]
                 df2 = data_daily[(leftedge2):(rightedge)]
 
 
                 if date == "0":
                     pmPrice = (setups_data.iloc[i][4])
-                    mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df, type='candle', volume=True, title=str(ticker + "  " + date + "  " + setup + "  " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
 
 
@@ -219,7 +219,7 @@ class UI:
     def update(self, init):
        
 
-        print(datetime.datetime.now())
+        #print(datetime.datetime.now())
         
         date = str(self.setups_data.iloc[self.i][0])
         ticker = str(self.setups_data.iloc[self.i][1])
@@ -231,14 +231,14 @@ class UI:
         #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
        
         
-        print(datetime.datetime.now())
+        #print(datetime.datetime.now())
 
         if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv")):
         
             
 
             
-            print(datetime.datetime.now())
+            #print(datetime.datetime.now())
             
 
            
@@ -255,14 +255,14 @@ class UI:
             image2.thumbnail((3500, 2000))
             bio2 = io.BytesIO()
             image2.save(bio2, format="PNG")
-            print(datetime.datetime.now())
+            #print(datetime.datetime.now())
             
             if init:
                 
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
-                [(sg.Text("Historical", key = "-hist-"))],
+                [(sg.Text("Current", key = "-hist-"))],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                 [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
                 [(sg.Text("Date")),sg.InputText(key = 'input-date')],
@@ -276,8 +276,8 @@ class UI:
                 self.window["-IMAGE2-"].update(data=bio2.getvalue())
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
 
-            print(datetime.datetime.now())
-            print("dddddddddddddddddddddddddddddddddddddddddd")
+           # print(datetime.datetime.now())
+           # print("dddddddddddddddddddddddddddddddddddddddddd")
             
     
 

@@ -103,6 +103,8 @@ class Data:
             print("had issue with KeyError")
         except TypeError:
             pass
+        except OSError:
+            print("os error")
 
 
     def isTickerUpdated(tickerandDate):
