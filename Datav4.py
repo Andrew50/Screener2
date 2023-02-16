@@ -139,7 +139,7 @@ class Data:
     
 
    
-    def runUpdate(tv):
+    def runUpdate(tv,allTickers):
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         isClosed = Data.isMarketClosed()
        
@@ -156,7 +156,10 @@ class Data:
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
         #print(lastDStock)
-        screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+        if allTickers:
+            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+        else:
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         numTickers = len(screener_data) #Number of Tickers contained in the dataframe
         tickers = []
         for i in range(numTickers):

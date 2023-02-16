@@ -20,12 +20,14 @@ class UI:
 
     
 
-    def loop(self):
+    def loop(self,current):
         self.i = 0
-        try:
+        if current:
+        
             self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
             self.historical = False
-        except pd.errors.EmptyDataError:
+    
+        else:
             self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
             self.historical = True
 
@@ -298,5 +300,5 @@ if __name__ == "__main__":
     
 
 
-    UI.loop(UI)
+    UI.loop(UI,False)
 

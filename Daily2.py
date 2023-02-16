@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore")
 from collections import deque
 from Datav4 import Data as data
 from Screen import Screen as screen
+from UI3 import UI as ui
 
 
 
@@ -98,16 +99,17 @@ class Daily:
         if dateToSearch == "0":
             
             tv = TvDatafeed()
-            data.runUpdate(tv)
+            
             data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
             dateTimeOfDay2 = data_apple2.index[0]
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
-            if date2 == today and False:
+            if date2 == today:
                
                 if  datetime.datetime.now().hour > 12:
                     print("artificial 0")
+                    
                     dateToSearch = date2
                     screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
             else:
@@ -115,14 +117,14 @@ class Daily:
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
-                
+               
             
                 if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                     os.remove("C:/Screener/data_csvs/todays_setups.csv")
         
                 god = pd.DataFrame()
                 god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
-                    
+            data.runUpdate(tv,False)
         else:
             dateSplit = dateToSearch.split("-")
             x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
@@ -131,7 +133,7 @@ class Daily:
                 print("The date given is not a weekday.")
                 return False
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-                
+            data.runUpdate(tv,True)
        
         screenbars = []
         for i in range(len(screener_data)):
@@ -139,7 +141,9 @@ class Daily:
             screenbars.append(screener_data.iloc[i])
         with Pool(nodes=6) as pool:
             pool.map(Daily.processTickers, screenbars)
-     
+        
+        if dateToSearch == "0":
+            ui.loop(ui,True)
 
 
     def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
