@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from Log import log as log
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
-from tvDatafeed import TvDatafeed
+from tvDatafeed import TvDatafeed,  Interval
 warnings.filterwarnings("ignore")
 from collections import deque
 from Datav4 import Data as data
@@ -48,7 +48,7 @@ class Daily:
                 indexOfDay = data.findIndex(data_daily_full, dateToSearch,False)
                     
 
-              
+                
                 if(indexOfDay != 99999):
                  
                     #print(f"{tick} {indexOfDay} {len(data_daily_full)}")
@@ -61,7 +61,9 @@ class Daily:
                         dolVol = screenbar['Volume*Price']
                         pmPrice = prevClose + pmChange
 
+
                         rightedge = indexOfDay 
+                        currentday = chartSize 
                         
                     else:
                         pmPrice = data_daily_full.iloc[indexOfDay][1]#open
@@ -70,14 +72,17 @@ class Daily:
                         pmChange = pmPrice/prevClose - 1
 
                         rightedge = indexOfDay
+                        currentday = chartSize
                          
 
                     
                     
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
-                    currentday = chartSize
-               
-                    
+                    #print(data_daily)
+                    #print(currentday)
+                    #print(data_daily.iloc[currentday - 1][0])
+
+
                    # data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
                    # data_daily = data_daily.set_index('Datetime')
                     #data_daily = data_daily.drop(['Date'], axis=1)
@@ -100,20 +105,13 @@ class Daily:
             
             tv = TvDatafeed()
             
-            data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
+            data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1, interval=Interval.in_1_minute, extended_session = True)
             dateTimeOfDay2 = data_apple2.index[0]
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
-            if date2 == today:
-               
-                if  datetime.datetime.now().hour > 12:
-                    print("artificial 0")
-                    
-                    dateToSearch = date2
-                    screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-            else:
-                screen.runDailyScan(None)
+            if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15))  :
+               #screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
@@ -124,6 +122,13 @@ class Daily:
         
                 god = pd.DataFrame()
                 god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+          
+                
+            else:
+                print("artificial 0")
+                    
+                dateToSearch = date2
+                screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv") 
             data.runUpdate(tv,False)
         else:
             dateSplit = dateToSearch.split("-")
@@ -147,7 +152,7 @@ class Daily:
 
 
     def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
-        
+      
         
         zfilter = 7
         
@@ -274,7 +279,10 @@ class Daily:
                 
                 
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
-           
+
+            if gapz > lowergapzfilter and close1 > ma3 and pmPrice < ma3 and close1 > close2 and close2 > open2 and close1 > open1 :
+
+                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
         except IndexError:
            print(f" did not exist at the date " )
         except TimeoutError:

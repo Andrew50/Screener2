@@ -21,6 +21,9 @@ class UI:
     
 
     def loop(self,current):
+        if os.path.exists("C:/Screener/tmp/charts"):
+            shutil.rmtree("C:/Screener/tmp/charts")
+        os.mkdir("C:/Screener/tmp/charts")
         self.i = 0
         if current:
         
@@ -41,7 +44,7 @@ class UI:
 
        
         
-        sleep(7)
+       
         
         self.update(self,True)
 
@@ -51,7 +54,7 @@ class UI:
         while True:
             event, values = self.window.read()
             if event == 'Next': # if user closes window or clicks cancel
-                if self.i < len(self.setups_data) - 2:
+                if self.i < len(self.setups_data) - 1:
                     self.i += 1
                     self.update(self,False)
                     timepreload = True
@@ -154,7 +157,7 @@ class UI:
                 shutil.rmtree("C:/Screener/tmp/charts")
             os.mkdir("C:/Screener/tmp/charts")
             self.preload(self, True)
-            sleep(8)
+           
 
     
     def preload(self,init):
@@ -252,18 +255,21 @@ class UI:
            
            
 
-                
-       
-            image = Image.open(r"C:\Screener\tmp\charts\databasesmall" + str(self.i) + ".png")
-            image.thumbnail((3500, 2000))
-            bio = io.BytesIO()
-            image.save(bio, format="PNG")
+            while True:
+                try:
+                    image = Image.open(r"C:\Screener\tmp\charts\databasesmall" + str(self.i) + ".png")
+                    image.thumbnail((3500, 2000))
+                    bio = io.BytesIO()
+                    image.save(bio, format="PNG")
            
-            image2 = Image.open(r"C:\Screener\tmp\charts\databaselarge" + str(self.i) + ".png")
-            image2.thumbnail((3500, 2000))
-            bio2 = io.BytesIO()
-            image2.save(bio2, format="PNG")
-            #print(datetime.datetime.now())
+                    image2 = Image.open(r"C:\Screener\tmp\charts\databaselarge" + str(self.i) + ".png")
+                    image2.thumbnail((3500, 2000))
+                    bio2 = io.BytesIO()
+                    image2.save(bio2, format="PNG")
+                    break
+                except OSError:
+                    pass
+           
             
             if init:
                 if self.historical:
@@ -294,11 +300,9 @@ class UI:
     
 
 if __name__ == "__main__":
-    if os.path.exists("C:/Screener/tmp/charts"):
-        shutil.rmtree("C:/Screener/tmp/charts")
-    os.mkdir("C:/Screener/tmp/charts")
+    
     
 
 
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 

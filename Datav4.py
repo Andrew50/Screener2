@@ -104,6 +104,7 @@ class Data:
                     cs['Date'] = pd.to_datetime(cs['Date'])
                     cs = cs.set_index('Date')
                     scrapped_data_index = Data.findIndex(ticker_df, lastDay,True) 
+                    print(scrapped_data_index)
                     need_append_data = ticker_df[scrapped_data_index + 1:]
                     cs = pd.concat([cs, need_append_data])
                     cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
@@ -197,7 +198,7 @@ class Data:
 if __name__ == '__main__':
     tv = TvDatafeed()
     #print(datetime.datetime.now())
-    Data.runUpdate(tv)
+    Data.runUpdate(tv,True)
     #print(datetime.datetime.now())
     
 
