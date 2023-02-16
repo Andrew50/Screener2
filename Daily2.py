@@ -41,13 +41,17 @@ class Daily:
             data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
             if len(data_daily_full) > 35:
-                try:
-                    indexOfDay = data.findIndex(data_daily_full, dateToSearch)
-                except IndexError:
-                    indexOfDay = 99999
+                
+                
+                
+                indexOfDay = data.findIndex(data_daily_full, dateToSearch,False)
+                    
+
+              
                 if(indexOfDay != 99999):
+                 
                     #print(f"{tick} {indexOfDay} {len(data_daily_full)}")
-                        
+                    
                     if (dateToSearch == "0"):
                         prevClose = screenbar['Price']
                             
@@ -59,9 +63,9 @@ class Daily:
                         rightedge = indexOfDay 
                         
                     else:
-                        pmPrice = data_daily_full.iloc[indexOfDay][2]#open
-                        prevClose = data_daily_full.iloc[indexOfDay-1][5] #close
-                        dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][6]
+                        pmPrice = data_daily_full.iloc[indexOfDay][1]#open
+                        prevClose = data_daily_full.iloc[indexOfDay-1][4] #close
+                        dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][5]
                         pmChange = pmPrice/prevClose - 1
 
                         rightedge = indexOfDay
@@ -71,50 +75,55 @@ class Daily:
                     
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
                     currentday = chartSize
-
-                   
+               
                     
-                    data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
-                    data_daily = data_daily.set_index('Datetime')
-                    data_daily = data_daily.drop(['Date'], axis=1)
+                   # data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
+                   # data_daily = data_daily.set_index('Datetime')
+                    #data_daily = data_daily.drop(['Date'], axis=1)
+                    
 
 
                    
                     if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
-                        Daily.EP(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
+                        Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
-                        Daily.MR(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
+                        Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
-                        Daily.Pivot(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
+                        Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMover):
-                        Daily.Mover(data_daily, currentday, pmPrice, prevClose,screenbar, dateToSearch,tick)
+                        Daily.Mover(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+
+
     def runDaily(self, dateToSearch):
         if dateToSearch == "0":
+            
             tv = TvDatafeed()
-   
-            tv = TvDatafeed()
-   
             data.runUpdate(tv)
-
-            screen.runDailyScan(None)
-            print("ready")
-            if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
-                os.remove("C:/Screener/data_csvs/todays_setups.csv")
-        
-            god = pd.DataFrame()
-            god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
-            tvs = TvDatafeed()
-            data_apple2 = tvs.get_hist('AAPL', 'NASDAQ', n_bars=1)
+            data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1)
             dateTimeOfDay2 = data_apple2.index[0]
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
-            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-            if not date2 == datetime.datetime.today() and False:
-                dateToSearch = date2
-                print("weekend")
-            
+            today = datetime.datetime.today().strftime('%Y-%m-%d')
+            if date2 == today and False:
+               
+                if  datetime.datetime.now().hour > 12:
+                    print("artificial 0")
+                    dateToSearch = date2
+                    screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            else:
+                screen.runDailyScan(None)
+                screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+                
 
-        if dateToSearch != "0":
+                
+            
+                if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
+                    os.remove("C:/Screener/data_csvs/todays_setups.csv")
+        
+                god = pd.DataFrame()
+                god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+                    
+        else:
             dateSplit = dateToSearch.split("-")
             x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
 
@@ -122,26 +131,24 @@ class Daily:
                 print("The date given is not a weekday.")
                 return False
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-        
+                
        
-            
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
             screenbars.append(screener_data.iloc[i])
         with Pool(nodes=6) as pool:
             pool.map(Daily.processTickers, screenbars)
-            
-
-    #currentday is the day of the setup. This would be the day that the setup would be bough
-    #if datetosearch is 0 then currentday is the length of daily_data
+     
 
 
-    def EP(data_daily, currentday, pmPrice, prevClose, screenbar, dateToSearch,tick):
+    def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
+        
         
         zfilter = 7
         
         try: 
+            prevClose = data_daily.iloc[currentday-1][4]
             gaps = []
             lows = []
             highs = []
@@ -152,14 +159,14 @@ class Daily:
                 highs.append(data_daily.iloc[currentday-j-1][2])
 
             z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
-            #print(str(f"{tick} , {z} , {todayGapValue},{statistics.mean(gaps)}, {statistics.stdev(gaps)}, {len(gaps)}"))
+           
+            
             if(z > zfilter) and pmPrice > max(highs):
                 log.daily(screenbar,z,"EP", dateToSearch,pmPrice) 
-                
+            
             elif (z < -zfilter) and pmPrice < min(lows):
                 log.daily(screenbar,z,"NEP", dateToSearch,pmPrice) 
-                #print("1")
-            #dM.post(data_daily,screenbar,z,"NEP",currentday)
+
         except IndexError:
             print("index error")
         except TimeoutError:
@@ -167,15 +174,16 @@ class Daily:
         except FileNotFoundError:
             print("file error") 
  
-    def MR(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
-        #print(currentday)
-        #print(len(data_daily))
+    def MR(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+        
+    
         
         zfilter = 3
         gapzfilter0 = 5.5
         gapzfilter1 = 4
         changezfilter = 2.5
         try: 
+            prevClose = data_daily.iloc[currentday-1][4]
             zdata = []
             zgaps = []
             zchange = []
@@ -232,12 +240,14 @@ class Daily:
         except FileNotFoundError:
             print(" does not have a file")
             
-    def Pivot(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
+    def Pivot(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+        
 
         uppergapzfilter = 8
         lowergapzfilter = 1
        
         try: 
+            prevClose = data_daily.iloc[currentday-1][4]
             zgaps = []
             for i in range(15):
                 n = 14-i
@@ -262,14 +272,15 @@ class Daily:
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
            
         except IndexError:
-           print(f" did not exist at the date {tick}" )
+           print(f" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")
 
 
-    def Mover(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
+    def Mover(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+      
 
         zfilter = 3
         l2 = 10
@@ -277,6 +288,7 @@ class Daily:
         q = deque([])
         z = []
         try: 
+            prevClose = data_daily.iloc[currentday-1][4]
             for i in range(l + l2):
                 n = l-i - 1
                 q.append(data_daily.iloc[currentday-1][4])
@@ -296,20 +308,13 @@ class Daily:
                 log.daily(screenbar,z,"Mover", dateToSearch,pmPrice) 
            
         except IndexError:
-           print(f" did not exist at the date {tick}" )
+           print(f" did not exist at the date " )
         except TimeoutError:
             print("Timeout caught")
         except FileNotFoundError:
             print(" does not have a file")
             
-    def Mover(data_daily, currentday,pmPrice,prevClose,screenbar, dateToSearch,tick):
-
-        l = 20
-
-        #try:
-            #for i in range(l):
-
-
+  
 
 
 
@@ -319,7 +324,7 @@ if __name__ == '__main__':
     backtest = False
     day_count = 200
     if backtest:
-        print(datetime.datetime.now())
+        #print(datetime.datetime.now())
         start_date = date(2018, 1, 1)
         
         for single_date in (start_date + timedelta(n) for n in range(day_count)):

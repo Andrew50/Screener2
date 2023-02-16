@@ -22,9 +22,15 @@ class UI:
 
     def loop(self):
         self.i = 0
-        self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+        try:
+            self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+            self.historical = False
+        except pd.errors.EmptyDataError:
+            self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+            self.historical = True
+
         self.setups_data = self.full_setups_data
-        historical = False
+        
         
         self.preloadamount = 10
         self.preloadbuffer = self.preloadamount - 1
@@ -33,7 +39,7 @@ class UI:
 
        
         
-        sleep(5)
+        sleep(7)
         
         self.update(self,True)
 
@@ -71,7 +77,7 @@ class UI:
                 timepreload = False
                 
             if event == 'Toggle':
-                if historical:
+                if self.historical:
                     try:
                         holder = pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
                         self.full_setups_data  = holder
@@ -187,7 +193,7 @@ class UI:
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
                 #print(date)
-                rightedge = data.findIndex(data_daily,date) + chartoffset
+                rightedge = data.findIndex(data_daily,date,False) + chartoffset
                 leftedge = rightedge - chartsize
                 leftedge2 = rightedge - chartsize2
                 if leftedge2 < 0:
@@ -258,11 +264,15 @@ class UI:
             #print(datetime.datetime.now())
             
             if init:
+                if self.historical:
+                    histstr = "Historical"
+                else:
+                    histstr = "Current"
                 
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
-                [(sg.Text("Current", key = "-hist-"))],
+                [(sg.Text(histstr, key = "-hist-"))],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                 [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
                 [(sg.Text("Date")),sg.InputText(key = 'input-date')],

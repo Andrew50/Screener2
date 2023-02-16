@@ -12,16 +12,21 @@ import warnings
 import math
 import yfinance as yf
 warnings.filterwarnings("ignore")
+
+
 class Data:
-    def findIndex(df, dateTo):
+    def findIndex(df, dateTo, fromdata):
+       
         if dateTo == "0":
             return len(df)
-        #this function essentialy takes in a dataframe and a date, and returns the index of the date in the dataframe. 
-        # if the date is not contained in the dataframe, it returns 99999
+        if not fromdata:
+            df = df.set_index('Date')
+
+        
         lookforSplit = dateTo.split("-")
         middle = int(len(df)/2)
         middleDTOD = str(df.index[middle])
-        middleSplit = middleDTOD.split("-")      
+        middleSplit = middleDTOD.split("-")  
         yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
         monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
         if(monthDifference < 0):
@@ -29,12 +34,16 @@ class Data:
             monthDifference = -12 + monthDifference
         addInt = (yearDifference*-252) + (monthDifference*-21)
         newRef = middle + addInt
-        dateTo = dateTo + "00:00:00"
+        if fromdata:
+            dateTo = dateTo + " 00:00:00"
         if(newRef < 0):
             return 99999
         if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            
             for i in range(35):
+                
                 dateTimeofDayAhead = str(df.index[len(df)-35 + i])
+                #print(f"{dateTimeofDayAhead} , {dateTo}")
                 if(dateTimeofDayAhead == dateTo):
                     return int(len(df) - 35 + i)
         else:
@@ -46,6 +55,8 @@ class Data:
                 if(dateTimeofDayAhead == dateTo):
                     return (newRef + i)
         return 99999
+        
+           
     def isMarketClosed():
         #function returns a boolean based on whether or not the market is closed. If market is open, returns false. If market is closed, returns True
         dayOfWeek = datetime.datetime.now().weekday()
@@ -66,6 +77,7 @@ class Data:
         else: 
             return True
     def updatTick(tickersString):
+
         tickers = tickersString.split(' ')
         test = yf.download(tickers =  tickersString,  # list of tickers
             period = "25y",  group_by='ticker',       # time period
@@ -91,9 +103,8 @@ class Data:
                     lastDay = cs.iloc[len(cs)-1]['Date']
                     cs['Date'] = pd.to_datetime(cs['Date'])
                     cs = cs.set_index('Date')
-                    scrapped_data_index = Data.findIndex(ticker_df, lastDay)
-                    print(scrapped_data_index)
-                    need_append_data = ticker_df[scrapped_data_index+1:]
+                    scrapped_data_index = Data.findIndex(ticker_df, lastDay,True) 
+                    need_append_data = ticker_df[scrapped_data_index + 1:]
                     cs = pd.concat([cs, need_append_data])
                     cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     numRows = len(need_append_data)
@@ -105,6 +116,8 @@ class Data:
             pass
         except OSError:
             print("os error")
+        except IndexError:
+            print("index error")
 
 
     def isTickerUpdated(tickerandDate):
@@ -113,11 +126,13 @@ class Data:
         if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv") == False):
             return ticker
         else:
+            
             cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
             lastDayTime = cs.iloc[len(cs)-1]['Date']
             lastDaySplit = lastDayTime.split(" ")
             lastDay = lastDaySplit[0]
             if (lastDay != lastDStock):
+               
                 return ticker
         print(f"{ticker} is approved")
 
@@ -127,6 +142,7 @@ class Data:
     def runUpdate(tv):
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         isClosed = Data.isMarketClosed()
+       
         last = 't' # placeholder variables for future use since variable values are created in a if statement
         lastDStock = 't' #placeholder
         # if the market is closed, its free to access the most recent day since the data is complete. This code basically finds the most recent trading day
@@ -139,8 +155,8 @@ class Data:
             last = data_apple.index[0]
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
-        print(lastDStock)
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        #print(lastDStock)
+        screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
         numTickers = len(screener_data) #Number of Tickers contained in the dataframe
         tickers = []
         for i in range(numTickers):
@@ -169,7 +185,7 @@ class Data:
                     #print(new_remaining[num])
                     tickerString = tickerString + new_remaining[num] + " "
             tickerBatches.append(tickerString)
-            print(tickerString)
+            #print(tickerString)
         with Pool(nodes=2) as pool:
             pool.map(Data.updatTick, tickerBatches)
 
@@ -177,9 +193,9 @@ class Data:
 
 if __name__ == '__main__':
     tv = TvDatafeed()
-    print(datetime.datetime.now())
+    #print(datetime.datetime.now())
     Data.runUpdate(tv)
-    print(datetime.datetime.now())
+    #print(datetime.datetime.now())
     
 
 
