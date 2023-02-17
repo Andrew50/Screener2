@@ -51,7 +51,6 @@ class Daily:
                 
                 if(indexOfDay != 99999):
                  
-                    #print(f"{tick} {indexOfDay} {len(data_daily_full)}")
                     
                     if (dateToSearch == "0"):
                         prevClose = screenbar['Price']
@@ -78,14 +77,7 @@ class Daily:
                     
                     
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
-                    #print(data_daily)
-                    #print(currentday)
-                    #print(data_daily.iloc[currentday - 1][0])
-
-
-                   # data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
-                   # data_daily = data_daily.set_index('Datetime')
-                    #data_daily = data_daily.drop(['Date'], axis=1)
+             
                     
 
 
