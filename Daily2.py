@@ -111,7 +111,7 @@ class Daily:
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
             if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15))  :
-               #screen.runDailyScan(None)
+                screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
