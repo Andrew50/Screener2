@@ -98,68 +98,20 @@ class log:
             log.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
             log.sendDiscordGainersPost('tmp/test.png')
 
-        if(type == "MR"):
-            mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            log.sendDiscordEmbed(tick + f" PC:{prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"MR {z}")
-            log.sendDiscordPost('tmp/test.png')
-        if(type == "EP"):
-            mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▲ {pmChange} ({gapValuePercent}%)", f"EP {z}")
-            log.sendDiscordPost('tmp/test.png')
-        if(type == "NEP"):
-            mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"NEP {z}")
-            log.sendDiscordPost('tmp/test.png')
-        if(type == "Pivot"):
-            mpf.plot(df, type='candle', volume=True, title=tick, hlines=dict(hlines=[pmPrice], linestyle="-."), style=s, savefig=ourpath)
-            log.sendDiscordEmbed(tick + f" {prevClose} >> PM$:{pmPrice} ▼ {pmChange} ({gapValuePercent}%)", f"Pivot {z}")
-            log.sendDiscordPost('tmp/test.png')
+       
 
 
-
-    def daily(screenbar, z, type, dateToSearch,pmPrice):
-            
-
-        
+    def daily(screenbar, z, setup_type, dateToSearch,pmPrice):
+    
         tick = str(screenbar['Ticker'])
-        #c = pd.read_csv(r"C:/Screener/tmp/setups.csv")
         dateString = dateToSearch
+        data ={'Date': [dateString],
+                'Ticker':[ tick],
+                'Setup': [str(setup_type)],
+                'Z': [z],
+                'pm':[pmPrice]}
         
-        #dateString = str(df.index[dateToSearch - 1])
-        if(type == "MR"):
-            data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': ["MR"],
-                'Z': [z],
-                'pm':[pmPrice]}
-        if(type == "EP"):
-            data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': ["EP"],
-                'Z': [z],
-                'pm':[pmPrice]}
-        if(type == "NEP"):
-            data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': ["NEP"],
-                'Z': [z],
-                'pm':[pmPrice]}
-        if(type == "Pivot"):
-            data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': ["Pivot"],
-                'Z': [z],
-                'pm':[pmPrice]}
-        if(type == "Mover"):
-            data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': ["Mover"],
-                'Z': [z],
-                'pm':[pmPrice]}
         dfadd = pd.DataFrame(data)
-      
-
-
         if dateToSearch == "0":
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
         else:
