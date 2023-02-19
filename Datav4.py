@@ -16,46 +16,48 @@ warnings.filterwarnings("ignore")
 
 class Data:
     def findIndex(df, dateTo, fromdata):
-       
-        if dateTo == "0":
-            return len(df)
-        if not fromdata:
-            df = df.set_index('Date')
+        try:
+            if dateTo == "0":
+                return len(df)
+            if not fromdata:
+                df = df.set_index('Date')
 
         
-        lookforSplit = dateTo.split("-")
-        middle = int(len(df)/2)
-        middleDTOD = str(df.index[middle])
-        middleSplit = middleDTOD.split("-")  
-        yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
-        monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
-        if(monthDifference < 0):
-            yearDifference = yearDifference + 1
-            monthDifference = -12 + monthDifference
-        addInt = (yearDifference*-252) + (monthDifference*-21)
-        newRef = middle + addInt
+            lookforSplit = dateTo.split("-")
+            middle = int(len(df)/2)
+            middleDTOD = str(df.index[middle])
+            middleSplit = middleDTOD.split("-")  
+            yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
+            monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
+            if(monthDifference < 0):
+                yearDifference = yearDifference + 1
+                monthDifference = -12 + monthDifference
+            addInt = (yearDifference*-252) + (monthDifference*-21)
+            newRef = middle + addInt
 
-        if fromdata and not '00:00:00' in dateTo:
-            dateTo = dateTo + " 00:00:00"
-        if(newRef < 0):
-            return 99999
-        if( ((len(df) - newRef) < 20) or (newRef > len(df))):
+            if fromdata and not '00:00:00' in dateTo:
+                dateTo = dateTo + " 00:00:00"
+            if(newRef < 0):
+                return 99999
+            if( ((len(df) - newRef) < 20) or (newRef > len(df))):
             
-            for i in range(35):
+                for i in range(35):
                 
-                dateTimeofDayAhead = str(df.index[len(df)-35 + i])
-                if(dateTimeofDayAhead == dateTo):
-                    return int(len(df) - 35 + i)
-        else:
-            for i in range(35):
-                dateTimeofDayBehind = str(df.index[newRef - i])
-                if(dateTimeofDayBehind == dateTo):
-                    return (newRef - i)
-                dateTimeofDayAhead = str(df.index[newRef + i])
-                if(dateTimeofDayAhead == dateTo):
-                    return (newRef + i)
-        return 99999
-        
+                    dateTimeofDayAhead = str(df.index[len(df)-35 + i])
+                    if(dateTimeofDayAhead == dateTo):
+                        return int(len(df) - 35 + i)
+            else:
+                for i in range(35):
+                    dateTimeofDayBehind = str(df.index[newRef - i])
+                    if(dateTimeofDayBehind == dateTo):
+                        return (newRef - i)
+                    dateTimeofDayAhead = str(df.index[newRef + i])
+                    if(dateTimeofDayAhead == dateTo):
+                        return (newRef + i)
+            return 99999
+        except IndexError:
+            print("findindex index error")
+            return 99999
            
     def isMarketClosed():
         dayOfWeek = datetime.datetime.now().weekday()
@@ -128,16 +130,18 @@ class Data:
         else:
             
             cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
-            lastDayTime = cs.iloc[len(cs)-1]['Date']
-            lastDaySplit = lastDayTime.split(" ")
-            lastDay = lastDaySplit[0]
+            if len(cs) > 1:
+                lastDayTime = cs.iloc[len(cs)-1]['Date']
+                lastDaySplit = lastDayTime.split(" ")
+                lastDay = lastDaySplit[0]
    
           
-            if (lastDay != lastDStock):
+                if (lastDay != lastDStock):
                
-                return ticker
-        print(f"{ticker} is approved")
-
+                    return ticker
+                print(f"{ticker} is approved")
+            else:
+                print(f"{ticker} too young")
     
 
    

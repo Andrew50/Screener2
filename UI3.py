@@ -14,7 +14,7 @@ import shutil
 
 
 
-#ui.Window(title="Hello World", layout=[[]], margins=(1000, 1000)).read()
+
 
 class UI:
 
@@ -53,7 +53,7 @@ class UI:
         
         while True:
             event, values = self.window.read()
-            if event == 'Next': # if user closes window or clicks cancel
+            if event == 'Next': 
                 if self.i < len(self.setups_data) - 1:
                     self.i += 1
                     self.update(self,False)
@@ -197,7 +197,7 @@ class UI:
                 data_daily = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
-                #print(date)
+              
                 rightedge = data.findIndex(data_daily,date,False) + chartoffset
                 leftedge = rightedge - chartsize
                 leftedge2 = rightedge - chartsize2
@@ -230,29 +230,19 @@ class UI:
     def update(self, init):
        
 
-        #print(datetime.datetime.now())
+       
         
         date = str(self.setups_data.iloc[self.i][0])
         ticker = str(self.setups_data.iloc[self.i][1])
         setup = str(self.setups_data.iloc[self.i][2])
         z= str(self.setups_data.iloc[self.i][3])
         zs = float(z)
-        #self.window['-setup-'].update(str(self.setups_data.iloc[self.i][2]))
-        #self.window['-ticker-'].update(str(self.setups_data.iloc[self.i][1]))
-        #self.window['-date-'].update(str(self.setups_data.iloc[self.i][0]))
-       
-        
-        #print(datetime.datetime.now())
+    
 
         if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv")):
         
             
-
             
-            #print(datetime.datetime.now())
-            
-
-           
            
 
             while True:
@@ -279,7 +269,7 @@ class UI:
                 
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
-                #[(sg.Text(ticker,key = '-ticker-')), (sg.Text(date, key = '-date-')),(sg.Text(setup,key = '-setup-'))],
+              
                 [(sg.Text(histstr, key = "-hist-"))],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                 [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
@@ -294,8 +284,6 @@ class UI:
                 self.window["-IMAGE2-"].update(data=bio2.getvalue())
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
 
-           # print(datetime.datetime.now())
-           # print("dddddddddddddddddddddddddddddddddddddddddd")
             
     
 
