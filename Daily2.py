@@ -27,9 +27,9 @@ class Daily:
 
 
     def processTickers(sbr):
-        sMR = False
-        sEP = False
-        sPivot = False
+        sMR = True
+        sEP = True
+        sPivot = True
         sFlag = True
         sMover = False
         chartSize = 80
@@ -79,10 +79,10 @@ class Daily:
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
              
                     
-                    
-                    adr = 0
-                    try:
-                        if False:
+                    if(dolVol > 1000000  and prevClose > 2): 
+                        adr = 0
+                        try:
+                            
                             adrlist = []
                             for j in range(20): 
                                 high = data_daily.iloc[currentday-j-1][2]
@@ -91,20 +91,20 @@ class Daily:
                                 adrlist.append(val)
                         
                             adr = statistics.mean(adrlist)
-                    except IndexError:
-                        print("adr error")
-                   
-                    if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
-                        Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
-                        Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
-                        Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMover):
-                        Daily.Mover(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        except IndexError:
+                            print("adr error")
+                    
+                        if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
+                            Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
+                            Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
+                            Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMover):
+                            Daily.Mover(data_daily, currentday, pmPrice,screenbar, dateToSearch)
 
-                    if(dolVol > 15000000  and prevClose > 2 and sFlag):
-                        Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        if(dolVol > 15000000  and prevClose > 2 and adr > 3.5 and sFlag):
+                            Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     
 
     def runDaily(self, dateToSearch):
@@ -262,6 +262,7 @@ class Daily:
 
         uppergapzfilter = 8
         lowergapzfilter = 1
+        lowergapzfilter2 = 1.5
        
         try: 
             prevClose = data_daily.iloc[currentday-1][4]
@@ -288,7 +289,7 @@ class Daily:
                 
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
 
-            if gapz > lowergapzfilter and close1 > ma3 and pmPrice < ma3 and close1 > close2 and close2 > open2 and close1 > open1 :
+            if gapz > lowergapzfilter2 and close1 > ma3 and pmPrice < ma3 and close1 > close2 and close2 > open2 and close1 > open1 :
 
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
         except IndexError:
@@ -337,7 +338,7 @@ class Daily:
   
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
-        zfilter = 1
+        zfilter = 2.2
         lmin = 6
         lmax = 30
         rsil = 10
@@ -346,68 +347,70 @@ class Daily:
         try:
             
             rsidata = []
-            rsimax = 0
-            rsilist = []
+            
             #for i in range(5):
-            for i in range(lmax):
-                
-                gains = []
-                losses = []
-                for k in range(rsil):
-                    change = data_daily.iloc[currentday-i-k-1][4]/data_daily.iloc[currentday-i-k-2][4] - 1
-                    if change > 0:
-                        gains.append(change)
-                    else:
-                        losses.append(-change)
-
-
-                RS = (sum(gains)/rsil) / (sum(losses)/rsil)
-                rsi = abs((100 - (100 / (1 + RS))) - 50)
-                rsilist.append(rsi)
-                if rsi > rsimax:
-                    rsimax = rsi
-                    l = i
-            #print(str(f"{tick} , {l}, {rsilist}"))
-            j = 0
-            if l > lmin:
-                #zma = []
+                     #zma = []
                 #for j in range(5):
-                zdata = []
-                for k in range(zl):
-                    gaindata = []
-                    flagdata = []
-                    for i in range(l * 2):
-                        ma3 = []
-                        for s in range(3):
-
-                            ma3.append(data_daily.iloc[currentday-i-s-k-j-1][4])
-                        ma3 = statistics.mean(ma3)
-                            
-                        if i > l:
-                            gaindata.append(ma3)
+            zdata = []
+            for i in range(zl):
+                rsilist = []
+                rsimax = 0
+                for j in range(lmax):
+                
+                    gains = []
+                    losses = []
+                    
+                    
+                    for k in range(rsil):
+                        change = (data_daily.iloc[currentday-i-k-j-1][4]/data_daily.iloc[currentday-i-k-j-2][4]) - 1
+                        if change > 0:
+                            gains.append(change)
                         else:
+                            losses.append(-change)
 
-                            flagdata.append(ma3)
-                    if k == l *2 - 1:
-                        print ( str( f"{tick} , {gaindata} , {flagdata}"))
-                    gain = max(gaindata)/min(gaindata)
-                    flag = max(flagdata)/min(flagdata)
-                    #print ( str( f"{tick} , {currentvalue} , {gain} , {flag}"))
-                    value = gain - flag
-                    if k > 0:
 
-                        zdata.append(value)
+                    RS = (sum(gains)/rsil) / (sum(losses)/rsil)
+                    rsi = abs((100 - (100 / (1 + RS))) - 50)
+                    rsilist.append(rsi)
+                    if rsi > rsimax:
+                        rsimax = rsi
+                        l = j
+                
+                #print(str(f"{tick} , {l}"))
+                
+                gaindata = []
+                flagdata = []
+                if l < 1:
+                    l = 1
+                for j in range(l * 2):
+                    ma3 = []
+                    for k in range(3):
+
+                        ma3.append(data_daily.iloc[currentday-i-j-k-1][4])
+                    ma3 = statistics.mean(ma3)
+                            
+                    if j >= l:
+                        gaindata.append(ma3)
                     else:
-                        currentvalue = value
-                z = (currentvalue - statistics.mean(zdata))/statistics.stdev(zdata)
-                #print ( str( f"{tick} , {zdata} "))
-                #zma.append(z)
+
+                        flagdata.append(ma3)
+                    
+                gain = max(gaindata)/min(gaindata)
+                flag = max(flagdata)/min(flagdata)
                
-                #zma = statistics.mean(zma)
-               
-                if z > zfilter:
-                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
-           
+                value = gain - flag
+                if i > 0:
+
+                    zdata.append(value)
+                else:
+                    currentvalue = value
+              
+            z = (currentvalue - statistics.mean(zdata))/statistics.stdev(zdata)
+            
+            if z > zfilter and l > lmin:
+                log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
+        except ValueError:
+            print("value error")
         except IndexError:
            print(f" did not exist at the date " )
         except TimeoutError:
@@ -426,5 +429,5 @@ if __name__ == '__main__':
 
             Daily.runDaily(Daily, str(single_date))
     else:
-        Daily.runDaily(Daily, '2023-01-13')
+        Daily.runDaily(Daily, '2023-01-30')
          
