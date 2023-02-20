@@ -15,46 +15,14 @@ warnings.filterwarnings("ignore")
 
 
 class Data:
-    def findIndex(df, dateTo, fromdata):
+    def findIndex(df, dateTo):
         try:
-            if dateTo == "0":
-                return len(df)
-            if not fromdata:
-                df = df.set_index('Date')
-
-        
-            lookforSplit = dateTo.split("-")
-            middle = int(len(df)/2)
-            middleDTOD = str(df.index[middle])
-            middleSplit = middleDTOD.split("-")  
-            yearDifference = int(middleSplit[0]) - int(lookforSplit[0])
-            monthDifference = int(middleSplit[1]) - int(lookforSplit[1])
-            if(monthDifference < 0):
-                yearDifference = yearDifference + 1
-                monthDifference = -12 + monthDifference
-            addInt = (yearDifference*-252) + (monthDifference*-21)
-            newRef = middle + addInt
-
-            if fromdata and not '00:00:00' in dateTo:
-                dateTo = dateTo + " 00:00:00"
-            if(newRef < 0):
-                return 99999
-            if( ((len(df) - newRef) < 20) or (newRef > len(df))):
-            
-                for i in range(35):
-                
-                    dateTimeofDayAhead = str(df.index[len(df)-35 + i])
-                    if(dateTimeofDayAhead == dateTo):
-                        return int(len(df) - 35 + i)
-            else:
-                for i in range(35):
-                    dateTimeofDayBehind = str(df.index[newRef - i])
-                    if(dateTimeofDayBehind == dateTo):
-                        return (newRef - i)
-                    dateTimeofDayAhead = str(df.index[newRef + i])
-                    if(dateTimeofDayAhead == dateTo):
-                        return (newRef + i)
+            for i in range(len(df)):
+                j = len(df) - i - 1
+                if(df.index[j] == dateTo):
+                    return j
             return 99999
+        
         except IndexError:
             print("findindex index error")
             return 99999
@@ -95,12 +63,12 @@ class Data:
                     lastDay = cs.iloc[len(cs)-1]['datetime']
                     cs['datetime'] = pd.to_datetime(cs['datetime'])
                     cs = cs.set_index('datetime')
-                    scrapped_data_index = Data.findIndex(ticker_df, lastDay,True) 
+                    scrapped_data_index = Data.findIndex(ticker_df, lastDay) 
                     
                     need_append_data = ticker_df[scrapped_data_index + 1:]
                     
                     cs = pd.concat([cs, need_append_data])
-                    cs.to_csv("C:/Screener/intraday_data/" + ticker + "_intradaydata.csv")
+                    cs.to_csv("C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
                     numRows = len(need_append_data)
                     print(f"{tick} appended with {numRows}")
                 
