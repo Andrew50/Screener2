@@ -10,6 +10,8 @@ import multiprocessing
 from time import sleep
 from Datav4 import Data as data
 import shutil
+import concurrent.futures
+from pathos.multiprocessing import ProcessingPool as Pool
 
 
 
@@ -37,27 +39,29 @@ class UI:
         self.setups_data = self.full_setups_data
         
         
-        self.preloadamount = 10
+        self.preloadamount = 6
         self.preloadbuffer = self.preloadamount - 1
 
         self.preload(self,True)
 
-       
         
-       
         
         self.update(self,True)
 
-
-        timepreload = False
-        
         while True:
+            
             event, values = self.window.read()
+            
+            
+          
+
+
             if event == 'Next': 
                 if self.i < len(self.setups_data) - 1:
                     self.i += 1
                     self.update(self,False)
-                    timepreload = True
+                    self.window.refresh()
+                    self.preload(self,False)
                     
                     
                 
@@ -66,7 +70,7 @@ class UI:
                 if self.i > 0:
                     self.i -= 1
                     self.update(self,False)
-                    timepreaload = True
+                   
                     
             if event == 'Load':
                 ticker = values["input-ticker"]
@@ -74,19 +78,17 @@ class UI:
                 setup = values["input-setup"]
                 self.lookup(self,ticker,date,setup)
                 self.update(self,False)
-                timepreload = True
+           
                
 
-            if timepreload:
-                self.preload(self,False)
-                timepreload = False
+            
                 
             if event == 'Toggle':
                 if self.historical:
                     try:
                         holder = pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
                         self.full_setups_data  = holder
-                        historical = False
+                        self.historical = False
                         self.window["-hist-"].update('Today')
                         ticker = values["input-ticker"]
                         date = values["input-date"]
@@ -100,7 +102,7 @@ class UI:
                     try: 
                         holder = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
                         self.full_setups_data  = holder
-                        historical = True
+                        self.historical = True
                         self.window["-hist-"].update('Historical')
                         ticker = values["input-ticker"]
                         date = values["input-date"]
@@ -158,26 +160,10 @@ class UI:
             os.mkdir("C:/Screener/tmp/charts")
             self.preload(self, True)
            
-
-    
-    def preload(self,init):
-        c = 0
-        if not init:
-            c = self.preloadbuffer
-            
-        for x in range(self.preloadamount - c):
-            
-            v = (x + self.i + c)
-            
-            p = multiprocessing.Process(target = self.plot, args = [self.setups_data,v])
-
-            p.start()
-
-       
-
-
-    def plot(setups_data, i):
-
+    def plot(slist):
+        i = slist[1]
+        setups_data = slist[0]
+        
         
         
         iss = str(i)
@@ -224,8 +210,34 @@ class UI:
                 else:
                     mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+            
+            
+
+    
+    def preload(self,init):
+        arglist = []
+        c = 0
+        if not init:
+            c = self.preloadbuffer
+        for x in range(self.preloadamount - c):
+        #for x in range(len(self.setups_data)):
+            
+            v = (x + self.i + c)
+            if v < len(self.setups_data):
+                arglist.append([self.setups_data,v])
+
+        with Pool(nodes=6) as pool:
+            pool.map(self.plot, arglist)
+      
+        
+       
+            
+          
+
+       
 
 
+    
 
     def update(self, init):
        

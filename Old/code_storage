@@ -1,4 +1,46 @@
 ﻿
+MOVER--------------------------------------------------------------------------------------------
+
+
+    def Mover(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+      
+
+        zfilter = 3
+        l2 = 10
+        l = 100 
+        q = deque([])
+        z = []
+        try: 
+            prevClose = data_daily.iloc[currentday-1][4]
+            for i in range(l + l2):
+                n = l-i - 1
+                q.append(data_daily.iloc[currentday-1][4])
+                if len(q) >= l2:
+                    ma1 = statistics.mean(q)
+                    
+                    if i >= l2:
+                        value = abs(ma2/ma1 - 1)
+                        z.append(value)
+                    
+                    ma2 = ma1
+                    q.popleft()
+            z = (value - statistics.mean(z))/statistics.stdev(z)
+            if z > zfilter:
+                
+                
+                log.daily(screenbar,z,"Mover", dateToSearch,pmPrice) 
+           
+        except IndexError:
+           print(f" did not exist at the date " )
+        except TimeoutError:
+            print("Timeout caught")
+        except FileNotFoundError:
+            print(" does not have a file")
+
+
+
+
+SCREEN------------------------------------------------------------------------------------------------------------------
 
 user = 'cs.benliu@gmail.com'
 password = 'tltShort!1'

@@ -27,11 +27,15 @@ class Daily:
 
 
     def processTickers(sbr):
+
+
         sMR = True
         sEP = True
         sPivot = True
         sFlag = True
-        sMover = False
+  
+
+
         chartSize = 80
         rightbuffer = 20
         screenbar = sbr
@@ -57,7 +61,7 @@ class Daily:
                             
                         pmChange = screenbar['Pre-market Change']
             
-                        dolVol = screenbar['Volume*Price']
+                        
                         pmPrice = prevClose + pmChange
 
 
@@ -67,15 +71,18 @@ class Daily:
                     else:
                         pmPrice = data_daily_full.iloc[indexOfDay][1]
                         prevClose = data_daily_full.iloc[indexOfDay-1][4] 
-                        dolVol = prevClose*data_daily_full.iloc[indexOfDay-1][5]
+                        
                         pmChange = pmPrice/prevClose - 1
 
                         rightedge = indexOfDay
                         currentday = chartSize
                          
+                    dolVol = []
+                    for i in range(10):
+                        dolVol.append(data_daily_full.iloc[indexOfDay-1-i][4]*data_daily_full.iloc[indexOfDay-1-i][5])
+                    dolVol = statistics.mean(dolVol)
 
-                    
-                    
+
                     data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
              
                     
@@ -94,15 +101,12 @@ class Daily:
                         except IndexError:
                             print("adr error")
                     
-                        if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and sEP):
+                        if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and adr > 2.5 and sEP):
                             Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMR):
+                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sMR):
                             Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sPivot):
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3 and sPivot):
                             Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and sMover):
-                            Daily.Mover(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-
                         if(dolVol > 15000000  and prevClose > 2 and adr > 3.5 and sFlag):
                             Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     
@@ -300,48 +304,12 @@ class Daily:
             print(" does not have a file")
 
 
-    def Mover(data_daily, currentday,pmPrice,screenbar, dateToSearch):
-      
-
-        zfilter = 3
-        l2 = 10
-        l = 100 
-        q = deque([])
-        z = []
-        try: 
-            prevClose = data_daily.iloc[currentday-1][4]
-            for i in range(l + l2):
-                n = l-i - 1
-                q.append(data_daily.iloc[currentday-1][4])
-                if len(q) >= l2:
-                    ma1 = statistics.mean(q)
-                    
-                    if i >= l2:
-                        value = abs(ma2/ma1 - 1)
-                        z.append(value)
-                    
-                    ma2 = ma1
-                    q.popleft()
-            z = (value - statistics.mean(z))/statistics.stdev(z)
-            if z > zfilter:
-                
-                
-                log.daily(screenbar,z,"Mover", dateToSearch,pmPrice) 
-           
-        except IndexError:
-           print(f" did not exist at the date " )
-        except TimeoutError:
-            print("Timeout caught")
-        except FileNotFoundError:
-            print(" does not have a file")
-            
-  
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
         zfilter = 2.2
         lmin = 6
         lmax = 30
-        rsil = 10
+        rsil = 20#10
         zl = 20
 
         try:
@@ -420,14 +388,14 @@ class Daily:
         except statistics.StatisticsError:
             print("stats error")
 if __name__ == '__main__':
-    backtest = False
-    day_count = 200
+    backtest = True
+    day_count = 100
     if backtest:
-        start_date = date(2018, 1, 1)
+        start_date = date(2022, 1, 1)
         
         for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
             Daily.runDaily(Daily, str(single_date))
     else:
         Daily.runDaily(Daily, '2023-01-30')
-         
+                  
