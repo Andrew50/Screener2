@@ -9,6 +9,11 @@ from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
 
 class Intraday:
+    def findIndex(df, dateTo):
+
+
+
+
     def runTickerList(screenb):
         screenbar = screenb
         exchange = str(screenbar['Exchange'])

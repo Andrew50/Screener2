@@ -12,6 +12,7 @@ from Datav4 import Data as data
 import shutil
 import concurrent.futures
 from pathos.multiprocessing import ProcessingPool as Pool
+from IntradayV2 import Intraday as intraday
 
 
 
@@ -192,8 +193,10 @@ class UI:
                 
                 string1 = "databasesmall" + iss + ".png"
                 string2 = "databaselarge" + iss + ".png"
+                string3 = "databaseintraday" + iss + ".png"
                 ourpath = pathlib.Path("C:/Screener/tmp/charts") / string1
                 ourpath2 = pathlib.Path("C:/Screener/tmp/charts") / string2
+                ourpath3 = pathlib.Path("C:/Screener/tmp/charts") / string3
             
             
                 data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
@@ -208,8 +211,17 @@ class UI:
                     mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
+
+
+                    dfintraday_full = pd.read_csv(r"C:/Screener/intraday_data/" + ticker + "_intradaydata.csv")
+
+                    dfintraday = intraday.findIndex(dfintraday_full,date)
+
+
+
                     mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
             
             
 
