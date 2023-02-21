@@ -213,15 +213,15 @@ class UI:
                 else:
 
 
-                    dfintraday_full = pd.read_csv(r"C:/Screener/intraday_data/" + ticker + "_intradaydata.csv")
+                   # dfintraday_full = pd.read_csv(r"C:/Screener/intraday_data/" + ticker + "_intradaydata.csv")
 
-                    dfintraday = intraday.findIndex(dfintraday_full,date)
+                    #dfintraday = intraday.findIndex(dfintraday_full,date)
 
 
 
                     mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
+                   # mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
             
             
 
