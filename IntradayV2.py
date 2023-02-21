@@ -11,7 +11,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 class Intraday:
     def findIndex(df, dateTo):
 
-
+        pass
 
 
     def runTickerList(screenb):

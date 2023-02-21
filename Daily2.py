@@ -388,7 +388,7 @@ class Daily:
         except statistics.StatisticsError:
             print("stats error")
 if __name__ == '__main__':
-    backtest = True
+    backtest = False
     day_count = 100
     if backtest:
         start_date = date(2022, 1, 1)
@@ -397,5 +397,5 @@ if __name__ == '__main__':
 
             Daily.runDaily(Daily, str(single_date))
     else:
-        Daily.runDaily(Daily, '2023-01-30')
+        Daily.runDaily(Daily, '0')
                   
