@@ -308,7 +308,7 @@ class Daily:
 
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
-        zfilter = 2.2
+        zfilter = 2.8
         lmin = 5
         lmax = 30
         rsil = 20#10 or 15 but for actuall real flag 20 seems best
