@@ -311,8 +311,9 @@ class Daily:
         zfilter = 2.5
         lmin = 6
         lmax = 30
-        rsil = 20#10
+        rsil = 14#10
         zl = 20
+        todayl = 0
 
         try:
             
@@ -352,14 +353,16 @@ class Daily:
                 flagdata = []
                 if l < 1:
                     l = 1
-                for j in range(l * 2):
+                if i == 0:
+                    todayl = l
+                for j in range((l-1) * 2):
                     ma3 = []
                     for k in range(2):
 
                         ma3.append(data_daily.iloc[currentday-i-j-k-1][4])
                     ma3 = statistics.mean(ma3)
                             
-                    if j >= l:
+                    if j >= l - 1:
                         gaindata.append(ma3)
                     else:
 
@@ -377,7 +380,7 @@ class Daily:
               
             z = (currentvalue - statistics.mean(zdata))/statistics.stdev(zdata)
             
-            if z > zfilter and l > lmin:
+            if z > zfilter and todayl > lmin:
                 log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
         except ValueError:
             print("value error")
