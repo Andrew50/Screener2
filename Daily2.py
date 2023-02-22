@@ -123,7 +123,7 @@ class Daily:
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
             if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15))  :
-                screen.runDailyScan(None)
+                #screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
@@ -265,8 +265,8 @@ class Daily:
         
 
         uppergapzfilter = 8
-        lowergapzfilter = 2
-        lowergapzfilter2 = 2
+        lowergapzfilter = 1.8
+        lowergapzfilter2 = 1.8
        
         try: 
             prevClose = data_daily.iloc[currentday-1][4]
@@ -308,10 +308,10 @@ class Daily:
 
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
-        zfilter = 2.5
-        lmin = 6
+        zfilter = 2.2
+        lmin = 5
         lmax = 30
-        rsil = 14#10
+        rsil = 20#10 or 15 but for actuall real flag 20 seems best
         zl = 20
         todayl = 0
 
@@ -351,8 +351,8 @@ class Daily:
                 
                 gaindata = []
                 flagdata = []
-                if l < 1:
-                    l = 1
+                if l < 2:
+                    l = 2
                 if i == 0:
                     todayl = l
                 for j in range((l-1) * 2):
