@@ -19,7 +19,7 @@ class Data:
         try:
             for i in range(len(df)):
                 j = len(df) - i - 1
-                if(df.index[j] == dateTo):
+                if(str(df.index[j]) == dateTo):
                     return j
             return 99999
         
@@ -51,10 +51,8 @@ class Data:
             for t in tickers:
                 tick = t.split(":")[0]
                 exchange = t.split(":")[1]
-                print(f"{tick} {exchange}")
                 tv = TvDatafeed(username="cs.benliu@gmail.com", password="tltShort!1")
                 ticker_df = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=10000)
-                print(ticker_df)
                 if(os.path.exists("C:/Screener/intraday_data/" + tick + "_intradaydata.csv") == False):
                     ticker_df.to_csv("C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
                     print(f"{tick} created")
