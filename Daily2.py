@@ -78,7 +78,7 @@ class Daily:
                         currentday = chartSize
                          
                     dolVol = []
-                    for i in range(10):
+                    for i in range(5):
                         dolVol.append(data_daily_full.iloc[indexOfDay-1-i][4]*data_daily_full.iloc[indexOfDay-1-i][5])
                     dolVol = statistics.mean(dolVol)
 
@@ -97,17 +97,17 @@ class Daily:
                                 val = (high/low - 1) * 100
                                 adrlist.append(val)
                         
-                            adr = statistics.mean(adrlist)
+                            adr = statistics.mean(adrlist)  
                         except IndexError:
                             print("adr error")
                     
-                        if(dolVol > 1000000  and prevClose > 3 and pmChange != 0 and math.isnan(pmChange) != True and adr > 2.5 and sEP):
+                        if(dolVol > 8000000  and prevClose > 1 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
                             Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 5000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sMR):
+                        if(dolVol > 10000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
                             Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3 and sPivot):
+                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
                             Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and adr > 3.5 and sFlag):
+                        if(dolVol > 10000000  and prevClose > 2 and adr > 4 and sFlag):
                             Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     
 
@@ -265,8 +265,8 @@ class Daily:
         
 
         uppergapzfilter = 8
-        lowergapzfilter = 1
-        lowergapzfilter2 = 1.5
+        lowergapzfilter = 2
+        lowergapzfilter2 = 2
        
         try: 
             prevClose = data_daily.iloc[currentday-1][4]
@@ -287,13 +287,15 @@ class Daily:
             close2 = data_daily.iloc[currentday-2][4]
             open1 = data_daily.iloc[currentday-1][1]
             open2 = data_daily.iloc[currentday-2][1]
+            low1 = data_daily.iloc[currentday-1][3]
+            high1 = data_daily.iloc[currentday-1][2]
 
-            if gapz > lowergapzfilter and close1 < ma3 and pmPrice > ma3 and close1 < close2 and close2 < open2 and close1 < open1 :
+            if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
 
-            if gapz > lowergapzfilter2 and close1 > ma3 and pmPrice < ma3 and close1 > close2 and close2 > open2 and close1 > open1 :
+            if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
                 log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
         except IndexError:
@@ -306,7 +308,7 @@ class Daily:
 
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
-        zfilter = 2.2
+        zfilter = 2.5
         lmin = 6
         lmax = 30
         rsil = 20#10
@@ -352,7 +354,7 @@ class Daily:
                     l = 1
                 for j in range(l * 2):
                     ma3 = []
-                    for k in range(3):
+                    for k in range(2):
 
                         ma3.append(data_daily.iloc[currentday-i-j-k-1][4])
                     ma3 = statistics.mean(ma3)
