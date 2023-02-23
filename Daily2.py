@@ -123,7 +123,7 @@ class Daily:
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
             if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15))  :
-                #screen.runDailyScan(None)
+                screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
@@ -308,61 +308,59 @@ class Daily:
 
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         tick = str(screenbar['Ticker'])
-        zfilter = 2.8
+        zfilter = 4
+        z2filter = .4
         lmin = 5
-        lmax = 30
-        rsil = 20#10 or 15 but for actuall real flag 20 seems best
+        lmax = 20
+        rsil = 20
         zl = 20
         todayl = 0
+        currentvalue = 0
 
         try:
             
-            rsidata = []
             
-            #for i in range(5):
-                     #zma = []
-                #for j in range(5):
-            zdata = []
-            for i in range(zl):
-                rsilist = []
-                rsimax = 0
-                for j in range(lmax):
+            rsimax = 0
+            for j in range(lmax):
                 
-                    gains = []
-                    losses = []
+                gains = []
+                losses = []
                     
                     
-                    for k in range(rsil):
-                        change = (data_daily.iloc[currentday-i-k-j-1][4]/data_daily.iloc[currentday-i-k-j-2][4]) - 1
-                        if change > 0:
-                            gains.append(change)
-                        else:
-                            losses.append(-change)
+                for k in range(rsil):
+                    change = (data_daily.iloc[currentday-k-j-1][4]/data_daily.iloc[currentday-k-j-2][4]) - 1
+                    if change > 0:
+                        gains.append(change)
+                    else:
+                        losses.append(-change)
 
 
-                    RS = (sum(gains)/rsil) / (sum(losses)/rsil)
-                    rsi = abs((100 - (100 / (1 + RS))) - 50)
-                    rsilist.append(rsi)
-                    if rsi > rsimax:
-                        rsimax = rsi
-                        l = j
+                RS = (sum(gains)/rsil) / (sum(losses)/rsil)
+                rsi = abs((100 - (100 / (1 + RS))) - 50)
+               
+                if rsi > rsimax:
+                    rsimax = rsi
+                    l = j - 1
                 
-                #print(str(f"{tick} , {l}"))
+          
                 
-                gaindata = []
-                flagdata = []
-                if l < 2:
-                    l = 2
-                if i == 0:
-                    todayl = l
-                for j in range((l-1) * 2):
+            gaindata = []
+            flagdata = []
+            
+            halfdata = []
+                
+            if l > lmin and l < lmax - 2:
+                for j in range(l * 2):
                     ma3 = []
-                    for k in range(2):
+                    for k in range(3):
 
-                        ma3.append(data_daily.iloc[currentday-i-j-k-1][4])
+                        ma3.append(data_daily.iloc[currentday-j-k-1][4])
                     ma3 = statistics.mean(ma3)
-                            
-                    if j >= l - 1:
+                          
+                    if j < int(l/2):
+                        halfdata.append(ma3)
+
+                    if j >=l:
                         gaindata.append(ma3)
                     else:
 
@@ -371,17 +369,21 @@ class Daily:
                 gain = max(gaindata)/min(gaindata)
                 flag = max(flagdata)/min(flagdata)
                
-                value = gain - flag
-                if i > 0:
+                halfflag = max(halfdata)/min(halfdata) - 1
 
-                    zdata.append(value)
-                else:
-                    currentvalue = value
-              
-            z = (currentvalue - statistics.mean(zdata))/statistics.stdev(zdata)
+                value = gain - flag
+                
+
+                zdata = []
             
-            if z > zfilter and todayl > lmin:
-                log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
+                for i in range(zl):
+                    pushvalue = data_daily.iloc[currentday-i-1][2]/data_daily.iloc[currentday-i-1][3] - 1
+                    zdata.append(pushvalue)
+
+                z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
+                z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
+                if z > zfilter and z2 > z2filter:
+                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
         except ValueError:
             print("value error")
         except IndexError:
@@ -396,11 +398,11 @@ if __name__ == '__main__':
     backtest = False
     day_count = 100
     if backtest:
-        start_date = date(2022, 1, 1)
+        start_date = date(2020, 6, 1)
         
         for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
             Daily.runDaily(Daily, str(single_date))
     else:
-        Daily.runDaily(Daily, '0')
+        Daily.runDaily(Daily, '2023-01-25')
                   
