@@ -150,7 +150,7 @@ class Daily:
                 print("The date given is not a weekday.")
                 return False
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-            #data.runUpdate(tv,True)
+            data.runUpdate(tv,True)
        
         screenbars = []
         for i in range(len(screener_data)):
