@@ -107,7 +107,7 @@ class Daily:
                             Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                         if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
                             Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 10000000  and prevClose > 2 and adr > 4 and sFlag):
+                        if(dolVol > 8000000  and prevClose > 2 and adr > 4 and sFlag):
                             Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     
 
@@ -122,7 +122,7 @@ class Daily:
             dateSplit2 = str(dateTimeOfDay2).split(" ")
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
-            if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15))  :
+            if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15)) :
                 screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
@@ -150,7 +150,7 @@ class Daily:
                 print("The date given is not a weekday.")
                 return False
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-            data.runUpdate(tv,True)
+            data.runUpdate(tv,False)
        
         screenbars = []
         for i in range(len(screener_data)):
@@ -396,13 +396,18 @@ class Daily:
             print("stats error")
 if __name__ == '__main__':
     backtest = False
-    day_count = 100
-    if backtest:
-        start_date = date(2020, 6, 1)
-        
-        for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
-            Daily.runDaily(Daily, str(single_date))
+    day_count = 100
+
+    if (datetime.datetime.now().hour) < 6:
+            Daily.runDaily(Daily, '0')
     else:
-        Daily.runDaily(Daily, '2023-01-25')
-                  
+            
+        if backtest:
+            start_date = date(2020, 6, 1)
+        
+            for single_date in (start_date + timedelta(n) for n in range(day_count)):
+
+                Daily.runDaily(Daily, str(single_date))
+        else:
+            Daily.runDaily(Daily, '0')

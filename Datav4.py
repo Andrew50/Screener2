@@ -54,6 +54,7 @@ class Data:
                     dateTimeofDayAhead = str(df.index[newRef + i])
                     if(dateTimeofDayAhead == dateTo):
                         return (newRef + i)
+            print(str(f"{dateTimeofDayAhead} , {dateTo}"))
             return 99999
         except IndexError:
             print("findindex index error")
@@ -97,20 +98,22 @@ class Data:
                     if not Data.isMarketClosed():
                         ticker_df.drop(ticker_df.tail(1).index,inplace=True)
                     ticker_df.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
-                    print(f"{ticker} created")
+                    print(f"created {ticker}")
                 else:
                     cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                     lastDay = cs.iloc[len(cs)-1]['Date']
                     cs['Date'] = pd.to_datetime(cs['Date'])
                     cs = cs.set_index('Date')
                     scrapped_data_index = Data.findIndex(ticker_df, lastDay,True) 
-                    
+                    #print(scrapped_data_index)
                     need_append_data = ticker_df[scrapped_data_index + 1:]
                     
                     cs = pd.concat([cs, need_append_data])
                     cs.to_csv("C:/Screener/data_csvs/" + ticker + "_data.csv")
                     numRows = len(need_append_data)
-                    print(f"{ticker} appended with {numRows}")
+                    print(f"appended {numRows} to {ticker}")
+                    if numRows == 0:
+                        print(f"{ticker} , {scrapped_data_index}, not workingappended 0")
                 
         except KeyError:
             print("had issue with KeyError")
@@ -130,18 +133,26 @@ class Data:
         else:
             
             cs = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
-            if len(cs) > 1:
+            try:
                 lastDayTime = cs.iloc[len(cs)-1]['Date']
                 lastDaySplit = lastDayTime.split(" ")
                 lastDay = lastDaySplit[0]
    
-          
+                
                 if (lastDay != lastDStock):
-               
-                    return ticker
-                print(f"{ticker} is approved")
-            else:
-                print(f"{ticker} too young")
+                    lastDay = datetime.datetime.strptime(lastDay, '%Y-%m-%d')
+                    lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
+                    if lastDStock < lastDay:
+                        print(f"deleted {ticker}")
+                        os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+                        return ticker
+                    else:
+                    
+                        return ticker
+                print(f"approved {ticker}")
+            except IndexError:
+                print(f"deleted {ticker}")
+                os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
     
 
    
@@ -151,6 +162,7 @@ class Data:
        
         last = 't' 
         lastDStock = 't' 
+        print(isClosed)
         if(isClosed == True):
             last = data_apple.index[1]
             lastSplit = str(last).split(" ")

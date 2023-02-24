@@ -1,4 +1,5 @@
-﻿from discordwebhook import Discord
+﻿
+from discordwebhook import Discord
 import pathlib
 import mplfinance as mpf
 import pandas as pd
@@ -115,6 +116,11 @@ class log:
         if dateToSearch == "0":
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
         else:
+
+
+            #calculate traits
+
+
             dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
    
 
@@ -124,4 +130,3 @@ class log:
 
 
 
-    
