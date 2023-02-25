@@ -1,10 +1,15 @@
 ﻿
+from argparse import ONE_OR_MORE
+from multiprocessing.pool import CLOSE
+import typing_extensions
 from discordwebhook import Discord
 import pathlib
 import mplfinance as mpf
+import statistics
 import pandas as pd
 import datetime
 import matplotlib as mpl
+from Datav4 import Data
 from tvDatafeed import TvDatafeed
 from datetime import datetime
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
@@ -102,23 +107,125 @@ class log:
        
 
 
-    def daily(screenbar, z, setup_type, dateToSearch,pmPrice):
+    def daily(screenbar, z, setup_type, dateToSearch,pmPrice, data_daily,currentday):
     
-        tick = str(screenbar['Ticker'])
-        dateString = dateToSearch
-        data ={'Date': [dateString],
-                'Ticker':[ tick],
-                'Setup': [str(setup_type)],
-                'Z': [z],
-                'pm':[pmPrice]}
         
-        dfadd = pd.DataFrame(data)
         if dateToSearch == "0":
+            tick = str(screenbar['Ticker'])
+            dateString = dateToSearch
+            data ={'Date': [dateString],
+                    'Ticker':[ tick],
+                    'Setup': [str(setup_type)],
+                    'Z': [z],
+                    'pm':[pmPrice]}
+        
+            dfadd = pd.DataFrame(data)
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
         else:
 
+            #gap percent
+            #adr
+            #vol %
+            #q risin 10 > rising 20
+            # 1 dperf
+            # 2 d perf
+            #3 d perf
+            #10 ma perf
+            #10 am perf time
+           
+            
+           
 
-            #calculate traits
+
+            tick = str(screenbar['Ticker'])
+            dateString = dateToSearch
+
+
+           
+            gap = round( (data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)*100,2)
+
+            volma = []
+            for i in range(10):
+                volma.append(data_daily.iloc[currentday-1-i][5])
+            vol = round((data_daily.iloc[currentday][5]/statistics.mean(volma) - 1),2)
+
+            q_data = pd.read_csv("C:/Screener/data_csvs/QQQ_data.csv")
+            qcurrentday = Data.findIndex(q_data, dateToSearch,False)
+            q10 = []
+            q20 = []
+
+            for i in range(21):
+                close = q_data.iloc[qcurrentday - 1-i][4]
+
+                q20.append(close)
+                if i >= 9:
+                    q10.append(close)
+
+                if i == 19:
+                    prev10 = statistics.mean(q10)
+                    prev20 = statistics.mean(q20)
+
+            current10 = statistics.mean(q10)
+            current20 = statistics.mean(q20)
+            
+            if current10 > prev10 and current20 > prev20 and current10 > current20:
+                q = True
+            else:
+                q = False
+            
+            one = round((data_daily.iloc[currentday][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+            two =   round((data_daily.iloc[currentday+1][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+            three =  round((data_daily.iloc[currentday+2][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+
+            
+          
+                            
+            adr = []
+            for j in range(20): 
+                high = data_daily.iloc[currentday-j-1][2]
+                low = data_daily.iloc[currentday-j-1][3]
+                val = (high/low - 1) * 100
+                adr.append(val)
+                        
+            adr = round(statistics.mean(adr) ,2)
+           
+            i = 0
+            while True:
+
+                ma10 = []
+                for j in range(10):
+                    ma10.append((data_daily.iloc[currentday-j+i][4]))
+                ma10 = statistics.mean(ma10)
+                if (data_daily.iloc[currentday+i][4]) < ma10:
+                    break
+
+                i += 1
+            ten = round( (data_daily.iloc[currentday+i][4] / data_daily.iloc[currentday][4] - 1)*100,2)
+            time = i 
+
+          
+        
+
+            data ={'Date': [dateString],
+                    'Ticker':[tick],
+                    'Setup': [str(setup_type)],
+                    'Z': [z],
+                    'gap': [gap],
+                    'adr': [adr],
+                    'vol': [vol],
+                    'q': [q],
+                    '1': [one],
+                    '2': [two],
+                    '3': [three],
+                    '10': [ten],
+                    'annotation': [""],
+                    'time': [time]
+  
+                    }
+        
+            dfadd = pd.DataFrame(data)
+
+
 
 
             dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)

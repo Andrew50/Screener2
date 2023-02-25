@@ -1,6 +1,6 @@
 
 from tvDatafeed import TvDatafeed
-from Daily2 import Daily as daily
+from Daily3 import Daily as daily
 import datetime
 from datetime import date, timedelta
 

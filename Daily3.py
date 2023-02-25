@@ -1,3 +1,4 @@
+
 from fileinput import close
 import os 
 import pandas as pd
@@ -5,7 +6,7 @@ import statistics
 import math
 import datetime
 from datetime import date, timedelta
-from Log import log as log
+from Log2 import log as log
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
 from tvDatafeed import TvDatafeed,  Interval
@@ -43,19 +44,19 @@ class Daily:
         dateToSearch = screenbar['dateToSearch']
         print(tick)
         if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
-            data_daily_full = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
+            data_daily = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
         
-            if len(data_daily_full) > 35:
+            if len(data_daily) > 35:
                 
                 
                 
-                indexOfDay = data.findIndex(data_daily_full, dateToSearch,False)
+                indexOfDay = data.findIndex(data_daily, dateToSearch,False)
                     
 
                 
                 if(indexOfDay != 99999):
                  
-                    
+                    currentday = indexOfDay
                     if (dateToSearch == "0"):
                         prevClose = screenbar['Price']
                             
@@ -65,25 +66,23 @@ class Daily:
                         pmPrice = prevClose + pmChange
 
 
-                        rightedge = indexOfDay 
-                        currentday = chartSize 
+                     
                         
                     else:
-                        pmPrice = data_daily_full.iloc[indexOfDay][1]
-                        prevClose = data_daily_full.iloc[indexOfDay-1][4] 
+                        pmPrice = data_daily.iloc[currentday][1]
+                        prevClose = data_daily.iloc[currentday-1][4] 
                         
                         pmChange = pmPrice/prevClose - 1
 
-                        rightedge = indexOfDay
-                        currentday = chartSize
+                       
                          
                     dolVol = []
                     for i in range(5):
-                        dolVol.append(data_daily_full.iloc[indexOfDay-1-i][4]*data_daily_full.iloc[indexOfDay-1-i][5])
+                        dolVol.append(data_daily.iloc[indexOfDay-1-i][4]*data_daily.iloc[indexOfDay-1-i][5])
                     dolVol = statistics.mean(dolVol)
 
 
-                    data_daily = data_daily_full[(rightedge - chartSize):(rightedge)]
+                   
              
                     
                     if(dolVol > 1000000  and prevClose > 2): 
@@ -183,10 +182,10 @@ class Daily:
            
             
             if(z > zfilter) and pmPrice > max(highs):
-                log.daily(screenbar,z,"EP", dateToSearch,pmPrice) 
+                log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday) 
             
             elif (z < -zfilter) and pmPrice < min(lows):
-                log.daily(screenbar,z,"NEP", dateToSearch,pmPrice) 
+                log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday) 
 
         except IndexError:
             print("index error")
@@ -251,7 +250,7 @@ class Daily:
                 if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                    log.daily(screenbar,z,"MR", dateToSearch,pmPrice) 
+                    log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday) 
                
             
         except IndexError:
@@ -293,11 +292,11 @@ class Daily:
             if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
+                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
 
             if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice) 
+                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
         except IndexError:
            print(f" did not exist at the date " )
         except TimeoutError:
@@ -383,7 +382,7 @@ class Daily:
                 z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
                 z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
                 if z > zfilter and z2 > z2filter:
-                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice) 
+                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday) 
         except ValueError:
             print("value error")
         except IndexError:
@@ -395,7 +394,7 @@ class Daily:
         except statistics.StatisticsError:
             print("stats error")
 if __name__ == '__main__':
-    backtest = False
+    backtest = True
 
     day_count = 100
 
@@ -404,7 +403,7 @@ if __name__ == '__main__':
     else:
             
         if backtest:
-            start_date = date(2020, 6, 1)
+            start_date = date(2023, 2, 3)
         
             for single_date in (start_date + timedelta(n) for n in range(day_count)):
 

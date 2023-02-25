@@ -8,6 +8,7 @@ from Screen import Screen as screen
 from functools import partial
 from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
+from multiprocessing import Lock
 import warnings
 import math
 import yfinance as yf
@@ -54,7 +55,7 @@ class Data:
                     dateTimeofDayAhead = str(df.index[newRef + i])
                     if(dateTimeofDayAhead == dateTo):
                         return (newRef + i)
-            print(str(f"{dateTimeofDayAhead} , {dateTo}"))
+            #print(str(f"{dateTimeofDayAhead} , {dateTo}"))
             return 99999
         except IndexError:
             print("findindex index error")
@@ -140,6 +141,7 @@ class Data:
    
                 
                 if (lastDay != lastDStock):
+                    #print(f"{lastDay} , {lastDStock}")
                     lastDay = datetime.datetime.strptime(lastDay, '%Y-%m-%d')
                     lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
                     if lastDStock < lastDay:
@@ -153,16 +155,19 @@ class Data:
             except IndexError:
                 print(f"deleted {ticker}")
                 os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+            except ValueError:
+                print("value error in istickerupate")
     
 
    
     def runUpdate(tv,allTickers):
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         isClosed = Data.isMarketClosed()
-       
+        if isClosed == None:
+            isClosed = True
         last = 't' 
         lastDStock = 't' 
-        print(isClosed)
+        #print(isClosed)
         if(isClosed == True):
             last = data_apple.index[1]
             lastSplit = str(last).split(" ")
@@ -178,9 +183,12 @@ class Data:
         numTickers = len(screener_data)
         tickers = []
         for i in range(numTickers):
+           
            ticker = screener_data.iloc[i]['Ticker']
+           #print(f'{ticker}:{lastDStock}')
            tickers.append(f'{ticker}:{lastDStock}')
         remaining_tickers = []
+        
         with Pool(nodes=6) as pool:
             remaining_tickers = pool.map(Data.isTickerUpdated, tickers)
         new_remaining = []
