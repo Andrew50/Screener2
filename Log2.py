@@ -111,6 +111,7 @@ class log:
     
         
         if dateToSearch == "0":
+
             tick = str(screenbar['Ticker'])
             dateString = dateToSearch
             data ={'Date': [dateString],
@@ -122,7 +123,7 @@ class log:
             dfadd = pd.DataFrame(data)
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
         else:
-
+            
             #gap percent
             #adr
             #vol %
@@ -147,7 +148,7 @@ class log:
             volma = []
             for i in range(10):
                 volma.append(data_daily.iloc[currentday-1-i][5])
-            vol = round((data_daily.iloc[currentday][5]/statistics.mean(volma) - 1),2)
+            vol = round((data_daily.iloc[currentday][5]/statistics.mean(volma) ),2)
 
             q_data = pd.read_csv("C:/Screener/data_csvs/QQQ_data.csv")
             qcurrentday = Data.findIndex(q_data, dateToSearch,False)
@@ -199,6 +200,9 @@ class log:
                 if (data_daily.iloc[currentday+i][4]) < ma10:
                     break
 
+                if i > 150:
+                    break
+
                 i += 1
             ten = round( (data_daily.iloc[currentday+i][4] / data_daily.iloc[currentday][4] - 1)*100,2)
             time = i 
@@ -219,6 +223,7 @@ class log:
                     '3': [three],
                     '10': [ten],
                     'annotation': [""],
+                    'rating': [""],
                     'time': [time]
   
                     }
@@ -226,10 +231,11 @@ class log:
             dfadd = pd.DataFrame(data)
 
 
-
-
+            
+            
             dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
-   
+            
+            
 
 
 

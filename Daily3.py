@@ -42,71 +42,84 @@ class Daily:
         screenbar = sbr
         tick = str(screenbar['Ticker'])
         dateToSearch = screenbar['dateToSearch']
-        print(tick)
+        if dateToSearch == "0":
+            print(tick)
         if (os.path.exists("C:/Screener/data_csvs/" + tick + "_data.csv")):
             data_daily = pd.read_csv(f"C:/Screener/data_csvs/{tick}_data.csv")
-        
-            if len(data_daily) > 35:
+            
+            
                 
                 
                 
-                indexOfDay = data.findIndex(data_daily, dateToSearch,False)
+            indexOfDay = data.findIndex(data_daily, dateToSearch,False)
                     
 
                 
-                if(indexOfDay != 99999):
-                 
-                    currentday = indexOfDay
-                    if (dateToSearch == "0"):
-                        prevClose = screenbar['Price']
+            if(indexOfDay != 99999) and indexOfDay > 45:
+                    
+                currentday = indexOfDay
+                if (dateToSearch == "0"):
+                    prevClose = screenbar['Price']
                             
-                        pmChange = screenbar['Pre-market Change']
+                    pmChange = screenbar['Pre-market Change']
             
                         
-                        pmPrice = prevClose + pmChange
+                    pmPrice = prevClose + pmChange
 
+                        
 
                      
                         
-                    else:
-                        pmPrice = data_daily.iloc[currentday][1]
-                        prevClose = data_daily.iloc[currentday-1][4] 
+                else:
+                    pmPrice = data_daily.iloc[currentday][1]
+                    prevClose = data_daily.iloc[currentday-1][4] 
                         
-                        pmChange = pmPrice/prevClose - 1
+                    pmChange = pmPrice/prevClose - 1
 
                        
                          
-                    dolVol = []
-                    for i in range(5):
-                        dolVol.append(data_daily.iloc[indexOfDay-1-i][4]*data_daily.iloc[indexOfDay-1-i][5])
-                    dolVol = statistics.mean(dolVol)
+                dolVol = []
+                for i in range(5):
+                    dolVol.append(data_daily.iloc[indexOfDay-1-i][4]*data_daily.iloc[indexOfDay-1-i][5])
+                dolVol = statistics.mean(dolVol)
 
+                        
+                    
 
-                   
+                currentdate = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d')
+                startdate = datetime.datetime(1998, 5, 10)
+                delta = (currentdate - startdate).days
+
+                dolVolFilter = .12 * math.pow(delta,2) + 200000
              
                     
-                    if(dolVol > 1000000  and prevClose > 2): 
-                        adr = 0
-                        try:
-                            
-                            adrlist = []
-                            for j in range(20): 
-                                high = data_daily.iloc[currentday-j-1][2]
-                                low = data_daily.iloc[currentday-j-1][3]
-                                val = (high/low - 1) * 100
-                                adrlist.append(val)
+                if(dolVol > dolVolFilter * .2  and (prevClose > 2 or dateToSearch != "0")): 
                         
-                            adr = statistics.mean(adrlist)  
-                        except IndexError:
-                            print("adr error")
+                    adr = 0
+                    try:
+                            
+                        adrlist = []
+                        for j in range(20): 
+                            high = data_daily.iloc[currentday-j-1][2]
+                            low = data_daily.iloc[currentday-j-1][3]
+                            val = (high/low - 1) * 100
+                            adrlist.append(val)
+                        
+                        adr = statistics.mean(adrlist)  
+                    except IndexError:
+                        print("adr error")
                     
-                        if(dolVol > 8000000  and prevClose > 1 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
+
+                    if adr > 3.5:
+                        if dateToSearch != "0":
+                            print(tick)
+                        if(dolVol > .2* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
                             Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 10000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
+                        if(dolVol > dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
                             Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 15000000  and prevClose > 2 and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
+                        if(dolVol > 1.5* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
                             Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 8000000  and prevClose > 2 and adr > 4 and sFlag):
+                        if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
                             Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
                     
 
@@ -149,7 +162,7 @@ class Daily:
                 print("The date given is not a weekday.")
                 return False
             screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-            data.runUpdate(tv,False)
+            
        
         screenbars = []
         for i in range(len(screener_data)):
@@ -381,7 +394,9 @@ class Daily:
 
                 z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
                 z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
+             
                 if z > zfilter and z2 > z2filter:
+                    
                     log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday) 
         except ValueError:
             print("value error")
@@ -393,20 +408,34 @@ class Daily:
             print(" does not have a file")
         except statistics.StatisticsError:
             print("stats error")
+        except UnboundLocalError:
+            print("unbound var")
 if __name__ == '__main__':
     backtest = True
 
-    day_count = 100
+    
 
     if (datetime.datetime.now().hour) < 6:
             Daily.runDaily(Daily, '0')
     else:
             
         if backtest:
-            start_date = date(2023, 2, 3)
-        
-            for single_date in (start_date + timedelta(n) for n in range(day_count)):
 
+            
+            try:
+                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                strdate = df.iloc[len(df)][0]
+                startdate = datetime.strptime(strdate, '%m/%d/%Y')
+               
+            except:
+                startdate = date(2000, 1, 1)
+
+            
+            day_count = 10000
+            
+            for single_date in (startdate + timedelta(n) for n in range(day_count)):
+
+                print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
                 Daily.runDaily(Daily, str(single_date))
         else:
             Daily.runDaily(Daily, '0')
