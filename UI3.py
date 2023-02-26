@@ -34,14 +34,15 @@ class UI:
         self.annotation = False
         if current:
         
-            self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+            self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
             self.historical = False
     
         else:
-            self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+            self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+            self.historical = True
             self.historical = True
 
-        self.setups_data = self.full_setups_data
+        
         
         
         self.preloadamount = 6
@@ -90,10 +91,11 @@ class UI:
                 date = values["input-date"]
                 setup = values["input-setup"]
                 keyword = values["input-keyword"]
+                previ = 0
+                #print(previ)
                 
-                self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
                 self.lookup(self,ticker,date,setup,keyword)
-                self.update(self,False,values)
+                self.update(self,False,values,previ)
            
                
 
@@ -134,7 +136,7 @@ class UI:
 
 
             if event == sg.WIN_CLOSED:
-                self.update(self,False,values,self.i)
+                #self.update(self,False,values,self.i)
                 break
             
         self.window.close()
@@ -142,9 +144,9 @@ class UI:
 
     def lookup(self,ticker,date,setup,keyword):
         
-        print(keyword)
-        self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-        scan = self.full_setups_data
+        print(f"searching for {keyword}")
+        scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+        
         
         if ticker  != "":
             scanholder = pd.DataFrame()
@@ -173,7 +175,7 @@ class UI:
         if self.annotation:
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
-                ##print(scan.iloc[k][12])
+               
                 if scan.iloc[k][12] !=  scan.iloc[k][12]: # == "" or scan.iloc[k][12] == None:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
@@ -362,20 +364,21 @@ class UI:
                 self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
                
+                try:
                 
-                if values["annotation"]: #or values["rating"]:
                     df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                
                     index = self.setups_data.index[previ]
                   
                     print('saved annotation')
-                    print(index)
+              
                     df.at[index, 12] = values["annotation"]
                     self.setups_data.at[index, 12] = values["annotation"]
                    
                     
                     df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
                 
-                try:
+                
                     self.window["-IMAGE-"].update(data=bio.getvalue())
                     self.window["-IMAGE2-"].update(data=bio2.getvalue())
                     self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
