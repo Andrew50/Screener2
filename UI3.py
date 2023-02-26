@@ -19,9 +19,6 @@ from IntradayV2 import Intraday as intraday
 
 
 
-
-
-
 class UI:
 
     
@@ -33,7 +30,6 @@ class UI:
         self.i = 0
         self.annotation = False
         if current:
-        
             self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
             self.historical = False
     
@@ -42,26 +38,14 @@ class UI:
             self.historical = True
             self.historical = True
 
-        
-        
-        
+
         self.preloadamount = 6
         self.preloadbuffer = self.preloadamount - 1
-
         self.preload(self,True)
-
-        
-        
         self.update(self,True,None,0)
-
-        
-
         while True:
             
             event, values = self.window.read()
-            
-            
-          
 
 
             if event == 'Next': 
@@ -73,9 +57,7 @@ class UI:
                     self.window.refresh()
                     self.preload(self,False)
                     
-                    
-                
-                
+
             if event == 'Prev':
                 
                 if self.i > 0:
@@ -83,9 +65,7 @@ class UI:
                     self.i -= 1
                    
                     self.update(self,False,values,previ)
-                   
-                   
-                    
+    
             if event == 'Load':
                 ticker = values["input-ticker"]
                 date = values["input-date"]
@@ -97,10 +77,7 @@ class UI:
                 self.lookup(self,ticker,date,setup,keyword)
                 self.update(self,False,values,previ)
            
-               
-
-            
-                
+  
             if event == 'Toggle':
                 previ = self.i
                 if self.annotation:
@@ -129,11 +106,7 @@ class UI:
                         self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
-                   
-                        
-                
-                
-
+    
 
             if event == sg.WIN_CLOSED:
                 #self.update(self,False,values,self.i)
@@ -327,7 +300,7 @@ class UI:
 
             if init:
                 histstr = "Historical"
-                sg.theme('Dark')
+                sg.theme('DarkGrey')
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
 
@@ -398,6 +371,7 @@ class UI:
 
         else:
             if init:
+                sg.theme('DarkGrey')
                 histstr = "Current"
                 
                 layout = [  
@@ -410,7 +384,7 @@ class UI:
                 ]
 
 
-                sg.theme('DarkBlack')
+                
                 self.window = sg.Window('Window Title', layout,margins = (10,10))
 
 
