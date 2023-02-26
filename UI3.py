@@ -51,7 +51,7 @@ class UI:
 
         
         
-        self.update(self,True,None)
+        self.update(self,True,None,0)
 
         
 
@@ -65,9 +65,10 @@ class UI:
 
             if event == 'Next': 
                 if self.i < len(self.setups_data) - 1:
+                    previ = self.i
                     self.i += 1
                    
-                    self.update(self,False,values)
+                    self.update(self,False,values,previ)
                     self.window.refresh()
                     self.preload(self,False)
                     
@@ -75,10 +76,12 @@ class UI:
                 
                 
             if event == 'Prev':
+                
                 if self.i > 0:
+                    previ = self.i
                     self.i -= 1
                    
-                    self.update(self,False,values)
+                    self.update(self,False,values,previ)
                    
                    
                     
@@ -86,10 +89,10 @@ class UI:
                 ticker = values["input-ticker"]
                 date = values["input-date"]
                 setup = values["input-setup"]
-                rating = values["input-rating"]
+                keyword = values["input-keyword"]
                 
                 self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                self.lookup(self,ticker,date,setup,rating)
+                self.lookup(self,ticker,date,setup,keyword)
                 self.update(self,False,values)
            
                
@@ -97,6 +100,7 @@ class UI:
             
                 
             if event == 'Toggle':
+                previ = self.i
                 if self.annotation:
                     try:
                         self.annotation = False
@@ -104,23 +108,23 @@ class UI:
                         ticker = values["input-ticker"]
                         date = values["input-date"]
                         setup = values["input-setup"]
-                        rating = values["input-rating"]
-                        self.lookup(self,ticker,date,setup,rating)
-                        self.update(self,False,values)
+                        keyword = values["input-keyword"]
+                        self.lookup(self,ticker,date,setup,keyword)
+                        self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
    
                 else:
                     try: 
-                       
+                        
                         self.annotation = True
                        
                         ticker = values["input-ticker"]
                         date = values["input-date"]
                         setup = values["input-setup"]
-                        rating = values["input-rating"]
-                        self.lookup(self,ticker,date,setup,rating)
-                        self.update(self,False,values)
+                        keyword = values["input-keyword"]
+                        self.lookup(self,ticker,date,setup,keyword)
+                        self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
                    
@@ -130,14 +134,16 @@ class UI:
 
 
             if event == sg.WIN_CLOSED:
+                self.update(self,False,values,self.i)
                 break
             
         self.window.close()
     
 
-    def lookup(self,ticker,date,setup,rating):
+    def lookup(self,ticker,date,setup,keyword):
         
-      
+        print(keyword)
+        self.full_setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
         scan = self.full_setups_data
         
         if ticker  != "":
@@ -158,10 +164,10 @@ class UI:
                 if scan.iloc[k][2] == setup:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
-        if rating  != "":
+        if keyword  != "":
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
-                if scan.iloc[k][13] == rating:
+                if  str(keyword) in str(scan.iloc[k][12]) :
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         if self.annotation:
@@ -277,41 +283,25 @@ class UI:
 
     
 
-    def update(self, init,values):
-       
-
+    def update(self, init,values,previ):
        
         
-        date = str(self.setups_data.iloc[self.i][0])
-        ticker = str(self.setups_data.iloc[self.i][1])
-        setup = str(self.setups_data.iloc[self.i][2])
-        z= str(self.setups_data.iloc[self.i][3])
-        zs = float(z)
-    
-
-        #if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv")):
-        
-            
-            
-           
-
         while True:
             try:
                 image = Image.open(r"C:\Screener\tmp\charts\databasesmall" + str(self.i) + ".png")
-                image.thumbnail((3500, 2000))
+                #image.thumbnail((930, 570))
                 bio = io.BytesIO()
                 image.save(bio, format="PNG")
            
                 image2 = Image.open(r"C:\Screener\tmp\charts\databaselarge" + str(self.i) + ".png")
-                image2.thumbnail((3500, 2000))
+               # image2.thumbnail((930, 570))
                 bio2 = io.BytesIO()
                 image2.save(bio2, format="PNG")
                 break
             except OSError:
                 pass
            
-            
-
+     
 
         if self.historical:
             gap = str(self.setups_data.iloc[self.i][4])
@@ -323,69 +313,85 @@ class UI:
             three = str(self.setups_data.iloc[self.i][10])
             ten = str(self.setups_data.iloc[self.i][11])
             annotation = str(self.setups_data.iloc[self.i][12])
-            rating = str(self.setups_data.iloc[self.i][13])
-            time = str(self.setups_data.iloc[self.i][14])
+            #rating = str(self.setups_data.iloc[self.i][13])
+            time = str(self.setups_data.iloc[self.i][13])
                 
             if annotation == "nan":
                 annotation = ""
-            if rating == "nan":
-                rating = ""
+            #if rating == "nan":
+                #rating = ""
 
 
 
             if init:
                 histstr = "Historical"
+                sg.theme('Dark')
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
-                [sg.Multiline(annotation,size=(285, 2), key='annotation')],
-                [(sg.Text("Rating")),sg.InputText(rating,key = 'rating')],
+
+                [ (sg.Text("Gap")),(sg.Text(gap, key = '-gap-')),
+                (sg.Text("|   ADR")),(sg.Text(adr, key = '-adr-')),
+                (sg.Text("|   Vol")),(sg.Text(vol, key = '-vol-')),
+                (sg.Text("|   QQQ")),(sg.Text(q, key = '-q-')),
+                (sg.Text("|   One")),(sg.Text(one, key = '-one-')),
+                (sg.Text("|   Two")),(sg.Text(two, key = '-two-')),
+                (sg.Text("|   Three")),(sg.Text(three, key = '-three-')),
+                (sg.Text("|   Ten")),(sg.Text(ten, key = '-ten-')),
+                (sg.Text("|   Time")),(sg.Text(time, key = '-time-'))],
+                 #[(sg.Text("Rating ")),sg.InputText(rating,key = 'rating')],
+                [sg.Multiline(annotation,size=(150, 5), key='annotation')],
+                
+               
+                [(sg.Text("Ticker    ")),sg.InputText(key = 'input-ticker')],
+                [(sg.Text("Date      ")),sg.InputText(key = 'input-date')],
+                [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
+                [(sg.Text("Keyword")),sg.InputText(key = 'input-keyword')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
-                [(sg.Text("Ticker")),sg.InputText(key = 'input-ticker')],
-                [(sg.Text("Date")),sg.InputText(key = 'input-date')],
-                [(sg.Text("Setup")),sg.InputText(key = 'input-setup')],
-                [(sg.Text("Rating")),sg.InputText(key = 'input-rating')],
-                [(sg.Text("Gap")),(sg.Text(gap, key = '-gap-'))] , 
-                [(sg.Text("ADR")),(sg.Text(adr, key = '-adr-'))] , 
-                [(sg.Text("Vol")),(sg.Text(vol, key = '-vol-'))] , 
-                [(sg.Text("QQQ")),(sg.Text(q, key = '-q-'))] , 
-                [(sg.Text("One")),(sg.Text(one, key = '-one-'))] , 
-                [(sg.Text("Two")),(sg.Text(two, key = '-two-'))] , 
-                [(sg.Text("Three")),(sg.Text(three, key = '-three-'))] , 
-                [(sg.Text("Ten")),(sg.Text(ten, key = '-ten-'))] ,
+                #[(sg.Text("Gap")),(sg.Text(gap, key = '-gap-'))] , 
+                #[(sg.Text("ADR")),(sg.Text(adr, key = '-adr-'))] , 
+                #[(sg.Text("Vol")),(sg.Text(vol, key = '-vol-'))] , 
+                #[(sg.Text("QQQ")),(sg.Text(q, key = '-q-'))] , 
+                #[(sg.Text("One")),(sg.Text(one, key = '-one-'))] , 
+                #[(sg.Text("Two")),(sg.Text(two, key = '-two-'))] , 
+                #[(sg.Text("Three")),(sg.Text(three, key = '-three-'))] , 
+                #[(sg.Text("Ten")),(sg.Text(ten, key = '-ten-'))] ,
                 #[(sg.Text("Time")),(sg.Text(time, key = '-time-'))] , 
                 [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load'), sg.Button('Toggle')] 
                 ]
-                sg.theme('DarkBlack')
+                
                 self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
                
                 
-                
-                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                index = self.setups_data.index[self.i] - 1
-                if values["annotation"]:
+                if values["annotation"]: #or values["rating"]:
+                    df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                    index = self.setups_data.index[previ]
+                  
                     print('saved annotation')
+                    print(index)
                     df.at[index, 12] = values["annotation"]
-                if values["rating"]:
-                    print('saved rating')
-                    df.at[index, 13] = values["rating"]
-                df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
+                    self.setups_data.at[index, 12] = values["annotation"]
+                   
+                    
+                    df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
                 
-
-                self.window["-IMAGE-"].update(data=bio.getvalue())
-                self.window["-IMAGE2-"].update(data=bio2.getvalue())
-                self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
-                self.window["-gap-"].update(gap)
-                self.window["-adr-"].update(adr)
-                self.window["-vol-"].update(vol)
-                self.window["-q-"].update(q)
-                self.window["-one-"].update(one)
-                self.window["-two-"].update(two)
-                self.window["-three-"].update(three)
-                self.window["-ten-"].update(ten)
-                #self.window["-time-"].update(time)
-                self.window["annotation"].update(annotation)
-                self.window["rating"].update(rating)
+                try:
+                    self.window["-IMAGE-"].update(data=bio.getvalue())
+                    self.window["-IMAGE2-"].update(data=bio2.getvalue())
+                    self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
+                    self.window["-gap-"].update(gap)
+                    self.window["-adr-"].update(adr)
+                    self.window["-vol-"].update(vol)
+                    self.window["-q-"].update(q)
+                    self.window["-one-"].update(one)
+                    self.window["-two-"].update(two)
+                    self.window["-three-"].update(three)
+                    self.window["-ten-"].update(ten)
+                    #self.window["-time-"].update(time)
+                    self.window["annotation"].update(annotation)
+                    #self.window["rating"].update(rating)
+                except:
+                    print("shutting down")
 
         else:
             if init:

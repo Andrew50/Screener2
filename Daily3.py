@@ -3,6 +3,7 @@ from fileinput import close
 import os 
 import pandas as pd
 import statistics
+import time
 import math
 import datetime
 from datetime import date, timedelta
@@ -424,15 +425,17 @@ if __name__ == '__main__':
             
             try:
                 df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                strdate = df.iloc[len(df)][0]
-                startdate = datetime.strptime(strdate, '%m/%d/%Y')
-               
+                strdate = df.iloc[len(df)-1][0]
+           
+                startdate = datetime.datetime.strptime(strdate, '%Y-%m-%d').date()
+                print(f"starting from {startdate}")
+                time.sleep(3)
             except:
                 startdate = date(2000, 1, 1)
 
-            
+           
             day_count = 10000
-            
+           
             for single_date in (startdate + timedelta(n) for n in range(day_count)):
 
                 print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
