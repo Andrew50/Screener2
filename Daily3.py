@@ -86,12 +86,15 @@ class Daily:
 
                         
                     
+                if dateToSearch == "0":
+                   dolVolFilter = 10000000
 
-                currentdate = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d')
-                startdate = datetime.datetime(1998, 5, 10)
-                delta = (currentdate - startdate).days
+                else:
+                    currentdate = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d')
+                    startdate = datetime.datetime(1998, 5, 10)
+                    delta = (currentdate - startdate).days
 
-                dolVolFilter = .12 * math.pow(delta,2) + 200000
+                    dolVolFilter = .12 * math.pow(delta,2) + 200000
              
                     
                 if(dolVol > dolVolFilter * .2  and (prevClose > 2 or dateToSearch != "0")): 
