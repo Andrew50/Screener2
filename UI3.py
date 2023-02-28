@@ -15,7 +15,7 @@ from Datav4 import Data as data
 import shutil
 import concurrent.futures
 from pathos.multiprocessing import ProcessingPool as Pool
-from IntradayV2 import Intraday as intraday
+
 
 
 
@@ -308,10 +308,10 @@ class UI:
                 (sg.Text("|   ADR")),(sg.Text(adr, key = '-adr-')),
                 (sg.Text("|   Vol")),(sg.Text(vol, key = '-vol-')),
                 (sg.Text("|   QQQ")),(sg.Text(q, key = '-q-')),
-                (sg.Text("|   One")),(sg.Text(one, key = '-one-')),
-                (sg.Text("|   Two")),(sg.Text(two, key = '-two-')),
-                (sg.Text("|   Three")),(sg.Text(three, key = '-three-')),
-                (sg.Text("|   Ten")),(sg.Text(ten, key = '-ten-')),
+                (sg.Text("|   1")),(sg.Text(one, key = '-one-')),
+                (sg.Text("|   2")),(sg.Text(two, key = '-two-')),
+                (sg.Text("|   3")),(sg.Text(three, key = '-three-')),
+                (sg.Text("|   10")),(sg.Text(ten, key = '-ten-')),
                 (sg.Text("|   Time")),(sg.Text(time, key = '-time-'))],
                  #[(sg.Text("Rating ")),sg.InputText(rating,key = 'rating')],
                 [sg.Multiline(annotation,size=(150, 5), key='annotation')],
@@ -380,7 +380,7 @@ class UI:
                     
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                    
-                        [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load')] 
+                        [sg.Button('Prev'), sg.Button('Next')] 
                 ]
 
 

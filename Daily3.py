@@ -115,17 +115,19 @@ class Daily:
                     
 
                     if adr > 3.5:
-                        if dateToSearch != "0":
-                            print(tick)
-                        if(dolVol > .2* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
-                            Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
-                            Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > 1.5* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
-                            Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                        if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                            Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
-                    
+                        try:
+                            if dateToSearch != "0":
+                                print(tick)
+                            if(dolVol > .2* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
+                                Daily.EP(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                            if(dolVol > dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
+                                Daily.MR(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                            if(dolVol > 1.5* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
+                                Daily.Pivot(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                            if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
+                                Daily.Flag(data_daily, currentday, pmPrice,screenbar, dateToSearch)
+                        except:
+                            print(f"{tick} failed")
 
     def runDaily(self, dateToSearch):
         tv = TvDatafeed()
@@ -139,7 +141,7 @@ class Daily:
             date2 = dateSplit2[0]
             today = datetime.datetime.today().strftime('%Y-%m-%d')
             if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15)) :
-                #screen.runDailyScan(None)
+                screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
@@ -184,32 +186,32 @@ class Daily:
         
         zfilter = 7
         
-        try: 
-            prevClose = data_daily.iloc[currentday-1][4]
-            gaps = []
-            lows = []
-            highs = []
-            todayGapValue = ((pmPrice/prevClose)-1)
-            for j in range(20): 
-                gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
-                lows.append(data_daily.iloc[currentday-j-1][3])
-                highs.append(data_daily.iloc[currentday-j-1][2])
+      #  try: 
+        prevClose = data_daily.iloc[currentday-1][4]
+        gaps = []
+        lows = []
+        highs = []
+        todayGapValue = ((pmPrice/prevClose)-1)
+        for j in range(20): 
+            gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
+            lows.append(data_daily.iloc[currentday-j-1][3])
+            highs.append(data_daily.iloc[currentday-j-1][2])
 
-            z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
+        z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
            
             
-            if(z > zfilter) and pmPrice > max(highs):
-                log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday) 
+        if(z > zfilter) and pmPrice > max(highs):
+            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday) 
             
-            elif (z < -zfilter) and pmPrice < min(lows):
-                log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday) 
+        elif (z < -zfilter) and pmPrice < min(lows):
+            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday) 
 
-        except IndexError:
-            print("index error")
-        except TimeoutError:
-            print("timeout error")
-        except FileNotFoundError:
-            print("file error") 
+      #  except IndexError:
+       #     print("index error")
+     #   except TimeoutError:
+         #   print("timeout error")
+      #  except FileNotFoundError:
+         #   print("file error") 
  
     def MR(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         
@@ -219,63 +221,63 @@ class Daily:
         gapzfilter0 = 5.5
         gapzfilter1 = 4
         changezfilter = 2.5
-        try: 
-            prevClose = data_daily.iloc[currentday-1][4]
-            zdata = []
-            zgaps = []
-            zchange = []
+       # try: 
+        prevClose = data_daily.iloc[currentday-1][4]
+        zdata = []
+        zgaps = []
+        zchange = []
             
         
-            if data_daily.iloc[currentday-1][4] < data_daily.iloc[currentday-1][1] and data_daily.iloc[currentday-2][4] < data_daily.iloc[currentday-2][1] and data_daily.iloc[currentday-3][4] < data_daily.iloc[currentday-3][1]:
+        if data_daily.iloc[currentday-1][4] < data_daily.iloc[currentday-1][1] and data_daily.iloc[currentday-2][4] < data_daily.iloc[currentday-2][1] and data_daily.iloc[currentday-3][4] < data_daily.iloc[currentday-3][1]:
 
               
-                for i in range(30):
-                    n = 29-i
-                    gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
-                    changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
-                    lastCloses = 0
+            for i in range(30):
+                n = 29-i
+                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+                changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
+                lastCloses = 0
                     
-                    for c in range(4): 
+                for c in range(4): 
                     
-                        lastCloses += data_daily.iloc[currentday-2-c-n][4]
-                    fourSMA = (lastCloses/4)
-                    datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
-                    if i == 29:
-                        gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                    zgaps.append(gapvalue)
-                    zchange.append(changevalue)
-                    if i > 14:
-                        zdata.append(datavalue)
+                    lastCloses += data_daily.iloc[currentday-2-c-n][4]
+                fourSMA = (lastCloses/4)
+                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                if i == 29:
+                    gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+                zgaps.append(gapvalue)
+                zchange.append(changevalue)
+                if i > 14:
+                    zdata.append(datavalue)
 
              
-                todayGapValue = abs((pmPrice/prevClose)-1)
-                todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
-                lastCloses = 0
-                for c in range(4): 
-                    lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+            todayGapValue = abs((pmPrice/prevClose)-1)
+            todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
+            lastCloses = 0
+            for c in range(4): 
+                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
                 
-                fourSMA = (lastCloses/4)
-                value = (fourSMA)/pmPrice - 1
+            fourSMA = (lastCloses/4)
+            value = (fourSMA)/pmPrice - 1
 
 
             
-                gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
-                changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
-                z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
+            gapz = (todayGapValue-statistics.mean(zgaps))/statistics.stdev(zgaps)
+            changez = (todayChangeValue - statistics.mean(zchange))/statistics.stdev(zchange) 
+            z = (abs(value) - statistics.mean(zdata))/statistics.stdev(zdata) 
                 
               
-                if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
+            if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                    log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday) 
+                log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday) 
                
             
-        except IndexError:
-           print(" did not exist at the date " )
-        except TimeoutError:
-            print("Timeout caught")
-        except FileNotFoundError:
-            print(" does not have a file")
+       # except IndexError:
+         #  print(" did not exist at the date " )
+      #  except TimeoutError:
+       #     print("Timeout caught")
+     #   except FileNotFoundError:
+        #    print(" does not have a file")
             
     def Pivot(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         
@@ -284,42 +286,42 @@ class Daily:
         lowergapzfilter = 1.8
         lowergapzfilter2 = 1.8
        
-        try: 
-            prevClose = data_daily.iloc[currentday-1][4]
-            zgaps = []
-            for i in range(15):
-                n = 14-i
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
-                zgaps.append(gapvalue)
+       # try: 
+        prevClose = data_daily.iloc[currentday-1][4]
+        zgaps = []
+        for i in range(15):
+            n = 14-i
+            gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+            zgaps.append(gapvalue)
             
-            todayGapValue = (pmPrice/prevClose)-1
-            gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
-            lastCloses = 0
-            for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+        todayGapValue = (pmPrice/prevClose)-1
+        gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
+        lastCloses = 0
+        for c in range(4): 
+            lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
                 
-            ma3 = (lastCloses/4)
-            close1 = data_daily.iloc[currentday-1][4]
-            close2 = data_daily.iloc[currentday-2][4]
-            open1 = data_daily.iloc[currentday-1][1]
-            open2 = data_daily.iloc[currentday-2][1]
-            low1 = data_daily.iloc[currentday-1][3]
-            high1 = data_daily.iloc[currentday-1][2]
+        ma3 = (lastCloses/4)
+        close1 = data_daily.iloc[currentday-1][4]
+        close2 = data_daily.iloc[currentday-2][4]
+        open1 = data_daily.iloc[currentday-1][1]
+        open2 = data_daily.iloc[currentday-2][1]
+        low1 = data_daily.iloc[currentday-1][3]
+        high1 = data_daily.iloc[currentday-1][2]
 
-            if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
+        if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
+            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
 
-            if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
+        if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-                log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
-        except IndexError:
-           print(f" did not exist at the date " )
-        except TimeoutError:
-            print("Timeout caught")
-        except FileNotFoundError:
-            print(" does not have a file")
+            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
+       # except IndexError:
+           #print(f" did not exist at the date " )
+       # except TimeoutError:
+           # print("Timeout caught")
+       # except FileNotFoundError:
+           # print(" does not have a file")
 
 
     def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
@@ -402,18 +404,18 @@ class Daily:
                 if z > zfilter and z2 > z2filter:
                     
                     log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday) 
-        except ValueError:
-            print("value error")
-        except IndexError:
-           print(f" did not exist at the date " )
-        except TimeoutError:
-            print("Timeout caught")
-        except FileNotFoundError:
-            print(" does not have a file")
+       # except ValueError:
+        #    print("value error")
+      #  except IndexError:
+     #      print(f" did not exist at the date " )
+    #    except TimeoutError:
+     #       print("Timeout caught")
+    #    except FileNotFoundError:
+    #        print(" does not have a file")
         except statistics.StatisticsError:
             print("stats error")
-        except UnboundLocalError:
-            print("unbound var")
+     #   except UnboundLocalError:
+     #       print("unbound var")
 if __name__ == '__main__':
     backtest = True
 

@@ -12,7 +12,6 @@ import datetime
 import matplotlib as mpl
 from Datav4 import Data
 from tvDatafeed import TvDatafeed
-from datetime import datetime
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
 discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
@@ -160,18 +159,25 @@ class log:
                         scanholder = pd.concat([scanholder,scan.iloc[[k]]])
                 scan = scanholder
                 
-                length = len(scan)
-                str_recent_date = scan.iloc[length][0]
-                recent_date = datetime.datetime.strptime(str_recent_date, '%Y-%m-%d').date()
-                today_date = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d').date()
-                if (today_date - recent_date).days <= cooldown:
-                    exclude = True
-                else:
+                
+                try:
+                    str_recent_date = scan.iloc[-1][0]
+                    recent_date = datetime.datetime.strptime(str_recent_date, '%Y-%m-%d').date()
+                    today_date = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d').date()
+                    delta = (today_date - recent_date).days
+                    #print(f"{delta} , {tick}")
+                    if delta <= cooldown:
+                        exclude = True
+                       # print(f"excluded {tick} ///////////////////////")
+                    
+                    else:
+                        exclude = False
+                except IndexError:
                     exclude = False
             except pd.errors.EmptyDataError:
                 exclude = False
-            except IndexError:
-                exclude = False
+            #except IndexError:
+               # exclude = False
 
             
 
@@ -229,20 +235,35 @@ class log:
                 adr = round(statistics.mean(adr) ,2)
            
                 i = 0
+
                 while True:
 
                     ma10 = []
                     for j in range(10):
                         ma10.append((data_daily.iloc[currentday-j+i][4]))
                     ma10 = statistics.mean(ma10)
-                    if (data_daily.iloc[currentday+i][4]) < ma10:
-                        break
+                    close = data_daily.iloc[currentday+i][4]
 
+                    if i == 0:
+                        if close > ma10:
+                            short = False
+                        else:
+                           short = True
+
+                    if short:
+                        if close > ma10:
+                            break
+                    else:
+                        if ma10 > close:
+                            break
+                   
+                    
                     if i > 150:
                         break
 
                     i += 1
-                ten = round( (data_daily.iloc[currentday+i][4] / data_daily.iloc[currentday][4] - 1)*100,2)
+
+                ten = round( (data_daily.iloc[currentday+i][4] / data_daily.iloc[currentday][1] - 1)*100,2)
                 time = i 
 
           
