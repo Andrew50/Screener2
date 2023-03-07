@@ -110,7 +110,7 @@ class log:
     def daily(screenbar, z, setup_type, dateToSearch,pmPrice, data_daily,currentday):
     
 
-        cooldown = 7
+        cooldown = 20
 
         
         if dateToSearch == "0":

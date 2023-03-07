@@ -3,19 +3,51 @@ import datetime
 from tvDatafeed import TvDatafeed
 import os 
 import datetime
-import concurrent.futures
-from Screen import Screen as screen
-from functools import partial
-from itertools import repeat
 from pathos.multiprocessing import ProcessingPool as Pool
-from multiprocessing import Lock
 import warnings
 import math
 import yfinance as yf
+
 warnings.filterwarnings("ignore")
 
-
 class Data:
+    def findWeeklyIndex(df,index):
+        k = 0
+        while k < 10:
+            try:
+                value = df.loc[index - k]['index2']
+                return value
+            except:
+                k += 1
+        return 9999
+    def toWeekly(data_daily):
+      
+        #save the daily datas index into a column for later
+        data_daily['index1'] = data_daily.index
+        #convert the string thing or whatever to a datetime object
+        data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
+        #set the index as that datetime object
+        df = data_daily.set_index('Datetime')
+        logic = {'Open'  : 'first',
+                 'High'  : 'max',
+                 'Low'   : 'min',
+                 'Close' : 'last',
+                 'Volume': 'sum',
+                 'index1': 'first'}
+
+        #convert to weekly
+        dfw = df.resample('W').apply(logic)
+        dfw.index = dfw.index - pd.tseries.frequencies.to_offset("6D")
+        dfw = dfw.reset_index()    
+        dfw['index2'] = dfw.index
+        #sets the index to the first days index in that week so that findIndex can be done easily
+        dfw = dfw.set_index('index1')
+      
+
+        return (dfw)
+
+    
+
     def findIndex(df, dateTo, fromdata):
         try:
             if dateTo == "0":
@@ -48,16 +80,22 @@ class Data:
                     if(dateTimeofDayAhead == dateTo):
                         return int(len(df) - 35 + i)
             else:
-                for i in range(35):
-                    dateTimeofDayBehind = str(df.index[newRef - i])
-                    if(dateTimeofDayBehind == dateTo):
-                        return (newRef - i)
-                    dateTimeofDayAhead = str(df.index[newRef + i])
-                    if(dateTimeofDayAhead == dateTo):
-                        return (newRef + i)
+                
+                    for i in range(35):
+                        try:
+                            dateTimeofDayBehind = str(df.index[newRef - i])
+                            if(dateTimeofDayBehind == dateTo):
+                                return (newRef - i)
+                            dateTimeofDayAhead = str(df.index[newRef + i])
+                            if(dateTimeofDayAhead == dateTo):
+                                return (newRef + i)
+                        except IndexError:
+                            pass
+                
             #print(str(f"{dateTimeofDayAhead} , {dateTo}"))
+            
             return 99999
-        except IndexError:
+        except:
             print("findindex index error")
             return 99999
            
@@ -114,7 +152,8 @@ class Data:
                     numRows = len(need_append_data)
                     print(f"appended {numRows} to {ticker}")
                     if numRows == 0:
-                        print(f"{ticker} , {scrapped_data_index}, not workingappended 0")
+                        print(f"deleted {ticker}")
+                        os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                 
         except KeyError:
             print("had issue with KeyError")

@@ -21,11 +21,11 @@ class Data:
                 j = len(df) - i - 1
                 if(str(df.index[j]) == dateTo):
                     return j
-            return 99999
+            return -1
         
         except IndexError:
             print("findindex index error")
-            return 99999
+            return -1
            
     def isMarketClosed():
         dayOfWeek = datetime.datetime.now().weekday()
@@ -55,7 +55,7 @@ class Data:
                 ticker_df = tv.get_hist(tick, exchange, interval=Interval.in_1_minute, n_bars=10000)
                 if(os.path.exists("C:/Screener/intraday_data/" + tick + "_intradaydata.csv") == False):
                     ticker_df.to_csv("C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
-                    print(f"{tick} created")
+                    print(f"created {tick}")
                 else:
                     cs = pd.read_csv(r"C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
                     lastDay = cs.iloc[len(cs)-1]['datetime']
@@ -63,21 +63,18 @@ class Data:
                     cs = cs.set_index('datetime')
                     scrapped_data_index = Data.findIndex(ticker_df, lastDay) 
                     
-                    need_append_data = ticker_df[scrapped_data_index + 1:]
+                    if scrapped_data_index != -1:
+                        need_append_data = ticker_df[scrapped_data_index + 1:]
                     
-                    cs = pd.concat([cs, need_append_data])
-                    cs.to_csv("C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
-                    numRows = len(need_append_data)
-                    print(f"{tick} appended with {numRows}")
+                        cs = pd.concat([cs, need_append_data])
+                        cs.to_csv("C:/Screener/intraday_data/" + tick + "_intradaydata.csv")
+                        numRows = len(need_append_data)
+                        print(f"appended {numRows} to {tick}")
+                    #else 
                 
-        except KeyError:
-            print("had issue with KeyError")
-        except TypeError:
-            pass
-        except OSError:
-            print("os error")
-        except IndexError:
-            print("index error")
+        except:
+            print(f"failed {tick}")
+            #os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
 
 
 

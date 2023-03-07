@@ -12,6 +12,7 @@ import math
 import multiprocessing
 from time import sleep
 from Datav4 import Data as data
+import time as ttime
 import shutil
 import concurrent.futures
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -36,9 +37,10 @@ class UI:
         else:
             self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
             self.historical = True
-            self.historical = True
 
+            
 
+        self.sort = False
         self.preloadamount = 6
         self.preloadbuffer = self.preloadamount - 1
         self.preload(self,True)
@@ -74,10 +76,28 @@ class UI:
                 previ = 0
                 #print(previ)
                 
-                self.lookup(self,ticker,date,setup,keyword)
+                sortinput = values["input-trait"]
+                self.lookup(self,ticker,date,setup,keyword,sortinput)
                 self.update(self,False,values,previ)
            
-  
+
+            if event == 'Sort' and False:
+
+                if self.sort:
+                    self.sort = False
+                else:
+                    self.sort = True
+                ticker = values["input-ticker"]
+                date = values["input-date"]
+                setup = values["input-setup"]
+                keyword = values["input-keyword"]
+                
+                previ = 0
+                #print(previ)
+                sortinput = values["input-trait"]
+                self.lookup(self,ticker,date,setup,keyword,sortinput)
+                self.update(self,False,values,previ)
+                
             if event == 'Toggle':
                 previ = self.i
                 if self.annotation:
@@ -88,7 +108,8 @@ class UI:
                         date = values["input-date"]
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
-                        self.lookup(self,ticker,date,setup,keyword)
+                        sortinput = values["input-trait"]
+                        self.lookup(self,ticker,date,setup,keyword,sortinput)
                         self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
@@ -102,7 +123,8 @@ class UI:
                         date = values["input-date"]
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
-                        self.lookup(self,ticker,date,setup,keyword)
+                        sortinput = values["input-trait"]
+                        self.lookup(self,ticker,date,setup,keyword,sortinput)
                         self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
@@ -115,7 +137,7 @@ class UI:
         self.window.close()
     
 
-    def lookup(self,ticker,date,setup,keyword):
+    def lookup(self,ticker,date,setup,keyword,sortinput):
         
         print(f"searching for {keyword}")
         scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
@@ -153,7 +175,40 @@ class UI:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         
-  
+        if sortinput != "":
+          
+            idex = 0
+            if sortinput == 'z':
+                idex = 3
+            if sortinput == 'gap':
+                idex = 4
+            if sortinput == 'adr':
+                idex = 5
+            if sortinput == 'vol':
+                idex = 6
+            #if sortinput == 'q':
+               # idex = 7
+            if sortinput == '1':
+                idex = 8
+            if sortinput == '2':
+                idex = 9
+            if sortinput == '3':
+                idex = 10
+            if sortinput == '10':
+                idex = 11
+            if sortinput == 'time':
+                idex = 13
+
+
+            if idex != 0:
+
+                scan = scan.sort_values(by=[idex], ascending=False)
+
+            else:
+                sg.Popup('Not A Trait')
+
+        else:
+            scan = scan.sample(frac=1)
 
         if len(scan) < 1:
             sg.Popup('No Setups Found')
@@ -184,33 +239,61 @@ class UI:
             zs = float(z)
 
             chartsize = 80
-            chartsize2 = 500
+            chartsize2 = 80
             chartoffset = 20
+            chartoffset2 = 20
 
             if(os.path.exists("C:/Screener/data_csvs/" + ticker + "_data.csv")):
                 data_daily = pd.read_csv(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+                dfw = data.toWeekly(data_daily)
+
+
+
+
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
               
-                rightedge = data.findIndex(data_daily,date,False) + chartoffset
+
+                index = data.findIndex(data_daily,date,False)
+                rightedge = index + chartoffset
+
+
+                
+                
+
+                rightedge2 = data.findWeeklyIndex(dfw,index) + chartoffset2
+
+                
+              
+
                 leftedge = rightedge - chartsize
-                leftedge2 = rightedge - chartsize2
+                leftedge2 = rightedge2 - chartsize2
                 if leftedge2 < 0:
                     leftedge2 = 0
                 
                 string1 = "databasesmall" + iss + ".png"
                 string2 = "databaselarge" + iss + ".png"
-                string3 = "databaseintraday" + iss + ".png"
+                #string3 = "databaseintraday" + iss + ".png"
                 ourpath = pathlib.Path("C:/Screener/tmp/charts") / string1
                 ourpath2 = pathlib.Path("C:/Screener/tmp/charts") / string2
-                ourpath3 = pathlib.Path("C:/Screener/tmp/charts") / string3
+                #ourpath3 = pathlib.Path("C:/Screener/tmp/charts") / string3
             
             
+
+              
+
                 data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
                 data_daily = data_daily.set_index('Datetime')
                 data_daily = data_daily.drop(['Date'], axis=1)
+
+               
+                dfw = dfw.set_index('Datetime')
+
+
                 df = data_daily[(leftedge):(rightedge)]
-                df2 = data_daily[(leftedge2):(rightedge)]
+                #df2 = data_daily[(leftedge2):(rightedge)]
+
+                df2 = dfw[(leftedge2):(rightedge2)]
 
                
                 if date == "0":
@@ -225,10 +308,16 @@ class UI:
                     #dfintraday = intraday.findIndex(dfintraday_full,date)
 
 
-
-                    mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    # mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
+                    try:
+                    #print(df2)
+                        mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                        mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                        # mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
+                    except:
+                       # mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)
+                       # mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True)
+                       
+                        print("chart failed")
                 
             
 
@@ -261,20 +350,31 @@ class UI:
     def update(self, init,values,previ):
        
         
+        lasttime = ttime.time()
         while True:
-            try:
-                image = Image.open(r"C:\Screener\tmp\charts\databasesmall" + str(self.i) + ".png")
-                #image.thumbnail((930, 570))
-                bio = io.BytesIO()
-                image.save(bio, format="PNG")
+            laptime = round((ttime.time() - lasttime), 2)
+            if laptime < 2:
+                try:
+                    image = Image.open(r"C:\Screener\tmp\charts\databasesmall" + str(self.i) + ".png")
+                    #image.thumbnail((930, 570))
+                    bio = io.BytesIO()
+                    image.save(bio, format="PNG")
            
-                image2 = Image.open(r"C:\Screener\tmp\charts\databaselarge" + str(self.i) + ".png")
-               # image2.thumbnail((930, 570))
-                bio2 = io.BytesIO()
-                image2.save(bio2, format="PNG")
+                    image2 = Image.open(r"C:\Screener\tmp\charts\databaselarge" + str(self.i) + ".png")
+                   # image2.thumbnail((930, 570))
+                    bio2 = io.BytesIO()
+                    image2.save(bio2, format="PNG")
+                    break
+
+                except OSError:
+                    pass
+                
+                except:
+                    break
+            else:
+                print("image timed out")
                 break
-            except OSError:
-                pass
+            
            
      
 
@@ -304,15 +404,15 @@ class UI:
                 layout = [  
                 [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
 
-                [ (sg.Text("Gap")),(sg.Text(gap, key = '-gap-')),
-                (sg.Text("|   ADR")),(sg.Text(adr, key = '-adr-')),
-                (sg.Text("|   Vol")),(sg.Text(vol, key = '-vol-')),
-                (sg.Text("|   QQQ")),(sg.Text(q, key = '-q-')),
+                [ (sg.Text("gap")),(sg.Text(gap, key = '-gap-')),
+                (sg.Text("|   adr")),(sg.Text(adr, key = '-adr-')),
+                (sg.Text("|   vol")),(sg.Text(vol, key = '-vol-')),
+                (sg.Text("|   q")),(sg.Text(q, key = '-q-')),
                 (sg.Text("|   1")),(sg.Text(one, key = '-one-')),
                 (sg.Text("|   2")),(sg.Text(two, key = '-two-')),
                 (sg.Text("|   3")),(sg.Text(three, key = '-three-')),
                 (sg.Text("|   10")),(sg.Text(ten, key = '-ten-')),
-                (sg.Text("|   Time")),(sg.Text(time, key = '-time-'))],
+                (sg.Text("|   time")),(sg.Text(time, key = '-time-'))],
                  #[(sg.Text("Rating ")),sg.InputText(rating,key = 'rating')],
                 [sg.Multiline(annotation,size=(150, 5), key='annotation')],
                 
@@ -321,6 +421,7 @@ class UI:
                 [(sg.Text("Date      ")),sg.InputText(key = 'input-date')],
                 [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
                 [(sg.Text("Keyword")),sg.InputText(key = 'input-keyword')],
+                [(sg.Text("Trait      ")),sg.InputText(key = 'input-trait')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                 #[(sg.Text("Gap")),(sg.Text(gap, key = '-gap-'))] , 
                 #[(sg.Text("ADR")),(sg.Text(adr, key = '-adr-'))] , 
@@ -331,43 +432,47 @@ class UI:
                 #[(sg.Text("Three")),(sg.Text(three, key = '-three-'))] , 
                 #[(sg.Text("Ten")),(sg.Text(ten, key = '-ten-'))] ,
                 #[(sg.Text("Time")),(sg.Text(time, key = '-time-'))] , 
-                [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load'), sg.Button('Toggle')] 
+                [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load'), sg.Button('Toggle')]#, sg.Button('Sort')] 
                 ]
                 
                 self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
                
-                try:
+                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
                 
-                    df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                
-                    index = self.setups_data.index[previ]
+                index = self.setups_data.index[previ]
                   
-                    print('saved annotation')
+                print('saved annotation')
               
-                    df.at[index, 12] = values["annotation"]
-                    self.setups_data.at[index, 12] = values["annotation"]
+                df.at[index, 12] = values["annotation"]
+                self.setups_data.at[index, 12] = values["annotation"]
                    
                     
-                    df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
+                df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
                 
                 
+                    
+                self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
+                self.window["-gap-"].update(gap)
+                self.window["-adr-"].update(adr)
+                self.window["-vol-"].update(vol)
+                self.window["-q-"].update(q)
+                self.window["-one-"].update(one)
+                self.window["-two-"].update(two)
+                self.window["-three-"].update(three)
+                self.window["-ten-"].update(ten)
+                self.window["-time-"].update(time)
+                self.window["annotation"].update(annotation)
+                #self.window["rating"].update(rating)
+                try:
+
                     self.window["-IMAGE-"].update(data=bio.getvalue())
                     self.window["-IMAGE2-"].update(data=bio2.getvalue())
-                    self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
-                    self.window["-gap-"].update(gap)
-                    self.window["-adr-"].update(adr)
-                    self.window["-vol-"].update(vol)
-                    self.window["-q-"].update(q)
-                    self.window["-one-"].update(one)
-                    self.window["-two-"].update(two)
-                    self.window["-three-"].update(three)
-                    self.window["-ten-"].update(ten)
-                    #self.window["-time-"].update(time)
-                    self.window["annotation"].update(annotation)
-                    #self.window["rating"].update(rating)
                 except:
-                    print("shutting down")
+                    print("image load failed")
+                    
+                
+                    
 
         else:
             if init:
