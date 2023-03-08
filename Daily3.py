@@ -209,7 +209,7 @@ class Daily:
     def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
       
         
-        zfilter = 7
+        zfilter = 5.5
         
       #  try: 
         prevClose = data_daily.iloc[currentday-1][4]
@@ -308,8 +308,8 @@ class Daily:
         
 
         uppergapzfilter = 8
-        lowergapzfilter = 1.8
-        lowergapzfilter2 = 1.8
+        lowergapzfilter = 1.5
+        lowergapzfilter2 = 1.5
        
        # try: 
         prevClose = data_daily.iloc[currentday-1][4]
@@ -354,7 +354,7 @@ class Daily:
         
         
         if dateToSearch == "0":
-            zfilter = 5 
+            zfilter = 4
         else:
             zfilter = 8
 
