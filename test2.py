@@ -1,15 +1,22 @@
 
-from Datav4 import Data as data
-
+from Data5 import Data as data
+from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
+import os
+import datetime
+from IntradayDatabase2 import Data
+
+import datetime
 
 
 
-df = pd.read_csv(f"C:/Screener/data_csvs/AAPL_data.csv")
+df = data.get("COIN",'15min')
 
 
+date = datetime.date(2023, 2, 9)
 
-dfw= data.toWeekly(df)
 
+index = data.findex(df,date)
 
-print(dfw)
+print(index)
+

@@ -16,3 +16,5 @@ Testt.py
 /TT_data.csv
 /TEST_data.csv
 intraday_data/
+minute_data/
+daily_data/
