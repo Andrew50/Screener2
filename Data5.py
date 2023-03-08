@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 class Data:
     def findex(df,datetime):
         for i in range(len(df)):
-            if datetime <= df.iloc[i]['datetime']:
+            if datetime < df.iloc[i]['datetime']:
                 return i - 1 
             print('god')
         
