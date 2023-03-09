@@ -77,6 +77,7 @@ class Data:
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
                 ticker_df = ticker_df.set_index('datetime')
                 ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
+                ticker_df.dropna(inplace = True)
                 if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
                     if not Data.isMarketClosed():
                         ticker_df.drop(ticker_df.tail(1).index,inplace=True)
@@ -112,12 +113,14 @@ class Data:
         test = yf.download(tickers =  tickersString,  
         period = "5d",  group_by='ticker',      
         interval = "1m",      
+
         ignore_tz = True,
             prepost = False) 
         for ticker in tickers:
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
+                ticker_df.dropna(inplace = True)
                 if ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
                     ticker_df.drop(ticker_df.tail(1).index,inplace=True)
                 
