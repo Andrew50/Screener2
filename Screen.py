@@ -71,6 +71,7 @@ class Screen:
         os.rename(downloaded_file, new_name)
         os.replace(r"C:\Downloads\screener_data_intraday.csv", r"C:\Screener\tmp\screener_data_intraday.csv")
         time.sleep(0.1)
+
         
         return browser
 
@@ -174,6 +175,19 @@ class Screen:
             pass
 
 
+
+    def updateList():
+        df = pd.read_csv("C:/Screener/tmp/screener_data.csv")
+        df = df.set_index('Ticker')
+        df2 = pd.read_csv("C:/Screener/tmp/full_ticker_list.csv")
+        df2 = df2.set_index('Ticker')
+        df3 = df.merge(df2, left_index = True , right_index = True, how = 'outer')
+        #df3 = df3.reset_index()  
+        df3.to_csv("C:/Screener/tmp/trest.csv")
+
+        
+
 if __name__ == '__main__':
     Screen.runDailyScan(None)
+    Screen.updateList()
 
