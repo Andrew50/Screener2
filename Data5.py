@@ -14,28 +14,28 @@ warnings.filterwarnings("ignore")
 class Data:
 
     def findex(df,dt,premarket = False):
-        i = int(len(df)/2)
-        k = i
-        while True:
-            k = int(k/2)
-            date = df.iloc[i]['datetime'].date()
-            if date > dt:
-                i -= k
-            elif date < dt:
-                i += k
-            elif date == dt:
-                break
-            if k == 0:
-                i += 1
-                break
-        while True:
-            if df.iloc[i]['datetime'].date() > dt:
-                i -= 1
-            else:
-                if df.iloc[i]['datetime'].time() > df.iloc[i-1]['datetime'].time() and (premarket or df.iloc[i-1]['datetime'].time() >= datetime.time(9,30,0)):
-                    i -= 1
-                else:
+        try:
+            #print(f"length is {len(df)}")
+            i = int(len(df)/2)
+            k = i
+            jj = 0 
+            while True:
+                #print(f"iteration: {jj}, k: {k}, i: {i}")
+                k = int(k/2)
+                date = df.iloc[i]['datetime'].date()
+                if date > dt:
+                    i -= k
+                elif date < dt:
+                    i += k
+                elif date == dt:
                     break
+                if k == 0:
+                    i += 1
+                    break
+                jj += 1
+            
+        except IndexError:
+            print("FindIndex IndexError ")
         return i
 
     def get(ticker,interval = 'd'):
@@ -71,7 +71,6 @@ class Data:
         
         
         for ticker in tickers:
-            break
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
@@ -122,8 +121,10 @@ class Data:
                             print(f"appended {numRows} to {ticker} daily")
                     else:
                         print(f"failed {ticker} daily")
-            except TimeoutError:
-                print(f"error {ticker} daily")
+            except FileNotFoundError:
+                print(f"error {ticker} daily filenotFounderror")
+            except KeyError:
+                print(f"error {ticker} daily KeyError")
         test = yf.download(tickers =  tickersString,  
         period = "5d",  group_by='ticker',      
         interval = "1m",      
@@ -131,6 +132,7 @@ class Data:
         ignore_tz = True,
             prepost = False) 
         for ticker in tickers:
+            break
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
@@ -199,7 +201,7 @@ class Data:
                     lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
                     if lastDStock < lastDay:
                         print(f"deleted {ticker}")
-                        os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
+                        os.remove(r"C:/Screener/data_csvs/" + ticker + ".csv")
                         #s = f"{ticker}:{exchange}"
                         return ticker
                     else:
@@ -247,12 +249,11 @@ class Data:
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
        
-        #screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                                      'Exchange':['NASDAQ' , 'NASDAQ']})
+        #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
+                                    #  'Exchange':['NASDAQ' , 'NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []

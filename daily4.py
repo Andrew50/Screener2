@@ -30,8 +30,8 @@ class Daily:
             interval = str(screenbar['interval'])
             ticker = str(screenbar['Ticker'])
             dateToSearch = screenbar['dateToSearch']
-
-            print(ticker)
+            print(dateToSearch)
+            #print(ticker)
 
             dolVol, adr = Daily.requirements(ticker,dateToSearch)
 
@@ -66,7 +66,7 @@ class Daily:
                 if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
                     Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch)
 
-        except:
+        except TimeoutError:
             print(f"{ticker} failed")
 
             
@@ -132,11 +132,12 @@ class Daily:
             ui.loop(ui,True)
 
     def requirements(ticker,date):
-
+        print(f"{ticker} requirements")
 
         df = data.get(ticker,'d')
+        print(df)
         currentday = data.findex(df,date)
-
+        print(f"{ticker} currentDay = {currentday}")
         dolVol = []
         for i in range(5):
             dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
@@ -523,4 +524,4 @@ if __name__ == '__main__':
                     print("finished")
                     break
         else:
-            Daily.runDaily (datetime.datetime(2022,1,4))
+            Daily.runDaily(datetime.datetime(2022,1,4))
