@@ -135,13 +135,14 @@ class Data:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                ticker_df.dropna(inplace = True)
+                #ticker_df.dropna(inplace = True)
                 ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
                 
                 #if ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
                     #ticker_df.drop(ticker_df.tail(1).index,inplace=True)
-                print(ticker_df)
+                
                 if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
+                    ticker_df.dropna(inplace = True)
                     ticker_df.drop('datetime', axis = 1, inplace = True)
                     ticker_df.index.rename('datetime', inplace = True)
                     ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
@@ -157,7 +158,12 @@ class Data:
                     print(lastDay)
                     
                     if scrapped_data_index != None:
-                        ticker_df = ticker_df[scrapped_data_index + 1:]
+                        print(ticker_df.iloc[scrapped_data_index])
+                        ticker_df = ticker_df[scrapped_data_index + 388:]
+
+                        
+                        print(ticker_df)
+                        ticker_df.dropna(inplace = True)
 
                         ticker_df.drop('datetime', axis = 1, inplace = True)
                         
@@ -251,8 +257,8 @@ class Data:
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                                      'Exchange':['NASDAQ' , 'NASDAQ']})
+        screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD', 'IMAB'],
+                                      'Exchange':['NASDAQ' , 'NASDAQ','NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []

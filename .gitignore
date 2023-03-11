@@ -18,3 +18,5 @@ Testt.py
 intraday_data/
 minute_data/
 daily_data/
+daily_data_actual/
+minute_data_actual/
