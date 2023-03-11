@@ -16,27 +16,30 @@ class Data:
     def findex(df,dt,premarket = False):
         i = int(len(df)/2)
         k = i
-        while True:
-            k = int(k/2)
-            date = df.iloc[i]['datetime'].date()
-            if date > dt:
-                i -= k
-            elif date < dt:
-                i += k
-            elif date == dt:
-                break
-            if k == 0:
-                i += 1
-                break
-        while True:
-            if df.iloc[i]['datetime'].date() > dt:
-                i -= 1
-            else:
-                if df.iloc[i]['datetime'].time() > df.iloc[i-1]['datetime'].time() and (premarket or df.iloc[i-1]['datetime'].time() >= datetime.time(9,30,0)):
+        try:
+            while True:
+                k = int(k/2)
+                date = df.iloc[i]['datetime'].date()
+                if date > dt:
+                    i -= k
+                elif date < dt:
+                    i += k
+                elif date == dt:
+                    break
+                if k == 0:
+                    i += 1
+                    break
+            while True:
+                if df.iloc[i]['datetime'].date() > dt:
                     i -= 1
                 else:
-                    break
-        return i
+                    if df.iloc[i]['datetime'].time() > df.iloc[i-1]['datetime'].time() and (premarket or df.iloc[i-1]['datetime'].time() >= datetime.time(9,30,0)):
+                        i -= 1
+                    else:
+                        break
+            return i
+        except:
+            return None
 
     def get(ticker,interval = 'd'):
         if interval == 'd' or interval == 'w' or interval == 'm':
@@ -125,7 +128,7 @@ class Data:
             except TimeoutError:
                 print(f"error {ticker} daily")
         test = yf.download(tickers =  tickersString,  
-        period = "5d",  group_by='ticker',      
+        period = "d",  group_by='ticker',      
         interval = "1m",      
 
         ignore_tz = True,
@@ -135,14 +138,26 @@ class Data:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                #ticker_df.dropna(inplace = True)
                 ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
+
+
+                #ticker_df.dropna(inplace = True)
+
+
                 
+                
+
+
+
+
                 #if ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
                     #ticker_df.drop(ticker_df.tail(1).index,inplace=True)
                 
                 if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
                     ticker_df.dropna(inplace = True)
+
+
+
                     ticker_df.drop('datetime', axis = 1, inplace = True)
                     ticker_df.index.rename('datetime', inplace = True)
                     ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
@@ -150,16 +165,33 @@ class Data:
                 else:
                     cs = Data.get(ticker,'1min')
                     
-                   #print(cs)
+                
                     
+                
+
                     lastDay = cs.iloc[len(cs)-1]['datetime'].date()
-                    cs = cs.set_index('datetime')
-                    scrapped_data_index = Data.findex(ticker_df, lastDay) 
-                    print(lastDay)
+
+                    apl = Data.get('AAPL')
+
+                    index = Data.findex(apl,lastDay) + 1
+
+                    startday = apl.iloc[index]['datetime']
+
                     
+                    cs = cs.set_index('datetime')
+
+
+                    scrapped_data_index = Data.findex(ticker_df, startday) 
+
+                   
+
                     if scrapped_data_index != None:
+
+                        
+                    
+                    
                         print(ticker_df.iloc[scrapped_data_index])
-                        ticker_df = ticker_df[scrapped_data_index + 388:]
+                        ticker_df = ticker_df[scrapped_data_index + i:]
 
                         
                         print(ticker_df)
