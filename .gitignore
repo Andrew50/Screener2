@@ -18,3 +18,4 @@ Testt.py
 intraday_data/
 minute_data/
 daily_data/
+/__pycache__/
