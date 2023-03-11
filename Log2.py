@@ -1,17 +1,13 @@
 ﻿
-from argparse import ONE_OR_MORE
-from multiprocessing.pool import CLOSE
-from os import scandir
-import typing_extensions
+
 from discordwebhook import Discord
 import pathlib
 import mplfinance as mpf
 import statistics
 import pandas as pd
 import datetime
-import matplotlib as mpl
-from Datav4 import Data
-from tvDatafeed import TvDatafeed
+from Data5 import Data
+
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
 discord = Discord(url="https://discord.com/api/webhooks/1071506429229416519/41ps0qlsiiFRDLxnZVCF5KuDtb_SWBHCwB5scK-YUf96mrBpzZRydsT2C4GiGPDAEmKW")
@@ -194,8 +190,8 @@ class log:
                     volma.append(data_daily.iloc[currentday-1-i][5])
                 vol = round((data_daily.iloc[currentday][5]/statistics.mean(volma) ),2)
 
-                q_data = pd.read_csv("C:/Screener/data_csvs/QQQ_data.csv")
-                qcurrentday = Data.findIndex(q_data, dateToSearch,False)
+                q_data = Data.get('QQQ')#pd.read_csv("C:/Screener/data_csvs/QQQ_data.csv")
+                qcurrentday = Data.findex(q_data, dateToSearch)
                 q10 = []
                 q20 = []
 

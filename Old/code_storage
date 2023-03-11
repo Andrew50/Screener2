@@ -1,4 +1,80 @@
 ﻿
+
+OLDFINDEX -------------------------------------------
+def findexold(df,dt):
+        
+        try:
+
+            #if not type(dt) == datetime.date:
+         #      dt = dt.date()
+
+            x = (df.iloc[-1]['datetime'].date() - df.iloc[0]['datetime'].date()).days
+
+            y = len(df)
+            halfdate = df.iloc[int(y/2)]['datetime'].date()
+            slope = y/x
+
+
+            delta = (dt - halfdate).days + x/2
+            
+
+            print(delta)
+
+            correction = 1.02
+            estimate = int(correction*(delta*slope))
+
+            i = estimate
+            if i > y - 1:
+                i = y - 1
+
+           
+            print(df.iloc[i]['datetime'].date())
+            print( ((df.iloc[i]['datetime'].date() - dt).days)/x)
+
+            k = 0
+
+            
+
+            while df.iloc[i]['datetime'].date() < dt:
+                i += 1
+                k += 1
+
+
+
+            while True:
+
+                if df.iloc[i]['datetime'].date() > dt:
+                    i -= 1
+                   
+                else:
+                    if df.iloc[i]['datetime'].time() > df.iloc[i-1]['datetime'].time():
+                        i -= 1
+                        
+                    else:
+                        break
+
+            
+         
+
+            return i
+
+        except TimeoutError:
+            pass
+
+       
+   
+    #print(df)
+        #for i in range(len(df)):
+            #print(f"{datetime} , {df.index[i]}")
+            #if datetime < df.index[i]:
+               # return i - 1 
+
+
+
+
+
+
+
 MOVER--------------------------------------------------------------------------------------------
 
 

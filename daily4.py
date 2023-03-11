@@ -1,8 +1,6 @@
 
 
-from fileinput import close
-from ftplib import parse150
-import os 
+import os
 import pandas as pd
 import statistics
 import time
@@ -14,7 +12,6 @@ import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
 from tvDatafeed import TvDatafeed,  Interval
 warnings.filterwarnings("ignore")
-from collections import deque
 from Data5 import Data as data
 from Screen import Screen as screen
 from UI3 import UI as ui
@@ -26,129 +23,72 @@ class Daily:
 
     
 
-
-   
-
-
     def processTickers(screenbar):
 
+        try:
+            
+            interval = str(screenbar['interval'])
+            ticker = str(screenbar['Ticker'])
+            dateToSearch = screenbar['dateToSearch']
 
-        sMR = True
-        sEP = True
-        sPivot = True
-        sFlag = True
-        wFlag = True
+            print(ticker)
 
-       
-        tick = str(screenbar['Ticker'])
-        dateToSearch = screenbar['dateToSearch']
-        interval = screenbar
+            dolVol, adr = Daily.requirements(ticker,dateToSearch)
+
+            if dolVol > 10000000 and adr > 3.5:
+
+
+                df = data.get(ticker,interval)
+                currentday = data.findex(df,dateToSearch)
         
-        df = data.get(ticker,interval)
-            
-        currentday = data.findex(df,dateToSearch)
-        
-        if (dateToSearch == "0"):
-            prevClose = screenbar['Price']
-                            
-            pmChange = screenbar['Pre-market Change']
-            
-                        
-            pmPrice = prevClose + pmChange
-
-                        
-
-                     
-                        
-        else:
-            pmPrice = data_daily.iloc[currentday][1]
-            prevClose = data_daily.iloc[currentday-1][4] 
-                        
-            pmChange = pmPrice/prevClose - 1
-
-                       
-                         
-        dolVol = []
-        for i in range(5):
-            dolVol.append(df.iloc[indexOfDay-1-i][4]*df.iloc[indexOfDay-1-i][5])
-        dolVol = statistics.mean(dolVol)
-
-                        
-                    
-        if dateToSearch == "0":
-            dolVolFilter = 70000000
-
-        else:
-            dolVolFilter = 15000000
-            currentdate = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d')
-            startdate = datetime.datetime(1998, 5, 10)
-            delta = (currentdate - startdate).days
-
-            #dolVolFilter = .12 * math.pow(delta,2) + 200000
-                    
-             
-                    
-        if(dolVol > dolVolFilter * .2  and (prevClose > 2 or dateToSearch != "0")): 
-                    
-            adr = 0
-            try:
-                            
-                adrlist = []
-                for j in range(20): 
-                    high = data_daily.iloc[currentday-j-1][2]
-                    low = data_daily.iloc[currentday-j-1][3]
-                    val = (high/low - 1) * 100
-                    adrlist.append(val)
-                        
-                adr = statistics.mean(adrlist)  
-            except IndexError:
-                print("adr error")
-                    
-
-            if adr > 3.5:
-
-                try:
-                    if dateToSearch != "0":
-                                
-                        print(tick)
-                    if(dolVol > .2* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sEP):
-                        Daily.EP(df, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > .8 * dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 5 and sMR):
-                        Daily.MR(df, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > 1* dolVolFilter   and pmChange != 0 and math.isnan(pmChange) != True and adr > 3.5 and sPivot):
-                        Daily.Pivot(df, currentday, pmPrice,screenbar, dateToSearch)
-                    if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                        Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch)
-                                
-
-                    if(dolVol > 1 * dolVolFilter and adr > 5 and wFlag):
-                        Daily.weeklyFlag(df, currentday, pmPrice,screenbar, dateToSearch)
-
-                        
-
-
-                except:
-                    print(f"{tick} failed")
-
-                        
-
-    def runDaily(self, dateToSearch):
-        tv = TvDatafeed()
-        if dateToSearch == "0":
-            
-            
-            
-            data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1, interval=Interval.in_1_minute, extended_session = True)
-            dateTimeOfDay2 = data_apple2.index[0]
-            dateSplit2 = str(dateTimeOfDay2).split(" ")
-            date2 = dateSplit2[0]
-            today = datetime.datetime.today().strftime('%Y-%m-%d')
-            if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15)) :
-                screen.runDailyScan(None)
-                screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
                 
 
-               
+                if (dateToSearch == "0"):    
+                   
+                    pmPrice = df.iloc[currentday-1][4] + screenbar['Pre-market Change']
+       
+                else:
+                    
+                    pmPrice = df.iloc[currentday][1]
+
+                sEP = True
+                sMR = True
+                sPivot = True
+                sFlag = True
+                dolVolFilter = 10000000
+
+                if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
+                    Daily.EP(df, currentday, pmPrice,screenbar, dateToSearch)
+                if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
+                    Daily.MR(df, currentday, pmPrice,screenbar, dateToSearch)
+                if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
+                    Daily.Pivot(df, currentday, pmPrice,screenbar, dateToSearch)
+                if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
+                    Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch)
+
+        except:
+            print(f"{ticker} failed")
+
+            
+            
+    def get_list(dateToSearch,ticker):
+
+        
+        if ticker != None:
+            full = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            screener_data  = full.iloc[str(ticker)]
+        else:
+            tv = TvDatafeed()
+            if dateToSearch == "0":
+            
+                data_apple2 = tv.get_hist('AAPL', 'NASDAQ', n_bars=1, interval=Interval.in_1_minute, extended_session = True)
+                dateSplit2 = str(data_apple2.index[0]).split(" ")
+                date2 = dateSplit2[0]
+                today = datetime.datetime.today().strftime('%Y-%m-%d')
+               #if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15)) :
+                screen.runDailyScan(None)
+                screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+          
             
                 if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                     os.remove("C:/Screener/data_csvs/todays_setups.csv")
@@ -157,31 +97,63 @@ class Daily:
                 god.to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
           
                 
-            else:
-                print("artificial 0")
+                #else:
+                  #  print("artificial 0")
                     
-                dateToSearch = date2
-                screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv") 
-            data.runUpdate(tv,False)
-        else:
-            dateSplit = dateToSearch.split("-")
-            x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
+                 #   dateToSearch = date2
+                 #   screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv") 
+                data.runUpdate(tv,False)
+            else:
 
-            if(x_date.weekday() >= 5):
-               #print("The date given is not a weekday.")
-                return False
-            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-            
-        #screener_data  = pd.DataFrame({'Ticker': ["MLCO"]})
+                #dateSplit = dateToSearch.split("-")
+                #x_date = datetime.date(int(dateSplit[0]), int(dateSplit[1]), int(dateSplit[2]))
+
+                if(dateToSearch.weekday() >= 5):
+                    print("The date given is not a weekday.")
+                    return False
+                screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+
+            return screener_data
+
+    def runDaily(dateToSearch = '0', interval = 'd',ticker = None):
+
+        screener_data = Daily.get_list(dateToSearch,ticker)
+
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
+            screener_data.at[i, 'interval'] = interval
             screenbars.append(screener_data.iloc[i])
+
         with Pool(nodes=6) as pool:
             pool.map(Daily.processTickers, screenbars)
         
         if dateToSearch == "0":
             ui.loop(ui,True)
+
+    def requirements(ticker,date):
+
+
+        df = data.get(ticker,'d')
+        currentday = data.findex(df,date)
+
+        dolVol = []
+        for i in range(5):
+            dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
+        dolVol = statistics.mean(dolVol)
+
+       
+                            
+        adr= []
+        for j in range(20): 
+            high = df.iloc[currentday-j-1][2]
+            low = df.iloc[currentday-j-1][3]
+            val = (high/low - 1) * 100
+            adr.append(val)
+                        
+        adr = statistics.mean(adr)  
+       
+        return dolVol, adr
 
 
     def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
@@ -215,6 +187,8 @@ class Daily:
          #   print("timeout error")
       #  except FileNotFoundError:
          #   print("file error") 
+
+    
  
     def MR(data_daily, currentday,pmPrice,screenbar, dateToSearch):
         
@@ -515,7 +489,7 @@ class Daily:
                 log.daily(screenbar,z,"WFlag", dateToSearch,pmPrice,data_daily,currentday) 
       
 if __name__ == '__main__':
-    backtest = True
+    backtest = False
 
     god = True
 
@@ -549,4 +523,4 @@ if __name__ == '__main__':
                     print("finished")
                     break
         else:
-            Daily.runDaily(Daily, '0')
+            Daily.runDaily (datetime.datetime(2022,1,4))
