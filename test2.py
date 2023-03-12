@@ -8,17 +8,16 @@ import datetime
 lap = (datetime.datetime.now())
 
 
-df = data.get("AAPL",'m')
+df = data.get("AAPL",'17min')
 
-
-date = datetime.date(2023, 3, 6)
-
+date = datetime.datetime(2012, 3, 6, 11, 37 , 0)
+#date = datetime.datetime(2023, 2, 6)
 #print(datetime.datetime.now() - lap)
 lap = (datetime.datetime.now())
 
 index = data.findex(df,date)
 
-#print(datetime.datetime.now() - lap)
+print(datetime.datetime.now() - lap)
 
 
 

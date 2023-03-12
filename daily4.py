@@ -155,7 +155,7 @@ class Daily:
         return dolVol, adr
 
 
-    def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch):
+    def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch,timeframe):
       
         
         zfilter = 5.5
@@ -175,10 +175,10 @@ class Daily:
            
             
         if(z > zfilter) and pmPrice > max(highs):
-            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday) 
+            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday,intraday) 
             
         elif (z < -zfilter) and pmPrice < min(lows):
-            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday) 
+            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday,intraday) 
 
       #  except IndexError:
        #     print("index error")
@@ -189,7 +189,7 @@ class Daily:
 
     
  
-    def MR(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+    def MR(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
         
     
         
@@ -245,7 +245,7 @@ class Daily:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday) 
+                log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
                
             
        # except IndexError:
@@ -255,7 +255,7 @@ class Daily:
      #   except FileNotFoundError:
         #    print(" does not have a file")
             
-    def Pivot(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+    def Pivot(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
         
 
         uppergapzfilter = 8
@@ -287,11 +287,11 @@ class Daily:
         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
+            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
 
         if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday) 
+            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
        # except IndexError:
            #print(f" did not exist at the date " )
        # except TimeoutError:
@@ -300,7 +300,7 @@ class Daily:
            # print(" does not have a file")
 
 
-    def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+    def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
         tick = str(screenbar['Ticker'])
         
         
@@ -387,7 +387,7 @@ class Daily:
              
                 if z > zfilter and z2 > z2filter:
                     
-                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday) 
+                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,timeframe) 
 
                 
        # except ValueError:
@@ -405,7 +405,7 @@ class Daily:
      #   except UnboundLocalError:
      #       print("unbound var")'
 
-    def weeklyFlag(data_daily, currentday,pmPrice,screenbar, dateToSearch):
+    def weeklyFlag(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
         tick = str(screenbar['Ticker'])
         zfilter = 5
         z2filter = -100
@@ -485,7 +485,7 @@ class Daily:
              
             if z > zfilter and z2 > z2filter:
                     
-                log.daily(screenbar,z,"WFlag", dateToSearch,pmPrice,data_daily,currentday) 
+                log.daily(screenbar,z,"WFlag", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
       
 if __name__ == '__main__':
     backtest = False

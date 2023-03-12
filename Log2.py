@@ -103,7 +103,7 @@ class log:
        
 
 
-    def daily(screenbar, z, setup_type, dateToSearch,pmPrice, data_daily,currentday):
+    def daily(screenbar, z, setup_type, dateToSearch,pmPrice, data_daily,currentday,timeframe):
     
 
         cooldown = 20
@@ -280,7 +280,8 @@ class log:
                         '10': [ten],
                         'annotation': [""],
                         #'rating': [""],
-                        'time': [time]
+                        'time': [time],
+                        'timeframe': [timeframe]
   
                         }
         

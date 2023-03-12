@@ -1,4 +1,5 @@
 
+
 import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed, Interval
@@ -14,31 +15,35 @@ warnings.filterwarnings("ignore")
 class Data:
 
     def findex(df,dt,premarket = False):
+        
+        if type(dt) == datetime.date:
+            time = datetime.time(0,0,0)
+            dt = datetime.datetime.combine(dt,time)
         i = int(len(df)/2)
         k = i
         try:
             while True:
                 k = int(k/2)
-                date = df.iloc[i]['datetime'].date()
+                date = df.iloc[i]['datetime'].to_pydatetime()
                 if date > dt:
                     i -= k
                 elif date < dt:
                     i += k
-                elif date == dt:
-                    break
                 if k == 0:
+                    break
+
+            while True:
+                if df.iloc[i]['datetime'].to_pydatetime() < dt:
                     i += 1
+                else:
                     break
             while True:
-                if df.iloc[i]['datetime'].date() > dt:
+                if df.iloc[i]['datetime'].to_pydatetime() > dt:
                     i -= 1
                 else:
-                    if df.iloc[i]['datetime'].time() > df.iloc[i-1]['datetime'].time() and (premarket or df.iloc[i-1]['datetime'].time() >= datetime.time(9,30,0)):
-                        i -= 1
-                    else:
-                        break
+                    break
             return i
-        except:
+        except TimeoutError:
             return None
 
     def get(ticker,interval = 'd'):
@@ -74,6 +79,7 @@ class Data:
         
         
         for ticker in tickers:
+            
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
@@ -129,13 +135,15 @@ class Data:
             except KeyError:
                 print(f"error {ticker} daily KeyError")
         test = yf.download(tickers =  tickersString,  
-        period = "d",  group_by='ticker',      
+        period = "5d",  group_by='ticker',      
         interval = "1m",      
 
         ignore_tz = True,
             prepost = False) 
+
+        print(test)
         for ticker in tickers:
-            break
+            
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
@@ -166,48 +174,25 @@ class Data:
                     print(f"created {ticker} minute")
                 else:
                     cs = Data.get(ticker,'1min')
-                    
-                
-                    
-                
+                    lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
+                    #apl = Data.get('AAPL')
+                    #index = Data.findex(apl,lastDay) + 2
+                    #startday = apl.iloc[index]['datetime'].date()
+                    cs = cs.set_index('datetime') 
 
-                    lastDay = cs.iloc[len(cs)-1]['datetime'].date()
-
-                    apl = Data.get('AAPL')
-
-                    index = Data.findex(apl,lastDay) + 1
-
-                    startday = apl.iloc[index]['datetime']
-
-                    
-                    cs = cs.set_index('datetime')
-
-
-                    scrapped_data_index = Data.findex(ticker_df, startday) 
-
-                   
-
+                    scrapped_data_index = Data.findex(ticker_df, lastDay) + 1
                     if scrapped_data_index != None:
-
-                        
-                    
-                    
-                        print(ticker_df.iloc[scrapped_data_index])
-                        ticker_df = ticker_df[scrapped_data_index + i:]
-
-                        
-                        print(ticker_df)
+                        ticker_df = ticker_df[scrapped_data_index:]
                         ticker_df.dropna(inplace = True)
-
                         ticker_df.drop('datetime', axis = 1, inplace = True)
-                        
+                        god = len(cs)
                         cs = pd.concat([cs, ticker_df])
                         cs.index.rename('datetime', inplace = True)
-
                         cs.drop(cs.columns[0], axis = 1, inplace = True)
+                        
+                        #print(cs[god - 5 : god + 5])
 
                         cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
-
                         numRows = len(ticker_df)
                         print(f"appended {numRows} to {ticker} minute")
                     else:
@@ -226,16 +211,16 @@ class Data:
             return ticker
         else:
             try:
-                cs = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
+                cs = Data.get(ticker)
             
-                lastDay = cs.iloc[len(cs)-1][0]
+                lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
                 #lastDaySplit = lastDayTime.split(" ")
                 # lastDay = lastDaySplit[0]
    
                 #print(f"{lastDay},{lastDStock}")
                 if (lastDay != lastDStock):
                     #print(f"{lastDay} , {lastDStock}")
-                    lastDay = datetime.datetime.strptime(lastDay, '%Y-%m-%d')
+                    
                     lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
                     if lastDStock < lastDay:
                         print(f"deleted {ticker}")
@@ -251,7 +236,7 @@ class Data:
                  #   os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
                # except TimeoutError:
                   #  print("value error in istickerupate")
-            except:
+            except TimeoutError:
                 pass
 
     def isMarketClosed():
@@ -290,8 +275,8 @@ class Data:
 
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                                    #  'Exchange':['NASDAQ' , 'NASDAQ']})
+        screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
+                                      'Exchange':['NASDAQ' , 'NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []

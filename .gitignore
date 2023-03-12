@@ -20,3 +20,8 @@ minute_data/
 daily_data/
 daily_data_actual/
 minute_data_actual/
+
+daily_data_tester/
+minute_data_tester/
+data test subjects/
+test/
