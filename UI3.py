@@ -257,85 +257,86 @@ class UI:
               
 
             index = data.findex(data_daily,date)
+            if(index != None): 
 
-            print(date)
-            print(data_daily.iloc[index]['datetime'])
+                print(date)
+                print(data_daily.iloc[index]['datetime'])
 
 
-            rightedge = index + chartoffset
+                rightedge = index + chartoffset
 
 
                 
                 
 
-            rightedge2 = data.findex(dfw,date) + chartoffset2
+                rightedge2 = data.findex(dfw,date) + chartoffset2
 
                 
               
 
-            leftedge = rightedge - chartsize
-            leftedge2 = rightedge2 - chartsize2
-            if leftedge2 < 0:
-                leftedge2 = 0
+                leftedge = rightedge - chartsize
+                leftedge2 = rightedge2 - chartsize2
+                if leftedge2 < 0:
+                    leftedge2 = 0
                 
-            string1 = "databasesmall" + iss + ".png"
-            string2 = "databaselarge" + iss + ".png"
-            #string3 = "databaseintraday" + iss + ".png"
-            ourpath = pathlib.Path("C:/Screener/tmp/charts") / string1
-            ourpath2 = pathlib.Path("C:/Screener/tmp/charts") / string2
-            #ourpath3 = pathlib.Path("C:/Screener/tmp/charts") / string3
+                string1 = "databasesmall" + iss + ".png"
+                string2 = "databaselarge" + iss + ".png"
+                #string3 = "databaseintraday" + iss + ".png"
+                ourpath = pathlib.Path("C:/Screener/tmp/charts") / string1
+                ourpath2 = pathlib.Path("C:/Screener/tmp/charts") / string2
+                #ourpath3 = pathlib.Path("C:/Screener/tmp/charts") / string3
             
             
 
               
 
-           # data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
-           # data_daily = data_daily.set_index('Datetime')
-            #data_daily = data_daily.drop(['Date'], axis=1)
+               # data_daily['Datetime'] = pd.to_datetime(data_daily['Date'])
+               # data_daily = data_daily.set_index('Datetime')
+                #data_daily = data_daily.drop(['Date'], axis=1)
 
                
-            #print(data_daily)
+                #print(data_daily)
 
-            #print(rightedge)
-            df1 = data_daily[(leftedge):(rightedge)]
-            #df2 = data_daily[(leftedge2):(rightedge)]
+                #print(rightedge)
+                df1 = data_daily[(leftedge):(rightedge)]
+                #df2 = data_daily[(leftedge2):(rightedge)]
 
-            df2 = dfw[(leftedge2):(rightedge2)]
+                df2 = dfw[(leftedge2):(rightedge2)]
 
-            df1 = df1.set_index('datetime')
-            df2 = df2.set_index('datetime')
+                df1 = df1.set_index('datetime')
+                df2 = df2.set_index('datetime')
 
             
-            print(len(df1))
+                print(len(df1))
 
-            if date == "0":
-                pmPrice = (setups_data.iloc[i][4])
-                mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-                mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-            else:
+                if date == "0":
+                    pmPrice = (setups_data.iloc[i][4])
+                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
+                else:
 
 
-                #dfintraday_full = pd.read_csv(r"C:/Screener/intraday_data/" + ticker + ".csv")
+                    #dfintraday_full = pd.read_csv(r"C:/Screener/intraday_data/" + ticker + ".csv")
 
-                #dfindex = intraday.findIndex(dfintraday_full,date)
+                    #dfindex = intraday.findIndex(dfintraday_full,date)
 
-                #i = dfindex
-                #while True:
+                    #i = dfindex
+                    #while True:
                         
 
-               #print(df1)
-                #print(df2)
+                   #print(df1)
+                    #print(df2)
 
-                try:
-                #print(df2)
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + chartdate + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)#,vlines=dict(vlines=[chartdate], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True)#,vlines=dict(vlines=[chartdate], alpha = .25))
-                    #mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
-                except TimeoutError:
-                    # mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)
-                    # mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True)
+                    try:
+                    #print(df2)
+                        mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + chartdate + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)#,vlines=dict(vlines=[chartdate], alpha = .25))
+                        mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True)#,vlines=dict(vlines=[chartdate], alpha = .25))
+                        #mpf.plot(dfintraday, type='candle', volume=True, style=s, savefig=ourpath3, figratio = (32,18),  tight_layout = True )
+                    except TimeoutError:
+                        # mpf.plot(df, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=ourpath, figratio = (32,18), mav=(10,20), tight_layout = True)
+                        # mpf.plot(df2, type='candle', volume=True, style=s, savefig=ourpath2, figratio = (32,18), mav=(10,20), tight_layout = True)
                        
-                    print("chart failed")
+                        print("chart failed")
                 
             
 

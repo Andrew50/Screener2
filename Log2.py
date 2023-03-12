@@ -159,7 +159,8 @@ class log:
                 try:
                     str_recent_date = scan.iloc[-1][0]
                     recent_date = datetime.datetime.strptime(str_recent_date, '%Y-%m-%d').date()
-                    today_date = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d').date()
+                    #today_date = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d').date()
+                    today_date = dateToSearch.date()
                     delta = (today_date - recent_date).days
                     #print(f"{delta} , {tick}")
                     if delta <= cooldown:

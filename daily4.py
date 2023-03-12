@@ -30,9 +30,7 @@ class Daily:
             interval = str(screenbar['interval'])
             ticker = str(screenbar['Ticker'])
             dateToSearch = screenbar['dateToSearch']
-            print(dateToSearch)
-            #print(ticker)
-
+            print(ticker)
             dolVol, adr = Daily.requirements(ticker,dateToSearch)
 
             if dolVol > 10000000 and adr > 3.5:
@@ -65,7 +63,8 @@ class Daily:
                     Daily.Pivot(df, currentday, pmPrice,screenbar, dateToSearch)
                 if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
                     Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch)
-
+        except FileNotFoundError: 
+            print(f"{ticker} aka nan or PRN fileNotFound")
         except TimeoutError:
             print(f"{ticker} failed")
 
@@ -132,12 +131,11 @@ class Daily:
             ui.loop(ui,True)
 
     def requirements(ticker,date):
-        print(f"{ticker} requirements")
 
         df = data.get(ticker,'d')
-        print(df)
         currentday = data.findex(df,date)
-        print(f"{ticker} currentDay = {currentday}")
+        if(currentday == None): 
+            return 0, 0 
         dolVol = []
         for i in range(5):
             dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
