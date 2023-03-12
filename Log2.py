@@ -218,10 +218,17 @@ class log:
                 one = round((data_daily.iloc[currentday][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
                 two =   round((data_daily.iloc[currentday+1][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
                 three =  round((data_daily.iloc[currentday+2][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+                four = round((data_daily.iloc[currentday+3][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+                five = round((data_daily.iloc[currentday+4][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
 
-            
-          
+                change10 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-11][4] - 1) * 100,2)
+                change20 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-21][4] - 1) * 100,2)
+                change60 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-61][4] - 1) * 100,2)
+                change250 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-251][4] - 1) * 100,2)
                             
+              
+
+
                 adr = []
                 for j in range(20): 
                     high = data_daily.iloc[currentday-j-1][2]
@@ -264,6 +271,11 @@ class log:
                 time = i 
 
           
+
+
+
+
+
         
 
                 data ={'Date': [dateString],

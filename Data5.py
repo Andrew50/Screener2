@@ -2,20 +2,18 @@
 
 import pandas as pd
 import datetime
-from tvDatafeed import TvDatafeed, Interval
+from tvDatafeed import TvDatafeed
 import os 
 import datetime
 from pathos.multiprocessing import ProcessingPool as Pool
 import warnings
 import math
 import yfinance as yf
-
 warnings.filterwarnings("ignore")
 
 class Data:
 
-    def findex(df,dt,premarket = False):
-        
+    def findex(df,dt):
         if type(dt) == datetime.date:
             time = datetime.time(0,0,0)
             dt = datetime.datetime.combine(dt,time)
@@ -31,7 +29,6 @@ class Data:
                     i += k
                 if k == 0:
                     break
-
             while True:
                 if df.iloc[i]['datetime'].to_pydatetime() < dt:
                     i += 1
@@ -43,10 +40,10 @@ class Data:
                 else:
                     break
             return i
-        except TimeoutError:
+        except:
             return None
 
-    def get(ticker,interval = 'd'):
+    def get(ticker,interval = 'd',premarket = False):
         if interval == 'd' or interval == 'w' or interval == 'm':
             df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
         else:
@@ -59,52 +56,39 @@ class Data:
                         'high'  : 'max',
                         'low'   : 'min',
                         'close' : 'last',
-                        'volume': 'sum'
-                        }
-        
+                        'volume': 'sum' }
             df = df.resample(interval).apply(logic)
             df.dropna(inplace = True)
             df = df.reset_index()    
         return (df)
 
     def updatTick(tickersString):
-
         tickers = tickersString.split(' ')
-        print(tickers)
         test = yf.download(tickers =  tickersString,  
             period = "25y",  group_by='ticker',      
             interval = "1d",      
-            ignore_tz = True,     
+            ignore_tz = True,  
+            progress=False,
             prepost = False) 
-        
-        
         for ticker in tickers:
-            
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
-
                 for i in range(len(ticker_df)):                 
                     if(math.isnan(ticker_df.iloc[i]['Close']) == False):
                         ticker_df = ticker_df[i:]
                         break
-
-
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                #ticker_df = ticker_df.set_index('datetime')
                 ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
-                #ticker_df.rename(columns={0:'open', 1:'high', 2:'low',3:'close',4:'volume'}, inplace = True)
                 ticker_df.dropna(inplace = True)
                 if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
                     if not Data.isMarketClosed():
                         ticker_df.drop(ticker_df.tail(1).index,inplace=True)
-
-                    #print(ticker_df)
                     ticker_df.drop('datetime', axis = 1, inplace = True)
                     ticker_df.index.rename('datetime', inplace = True)
-                    #print(ticker_df)
+              
                     ticker_df.to_csv("C:/Screener/daily_data/" + ticker + ".csv")
-                    print(f"created {ticker} daily")
+                    print(f"created daily {ticker}")
                 else:
                     cs = Data.get(ticker,'d')
                     
@@ -114,7 +98,7 @@ class Data:
             
                     scrapped_data_index = Data.findex(ticker_df, lastDay) 
                     if scrapped_data_index != None:
-                    #print(scrapped_data_index)
+            
                         ticker_df = ticker_df[scrapped_data_index + 1:]
                         ticker_df.drop('datetime', axis = 1, inplace = True)
                         
@@ -124,120 +108,80 @@ class Data:
                         numRows = len(ticker_df)
                 
                         if numRows == 0:
-                            print(f"deleted {ticker} daily")
+                            print(f"deleted daily {ticker}")
                             os.remove(r"C:/Screener/daily_data/" + ticker + ".csv")
                         else:
-                            print(f"appended {numRows} to {ticker} daily")
+                            print(f"appended daily {numRows} to {ticker}")
                     else:
-                        print(f"failed {ticker} daily")
+                        print(f"failed daily {ticker}")
             except FileNotFoundError:
-                print(f"error {ticker} daily filenotFounderror")
+                print(f"error daily {ticker} filenotFounderror")
             except KeyError:
-                print(f"error {ticker} daily KeyError")
+                print(f"error daily {ticker}y KeyError")
+            except:
+                print(f"error daily {ticker}")
         test = yf.download(tickers =  tickersString,  
         period = "5d",  group_by='ticker',      
         interval = "1m",      
-
         ignore_tz = True,
+        progress=False,
             prepost = False) 
-
-        print(test)
         for ticker in tickers:
-            
             try:
                 ticker_df = test[ticker]
                 ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
                 ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
-
-
-                #ticker_df.dropna(inplace = True)
-
-
-                
-                
-
-
-
-
-                #if ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
-                    #ticker_df.drop(ticker_df.tail(1).index,inplace=True)
-                
+                if (datetime.datetime.now().weekday() < 5) and ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
+                    ticker_df.drop(ticker_df.tail(1).index,inplace=True)
+                    print('dropped 1 because market open')
                 if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
                     ticker_df.dropna(inplace = True)
-
-
-
                     ticker_df.drop('datetime', axis = 1, inplace = True)
                     ticker_df.index.rename('datetime', inplace = True)
                     ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
-                    print(f"created {ticker} minute")
+                    print(f"created minute{ticker}")
                 else:
                     cs = Data.get(ticker,'1min')
                     lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
-                    #apl = Data.get('AAPL')
-                    #index = Data.findex(apl,lastDay) + 2
-                    #startday = apl.iloc[index]['datetime'].date()
                     cs = cs.set_index('datetime') 
-
-                    scrapped_data_index = Data.findex(ticker_df, lastDay) + 1
+                    scrapped_data_index = Data.findex(ticker_df, lastDay) 
                     if scrapped_data_index != None:
-                        ticker_df = ticker_df[scrapped_data_index:]
-                        ticker_df.dropna(inplace = True)
-                        ticker_df.drop('datetime', axis = 1, inplace = True)
-                        god = len(cs)
-                        cs = pd.concat([cs, ticker_df])
-                        cs.index.rename('datetime', inplace = True)
-                        cs.drop(cs.columns[0], axis = 1, inplace = True)
-                        
-                        #print(cs[god - 5 : god + 5])
-
-                        cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
-                        numRows = len(ticker_df)
-                        print(f"appended {numRows} to {ticker} minute")
+                        scrapped_data_index = scrapped_data_index + 1
+                        if scrapped_data_index != len(ticker_df):
+                            ticker_df = ticker_df[scrapped_data_index:]
+                            ticker_df.dropna(inplace = True)
+                            ticker_df.drop('datetime', axis = 1, inplace = True)
+                            cs = pd.concat([cs, ticker_df])
+                            cs.index.rename('datetime', inplace = True)
+                            cs.drop(cs.columns[0], axis = 1, inplace = True)
+                            cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
+                            numRows = len(ticker_df)
+                            print(f"appended minute {numRows} to {ticker}")
+                        else:
+                            print(f'approved minute {ticker}')
                     else:
-                        print(f"failed {ticker} minute ")
+                        print(f"failed minute {ticker}")
         
-            except TimeoutError:
-                print(f"error {ticker} minute")
-        
-
+            except:
+                print(f"error minute {ticker}")
 
     def isTickerUpdated(tickerandDate):
         ticker = tickerandDate.split(":")[0]
         lastDStock = tickerandDate.split(":")[1]
-        #exchange = tickerandDate.split(":")[2]
         if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
             return ticker
         else:
             try:
                 cs = Data.get(ticker)
-            
                 lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
-                #lastDaySplit = lastDayTime.split(" ")
-                # lastDay = lastDaySplit[0]
-   
-                #print(f"{lastDay},{lastDStock}")
+                lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
                 if (lastDay != lastDStock):
-                    #print(f"{lastDay} , {lastDStock}")
-                    
-                    lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
-                    if lastDStock < lastDay:
-                        print(f"deleted {ticker}")
-                        os.remove(r"C:/Screener/data_csvs/" + ticker + ".csv")
-                        #s = f"{ticker}:{exchange}"
-                        return ticker
-                    else:
-                        # s = f"{ticker}:{exchange}"
-                        return ticker
+                    return ticker
+                        
                 print(f"approved {ticker}")
-               # except IndexError:
-               #     print(f"deleted {ticker}")
-                 #   os.remove(r"C:/Screener/data_csvs/" + ticker + "_data.csv")
-               # except TimeoutError:
-                  #  print("value error in istickerupate")
-            except TimeoutError:
-                pass
+            except:
+                print(f"{ticker} failed")
 
     def isMarketClosed():
         dayOfWeek = datetime.datetime.now().weekday()
@@ -262,7 +206,6 @@ class Data:
             isClosed = True
         last = 't' 
         lastDStock = 't' 
- 
         if(isClosed == True):
             last = data_apple.index[1]
             lastSplit = str(last).split(" ")
@@ -271,26 +214,17 @@ class Data:
             last = data_apple.index[0]
             lastSplit = str(last).split(" ")
             lastDStock = lastSplit[0]
-       
-
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                                      'Exchange':['NASDAQ' , 'NASDAQ']})
+        #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
+        #                              'Exchange':['NASDAQ' , 'NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []
         for i in range(numTickers):
            ticker = screener_data.iloc[i]['Ticker']
-           #exchange = screener_data.iloc[i]['Exchange']
-           #if(exchange == "NYSE ARCA"):
-           #    exchange = "AMEX"
-          # tickers.append(f'{ticker}:{lastDStock}:{exchange}')
            tickers.append(f'{ticker}:{lastDStock}')
-
-           
         remaining_tickers = []
-        
         with Pool(nodes=6) as pool:
             remaining_tickers = pool.map(Data.isTickerUpdated, tickers)
         new_remaining = []
@@ -317,11 +251,9 @@ class Data:
                     else:
                         tickerString = tickerString + new_remaining[num]
             tickerBatches.append(tickerString)
-        #print(tickerBatches)
-        with Pool(nodes=2) as pool:
+        with Pool(nodes=7) as pool:
             pool.map(Data.updatTick, tickerBatches)
 
-  
 
 if __name__ == '__main__':
     tv = TvDatafeed()

@@ -69,6 +69,7 @@ class UI:
                     self.update(self,False,values,previ)
     
             if event == 'Load':
+                timeframe = values['input-timeframe']
                 ticker = values["input-ticker"]
                 date = values["input-date"]
                 setup = values["input-setup"]
@@ -77,7 +78,7 @@ class UI:
                 #print(previ)
                 
                 sortinput = values["input-trait"]
-                self.lookup(self,ticker,date,setup,keyword,sortinput)
+                self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
                 self.update(self,False,values,previ)
            
 
@@ -103,13 +104,13 @@ class UI:
                 if self.annotation:
                     try:
                         self.annotation = False
-                        
+                        timeframe = values['input-timeframe']
                         ticker = values["input-ticker"]
                         date = values["input-date"]
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
                         sortinput = values["input-trait"]
-                        self.lookup(self,ticker,date,setup,keyword,sortinput)
+                        self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
                         self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
@@ -118,13 +119,13 @@ class UI:
                     try: 
                         
                         self.annotation = True
-                       
+                        timeframe = values['input-timeframe']
                         ticker = values["input-ticker"]
                         date = values["input-date"]
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
                         sortinput = values["input-trait"]
-                        self.lookup(self,ticker,date,setup,keyword,sortinput)
+                        self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
                         self.update(self,False,values,previ)
                     except pd.errors.EmptyDataError:
                         sg.Popup('No Setups Found')
@@ -137,12 +138,17 @@ class UI:
         self.window.close()
     
 
-    def lookup(self,ticker,date,setup,keyword,sortinput):
+    def lookup(self,ticker,date,setup,keyword,sortinput,timeframe):
         
         print(f"searching for {keyword}")
         scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
         
-        
+        if timeframe  != "":
+            scanholder = pd.DataFrame()
+            for k in range(len(scan)):
+                if scan.iloc[k][14] == timeframe:
+                    scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+            scan = scanholder
         if ticker  != "":
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
@@ -426,7 +432,7 @@ class UI:
                  #[(sg.Text("Rating ")),sg.InputText(rating,key = 'rating')],
                 [sg.Multiline(annotation,size=(150, 5), key='annotation')],
                 
-               
+                [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
                 [(sg.Text("Ticker    ")),sg.InputText(key = 'input-ticker')],
                 [(sg.Text("Date      ")),sg.InputText(key = 'input-date')],
                 [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],

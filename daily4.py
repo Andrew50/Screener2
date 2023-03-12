@@ -27,7 +27,7 @@ class Daily:
 
         try:
             
-            interval = str(screenbar['interval'])
+            timeframe = str(screenbar['interval'])
             ticker = str(screenbar['Ticker'])
             dateToSearch = screenbar['dateToSearch']
             print(ticker)
@@ -36,7 +36,7 @@ class Daily:
             if dolVol > 10000000 and adr > 3.5:
 
 
-                df = data.get(ticker,interval)
+                df = data.get(ticker,timeframe)
                 currentday = data.findex(df,dateToSearch)
         
                 
@@ -56,16 +56,16 @@ class Daily:
                 dolVolFilter = 10000000
 
                 if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
-                    Daily.EP(df, currentday, pmPrice,screenbar, dateToSearch)
+                    Daily.EP(df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
                 if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
-                    Daily.MR(df, currentday, pmPrice,screenbar, dateToSearch)
+                    Daily.MR(df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
                 if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
-                    Daily.Pivot(df, currentday, pmPrice,screenbar, dateToSearch)
+                    Daily.Pivot(df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
                 if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                    Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch)
+                    Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
         except FileNotFoundError: 
-            print(f"{ticker} aka nan or PRN fileNotFound")
-        except TimeoutError:
+            print(f"{ticker} is delisted")
+        except:
             print(f"{ticker} failed")
 
             
@@ -387,7 +387,7 @@ class Daily:
              
                 if z > zfilter and z2 > z2filter:
                     
-                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,timeframe) 
+                    log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
 
                 
        # except ValueError:
@@ -522,4 +522,4 @@ if __name__ == '__main__':
                     print("finished")
                     break
         else:
-            Daily.runDaily(datetime.datetime(2022,1,4))
+            Daily.runDaily(datetime.datetime(2022,1,4), '5min')
