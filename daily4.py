@@ -33,9 +33,11 @@ class Daily:
             print(ticker)
             dolVol, adr = Daily.requirements(ticker,dateToSearch)
 
+            
+
             if dolVol > 10000000 and adr > 3.5:
 
-
+                
                 df = data.get(ticker,timeframe)
                 currentday = data.findex(df,dateToSearch)
         
@@ -85,7 +87,7 @@ class Daily:
                 date2 = dateSplit2[0]
                 today = datetime.datetime.today().strftime('%Y-%m-%d')
                #if date2 == today and (datetime.datetime.now().hour < 12 or (datetime.datetime.now().hour == 12 and datetime.datetime.now().minute <= 15)) :
-                screen.runDailyScan(None)
+                #screen.runDailyScan(None)
                 screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
           
             
@@ -101,7 +103,7 @@ class Daily:
                     
                  #   dateToSearch = date2
                  #   screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv") 
-                data.runUpdate(tv,False)
+                #data.runUpdate(tv)
             else:
 
                 #dateSplit = dateToSearch.split("-")
@@ -115,7 +117,7 @@ class Daily:
             return screener_data
 
     def runDaily(dateToSearch = '0', interval = 'd',ticker = None):
-
+        
         screener_data = Daily.get_list(dateToSearch,ticker)
 
         screenbars = []
@@ -135,6 +137,7 @@ class Daily:
         df = data.get(ticker,'d')
         currentday = data.findex(df,date)
         if(currentday == None): 
+            print('god')
             return 0, 0 
         dolVol = []
         for i in range(5):
@@ -175,10 +178,10 @@ class Daily:
            
             
         if(z > zfilter) and pmPrice > max(highs):
-            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday,intraday) 
+            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
             
         elif (z < -zfilter) and pmPrice < min(lows):
-            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday,intraday) 
+            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
 
       #  except IndexError:
        #     print("index error")
@@ -193,7 +196,7 @@ class Daily:
         
     
         
-        zfilter = 4
+        zfilter = 3.5
         gapzfilter0 = 5.5
         gapzfilter1 = 4
         changezfilter = 2.5
@@ -493,7 +496,7 @@ if __name__ == '__main__':
     god = True
 
     if god and ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
-            Daily.runDaily(Daily, '0')
+            Daily.runDaily()
     else:
             
         if backtest:

@@ -14,12 +14,16 @@ warnings.filterwarnings("ignore")
 class Data:
 
     def findex(df,dt):
-        if type(dt) == datetime.date:
-            time = datetime.time(0,0,0)
-            dt = datetime.datetime.combine(dt,time)
-        i = int(len(df)/2)
-        k = i
         try:
+            if dt == '0':
+                return (len(df))
+
+            if type(dt) == datetime.date:
+                time = datetime.time(0,0,0)
+                dt = datetime.datetime.combine(dt,time)
+            i = int(len(df)/2)
+            k = i
+        
             while True:
                 k = int(k/2)
                 date = df.iloc[i]['datetime'].to_pydatetime()
@@ -40,27 +44,32 @@ class Data:
                 else:
                     break
             return i
-        except:
+        except TimeoutError:
             return None
 
     def get(ticker,interval = 'd',premarket = False):
-        if interval == 'd' or interval == 'w' or interval == 'm':
-            df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
-        else:
-            df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
-        df['datetime'] = pd.to_datetime(df.iloc[:,0])
-        
-        if interval != 'd' and interval != '1min':
-            df = df.set_index('datetime')
-            logic = {'open'  : 'first',
-                        'high'  : 'max',
-                        'low'   : 'min',
-                        'close' : 'last',
-                        'volume': 'sum' }
-            df = df.resample(interval).apply(logic)
-            df.dropna(inplace = True)
-            df = df.reset_index()    
-        return (df)
+        try:
+            if interval == 'd' or interval == 'w' or interval == 'm':
+                df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
+            else:
+                df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
+            df['datetime'] = pd.to_datetime(df.iloc[:,0])
+            
+            if interval != 'd' and interval != '1min':
+                df['open'] = df.iloc[1]
+                df = df.set_index('datetime')
+                
+                logic = {'open'  : 'first',
+                            'high'  : 'max',
+                            'low'   : 'min',
+                            'close' : 'last',
+                            'volume': 'sum' }
+                df = df.resample(interval).apply(logic)
+                df.dropna(inplace = True)
+                df = df.reset_index()    
+            return (df)
+        except TimeoutError:
+            return None
 
     def updatTick(tickersString):
         tickers = tickersString.split(' ')
