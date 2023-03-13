@@ -75,7 +75,7 @@ class UI:
                 setup = values["input-setup"]
                 keyword = values["input-keyword"]
                 previ = 0
-                #print(previ)
+           
                 
                 sortinput = values["input-trait"]
                 self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
@@ -94,7 +94,7 @@ class UI:
                 keyword = values["input-keyword"]
                 
                 previ = 0
-                #print(previ)
+              
                 sortinput = values["input-trait"]
                 self.lookup(self,ticker,date,setup,keyword,sortinput)
                 self.update(self,False,values,previ)
@@ -263,7 +263,7 @@ class UI:
                 df3 = data.get(ticker,'h')
                 df4 = data.get(ticker,'1min')
 
-                print(df1)
+                
 
 
                 l1 = data.findex(df1,date) - chartoffset
