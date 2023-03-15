@@ -507,7 +507,8 @@ class UI:
                 histstr = "Current"
                 
                 layout = [  
-                [sg.Image(bio.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
+                [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
+                [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
               
                     
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
@@ -521,8 +522,14 @@ class UI:
 
 
             else:
-                self.window["-IMAGE-"].update(data=bio.getvalue())
-                self.window["-IMAGE2-"].update(data=bio2.getvalue())
+                try:
+
+                    self.window["-IMAGE-"].update(data=bio1.getvalue())
+                    self.window["-IMAGE2-"].update(data=bio2.getvalue())
+                    self.window["-IMAGE3-"].update(data=bio3.getvalue())
+                    self.window["-IMAGE4-"].update(data=bio4.getvalue())
+                except:
+                    print("image load failed")
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
            
 

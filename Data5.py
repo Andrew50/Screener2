@@ -16,11 +16,12 @@ class Data:
     def findex(df,dt):
         try:
             if dt == '0':
-                return (len(df))
-
+                dt = datetime.datetime.now()
             if type(dt) == datetime.date:
                 time = datetime.time(0,0,0)
                 dt = datetime.datetime.combine(dt,time)
+
+
             i = int(len(df)/2)
             k = i
         
@@ -51,25 +52,34 @@ class Data:
         try:
             if interval == 'd' or interval == 'w' or interval == 'm':
                 df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
+                df['datetime'] = pd.to_datetime(df.iloc[:,0])
+                df = df.set_index('datetime')
             else:
                 df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
+
+                df['datetime'] = pd.to_datetime(df.iloc[:,0])
+                df = df.set_index('datetime')
+                if not premarket:
+                    df = df.between_time('09:30' , '16:00')
             
-            df['datetime'] = pd.to_datetime(df.iloc[:,0])
+            
             
             if interval != 'd' and interval != '1min':
                 
-                df = df.set_index('datetime')
-                try:
-                    logic = {'open'  : 'first',
-                                'high'  : 'max',
-                                'low'   : 'min',
-                                'close' : 'last',
-                                'volume': 'sum' }
-                    df = df.resample(interval).apply(logic)
-                except:
-                    print(f'{ticker} , {interval}')
-                df.dropna(inplace = True)
-                df = df.reset_index()    
+                
+                
+                logic = {'open'  : 'first',
+                            'high'  : 'max',
+                            'low'   : 'min',
+                            'close' : 'last',
+                            'volume': 'sum' }
+                df = df.resample(interval).apply(logic)
+                
+
+
+
+            df.dropna(inplace = True)
+            df = df.reset_index()    
             return (df)
         except TimeoutError:
             return None
@@ -91,7 +101,7 @@ class Data:
                         ticker_df = ticker_df[i:]
                         break
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
+                ticker_df.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'}, inplace = True)
                 ticker_df.dropna(inplace = True)
                 if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
                     if not Data.isMarketClosed():
@@ -231,7 +241,7 @@ class Data:
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
         #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                                      'Exchange':['NASDAQ' , 'NASDAQ']})
+           #                           'Exchange':['NASDAQ' , 'NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []

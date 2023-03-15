@@ -493,9 +493,11 @@ class Daily:
 if __name__ == '__main__':
     backtest = False
 
-    god = True
+    premarket = False
 
-    if god and ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
+    timeframe = '5min'
+
+    if ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
             Daily.runDaily()
     else:
             
@@ -506,23 +508,28 @@ if __name__ == '__main__':
                 df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
                 strdate = df.iloc[len(df)-1][0]
            
-                startdate = datetime.datetime.strptime(strdate, '%Y-%m-%d').date()
+                startdate = datetime.datetime.strptime(strdate, '%Y-%m-%d')
                 print(f"starting from {startdate}")
                 time.sleep(3)
             except:
-                startdate = date(2000, 1, 1)
-                #startdate = date(2023, 1, 3)
-                #startdate = date(2023, 1, 1)
+                startdate = date(2007, 8, 1)
+                
+            sample = data.get('AAPL',timeframe,premarket)
+            
            
             day_count = 1000000
            
             for single_date in (startdate + timedelta(n) for n in range(day_count)):
 
                 print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
-                Daily.runDaily(Daily, str(single_date))
+                Daily.runDaily(str(single_date),timeframe)
 
                 if startdate > date.today():
                     print("finished")
                     break
+        
+                
+                
+                
         else:
-            Daily.runDaily(datetime.datetime(2022,1,4), '5min')
+            Daily.runDaily(datetime.datetime(2022,1,4), timeframe)
