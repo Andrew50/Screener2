@@ -492,7 +492,7 @@ if __name__ == '__main__':
 
     god = True
 
-    if god and ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
+    if god and ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 44)) :
             Daily.runDaily(Daily, '0')
     else:
             
