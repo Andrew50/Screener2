@@ -1,8 +1,5 @@
 
 from Data5 import Data as data
-from tvDatafeed import TvDatafeed, Interval
-import pandas as pd
-import os
 import datetime
 import yfinance as yf
 

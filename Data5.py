@@ -12,13 +12,19 @@ import yfinance as yf
 warnings.filterwarnings("ignore")
 
 class Data:
+
     def findex(df,dt):
-        if type(dt) == datetime.date:
-            time = datetime.time(0,0,0)
-            dt = datetime.datetime.combine(dt,time)
-        i = int(len(df)/2)
-        k = i
         try:
+            if dt == '0':
+                dt = datetime.datetime.now()
+            if type(dt) == datetime.date:
+                time = datetime.time(0,0,0)
+                dt = datetime.datetime.combine(dt,time)
+
+
+            i = int(len(df)/2)
+            k = i
+        
             while True:
                 k = int(k/2)
                 date = df.iloc[i]['datetime'].to_pydatetime()
@@ -39,31 +45,46 @@ class Data:
                 else:
                     break
             return i
-        except:
+        except TimeoutError:
             return None
 
     def get(ticker,interval = 'd',premarket = False):
-        minutedataPath = "D:/data/Intraday_data/"
-        if interval == 'd' or interval == 'w' or interval == 'm':
-            df = pd.read_csv(r"" + minutedataPath + ticker + ".csv")
-        else:
-            df = pd.read_csv(r"" + minutedataPath + ticker + ".csv")
-        df['datetime'] = pd.to_datetime(df.iloc[:,0])
-        
-        if interval != 'd' and interval != '1min':
-            df = df.set_index('datetime')
-            logic = {'open'  : 'first',
-                        'high'  : 'max',
-                        'low'   : 'min',
-                        'close' : 'last',
-                        'volume': 'sum' }
-            df = df.resample(interval).apply(logic)
+        try:
+            if interval == 'd' or interval == 'w' or interval == 'm':
+                df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
+                df['datetime'] = pd.to_datetime(df.iloc[:,0])
+                df = df.set_index('datetime')
+            else:
+                df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
+
+                df['datetime'] = pd.to_datetime(df.iloc[:,0])
+                df = df.set_index('datetime')
+                if not premarket:
+                    df = df.between_time('09:30' , '16:00')
+            
+            
+            
+            if interval != 'd' and interval != '1min':
+                
+                
+                
+                logic = {'open'  : 'first',
+                            'high'  : 'max',
+                            'low'   : 'min',
+                            'close' : 'last',
+                            'volume': 'sum' }
+                df = df.resample(interval).apply(logic)
+                
+
+
+
             df.dropna(inplace = True)
             df = df.reset_index()    
-        return (df)
+            return (df)
+        except TimeoutError:
+            return None
 
     def updatTick(tickersString):
-        minutedataPath = "D:/data/Intraday_data/"
         tickers = tickersString.split(' ')
         test = yf.download(tickers =  tickersString,  
             period = "25y",  group_by='ticker',      
@@ -80,15 +101,15 @@ class Data:
                         ticker_df = ticker_df[i:]
                         break
                 ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
+                ticker_df.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'}, inplace = True)
                 ticker_df.dropna(inplace = True)
-                if(os.path.exists(minutedataPath + ticker + ".csv") == False):
+                if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
                     if not Data.isMarketClosed():
                         ticker_df.drop(ticker_df.tail(1).index,inplace=True)
                     ticker_df.drop('datetime', axis = 1, inplace = True)
                     ticker_df.index.rename('datetime', inplace = True)
               
-                    ticker_df.to_csv(minutedataPath + ticker + ".csv")
+                    ticker_df.to_csv("C:/Screener/daily_data/" + ticker + ".csv")
                     print(f"created daily {ticker}")
                 else:
                     cs = Data.get(ticker,'d')
@@ -105,12 +126,12 @@ class Data:
                         
                         cs = pd.concat([cs, ticker_df])
                         cs.index.rename('datetime', inplace = True)
-                        cs.to_csv(minutedataPath + ticker + ".csv")
+                        cs.to_csv("C:/Screener/daily_data/" + ticker + ".csv")
                         numRows = len(ticker_df)
                 
                         if numRows == 0:
                             print(f"deleted daily {ticker}")
-                            os.remove(r""+ minutedataPath + ticker + ".csv")
+                            os.remove(r"C:/Screener/daily_data/" + ticker + ".csv")
                         else:
                             print(f"appended daily {numRows} to {ticker}")
                     else:
@@ -139,6 +160,7 @@ class Data:
                 if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
                     ticker_df.dropna(inplace = True)
                     ticker_df.drop('datetime', axis = 1, inplace = True)
+                    
                     ticker_df.index.rename('datetime', inplace = True)
                     ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
                     print(f"created minute{ticker}")
@@ -155,7 +177,8 @@ class Data:
                             ticker_df.drop('datetime', axis = 1, inplace = True)
                             cs = pd.concat([cs, ticker_df])
                             cs.index.rename('datetime', inplace = True)
-                            cs.drop(cs.columns[0], axis = 1, inplace = True)
+                            
+                            #cs.drop(cs.columns[0], axis = 1, inplace = True)
                             cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
                             numRows = len(ticker_df)
                             print(f"appended minute {numRows} to {ticker}")
@@ -168,10 +191,9 @@ class Data:
                 print(f"error minute {ticker}")
 
     def isTickerUpdated(tickerandDate):
-        minutedataPath = "D:/data/Intraday_data/"
         ticker = tickerandDate.split(":")[0]
         lastDStock = tickerandDate.split(":")[1]
-        if(os.path.exists(minutedataPath + ticker + ".csv") == False):
+        if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
             return ticker
         else:
             try:
@@ -219,7 +241,7 @@ class Data:
         screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
         #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-        #                              'Exchange':['NASDAQ' , 'NASDAQ']})
+           #                           'Exchange':['NASDAQ' , 'NASDAQ']})
         
         numTickers = len(screener_data)
         tickers = []
