@@ -16,7 +16,8 @@ class Data:
     def findex(df,dt):
         try:
             if dt == '0':
-                dt = datetime.datetime.now()
+                #dt = datetime.datetime.now()
+                return len(df)
             if type(dt) == datetime.date:
                 time = datetime.time(0,0,0)
                 dt = datetime.datetime.combine(dt,time)
@@ -223,7 +224,8 @@ class Data:
                 return False
         else: 
             return True
-    def runUpdate(tv):
+    def runUpdate():
+        tv = TvDatafeed()
         data_apple = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         isClosed = Data.isMarketClosed()
         if isClosed == None:
@@ -280,8 +282,8 @@ class Data:
 
 
 if __name__ == '__main__':
-    tv = TvDatafeed()
-    Data.runUpdate(tv)
+    
+    Data.runUpdate()
     
 
 
