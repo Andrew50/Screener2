@@ -72,7 +72,8 @@ class Intraday:
         Intraday.processTickers(setupScreenbars)
         return tvr, br
             
-
+    def fiveMinFade():
+        print("n")
     def Gainers(screenbar):
         try:
             dayChange = round(screenbar['Change %'], 2)
