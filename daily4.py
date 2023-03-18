@@ -446,46 +446,71 @@ class Daily:
                 log.daily(screenbar,z,"WFlag", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
       
 if __name__ == '__main__':
-    backtest = False
+    
 
-    forcezero = True
+    
 
-    premarket = False
+    
     timeframe = '5min'
+    premarket = False
 
-    if forcezero or ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
+
+    replace_setups = True
+
+
+
+    #forecast //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if False or ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
             Daily.runDaily()
+
+
+    #backtest ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     else:
             
-        if backtest:
-
-            
-            try:
-                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                strdate = df.iloc[len(df)-1][0]
-           
-                startdate = datetime.datetime.strptime(strdate, '%Y-%m-%d')
-                print(f"starting from {startdate}")
-                time.sleep(3)
-            except:
-                startdate = date(2007, 8, 1)
-                
-            sample = data.get('AAPL',timeframe,premarket)
-            
-           
-            day_count = 1000000
-           
-            for single_date in (startdate + timedelta(n) for n in range(day_count)):
-
-                print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
-                Daily.runDaily(str(single_date),timeframe)
-
-                if startdate > date.today():
-                    print("finished")
-                    break
+        if replace_setups:
+            if(os.path.exists("C:/Screener/data_csvs/setups.csv")):
+                os.remove("C:/Screener/data_csvs/setups.csv")
+            pd.DataFrame().to_csv(("C:/Screener/tmp/setups.csv"),  header=False)
         
+        try:
+            df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+            strdate = df.iloc[len(df)-1][0]
+           
+            startdate = datetime.datetime.strptime(strdate, '%Y-%m-%d')
+            print(f"starting from {startdate}")
+            time.sleep(3)
+        except:
+            startdate = date(2008, 1, 1)
                 
-                
-                
-        else:
-            Daily.runDaily(datetime.datetime(2022,1,4), timeframe)
+        sample = data.get('AAPL',timeframe,premarket)
+        index = data.findex(sample,startdate)
+
+
+
+        search = sample.iloc[index][0]
+
+        while index < len(sample) - 50:
+
+            search = sample.iloc[index][0]
+
+            Daily.runDaily(search,timeframe)
+
+            index += 1
+
+
+
+
+
+
+        #day_count = 1000000000000000
+           
+        #for single_date in (startdate + timedelta(n) for n in range(day_count)):
+
+            #print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
+            #Daily.runDaily(str(single_date),timeframe)
+
+           # if startdate > date.today():
+              #  print("finished")
+               #break
+        
+        

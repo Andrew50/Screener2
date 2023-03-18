@@ -18,10 +18,17 @@ class Data:
             if dt == '0':
                 #dt = datetime.datetime.now()
                 return len(df)
+            if type(dt) == str:
+                try:
+                    dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
+                except:
+                    print(dt)
+                    dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
             if type(dt) == datetime.date:
                 time = datetime.time(0,0,0)
                 dt = datetime.datetime.combine(dt,time)
 
+            
 
             i = int(len(df)/2)
             k = i
