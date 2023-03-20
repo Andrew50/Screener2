@@ -1,5 +1,5 @@
 
-
+import numpy
 import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
@@ -15,7 +15,8 @@ class Data:
 
     def findex(df,dt):
         try:
-            if dt == '0':
+            
+            if dt == '0' or type(dt) == numpy.int64:
                 #dt = datetime.datetime.now()
                 return len(df)
             if type(dt) == str:
