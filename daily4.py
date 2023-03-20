@@ -86,7 +86,7 @@ class Daily:
                     os.remove("C:/Screener/data_csvs/todays_setups.csv")
                 pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
                 
-                #screen.runDailyScan(None)
+                screen.runDailyScan(None)
                 #data.runUpdate()
 
             else:
