@@ -34,11 +34,12 @@ class Backtest:
             
             timeframe = str(screenbar['interval'])
             ticker = str(screenbar['Ticker'])
+            test = (screenbar['test'])
             dateToSearch = screenbar['dateToSearch']
-            print(ticker)
+            #print(ticker)
 
 
-            dolVol, adr = Daily.requirements(ticker,dateToSearch)
+            dolVol, adr = Backtest.requirements(ticker,dateToSearch)
 
             
 
@@ -48,7 +49,9 @@ class Backtest:
                 df = data.get(ticker,timeframe)
                 currentday = data.findex(df,dateToSearch)
         
-               detection.check(dolVol, adr,df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
+                detection.check(dolVol, adr,df, currentday,screenbar, test,timeframe )
+
+
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
         except TimeoutError:
@@ -58,9 +61,9 @@ class Backtest:
             
     def get_list(dateToSearch,ticker):
 
-        
+        full = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
         if ticker != None:
-            full = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            
             screener_data  = full.iloc[str(ticker)]
         else:
             
@@ -68,14 +71,23 @@ class Backtest:
             if(dateToSearch.weekday() >= 5):
                 print("The date given is not a weekday.")
                 return False
-            screener_data = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            screener_data = full
 
-            return screener_data
+        return screener_data
 
-   d def runDaily( interval = 'd',dateToSearch = None, ticker = None):
+    def run( timeframe = 'd',dateToSearch = None, ticker = None):
+
+        if dateToSearch != None or ticker != None:
+            test = True
+            if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
+                os.remove("C:/Screener/data_csvs/todays_setups.csv")
+            pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+        else:
+            test = False
 
 
-        if dateTosearch == None:
+
+        if dateToSearch == None:
 
             try:
                 df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
@@ -87,24 +99,24 @@ class Backtest:
             except:
                 startdate = date(2008, 1, 1)
                 
-            sample = data.get('AAPL',timeframe,premarket)
+            sample = data.get('AAPL',timeframe)
             index = data.findex(sample,startdate)
 
             while index < len(sample) - 50:
 
                 search = sample.iloc[index][0]
 
-                Daily.pool(interval,search,ticker)
+                Backtest.pool(timeframe,search,ticker,test)
 
                 index += 1
 
         else:
 
-            Daily.pool(iinterval,dateToSearch)
+            Backtest.pool(timeframe,dateToSearch,ticker, test)
             
 
 
-    def pool( interval = 'd',dateToSearch, ticker):
+    def pool( timeframe,dateToSearch, ticker,test):
 
 
 
@@ -114,11 +126,12 @@ class Backtest:
         screenbars = []
         for i in range(len(screener_data)):
             screener_data.at[i, 'dateToSearch'] = dateToSearch
-            screener_data.at[i, 'interval'] = interval
+            screener_data.at[i, 'interval'] = timeframe
+            screener_data.at[i, 'test'] = test
             screenbars.append(screener_data.iloc[i])
 
         with Pool(nodes=6) as pool:
-            pool.map(Daily.processTickers, screenbars)
+            pool.map(Backtest.processTickers, screenbars)
         
     def requirements(ticker,date):
         try:
@@ -126,7 +139,7 @@ class Backtest:
             currentday = data.findex(df,date)
             if(currentday == None): 
                 print('god')
-                return 0, 0 
+                return 0, 0
             dolVol = []
             for i in range(5):
                 dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
@@ -145,44 +158,15 @@ class Backtest:
        
             return dolVol, adr
         except:
+            print('requirements failed')
             return 0 , 0
         
 if __name__ == '__main__':
     
 
+    dateToSearch = datetime.datetime(2023,3,15)
+
+    Backtest.run(dateToSearch = dateToSearch)
     
-
-    
-    timeframe = '5min'
-    premarket = False
-
-
-    replace_setups = True
-
-
-
-    #forecast //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if False or ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
-            Daily.runDaily()
-
-
-    #backtest ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    else:
-            
-        
-
-
-
-
-        #day_count = 1000000000000000
-           
-        #for single_date in (startdate + timedelta(n) for n in range(day_count)):
-
-            #print(f"////////////////////////////////////// {single_date} //////////////////////////////////////")
-            #Daily.runDaily(str(single_date),timeframe)
-
-           # if startdate > date.today():
-              #  print("finished")
-               #break
         
         

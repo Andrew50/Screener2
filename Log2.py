@@ -103,16 +103,16 @@ class log:
        
 
 
-    def daily(screenbar, z, setup_type, dateToSearch,pmPrice, data_daily,currentday,timeframe):
+    def daily(screenbar, z, setup_type, test,pmPrice, data_daily,currentday,timeframe):
     
 
         cooldown = 20
 
-        
-        if dateToSearch == "0":
+        dateString = str(data_daily.iloc[currentday][0])
+        if test:
 
             tick = str(screenbar['Ticker'])
-            dateString = dateToSearch
+            
             data ={'Date': [dateString],
                     'Ticker':[ tick],
                     'Setup': [str(setup_type)],
@@ -180,7 +180,7 @@ class log:
 
             if not exclude:
             
-                dateString = dateToSearch
+                
 
 
            

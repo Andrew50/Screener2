@@ -7,33 +7,70 @@ class Detection:
 
 
 
-    def check(dolVol, adr,df, currentday, pmPrice,screenbar, dateToSearch,timeframe )
+    def check(dolVol, adr,df, currentday,screenbar,test, timeframe, pmPrice = None ):
 
 
-    def EP(data_daily, currentday, pmPrice = df.iloc[currentday][1], screenbar, dateToSearch,timeframe):
+        if pmPrice == None:
+            pmPrice =  df.iloc[currentday][1]
+
+        
+
+       
+
+
+        if timeframe == 'd':
+            sEP = True
+            sMR = True
+            sPivot = True
+            sFlag = True
+            dolVolFilter = 10000000
+            
+            if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
+                
+                Detection.EP(df, currentday, pmPrice,screenbar, test,timeframe)
+            if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
+               Detection.MR(df, currentday, pmPrice,screenbar,test,timeframe)
+            if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
+                Detection.Pivot(df, currentday, pmPrice,screenbar, test,timeframe)
+            if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
+                Detection.Flag(df, currentday, pmPrice,screenbar, test,timeframe)
+
+            
+        if timeframe == '1min':
+            pass
+        if timeframe == '5min':
+            pass
+        if timeframe == '1h':
+            pass
+
+
+
+
+
+    def EP(df, currentday, pmPrice, screenbar, test,timeframe):
       
         
         zfilter = 5.5
         
       #  try: 
-        prevClose = data_daily.iloc[currentday-1][4]
+        prevClose = df.iloc[currentday-1][4]
         gaps = []
         lows = []
         highs = []
         todayGapValue = ((pmPrice/prevClose)-1)
         for j in range(20): 
-            gaps.append((data_daily.iloc[currentday-1-j][1]/data_daily.iloc[currentday-2-j][4])-1)
-            lows.append(data_daily.iloc[currentday-j-1][3])
-            highs.append(data_daily.iloc[currentday-j-1][2])
+            gaps.append((df.iloc[currentday-1-j][1]/df.iloc[currentday-2-j][4])-1)
+            lows.append(df.iloc[currentday-j-1][3])
+            highs.append(df.iloc[currentday-j-1][2])
 
         z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
            
             
         if(z > zfilter) and pmPrice > max(highs):
-            log.daily(screenbar,z,"EP", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+            log.daily(screenbar,z,"EP", test,pmPrice,df,currentday,timeframe) 
             
         elif (z < -zfilter) and pmPrice < min(lows):
-            log.daily(screenbar,z,"NEP", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+            log.daily(screenbar,z,"NEP", test,pmPrice,df,currentday,timeframe) 
 
       #  except IndexError:
        #     print("index error")
@@ -44,7 +81,7 @@ class Detection:
 
     
  
-    def MR(data_daily, currentday,pmPrice = df.iloc[currentday][1],screenbar, dateToSearch,timeframe):
+    def MR(df, currentday, pmPrice, screenbar, test,timeframe):
         
     
         
@@ -53,26 +90,26 @@ class Detection:
         gapzfilter1 = 4
         changezfilter = 2.5
        # try: 
-        prevClose = data_daily.iloc[currentday-1][4]
+        prevClose = df.iloc[currentday-1][4]
         zdata = []
         zgaps = []
         zchange = []
             
         
-        if data_daily.iloc[currentday-1][4] < data_daily.iloc[currentday-1][1] and data_daily.iloc[currentday-2][4] < data_daily.iloc[currentday-2][1] and data_daily.iloc[currentday-3][4] < data_daily.iloc[currentday-3][1]:
+        if df.iloc[currentday-1][4] < df.iloc[currentday-1][1] and df.iloc[currentday-2][4] < df.iloc[currentday-2][1] and df.iloc[currentday-3][4] < df.iloc[currentday-3][1]:
 
               
             for i in range(30):
                 n = 29-i
-                gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
-                changevalue = abs((data_daily.iloc[currentday-n-1][4]/data_daily.iloc[currentday-n-1][1]) - 1)
+                gapvalue = abs((df.iloc[currentday-n-1][1]/df.iloc[currentday-n-2][4]) - 1)
+                changevalue = abs((df.iloc[currentday-n-1][4]/df.iloc[currentday-n-1][1]) - 1)
                 lastCloses = 0
                     
                 for c in range(4): 
                     
-                    lastCloses += data_daily.iloc[currentday-2-c-n][4]
+                    lastCloses += df.iloc[currentday-2-c-n][4]
                 fourSMA = (lastCloses/4)
-                datavalue = abs(fourSMA/data_daily.iloc[currentday-n-1][1] - 1)
+                datavalue = abs(fourSMA/df.iloc[currentday-n-1][1] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                 zgaps.append(gapvalue)
@@ -82,10 +119,10 @@ class Detection:
 
              
             todayGapValue = abs((pmPrice/prevClose)-1)
-            todayChangeValue = abs(data_daily.iloc[currentday-1][4]/data_daily.iloc[currentday-1][1] - 1)
+            todayChangeValue = abs(df.iloc[currentday-1][4]/df.iloc[currentday-1][1] - 1)
             lastCloses = 0
             for c in range(4): 
-                lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+                lastCloses = lastCloses + df.iloc[currentday-c-1][4]
                 
             fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
@@ -100,10 +137,10 @@ class Detection:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                log.daily(screenbar,z,"MR", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+                log.daily(screenbar,z,"MR", test,pmPrice,df,currentday,timeframe) 
                
       
-    def Pivot(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
+    def Pivot(df, currentday, pmPrice, screenbar, test,timeframe):
         
 
        
@@ -111,43 +148,43 @@ class Detection:
         lowergapzfilter2 = 1.5
        
        # try: 
-        prevClose = data_daily.iloc[currentday-1][4]
+        prevClose = df.iloc[currentday-1][4]
         zgaps = []
         for i in range(15):
             n = 14-i
-            gapvalue = abs((data_daily.iloc[currentday-n-1][1]/data_daily.iloc[currentday-n-2][4]) - 1)
+            gapvalue = abs((df.iloc[currentday-n-1][1]/df.iloc[currentday-n-2][4]) - 1)
             zgaps.append(gapvalue)
             
         todayGapValue = (pmPrice/prevClose)-1
         gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
         lastCloses = 0
         for c in range(4): 
-            lastCloses = lastCloses + data_daily.iloc[currentday-c-1][4]
+            lastCloses = lastCloses + df.iloc[currentday-c-1][4]
                 
         ma3 = (lastCloses/4)
-        close1 = data_daily.iloc[currentday-1][4]
-        close2 = data_daily.iloc[currentday-2][4]
-        open1 = data_daily.iloc[currentday-1][1]
-        open2 = data_daily.iloc[currentday-2][1]
-        low1 = data_daily.iloc[currentday-1][3]
-        high1 = data_daily.iloc[currentday-1][2]
+        close1 = df.iloc[currentday-1][4]
+        close2 = df.iloc[currentday-2][4]
+        open1 = df.iloc[currentday-1][1]
+        open2 = df.iloc[currentday-2][1]
+        low1 = df.iloc[currentday-1][3]
+        high1 = df.iloc[currentday-1][2]
 
         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+            log.daily(screenbar,gapz,"Pivot", test,pmPrice,df,currentday,timeframe) 
 
         if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-            log.daily(screenbar,gapz,"Pivot", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+            log.daily(screenbar,gapz,"Pivot", test,pmPrice,df,currentday,timeframe) 
       
 
 
-    def Flag(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
+    def Flag(df, currentday, pmPrice, screenbar, test,timeframe):
         tick = str(screenbar['Ticker'])
         
         
-        if dateToSearch == "0":
+        if test:
             zfilter = 4
         else:
             zfilter = 8
@@ -172,7 +209,7 @@ class Detection:
                     
                     
             for k in range(rsil):
-                change = (data_daily.iloc[currentday-k-j-1][4]/data_daily.iloc[currentday-k-j-2][4]) - 1
+                change = (df.iloc[currentday-k-j-1][4]/df.iloc[currentday-k-j-2][4]) - 1
                 if change > 0:
                     gains.append(change)
                 else:
@@ -198,7 +235,7 @@ class Detection:
                 ma3 = []
                 for k in range(3):
 
-                    ma3.append(data_daily.iloc[currentday-j-k-1][4])
+                    ma3.append(df.iloc[currentday-j-k-1][4])
                 ma3 = statistics.mean(ma3)
                           
                 if j < int(l/2):
@@ -221,7 +258,7 @@ class Detection:
             zdata = []
             
             for i in range(zl):
-                pushvalue = data_daily.iloc[currentday-i-1][2] - data_daily.iloc[currentday-i-1][3]
+                pushvalue = df.iloc[currentday-i-1][2] - df.iloc[currentday-i-1][3]
                 zdata.append(pushvalue)
 
             z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
@@ -229,11 +266,11 @@ class Detection:
              
             if z > zfilter and z2 > z2filter:
                     
-                log.daily(screenbar,z,"Flag", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+                log.daily(screenbar,z,"Flag", test,pmPrice,df,currentday,timeframe) 
 
       
 
-    def weeklyFlag(data_daily, currentday,pmPrice,screenbar, dateToSearch,timeframe):
+    def weeklyFlag(df, currentday, pmPrice, screenbar, test,timeframe):
         tick = str(screenbar['Ticker'])
         zfilter = 5
         z2filter = -100
@@ -255,7 +292,7 @@ class Detection:
                     
                     
             for k in range(rsil):
-                change = (data_daily.iloc[currentday-k-j-1][4]/data_daily.iloc[currentday-k-j-2][4]) - 1
+                change = (df.iloc[currentday-k-j-1][4]/df.iloc[currentday-k-j-2][4]) - 1
                 if change > 0:
                     gains.append(change)
                 else:
@@ -281,7 +318,7 @@ class Detection:
                 ma3 = []
                 for k in range(3):
 
-                    ma3.append(data_daily.iloc[currentday-j-k-1][4])
+                    ma3.append(df.iloc[currentday-j-k-1][4])
                 ma3 = statistics.mean(ma3)
                           
                 if j < int(l/2):
@@ -304,7 +341,7 @@ class Detection:
             zdata = []
             
             for i in range(zl):
-                pushvalue = data_daily.iloc[currentday-i-1][2] - data_daily.iloc[currentday-i-1][3]
+                pushvalue = df.iloc[currentday-i-1][2] - df.iloc[currentday-i-1][3]
                 zdata.append(pushvalue)
 
             z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
@@ -312,4 +349,4 @@ class Detection:
              
             if z > zfilter and z2 > z2filter:
                     
-                log.daily(screenbar,z,"WFlag", dateToSearch,pmPrice,data_daily,currentday,timeframe) 
+                log.daily(screenbar,z,"WFlag", test,pmPrice,df,currentday,timeframe) 
