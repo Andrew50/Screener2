@@ -57,41 +57,69 @@ class Data:
         except TimeoutError:
             return None
 
-    def get(ticker,interval = 'd',premarket = False):
-        try:
-            if interval == 'd' or interval == 'w' or interval == 'm':
-                df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
-                df['datetime'] = pd.to_datetime(df.iloc[:,0])
-                df = df.set_index('datetime')
-            else:
-                df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
+    def get(ticker,interval = 'd',var = None,premarket = False):
+        
+        if interval == 'd' or interval == 'w' or interval == 'm':
 
-                df['datetime'] = pd.to_datetime(df.iloc[:,0])
-                df = df.set_index('datetime')
-                if not premarket:
-                    df = df.between_time('09:30' , '16:00')
+
+
+            df = pd.read_csv(r"C:/Screener/daily_data/" + ticker + ".csv")
+            df['datetime'] = pd.to_datetime(df.iloc[:,0])
+            df = df.set_index('datetime')
+        else:
+
+            
+            #if type(var) != None:
+               
+
+
+            df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
+
+            df['datetime'] = pd.to_datetime(df.iloc[:,0])
+            df = df.set_index('datetime')
+
+            
+
+
+            if not premarket:
+                df = df.between_time('09:30' , '16:00')
             
             
             
-            if interval != 'd' and interval != '1min':
+        if interval != 'd' and interval != '1min':
                 
                 
                 
-                logic = {'open'  : 'first',
-                            'high'  : 'max',
-                            'low'   : 'min',
-                            'close' : 'last',
-                            'volume': 'sum' }
-                df = df.resample(interval).apply(logic)
+            logic = {'open'  : 'first',
+                        'high'  : 'max',
+                        'low'   : 'min',
+                        'close' : 'last',
+                        'volume': 'sum' }
+            df = df.resample(interval).apply(logic)
                 
 
 
 
-            df.dropna(inplace = True)
-            df = df.reset_index()    
-            return (df)
-        except TimeoutError:
-            return None
+        df.dropna(inplace = True)
+        df = df.reset_index()
+        
+        
+        if type(var) != None:
+            pm = var['Pre-market Change'] + var['Price']
+            
+            row  ={'datetime': [''],
+                   'open': [pm],
+                   'high': [''],
+                   'low': [''],
+                   'close': [''],
+                   'volume': ['']}
+            row = pd.DataFrame(row)
+            df = pd.concat([df, row])
+            print(row)
+            print(df)
+
+        return (df)
+        
 
     def updatTick(tickersString):
         tickers = tickersString.split(' ')

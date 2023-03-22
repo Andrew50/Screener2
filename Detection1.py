@@ -2,48 +2,89 @@
 import statistics
 from Log2 import log as log
 
+from Data5 import Data as data
+
 
 class Detection:
 
 
 
-    def check(dolVol, adr,df, currentday,screenbar,test, timeframe, pmPrice = None ):
+    def check(screenbar):
+
+        try:
+            
+            df = (screenbar['df'])
+            index = screenbar['index']
+            tf = str(screenbar['tf'])
+            path = screenbar['path']
+            ticker = screenbar['Ticker']
+
+            print(ticker)
+            
+            dolVol, adr = Detection.requirements(df,index)
+
+            if dolVol > 1000000 and adr > 3:
+                
+            
+
+                if tf == 'd':
+                    sEP = True
+                    sMR = True
+                    sPivot = True
+                    sFlag = True
+                    dolVolFilter = 10000000
+            
+                    if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
+                
+                        Detection.EP(screenbar)
+                    if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
+                       Detection.MR(screenbar)
+                    if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
+                        Detection.Pivot(screenbar)
+                    if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
+                        Detection.Flag(screenbar)
+
+            
+                if tf == '1min':
+                    pass
+                if tf == '5min':
+                    pass
+                if tf == '1h':
+                    pass
+
+        except FileNotFoundError: 
+            print(f"{ticker} is delisted")
+        except TimeoutError:
+            print(f"{ticker} failed")
 
 
-        if pmPrice == None:
-            pmPrice =  df.iloc[currentday][1]
-
-        
+    def requirements(df,currentday):
+        try:
+            
+            
+            if(currentday == None): 
+               
+                return 0, 0
+            dolVol = []
+            for i in range(5):
+                dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
+            dolVol = statistics.mean(dolVol)
 
        
-
-
-        if timeframe == 'd':
-            sEP = True
-            sMR = True
-            sPivot = True
-            sFlag = True
-            dolVolFilter = 10000000
-            
-            if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
-                
-                Detection.EP(df, currentday, pmPrice,screenbar, test,timeframe)
-            if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
-               Detection.MR(df, currentday, pmPrice,screenbar,test,timeframe)
-            if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
-                Detection.Pivot(df, currentday, pmPrice,screenbar, test,timeframe)
-            if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                Detection.Flag(df, currentday, pmPrice,screenbar, test,timeframe)
-
-            
-        if timeframe == '1min':
-            pass
-        if timeframe == '5min':
-            pass
-        if timeframe == '1h':
-            pass
-
-
+                            
+            adr= []
+            for j in range(20): 
+                high = df.iloc[currentday-j-1][2]
+                low = df.iloc[currentday-j-1][3]
+                val = (high/low - 1) * 100
+                adr.append(val)
+                        
+            adr = statistics.mean(adr)  
+       
+            return dolVol, adr
+        except:
+            print('requirements failed')
+            return 0 , 0
 
 
 

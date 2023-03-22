@@ -66,7 +66,7 @@ class Daily:
                     Daily.Flag(df, currentday, pmPrice,screenbar, dateToSearch,timeframe)
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
-        except TimeoutError:
+        except:
             print(f"{ticker} failed")
 
             

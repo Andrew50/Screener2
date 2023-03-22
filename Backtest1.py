@@ -28,34 +28,7 @@ class Backtest:
 
     
 
-    def processTickers(screenbar):
-
-        try:
-            
-            timeframe = str(screenbar['interval'])
-            ticker = str(screenbar['Ticker'])
-            test = (screenbar['test'])
-            dateToSearch = screenbar['dateToSearch']
-            #print(ticker)
-
-
-            dolVol, adr = Backtest.requirements(ticker,dateToSearch)
-
-            
-
-            if dolVol > 10000000 and adr > 3.5:
-
-                
-                df = data.get(ticker,timeframe)
-                currentday = data.findex(df,dateToSearch)
-        
-                detection.check(dolVol, adr,df, currentday,screenbar, test,timeframe )
-
-
-        except FileNotFoundError: 
-            print(f"{ticker} is delisted")
-        except TimeoutError:
-            print(f"{ticker} failed")
+    
 
             
             
@@ -116,50 +89,9 @@ class Backtest:
             
 
 
-    def pool( timeframe,dateToSearch, ticker,test):
-
-
-
-
-        screener_data = Backtest.get_list(dateToSearch,ticker)
-
-        screenbars = []
-        for i in range(len(screener_data)):
-            screener_data.at[i, 'dateToSearch'] = dateToSearch
-            screener_data.at[i, 'interval'] = timeframe
-            screener_data.at[i, 'test'] = test
-            screenbars.append(screener_data.iloc[i])
-
-        with Pool(nodes=6) as pool:
-            pool.map(Backtest.processTickers, screenbars)
+   
         
-    def requirements(ticker,date):
-        try:
-            df = data.get(ticker,'d')
-            currentday = data.findex(df,date)
-            if(currentday == None): 
-                print('god')
-                return 0, 0
-            dolVol = []
-            for i in range(5):
-                dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
-            dolVol = statistics.mean(dolVol)
-
-       
-                            
-            adr= []
-            for j in range(20): 
-                high = df.iloc[currentday-j-1][2]
-                low = df.iloc[currentday-j-1][3]
-                val = (high/low - 1) * 100
-                adr.append(val)
-                        
-            adr = statistics.mean(adr)  
-       
-            return dolVol, adr
-        except:
-            print('requirements failed')
-            return 0 , 0
+   
         
 if __name__ == '__main__':
     
