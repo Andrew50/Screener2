@@ -67,7 +67,7 @@ class Detection:
 
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
-        except TimeoutError:
+        except:
             print(f"{ticker} failed")
 
 

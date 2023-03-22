@@ -20,7 +20,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 class Screener:
 
 
-    def queue(date = '0',tf = None,ticker = None):
+    def queue(date = None,tf = 'd',ticker = None):
 
         if date == '0':  ##if forecast
 
@@ -30,13 +30,14 @@ class Screener:
 
             Screener.run('d',scan,date,1,scan)
 
-            ui.loop(ui,True)
+            
             browser = None
             while True:
                 browser, scan = Scan.get('intraday',browser)
                 Screener.run('1min',scan,date,2,scan)
 
         else: #if backtest
+
 
             
             path = 0
@@ -45,8 +46,9 @@ class Screener:
             if ticker != None: # if a ticker was specified save to todays_setups
 
                 path = 1
-
-                scan = scan[str(ticker)]
+                scan = scan.set_index("Ticker")
+                
+                scan = scan.loc[str(ticker)]
 
             if date != None: # if a date was specified save to todays_setups and run that date
 
@@ -67,7 +69,7 @@ class Screener:
                         print(f"starting from {startdate}")
                         time.sleep(3)
                     except:
-                        startdate = date(2008, 1, 1)
+                        startdate = datetime.date(2008, 1, 1)
                 
                     sample = data.get('AAPL',tf)
                     index = data.findex(sample,startdate)
@@ -98,9 +100,11 @@ class Screener:
 
 
         screenbars = [] 
-        
+        print(scan)
         for i in range(len(scan)):
             try:
+                #if len(scan) == 1:
+                    #ticker = 
                 ticker = str(scan.iloc[i]['Ticker'])
                 try:
                     pmPrice = var.loc[str(ticker)]['Pre-market Change'] + var.loc[str(ticker)]['Price']
@@ -116,6 +120,10 @@ class Screener:
 
         with Pool(nodes=7) as pool:
             pool.map(detection.check, screenbars)
+
+
+        if path == 1:
+            ui.loop(ui,True)
         
         
 
@@ -123,8 +131,13 @@ class Screener:
 
 if __name__ == '__main__':
 
-    if True or ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
-         Screener.queue()
+    if ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
+
+         Screener.queue('0')
+
+    else:
+        
+        Screener.queue(ticker = "COIN")
 
 
 
