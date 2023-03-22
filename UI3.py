@@ -301,7 +301,7 @@ class UI:
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
                 
-                if date == '0' or type(date) == numpy.int64:
+                if date == '0' or type(date) == numpy.int64 or date == 'Today':
                    
                     pmPrice = (setups_data.iloc[i][4])
                     mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))

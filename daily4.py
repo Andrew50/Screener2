@@ -12,7 +12,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from tvDatafeed import TvDatafeed
 warnings.filterwarnings("ignore")
 from Data5 import Data as data
-from Screen import Screen as screen
+from Scan import Scan as screen
 from UI3 import UI as ui
 
 
@@ -85,8 +85,8 @@ class Daily:
                 if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
                     os.remove("C:/Screener/data_csvs/todays_setups.csv")
                 pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
-                
-                screen.runDailyScan(None)
+                #
+                #screen.runDailyScan(None)
                 #data.runUpdate()
 
             else:
@@ -139,6 +139,7 @@ class Daily:
        
             return dolVol, adr
         except:
+            print('req failed')
             return 0 , 0
 
     def EP(data_daily, currentday, pmPrice, screenbar, dateToSearch,timeframe):

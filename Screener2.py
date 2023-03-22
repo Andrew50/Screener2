@@ -1,6 +1,7 @@
 
 import pandas as pd
 import datetime
+import os
 import time
 from Data5 import Data as data
 
@@ -75,7 +76,7 @@ class Screener:
 
                         date = sample.iloc[index][0]
 
-                        screener.run(tf,scan,date,path,None)
+                        Screener.run(tf,scan,date,path,None)
                        
 
                         index += 1
@@ -90,18 +91,23 @@ class Screener:
     def run(tf,scan,date,path,var):
 
 
+        if path == 1:
+            if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
+                os.remove("C:/Screener/data_csvs/todays_setups.csv")
+            pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+
+
         screenbars = [] 
         
         for i in range(len(scan)):
             try:
                 ticker = str(scan.iloc[i]['Ticker'])
-                df = data.get(ticker,tf,var)
-
-                index = data.findex(df,date)
-
-
-                scan.at[i, 'df'] = df
-                scan.at[i, 'index'] = index
+                try:
+                    pmPrice = var.loc[str(ticker)]['Pre-market Change'] + var.loc[str(ticker)]['Price']
+                except:
+                    pmPrice = None
+                scan.at[i, 'var'] = pmPrice
+                scan.at[i, 'date'] = date
                 scan.at[i, 'tf'] = tf
                 scan.at[i, 'path'] = path
                 screenbars.append(scan.iloc[i])

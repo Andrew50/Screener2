@@ -1,56 +1,69 @@
 
 import statistics
-from Log2 import log as log
+from Log3 import log as log
 
 from Data5 import Data as data
-
 
 class Detection:
 
 
 
     def check(screenbar):
-
+        
         try:
             
-            df = (screenbar['df'])
-            index = screenbar['index']
+
+
+
+
+
+
+            date = (screenbar['date'])
+            var = screenbar['var']
             tf = str(screenbar['tf'])
             path = screenbar['path']
             ticker = screenbar['Ticker']
 
-            print(ticker)
-            
-            dolVol, adr = Detection.requirements(df,index)
+            df = data.get(ticker,tf,var)
 
-            if dolVol > 1000000 and adr > 3:
+            if len(df) > 50:
+
+             
+
+                currentday = data.findex(df,date)
+
+                print(ticker)
+            
+                dolVol, adr = Detection.requirements(df,currentday)
+
+                if dolVol > 1000000 and adr > 3:
                 
-            
-
-                if tf == 'd':
-                    sEP = True
-                    sMR = True
-                    sPivot = True
-                    sFlag = True
-                    dolVolFilter = 10000000
-            
-                    if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
                 
-                        Detection.EP(screenbar)
-                    if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
-                       Detection.MR(screenbar)
-                    if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
-                        Detection.Pivot(screenbar)
-                    if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                        Detection.Flag(screenbar)
+
+                    if tf == 'd':
+                        sEP = True
+                        sMR = True
+                        sPivot = True
+                        sFlag = True
+                        dolVolFilter = 10000000
+            
+                        if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
+                
+                            Detection.EP(df,currentday, tf, path, ticker)
+                        if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
+                           Detection.MR(df,currentday, tf, path, ticker)
+                        if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
+                            Detection.Pivot(df,currentday, tf, path, ticker)
+                        if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
+                            Detection.Flag(df,currentday, tf, path, ticker)
 
             
-                if tf == '1min':
-                    pass
-                if tf == '5min':
-                    pass
-                if tf == '1h':
-                    pass
+                    if tf == '1min':
+                        pass
+                    if tf == '5min':
+                        pass
+                    if tf == '1h':
+                        pass
 
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
@@ -59,6 +72,7 @@ class Detection:
 
 
     def requirements(df,currentday):
+
         try:
             
             
@@ -83,17 +97,22 @@ class Detection:
        
             return dolVol, adr
         except:
+           
             print('requirements failed')
             return 0 , 0
 
 
 
-    def EP(df, currentday, pmPrice, screenbar, test,timeframe):
+    def EP(df,currentday, tf, path, ticker):
+        
+       
+
+        pmPrice = df.iloc[currentday][1]
+        
+       # zfilter = 5.5
+        zfilter = 1
+        
       
-        
-        zfilter = 5.5
-        
-      #  try: 
         prevClose = df.iloc[currentday-1][4]
         gaps = []
         lows = []
@@ -106,31 +125,26 @@ class Detection:
 
         z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
            
-            
+        
         if(z > zfilter) and pmPrice > max(highs):
-            log.daily(screenbar,z,"EP", test,pmPrice,df,currentday,timeframe) 
+            log.log(df,currentday, tf, path, ticker, z, 'EP') 
             
         elif (z < -zfilter) and pmPrice < min(lows):
-            log.daily(screenbar,z,"NEP", test,pmPrice,df,currentday,timeframe) 
+            log.log(df,currentday, tf, path, ticker, z, 'NEP')  
 
-      #  except IndexError:
-       #     print("index error")
-     #   except TimeoutError:
-         #   print("timeout error")
-      #  except FileNotFoundError:
-         #   print("file error") 
-
+     
     
  
-    def MR(df, currentday, pmPrice, screenbar, test,timeframe):
+    def MR(df,currentday, tf, path, ticker):
         
-    
+        
+        pmPrice = df.iloc[currentday][1]
         
         zfilter = 3.5
         gapzfilter0 = 5.5
         gapzfilter1 = 4
         changezfilter = 2.5
-       # try: 
+      
         prevClose = df.iloc[currentday-1][4]
         zdata = []
         zgaps = []
@@ -178,17 +192,18 @@ class Detection:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                log.daily(screenbar,z,"MR", test,pmPrice,df,currentday,timeframe) 
+                log.log(df,currentday, tf, path, ticker, z, 'MR') 
                
       
-    def Pivot(df, currentday, pmPrice, screenbar, test,timeframe):
-        
-
+    def Pivot(df,currentday, tf, path, ticker):
+       
        
         lowergapzfilter = 1.5
         lowergapzfilter2 = 1.5
+
+        pmPrice = df.iloc[currentday][1]
        
-       # try: 
+        
         prevClose = df.iloc[currentday-1][4]
         zgaps = []
         for i in range(15):
@@ -213,22 +228,23 @@ class Detection:
         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-            log.daily(screenbar,gapz,"Pivot", test,pmPrice,df,currentday,timeframe) 
+           log.log(df,currentday, tf, path, ticker, gapz, 'Pivot')  
 
         if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-            log.daily(screenbar,gapz,"Pivot", test,pmPrice,df,currentday,timeframe) 
+            log.log(df,currentday, tf, path, ticker, gapz, 'Pivot') 
       
 
 
-    def Flag(df, currentday, pmPrice, screenbar, test,timeframe):
-        tick = str(screenbar['Ticker'])
+    def Flag(df,currentday, tf, path, ticker):
+
+        pmPrice = df.iloc[currentday][1]
+       
         
-        
-        if test:
-            zfilter = 4
-        else:
-            zfilter = 8
+        #if test:
+           # zfilter = 4
+       # else:
+        zfilter = 8
 
 
         z2filter = .25
@@ -250,7 +266,10 @@ class Detection:
                     
                     
             for k in range(rsil):
+                
                 change = (df.iloc[currentday-k-j-1][4]/df.iloc[currentday-k-j-2][4]) - 1
+                
+                    
                 if change > 0:
                     gains.append(change)
                 else:
@@ -305,14 +324,16 @@ class Detection:
             z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
             z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
              
+            
             if z > zfilter and z2 > z2filter:
                     
-                log.daily(screenbar,z,"Flag", test,pmPrice,df,currentday,timeframe) 
+                log.log(df,currentday, tf, path, ticker, z, 'Flag') 
 
       
 
-    def weeklyFlag(df, currentday, pmPrice, screenbar, test,timeframe):
-        tick = str(screenbar['Ticker'])
+    def weeklyFlag(df,currentday, tf, path, ticker):
+        pmPrice = df.iloc[currentday][1]
+        
         zfilter = 5
         z2filter = -100
         lmin = 20
@@ -390,4 +411,4 @@ class Detection:
              
             if z > zfilter and z2 > z2filter:
                     
-                log.daily(screenbar,z,"WFlag", test,pmPrice,df,currentday,timeframe) 
+                log.log(df,currentday, tf, path, ticker, z, 'sssFlag')

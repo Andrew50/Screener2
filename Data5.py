@@ -1,4 +1,5 @@
 
+
 import numpy
 import pandas as pd
 import datetime
@@ -16,14 +17,14 @@ class Data:
     def findex(df,dt):
         try:
             
-            if dt == '0' or type(dt) == numpy.int64:
+            if dt == 'Today' or dt == '0' or type(dt) == numpy.int64:
                 #dt = datetime.datetime.now()
-                return len(df)
+                return len(df) - 1
             if type(dt) == str:
                 try:
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
                 except:
-                    print(dt)
+                    
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
             if type(dt) == datetime.date:
                 time = datetime.time(0,0,0)
@@ -104,19 +105,23 @@ class Data:
         df = df.reset_index()
         
         
-        if type(var) != None:
-            pm = var['Pre-market Change'] + var['Price']
+        if type(var) != type(None) and (interval == 'd' or interval == 'w' or interval == 'm'):
             
-            row  ={'datetime': [''],
+            
+            pm = var
+            
+            row  ={'datetime': ['Today'],
                    'open': [pm],
-                   'high': [''],
-                   'low': [''],
-                   'close': [''],
-                   'volume': ['']}
+                   'high': [' '],
+                   'low': [' '],
+                   'close': [' '],
+                   'volume': [' ']}
             row = pd.DataFrame(row)
             df = pd.concat([df, row])
-            print(row)
-            print(df)
+            df = df.reset_index()
+            df.drop('index', axis = 1, inplace = True)
+            
+            
 
         return (df)
         
