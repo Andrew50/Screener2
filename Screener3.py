@@ -23,8 +23,7 @@ class Screener:
 
 
     def queue(date = None,ticker = None, tf = 'd'):
-        if date == '0':
-            date = datetime.datetime.today()
+        
         date_buffer = 20
 
         if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
@@ -35,6 +34,7 @@ class Screener:
         if date == None:
             try:
                 df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                dt = df.iloc[-1][0]
                 try:
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
                 except:
@@ -82,7 +82,7 @@ class Screener:
 
 
     def run(date_list,ticker_list,tf):
-        print(ticker_list)
+        
         poolsize = 5000
         container = []
         for date in date_list:
@@ -103,13 +103,17 @@ class Screener:
 
 if __name__ == '__main__':
 
-    if True or ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
+    if ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
          Screener.queue('0')
+         ui.loop(ui,True)
 
     else:
-        
-        Screener.queue(ticker = ['COIN','HOOD'])
+        Screener.queue('0')
+        #Screener.queue(date = '2023-03-22')
+        #Screener.queue(ticker = ['COIN','HOOD'])
+        ui.loop(ui,True)
+
 
 
 

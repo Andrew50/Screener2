@@ -10,6 +10,8 @@ import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
 
+fr
+
 
 
 
@@ -17,7 +19,7 @@ class Scan:
 
     def get(date, tf, browser = None):
         
-        if date == datetime.datetime.today():
+        if date == '0':
 
             if tf == 'd' or tf == 'w' or tf == 'm':
                 Scan.runDailyScan(None)

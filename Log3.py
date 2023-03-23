@@ -103,16 +103,23 @@ class log:
 
 
     def log(df,currentday, tf, ticker, z, st):
-        print('workingggggggggggggggggggggggggggggggggggggggggggg')
-        dateString = str(df.iloc[currentday][0])
+        
+        
         path = 1
-        pmPrice = df.iloc[currentday][1]
+        
 
         if path == 0:
+            dateString = str(df.iloc[currentday][0])
             
             pass
             
         if path == 1:
+            print(f"{df.iloc[currentday][0]},{datetime.date.today()}")
+            if df.iloc[currentday][0] == datetime.date.today(): 
+                dateString = '0'
+            else:
+                dateString = df.iloc[currentday][0]
+            pmPrice = df.iloc[currentday][1]
             data ={'Date': [dateString],
                     'Ticker':[ ticker],
                     'Setup': [str(st)],

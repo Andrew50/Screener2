@@ -4,6 +4,7 @@
 import numpy
 import pandas as pd
 import datetime
+import numpy as np
 from tvDatafeed import TvDatafeed
 import os 
 import datetime
@@ -18,7 +19,7 @@ class Data:
     def findex(df,dt):
         try:
             
-            if dt == 'Today' or dt == '0' or type(dt) == numpy.int64:
+            if dt == 'Today' or dt == '0' or type(dt) == numpy.int64 :
                 #dt = datetime.datetime.now()
                 return len(df) - 1
             if type(dt) == str:
@@ -31,8 +32,10 @@ class Data:
                 time = datetime.time(0,0,0)
                 dt = datetime.datetime.combine(dt,time)
 
-            
-
+            time = datetime.time(0,0,0)
+            today = datetime.date.today()
+            today = datetime.datetime.combine(today,time)
+            if dt >= 
             i = int(len(df)/2)
             k = i
         
@@ -60,9 +63,9 @@ class Data:
             return None
 
     def get(ticker,tf = 'd',date = None):
-        current = False
+        current = False##############
         premarket = False
-        if date != None and date == datetime.datetime.today():
+        if date != None and date == datetime.date.today():
             current = True
 
 
@@ -91,7 +94,7 @@ class Data:
 
 
             if not premarket:
-                df = df.between_time('09:30' , '16:00')
+                df = df.between_time('09:30' , '15:59')
             
             
             
@@ -114,16 +117,16 @@ class Data:
             
             screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
             screener_data.set_index('Ticker', inplace = True)
-            screenbar = screener_data[ticker]
+            screenbar = screener_data.loc[ticker]
             
             pm = screenbar['Price'] + screenbar['Pre-market Change']
-            
-            row  ={'datetime': ['Today'],
+            date = np.datetime64(datetime.date.today())
+            row  ={'datetime': [date],
                    'open': [pm],
-                   'high': [' '],
-                   'low': [' '],
-                   'close': [' '],
-                   'volume': [' ']}
+                   'high': [pm],
+                   'low': [pm],
+                   'close': [pm],
+                   'volume': [0]}
             row = pd.DataFrame(row)
             df = pd.concat([df, row])
             df = df.reset_index()
@@ -138,7 +141,7 @@ class Data:
         tickers = tickersString.split(' ')
         test = yf.download(tickers =  tickersString,  
             period = "25y",  group_by='ticker',      
-            tf = "1d",      
+            interval = "1d",      
             ignore_tz = True,  
             progress=False,
             prepost = False) 
@@ -192,53 +195,56 @@ class Data:
                 print(f"error daily {ticker}y KeyError")
             except:
                 print(f"error daily {ticker}")
-        test = yf.download(tickers =  tickersString,  
-        period = "5d",  group_by='ticker',      
-        tf = "1m",      
-        ignore_tz = True,
-        progress=False,
-            prepost = False) 
-        for ticker in tickers:
-            try:
-                ticker_df = test[ticker]
-                ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
-                ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
-                ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
-                if (datetime.datetime.now().weekday() < 5) and ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
-                    ticker_df.drop(ticker_df.tail(1).index,inplace=True)
-                    print('dropped 1 because market open')
-                if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
-                    ticker_df.dropna(inplace = True)
-                    ticker_df.drop('datetime', axis = 1, inplace = True)
+
+
+        if not ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):   #if it is in the morning and u forgot to update data it ill just do daily
+            test = yf.download(tickers =  tickersString,  
+            period = "5d",  group_by='ticker',      
+            interval = "1m",      
+            ignore_tz = True,
+            progress=False,
+                prepost = False) 
+            for ticker in tickers:
+                try:
+                    ticker_df = test[ticker]
+                    ticker_df = ticker_df.drop(axis=1, labels="Adj Close")
+                    ticker_df['datetime'] = pd.to_datetime(ticker_df.index)
+                    ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
+                    if (datetime.datetime.now().weekday() < 5) and ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
+                        ticker_df.drop(ticker_df.tail(1).index,inplace=True)
+                        print('dropped 1 because market open')
+                    if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
+                        ticker_df.dropna(inplace = True)
+                        ticker_df.drop('datetime', axis = 1, inplace = True)
                     
-                    ticker_df.index.rename('datetime', inplace = True)
-                    ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
-                    print(f"created minute{ticker}")
-                else:
-                    cs = Data.get(ticker,'1min')
-                    lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
-                    cs = cs.set_index('datetime') 
-                    scrapped_data_index = Data.findex(ticker_df, lastDay) 
-                    if scrapped_data_index != None:
-                        scrapped_data_index = scrapped_data_index + 1
-                        if scrapped_data_index != len(ticker_df):
-                            ticker_df = ticker_df[scrapped_data_index:]
-                            ticker_df.dropna(inplace = True)
-                            ticker_df.drop('datetime', axis = 1, inplace = True)
-                            cs = pd.concat([cs, ticker_df])
-                            cs.index.rename('datetime', inplace = True)
-                            
-                            #cs.drop(cs.columns[0], axis = 1, inplace = True)
-                            cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
-                            numRows = len(ticker_df)
-                            print(f"appended minute {numRows} to {ticker}")
-                        else:
-                            print(f'approved minute {ticker}')
+                        ticker_df.index.rename('datetime', inplace = True)
+                        ticker_df.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
+                        print(f"created minute{ticker}")
                     else:
-                        print(f"failed minute {ticker}")
+                        cs = Data.get(ticker,'1min')
+                        lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
+                        cs = cs.set_index('datetime') 
+                        scrapped_data_index = Data.findex(ticker_df, lastDay) 
+                        if scrapped_data_index != None:
+                            scrapped_data_index = scrapped_data_index + 1
+                            if scrapped_data_index != len(ticker_df):
+                                ticker_df = ticker_df[scrapped_data_index:]
+                                ticker_df.dropna(inplace = True)
+                                ticker_df.drop('datetime', axis = 1, inplace = True)
+                                cs = pd.concat([cs, ticker_df])
+                                cs.index.rename('datetime', inplace = True)
+                            
+                                #cs.drop(cs.columns[0], axis = 1, inplace = True)
+                                cs.to_csv("C:/Screener/minute_data/" + ticker + ".csv")
+                                numRows = len(ticker_df)
+                                print(f"appended minute {numRows} to {ticker}")
+                            else:
+                                print(f'approved minute {ticker}')
+                        else:
+                            print(f"failed minute {ticker}")
         
-            except:
-                print(f"error minute {ticker}")
+                except:
+                    print(f"error minute {ticker}")
 
     def isTickerUpdated(tickerandDate):
         ticker = tickerandDate.split(":")[0]

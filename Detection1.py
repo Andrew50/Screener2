@@ -4,6 +4,8 @@ from Log3 import log as log
 
 from Data5 import Data as data
 
+import pandas as pd
+
 class Detection:
 
    
@@ -69,6 +71,8 @@ class Detection:
 
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
+        except pd.errors.EmptyDataError:
+            print('{ticker} is empty')
         except TimeoutError:
             print(f"{ticker} failed")
 
