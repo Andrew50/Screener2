@@ -16,11 +16,35 @@ warnings.filterwarnings("ignore")
 
 class Data:
 
+
+    def isToday(dt):
+        if dt == 'Today' or dt == '0':
+            return True
+        time = datetime.time(0,0,0)
+        today = datetime.date.today()
+        today = datetime.datetime.combine(today,time)
+        if type(dt) == str:
+            try:
+                dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
+            except:
+                    
+                dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+        if type(dt) == datetime.date:
+            time = datetime.time(0,0,0)
+            dt = datetime.datetime.combine(dt,time)
+        if dt >= today:
+            return True
+        return False
+
+
+
+
+
     def findex(df,dt):
         try:
             
-            if dt == 'Today' or dt == '0' or type(dt) == numpy.int64 :
-                #dt = datetime.datetime.now()
+            if Data.isToday(dt):
+               
                 return len(df) - 1
             if type(dt) == str:
                 try:
@@ -32,10 +56,8 @@ class Data:
                 time = datetime.time(0,0,0)
                 dt = datetime.datetime.combine(dt,time)
 
-            time = datetime.time(0,0,0)
-            today = datetime.date.today()
-            today = datetime.datetime.combine(today,time)
-            if dt >= 
+            
+
             i = int(len(df)/2)
             k = i
         
