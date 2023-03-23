@@ -1,5 +1,6 @@
 
 
+
 import numpy
 import pandas as pd
 import datetime
@@ -58,9 +59,14 @@ class Data:
         except TimeoutError:
             return None
 
-    def get(ticker,interval = 'd',var = None,premarket = False):
-        
-        if interval == 'd' or interval == 'w' or interval == 'm':
+    def get(ticker,tf = 'd',date = None):
+        current = False
+        premarket = False
+        if date != None and date == datetime.datetime.today():
+            current = True
+
+
+        if tf == 'd' or tf == 'w' or tf == 'm':
 
 
 
@@ -70,7 +76,9 @@ class Data:
         else:
 
             
-            #if type(var) != None:
+            if current:
+                pass
+                #tv scrper shit
                
 
 
@@ -87,7 +95,7 @@ class Data:
             
             
             
-        if interval != 'd' and interval != '1min':
+        if tf != 'd' and tf != '1min':
                 
                 
                 
@@ -96,19 +104,19 @@ class Data:
                         'low'   : 'min',
                         'close' : 'last',
                         'volume': 'sum' }
-            df = df.resample(interval).apply(logic)
-                
-
-
-
+            df = df.resample(tf).apply(logic)
+          
         df.dropna(inplace = True)
         df = df.reset_index()
         
         
-        if type(var) != type(None) and (interval == 'd' or interval == 'w' or interval == 'm'):
+        if current and (tf == 'd' or tf == 'w' or tf == 'm'):
             
+            screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+            screener_data.set_index('Ticker', inplace = True)
+            screenbar = screener_data[ticker]
             
-            pm = var
+            pm = screenbar['Price'] + screenbar['Pre-market Change']
             
             row  ={'datetime': ['Today'],
                    'open': [pm],
@@ -130,7 +138,7 @@ class Data:
         tickers = tickersString.split(' ')
         test = yf.download(tickers =  tickersString,  
             period = "25y",  group_by='ticker',      
-            interval = "1d",      
+            tf = "1d",      
             ignore_tz = True,  
             progress=False,
             prepost = False) 
@@ -186,7 +194,7 @@ class Data:
                 print(f"error daily {ticker}")
         test = yf.download(tickers =  tickersString,  
         period = "5d",  group_by='ticker',      
-        interval = "1m",      
+        tf = "1m",      
         ignore_tz = True,
         progress=False,
             prepost = False) 

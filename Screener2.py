@@ -30,7 +30,7 @@ class Screener:
 
             Screener.run('d',scan,date,1,scan)
 
-            
+            ui.loop(ui,True)
             browser = None
             while True:
                 browser, scan = Scan.get('intraday',browser)
@@ -47,18 +47,33 @@ class Screener:
 
                 path = 1
                 scan = scan.set_index("Ticker")
+
                 
                 scan = scan.loc[str(ticker)]
 
+                scan = str(scan.name)
+
+                
+
+                
+
+                
+                
             if date != None: # if a date was specified save to todays_setups and run that date
 
                 path = 1
-
+                if path == 1:
+                    if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
+                        os.remove("C:/Screener/data_csvs/todays_setups.csv")
+                    pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
                 Screener.run(tf,scan,date,path,None)
 
 
             else:
-
+                if path == 1:
+                    if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
+                        os.remove("C:/Screener/data_csvs/todays_setups.csv")
+                    pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
                 while True:
 
                     try:
@@ -74,56 +89,70 @@ class Screener:
                     sample = data.get('AAPL',tf)
                     index = data.findex(sample,startdate)
 
-                    while index < len(sample) - 50:
+                    while index < len(sample) - 10:
 
                         date = sample.iloc[index][0]
 
+                       
                         Screener.run(tf,scan,date,path,None)
                        
 
                         index += 1
 
-
-
-
-
+                    if path == 1:
+                        ui.loop(ui,True)
 
 
 
     def run(tf,scan,date,path,var):
 
 
-        if path == 1:
-            if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
-                os.remove("C:/Screener/data_csvs/todays_setups.csv")
-            pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+        
 
 
         screenbars = [] 
-        print(scan)
-        for i in range(len(scan)):
-            try:
-                #if len(scan) == 1:
-                    #ticker = 
-                ticker = str(scan.iloc[i]['Ticker'])
+        
+        
+
+        if type(scan) is str:
+            scan  = pd.DataFrame({'var':[None],
+                                       'date':[date],
+                                       'tf':[tf],
+                                       'path':[path],
+                                       'Ticker':[scan]})
+           
+            
+            
+            detection.check(scan)
+
+
+
+        else:
+            for i in range(len(scan)):
                 try:
-                    pmPrice = var.loc[str(ticker)]['Pre-market Change'] + var.loc[str(ticker)]['Price']
-                except:
-                    pmPrice = None
-                scan.at[i, 'var'] = pmPrice
-                scan.at[i, 'date'] = date
-                scan.at[i, 'tf'] = tf
-                scan.at[i, 'path'] = path
-                screenbars.append(scan.iloc[i])
-            except FileNotFoundError:
-                print(f"{ticker} delisted")
+                    
+                    
+                       
+                    ticker = str(scan.iloc[i]['Ticker'])
+                    try:
+                        pmPrice = var.loc[str(ticker)]['Pre-market Change'] + var.loc[str(ticker)]['Price']
+                    except:
+                        pmPrice = None
+                    scan.at[i, 'var'] = pmPrice
+                    scan.at[i, 'date'] = date
+                    scan.at[i, 'tf'] = tf
+                    scan.at[i, 'path'] = path
 
-        with Pool(nodes=7) as pool:
-            pool.map(detection.check, screenbars)
+                
+                    screenbars.append(scan.iloc[i])
+                except FileNotFoundError:
+                    print(f"{ticker} delisted")
+
+            with Pool(nodes=7) as pool:
+                pool.map(detection.check, screenbars)
 
 
-        if path == 1:
-            ui.loop(ui,True)
+        
         
         
 

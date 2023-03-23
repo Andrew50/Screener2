@@ -102,10 +102,10 @@ class log:
        
 
 
-    def log(df,currentday, tf, path, ticker, z, st):
+    def log(df,currentday, tf, ticker, z, st):
         print('workingggggggggggggggggggggggggggggggggggggggggggg')
         dateString = str(df.iloc[currentday][0])
-
+        path = 1
         pmPrice = df.iloc[currentday][1]
 
         if path == 0:

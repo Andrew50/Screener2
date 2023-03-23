@@ -15,26 +15,41 @@ from tvDatafeed import TvDatafeed
 
 class Scan:
 
-    def get(ident, browser = None):
+    def get(date, tf, browser = None):
+        
+        if date == datetime.datetime.today():
+
+            if tf == 'd' or tf == 'w' or tf == 'm':
+                Scan.runDailyScan(None)
+                return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+
+            else:
+
+                browser = Scan.runIntradayScan(browser)
+                return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
 
 
-
-        if ident == 'full':
-
+        else:
             Scan.updateList()
             return pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        if ident == "daily":
+        if False:
+            if ident == 'full':
 
-            Scan.runDailyScan(None)
-            return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+                Scan.updateList()
+                return pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+
+            if ident == "daily":
+
+                Scan.runDailyScan(None)
+                return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 
 
 
-        if ident == 'intraday':
+            if ident == 'intraday':
 
-            browser = Scan.runIntradayScan(browser)
-            return browser, pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+                browser = Scan.runIntradayScan(browser)
+                return browser, pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
 
 
 
