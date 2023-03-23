@@ -62,7 +62,7 @@ class Screener:
 
 
         if ticker == None:
-            ticker_list = scan.get(date,tf)
+            ticker_list = scan.get(date,tf)['Ticker'].tolist()
 
         elif type(ticker) is str:
             ticker_list = [ticker]
@@ -82,7 +82,7 @@ class Screener:
 
 
     def run(date_list,ticker_list,tf):
-
+        print(ticker_list)
         poolsize = 5000
         container = []
         for date in date_list:
