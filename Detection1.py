@@ -66,14 +66,15 @@ class Detection:
                         pass
                     if tf == '5min':
                         pass
-                    if tf == '1h':
+                    if tf == 'h':
+                        
                         pass
 
         except FileNotFoundError: 
             print(f"{ticker} is delisted")
         except pd.errors.EmptyDataError:
             print('{ticker} is empty')
-        except TimeoutError:
+        except:
             print(f"{ticker} failed")
 
 

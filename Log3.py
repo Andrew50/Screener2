@@ -114,7 +114,7 @@ class log:
             pass
             
         if path == 1:
-            print(f"{df.iloc[currentday][0]},{datetime.date.today()}")
+            
             if df.iloc[currentday][0] == datetime.date.today(): 
                 dateString = '0'
             else:
@@ -124,7 +124,7 @@ class log:
                     'Ticker':[ ticker],
                     'Setup': [str(st)],
                     'Z': [z],
-                    'pm':[pmPrice]}
+                    'tf':[tf]}
         
             dfadd = pd.DataFrame(data)
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)

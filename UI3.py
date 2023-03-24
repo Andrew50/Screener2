@@ -30,15 +30,18 @@ class UI:
         os.mkdir("C:/Screener/tmp/charts")
         self.i = 0
         self.annotation = False
-        if current:
-            self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
-            self.historical = False
+        try:
+            if current:
+                self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+                self.historical = False
     
-        else:
-            self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-            self.historical = True
+            else:
+                self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                self.historical = True
 
-            
+        except:
+            print('There were no setups')
+            exit()
 
         self.sort = False
         self.preloadamount = 6
@@ -243,8 +246,7 @@ class UI:
                 s  = mpf.make_mpf_style(marketcolors=mc)
                 date = (setups_data.iloc[i][0])
                 
-                print(date)
-
+               
                 
                 ticker = str(setups_data.iloc[i][1])
                 setup = str(setups_data.iloc[i][2])
@@ -257,10 +259,10 @@ class UI:
                 chartoffset_minute = 10
                 chartoffset_hour = 50
 
-                df1 = data.get(ticker,'w')
-                df2 = data.get(ticker,'d')
-                df3 = data.get(ticker,'h')
-                df4 = data.get(ticker,'1min')
+                df1 = data.get(ticker,'w',date)
+                df2 = data.get(ticker,'d',date)
+                df3 = data.get(ticker,'h',date)
+                df4 = data.get(ticker,'1min',date)
 
                 
 
@@ -303,7 +305,7 @@ class UI:
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
                 
-                if date == '0' or date == 'Today' or date ==  0:
+                if data.isToday(date):
                     
                     
                     pmPrice = (setups_data.iloc[i][4])
@@ -314,8 +316,8 @@ class UI:
                 else:
                     mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date} 9:00")], alpha = .25))
-                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date} 9:30")], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date}")], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date}")], alpha = .25))
             except TimeoutError:
                 print('preload failed')
                        

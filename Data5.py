@@ -5,7 +5,7 @@ import numpy
 import pandas as pd
 import datetime
 import numpy as np
-from tvDatafeed import TvDatafeed
+from tvDatafeed import TvDatafeed, Interval
 import os 
 import datetime
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -18,22 +18,29 @@ class Data:
 
 
     def isToday(dt):
-        if dt == 'Today' or dt == '0':
+        
+        if dt == None:
+            return False
+
+        if dt == 'Today' or dt == '0' or dt == 0:
             return True
         time = datetime.time(0,0,0)
         today = datetime.date.today()
         today = datetime.datetime.combine(today,time)
-        if type(dt) == str:
+        if type(dt) is str:
+            
             try:
                 dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
             except:
                     
                 dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
-        if type(dt) == datetime.date:
+        if type(dt) is datetime.date:
             time = datetime.time(0,0,0)
             dt = datetime.datetime.combine(dt,time)
         if dt >= today:
+            
             return True
+
         return False
 
 
@@ -49,15 +56,24 @@ class Data:
             if type(dt) == str:
                 try:
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
-                except:
+                    
+                    
+                except TimeoutError:
                     
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+
+
             if type(dt) == datetime.date:
-                time = datetime.time(0,0,0)
+                
+                time = datetime.time(9,30,0)
                 dt = datetime.datetime.combine(dt,time)
 
             
-
+            if dt.time() == datetime.time(0):
+                time = datetime.time(9,30,0)
+                dt = datetime.datetime.combine(dt.date(),time)
+            
+            print(dt)
             i = int(len(df)/2)
             k = i
         
@@ -85,11 +101,10 @@ class Data:
             return None
 
     def get(ticker,tf = 'd',date = None):
-        current = False##############
+       
         premarket = False
-        if date != None and date == datetime.date.today():
-            current = True
-
+        current = Data.isToday(date)
+        
 
         if tf == 'd' or tf == 'w' or tf == 'm':
 
@@ -102,21 +117,27 @@ class Data:
 
             
             if current:
-                pass
-                #tv scrper shit
+                tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+                df = tvr.get_hist("AAPL", "NASDAQ", interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
+
+
+                df.drop('symbol', axis = 1, inplace = True)
+                df.index = df.index + pd.Timedelta(hours=4)
+                
+                #df.reset_index(inplace = True)
                
+            else:
 
+                df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
 
-            df = pd.read_csv(r"C:/Screener/minute_data/" + ticker + ".csv")
-
-            df['datetime'] = pd.to_datetime(df.iloc[:,0])
-            df = df.set_index('datetime')
+                df['datetime'] = pd.to_datetime(df.iloc[:,0])
+                df = df.set_index('datetime')
 
             
 
 
-            if not premarket:
-                df = df.between_time('09:30' , '15:59')
+                if not premarket:
+                    df = df.between_time('09:30' , '15:59')
             
             
             

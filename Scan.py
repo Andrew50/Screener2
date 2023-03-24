@@ -10,7 +10,7 @@ import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
 
-fr
+from Data5 import Data as data
 
 
 
@@ -19,14 +19,14 @@ class Scan:
 
     def get(date, tf, browser = None):
         
-        if date == '0':
+        if data.isToday(date):
 
             if tf == 'd' or tf == 'w' or tf == 'm':
                 Scan.runDailyScan(None)
                 return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 
             else:
-
+                print('orking')
                 browser = Scan.runIntradayScan(browser)
                 return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
 
@@ -109,16 +109,27 @@ class Scan:
         time.sleep(2)
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-        new_name = r"C:\Downloads\screener_data_intraday.csv"
-        os.rename(downloaded_file, new_name)
-        os.replace(r"C:\Downloads\screener_data_intraday.csv", r"C:\Screener\tmp\screener_data_intraday.csv")
+        #new_name = r"C:\Downloads\screener_data_intraday.csv"
 
-        #df = pd.read_csv(r"C:\Screener\screener_data_intraday.csv")
-        #df = 
 
+
+        #os.rename(downloaded_file, new_name)
+        #os.replace(r"C:\Downloads\screener_data_intraday.csv", r"C:\Screener\tmp\screener_data_intraday.csv")
+
+        #pull df
+        df = pd.read_csv(downloaded_file)
+        os.remove(downloaded_file)
+
+
+        percent = .1
+
+        length = len(df) - 1
+        left = 0
+        right =  int(length* (percent))
+        df = df[left:right]
+        df.to_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         time.sleep(0.1)
 
-        
         return browser
 
     def logInScrapper():
