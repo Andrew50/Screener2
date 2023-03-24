@@ -129,7 +129,7 @@ class log:
             dfadd = pd.DataFrame(data)
             dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
 
-        if path == '2' and False:
+        if path == 3 and False:
            
 
     
