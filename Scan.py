@@ -26,34 +26,21 @@ class Scan:
                 return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 
             else:
-                browser = Scan.runIntradayScan(browser)
-                return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
-
+                while True:
+                    try:
+                    
+                        browser = Scan.runIntradayScan(browser)
+                        return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+                        
+                    except:
+                        print('retrying scan')
+                        Scan.tryCloseLogout(browser)
 
         else:
             Scan.updateList()
             return pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
 
-        if False:
-            if ident == 'full':
-
-                Scan.updateList()
-                return pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
-
-            if ident == "daily":
-
-                Scan.runDailyScan(None)
-                return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
-
-
-
-            if ident == 'intraday':
-
-                browser = Scan.runIntradayScan(browser)
-                return browser, pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
-
-
-
+    
     def runDailyScan(brows):
         browser = brows
         if(browser == None):
@@ -87,6 +74,8 @@ class Scan:
                 screener_data.at[i, 'Exchange'] = "AMEX"
             if screener_data.iloc[i]['Pre-market Change'] is None:
                     screener_data.at[i, 'Pre-market Change'] = 0
+
+        screener_data.to_csv(r"C:\Screener\tmp\screener_data.csv")
     
     def runIntradayScan(brows):
         browser = brows
@@ -120,12 +109,18 @@ class Scan:
         os.remove(downloaded_file)
 
 
-        percent = .1
+        percent = .01
 
         length = len(df) - 1
         left = 0
         right =  int(length* (percent))
         df = df[left:right]
+        numTickers = len(df)
+        for i in range(numTickers):
+            if str(df.iloc[i]['Exchange']) == "NYSE ARCA":
+                df.at[i, 'Exchange'] = "AMEX"
+            if df.iloc[i]['Pre-market Change'] is None:
+                    df.at[i, 'Pre-market Change'] = 0
         df.to_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
         time.sleep(0.1)
 
@@ -182,7 +177,7 @@ class Scan:
         try:
             filter_tab.click()
         except ElementNotInteractableException:
-            print('test')
+            pass
         time.sleep(0.5)
         #Setting up the TV screener parameters
         tab1 = browser.find_element(By.XPATH, '//label[@data-field="earnings_per_share_basic_ttm"]')
@@ -222,13 +217,14 @@ class Scan:
         sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
         sortRVol.click()
     def tryCloseLogout(browser):
-        try:
-            print('test')
-            browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
-        except AttributeError:
-            pass
-        except selenium.common.exceptions.NoSuchElementException:
-            pass
+        if browser != None:
+            try:
+                print('test')
+                browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
+            except AttributeError:
+                pass
+            except selenium.common.exceptions.NoSuchElementException:
+                pass
 
 
 

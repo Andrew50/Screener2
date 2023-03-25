@@ -21,7 +21,7 @@ class Detection:
             tf = screenbar[2]
             path = screenbar[3]
 
-            print(f"{date} , {tf}, {ticker}")
+            #print(f"{date} , {tf}, {ticker}")
 
 
 
@@ -40,11 +40,12 @@ class Detection:
             
                 dolVol, adr = Detection.requirements(df,currentday)
 
-                if dolVol > 1000000 and adr > 3:
+                
                 
                 
 
-                    if tf == 'd':
+                if tf == 'd':
+                    if dolVol > 1000000 and adr > 3:
                         sEP = True
                         sMR = True
                         sPivot = True
@@ -55,29 +56,34 @@ class Detection:
                 
                             Detection.EP(df,currentday, tf, ticker, path)
                         if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
-                           Detection.MR(df,currentday, tf, ticker, path)
+                            Detection.MR(df,currentday, tf, ticker, path)
                         if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
                             Detection.Pivot(df,currentday, tf, ticker, path)
                         if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
                             Detection.Flag(df,currentday, tf, ticker, path)
 
             
-                    if tf == '1min':
-                        pass
-                    if tf == '5min':
-                        pass
-                    if tf == 'h':
+                if tf == '1min':
+                    z = 0
+                    log.log(df,currentday, tf, ticker, z, path , 'Intraday') 
+                if tf == '5min':
+                    pass
+                if tf == 'h':
                         
-                        pass
-
+                    pass
+            
         except FileNotFoundError: 
-            print(f"{ticker} is delisted")
+            pass
+            #print(f"{ticker} is delisted")
         except pd.errors.EmptyDataError:
-            print('{ticker} is empty')
+            pass
+            #print('{ticker} is empty')
         except:
-            print(f"{ticker} failed")
+            pass
+            #print(f"{ticker} failed")
 
-
+     
+        
     def requirements(df,currentday):
 
         try:

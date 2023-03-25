@@ -17,16 +17,20 @@ from Scan import Scan as scan
 
 
 
+num = 2463
+data.progress(num)
 
+for i in range (num):
+    data.progress()
 
+num = 1100
+data.progress(num)
 
-
+for i in range (num):
+    data.progress()
 
 #df = data.get('AAPL','5min','0')
-date = '0'
-tf = '1min'
-df = scan.get(date,tf)
-print(df)
+
 
 #print(df.iloc[data.findex(df,date)][0])
 

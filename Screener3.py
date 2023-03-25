@@ -5,6 +5,7 @@ import pandas as pd
 import datetime
 import os
 import time
+from tqdm import tqdm
 from Data5 import Data as data
 
 from Detection1 import Detection as detection
@@ -13,7 +14,8 @@ from Scan import Scan as scan
 
 from UI3 import UI as ui
 
-from pathos.multiprocessing import ProcessingPool as Pool
+#from pathos.multiprocessing import ProcessingPool as Pool
+
 
 
 
@@ -22,7 +24,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 class Screener:
 
 
-    def queue(date = None,days = 1, ticker = None, tf = 'd'):
+    def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None):
         
         path = 0
         date_buffer = 20
@@ -31,7 +33,7 @@ class Screener:
             os.remove("C:/Screener/data_csvs/todays_setups.csv")
         pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
         if ticker == None:
-            ticker_list = scan.get(date,tf)['Ticker'].tolist()
+            ticker_list = scan.get(date,tf,browser)['Ticker'].tolist()
 
         elif type(ticker) is str:
             path = 1
@@ -72,8 +74,7 @@ class Screener:
             start_index = data.findex(sample,startdate)  
             end_index = data.findex(sample, enddate) 
 
-            #print(f'{start_index} , {end_index}')
-            #print(f'{sample.iloc[start_index][0]} , {sample.iloc[end_index][0]}')
+           
 
             trim = sample[start_index:end_index]
             
@@ -89,47 +90,47 @@ class Screener:
         Screener.run(date_list, ticker_list, tf,path)
 
         
-    def pool(container):
-        with Pool(nodes=7) as pool:
-            pool.map(detection.check, container)
+  
+
 
 
     def run(date_list,ticker_list,tf,path):
 
-        
-        
-        poolsize = 5000
+
         container = []
         for date in date_list:
-           
+            
             for ticker in ticker_list:
                     
                     container.append([date,ticker,tf,path])
 
-                    if len(container) > poolsize:
-                        Screener.pool(container)
+                    #if len(container) > poolsize:
+                        #Screener.pool(container)
 
-                        container = []
+                        #container = []
 
-
-        Screener.pool(container)
-
+       
+        data.pool(detection.check, container)
+        
+    
 
 
 if __name__ == '__main__':
+    test = False
+    if test or  ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
-    if ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
-
-         Screener.queue('0')
-         ui.loop(ui,True)
+         #Screener.queue('0')
+         #ui.loop(ui,True)
+         browser = scan.startFirefoxSession()
          while True:
-           Screener.queue(tf = '1min', date = '0')
+            print('scanning intraday //////////////////////////////////')
+            Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
         #Screener.queue('0')
         #Screener.queue(date = '2023-03-21')
-        #Screener.queue(ticker = ['COIN','HOOD'])
-        Screener.queue(ticker = ['TSLA'])
+        Screener.queue(ticker = ['COIN','HOOD'])
+        #.queue()
         #Screener.queue(tf = '1min', date = '0')
         #Screener.queue(date = '2023-03-16', tf = '2h',ticker = ['HOOD'], days = 1)
         ui.loop(ui,True)
