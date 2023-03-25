@@ -233,6 +233,7 @@ class UI:
             
            
     def plot(slist):
+        
         i = slist[1]
         setups_data = slist[0]
         
@@ -304,6 +305,9 @@ class UI:
                 p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
+
+
+                
                 
                 if data.isToday(date):
                     
@@ -314,11 +318,23 @@ class UI:
                     mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
+                    
+                    try:
+                        god = datetime.datetime.strptime(date, '%Y-%m-%d')
+                        dm = f"{date} 09:30"
+                        dh = f"{date} 09:00"
+                    
+                    
+                    except:
+                    
+                        #god = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+                        dm = date
+                        dh = date
                     mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date}")], alpha = .25))
-                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{date}")], alpha = .25))
-            except TimeoutError:
+                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dm}")], alpha = .25))
+            except:
                 print('preload failed')
                        
     def preload(self,init):

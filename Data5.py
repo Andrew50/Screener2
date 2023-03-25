@@ -73,7 +73,7 @@ class Data:
                 time = datetime.time(9,30,0)
                 dt = datetime.datetime.combine(dt.date(),time)
             
-            print(dt)
+            
             i = int(len(df)/2)
             k = i
         
