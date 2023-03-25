@@ -103,6 +103,7 @@ class Data:
     def get(ticker,tf = 'd',date = None):
        
         premarket = False
+
         current = Data.isToday(date)
         
 
@@ -124,7 +125,7 @@ class Data:
                 df.drop('symbol', axis = 1, inplace = True)
                 df.index = df.index + pd.Timedelta(hours=4)
                 
-                #df.reset_index(inplace = True)
+              
                
             else:
 

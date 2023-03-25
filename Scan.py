@@ -26,7 +26,6 @@ class Scan:
                 return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
 
             else:
-                print('orking')
                 browser = Scan.runIntradayScan(browser)
                 return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
 

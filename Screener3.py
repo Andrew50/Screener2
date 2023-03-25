@@ -24,6 +24,7 @@ class Screener:
 
     def queue(date = None,days = 1, ticker = None, tf = 'd'):
         
+        path = 0
         date_buffer = 20
 
         if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
@@ -31,9 +32,14 @@ class Screener:
         pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
 
         if date == '0':
+            if tf == 'd' or tf == 'w' or tf == 'm':
+                path = 1
+            else:
+                path = 2
             date_list = [date]
         else:
             if date == None:
+
                 try:
                     df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
                     dt = df.iloc[-1][0]
@@ -44,9 +50,10 @@ class Screener:
                 enddate = datetime.datetime.now() - datetime.timedelta(date_buffer)
 
             else:
+                path = 1
                 startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
                
-                enddate = startdate + datetime.timedelta(days)
+                enddate = startdate + datetime.timedelta(days) - 1
 
 
 
@@ -68,15 +75,17 @@ class Screener:
             ticker_list = scan.get(date,tf)['Ticker'].tolist()
 
         elif type(ticker) is str:
+            path = 1
             ticker_list = [ticker]
 	       
         else:
+            path = 1
             ticker_list = ticker
             
 
         
 
-        Screener.run(date_list, ticker_list, tf)
+        Screener.run(date_list, ticker_list, tf,path)
 
         
     def pool(container):
@@ -84,7 +93,7 @@ class Screener:
             pool.map(detection.check, container)
 
 
-    def run(date_list,ticker_list,tf):
+    def run(date_list,ticker_list,tf,path):
 
         
         
@@ -94,7 +103,7 @@ class Screener:
            
             for ticker in ticker_list:
                     
-                    container.append([date,ticker,tf])
+                    container.append([date,ticker,tf,path])
 
                     if len(container) > poolsize:
                         Screener.pool(container)

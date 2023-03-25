@@ -1,6 +1,6 @@
 
 import statistics
-from Log3 import log as log
+from Log3 import Log as log
 
 from Data5 import Data as data
 
@@ -19,7 +19,7 @@ class Detection:
             date = screenbar[0]
             ticker = screenbar[1]
             tf = screenbar[2]
-            
+            path = screenbar[3]
 
             print(f"{date} , {tf}, {ticker}")
 
@@ -53,13 +53,13 @@ class Detection:
             
                         if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
                 
-                            Detection.EP(df,currentday, tf, ticker)
+                            Detection.EP(df,currentday, tf, ticker, path)
                         if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
-                           Detection.MR(df,currentday, tf, ticker)
+                           Detection.MR(df,currentday, tf, ticker, path)
                         if(dolVol > 1* dolVolFilter   and adr > 3.5 and sPivot):
-                            Detection.Pivot(df,currentday, tf, ticker)
+                            Detection.Pivot(df,currentday, tf, ticker, path)
                         if(dolVol > .8 * dolVolFilter   and adr > 4 and sFlag):
-                            Detection.Flag(df,currentday, tf, ticker)
+                            Detection.Flag(df,currentday, tf, ticker, path)
 
             
                     if tf == '1min':
@@ -110,7 +110,7 @@ class Detection:
 
 
 
-    def EP(df,currentday, tf, ticker):
+    def EP(df,currentday, tf, ticker, path):
         
        
 
@@ -134,15 +134,15 @@ class Detection:
            
         
         if(z > zfilter) and pmPrice > max(highs):
-            log.log(df,currentday, tf, ticker, z, 'EP')  
+            log.log(df,currentday, tf, ticker, z, path, 'EP')  
             
         elif (z < -zfilter) and pmPrice < min(lows):
-            log.log(df,currentday, tf, ticker, z, 'NEP')  
+            log.log(df,currentday, tf, ticker, z, path , 'NEP')  
 
      
     
  
-    def MR(df,currentday, tf, ticker):
+    def MR(df,currentday, tf, ticker, path):
         
         
         pmPrice = df.iloc[currentday][1]
@@ -199,10 +199,10 @@ class Detection:
             if (gapz1 < gapzfilter1 and gapz < gapzfilter0 and changez < changezfilter and z > zfilter and value > 0):
               
                
-                log.log(df,currentday, tf, ticker, z, 'MR')  
+                log.log(df,currentday, tf, ticker, z, path, 'MR')  
                
       
-    def Pivot(df,currentday, tf, ticker):
+    def Pivot(df,currentday, tf, ticker, path):
        
        
         lowergapzfilter = 1.5
@@ -235,15 +235,15 @@ class Detection:
         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
                 
-           log.log(df,currentday, tf, ticker, z, 'Pivot')   
+           log.log(df,currentday, tf, ticker, z, path, 'Pivot')   
 
         if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
 
-            log.log(df,currentday, tf, ticker, z, 'Pivot')  
+            log.log(df,currentday, tf, ticker, z, path, 'Pivot')  
       
 
 
-    def Flag(df,currentday, tf, ticker):
+    def Flag(df,currentday, tf, ticker, path):
 
         pmPrice = df.iloc[currentday][1]
        
@@ -334,11 +334,11 @@ class Detection:
             
             if z > zfilter and z2 > z2filter:
                     
-                log.log(df,currentday, tf, ticker, z, 'Flag')  
+                log.log(df,currentday, tf, ticker, z, path, 'Flag')  
 
       
 
-    def weeklyFlag(df,currentday, tf, ticker):
+    def weeklyFlag(df,currentday, tf, ticker, path):
         pmPrice = df.iloc[currentday][1]
         
         zfilter = 5
@@ -418,4 +418,4 @@ class Detection:
              
             if z > zfilter and z2 > z2filter:
                     
-                log.log(df,currentday, tf, ticker, z, 'WWFlg')  
+                log.log(df,currentday, tf, ticker, z, path, 'WWFlg')  
