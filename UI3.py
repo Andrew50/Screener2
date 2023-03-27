@@ -11,7 +11,7 @@ import io
 import datetime
 
 
-from Data5 import Data as data
+from Data6 import Data as data
 import time as ttime
 import shutil
 
@@ -242,7 +242,7 @@ class UI:
         iss = str(i)
         if (os.path.exists("C:/Screener/tmp/charts/databasesmall" + iss + ".png") == False):
             try:
-                print(f"fetching {i}")
+                #print(f"fetching {i}")
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
                 date = (setups_data.iloc[i][0])
@@ -252,6 +252,10 @@ class UI:
                 ticker = str(setups_data.iloc[i][1])
                 setup = str(setups_data.iloc[i][2])
                 z= str(setups_data.iloc[i][3])
+                try:
+                    tf = str(setups_data.iloc[i][13])
+                except:
+                    tf = 'd'
                 zs = float(z)
 
                 chartsize = 80
@@ -260,10 +264,56 @@ class UI:
                 chartoffset_minute = 10
                 chartoffset_hour = 50
 
-                df1 = data.get(ticker,'w',date)
-                df2 = data.get(ticker,'d',date)
-                df3 = data.get(ticker,'h',date)
-                df4 = data.get(ticker,'1min',date)
+                if data.isToday(date):
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '15min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
+
+                else:
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
+
+
+
+                df1 = data.get(ticker,tf1,date)
+                df2 = data.get(ticker,tf2)
+                df3 = data.get(ticker,tf3)
+                df4 = data.get(ticker,tf4)
 
                 
 
@@ -313,28 +363,30 @@ class UI:
                     
                     
                     pmPrice = (setups_data.iloc[i][4])
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2)) + "   " + tf), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
+                    if tf == 'd':
+                        try:
+                            god = datetime.datetime.strptime(date, '%Y-%m-%d')
+                            dm = f"{date} 09:30"
+                            dh = f"{date} 09:00"
                     
-                    try:
-                        god = datetime.datetime.strptime(date, '%Y-%m-%d')
-                        dm = f"{date} 09:30"
-                        dh = f"{date} 09:00"
                     
+                        except:
                     
-                    except:
+                            #god = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+                            dm = date
+                            dh = date
                     
-                        #god = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-                        dm = date
-                        dh = date
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2)) + "   " + tf), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dm}")], alpha = .25))
-            except:
+            except TimeoutError:
+                
                 print('preload failed')
                        
     def preload(self,init):
@@ -400,6 +452,7 @@ class UI:
             annotation = str(self.setups_data.iloc[self.i][12])
             #rating = str(self.setups_data.iloc[self.i][13])
             time = str(self.setups_data.iloc[self.i][13])
+            
                 
             if annotation == "nan":
                 annotation = ""
@@ -484,7 +537,7 @@ class UI:
                    
                         [sg.Button('Prev'), sg.Button('Next')] 
                 ]
-                self.window = sg.Window('Window Title', layout,margins = (10,10))
+                self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
                 try:
 

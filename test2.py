@@ -1,6 +1,6 @@
 
 
-from Data5 import Data as data
+from Data6 import Data as data
 from tvDatafeed import TvDatafeed, Interval
 from Scan import Scan as scan
 
@@ -16,18 +16,8 @@ from Scan import Scan as scan
 
 
 
-
-num = 2463
-data.progress(num)
-
-for i in range (num):
-    data.progress()
-
-num = 1100
-data.progress(num)
-
-for i in range (num):
-    data.progress()
+df = data.get('SI','1min','0')
+print(df)
 
 #df = data.get('AAPL','5min','0')
 

@@ -6,7 +6,7 @@ import datetime
 import os
 import time
 from tqdm import tqdm
-from Data5 import Data as data
+from Data6 import Data as data
 
 from Detection1 import Detection as detection
 
@@ -116,20 +116,22 @@ class Screener:
 
 
 if __name__ == '__main__':
-    test = False
+    test = True
     if test or  ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
-         #Screener.queue('0')
-         #ui.loop(ui,True)
-         browser = scan.startFirefoxSession()
-         while True:
-            print('scanning intraday //////////////////////////////////')
-            Screener.queue(tf = '1min', date = '0',browser = browser)
+        Screener.queue('0')
+         
+        ui.loop(ui,True)
+         
+        browser = scan.startFirefoxSession()
+      #  while True:
+           
+       #     Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
         #Screener.queue('0')
         #Screener.queue(date = '2023-03-21')
-        Screener.queue(ticker = ['COIN','HOOD'])
+        Screener.queue(ticker = ['NVAX'])
         #.queue()
         #Screener.queue(tf = '1min', date = '0')
         #Screener.queue(date = '2023-03-16', tf = '2h',ticker = ['HOOD'], days = 1)

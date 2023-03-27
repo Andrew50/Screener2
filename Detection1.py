@@ -2,7 +2,7 @@
 import statistics
 from Log3 import Log as log
 
-from Data5 import Data as data
+from Data6 import Data as data
 
 import pandas as pd
 

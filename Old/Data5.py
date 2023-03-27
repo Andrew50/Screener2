@@ -6,6 +6,7 @@ import numpy
 from tqdm import tqdm
 import pandas as pd
 import datetime
+import sys
 import numpy as np
 from tvDatafeed import TvDatafeed, Interval
 import os 
@@ -28,7 +29,9 @@ class Data:
         
             pool = Pool(processes = nodes)
 
-            list(tqdm(pool.imap(deff, arg), total=len(arg)))
+            data = list(tqdm(pool.imap(deff, arg), total=len(arg), ascii = True))
+
+            return(data)
 
 
             
@@ -208,12 +211,14 @@ class Data:
         
 
     def updatTick(tickersString):
+        
         tickers = tickersString.split(' ')
         test = yf.download(tickers =  tickersString,  
             period = "25y",  group_by='ticker',      
             interval = "1d",      
             ignore_tz = True,  
             progress=False,
+            threads = False,
             prepost = False) 
         for ticker in tickers:
             try:
@@ -270,13 +275,14 @@ class Data:
             except:
                 pass
                 #print(f"error daily {ticker}")
+               
 
-
-        if not ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or (datetime.datetime.now().weekday() >= 5):   #if it is in the morning and u forgot to update data it ill just do daily
+        if not (((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) and (datetime.datetime.now().weekday() < 5)):   #if it is in the morning and u forgot to update data it ill just do daily
             test = yf.download(tickers =  tickersString,  
             period = "5d",  group_by='ticker',      
             interval = "1m",      
             ignore_tz = True,
+            threads = False,
             progress=False,
                 prepost = False) 
             for ticker in tickers:
@@ -287,7 +293,7 @@ class Data:
                     ticker_df.rename(columns={'Open':'open', 'High':'high', 'Low':'low','Close':'close','Volume':'volume'}, inplace = True)
                     if (datetime.datetime.now().weekday() < 5) and ((datetime.datetime.now().hour >= 5 and datetime.datetime.now().minute >= 30) or (datetime.datetime.now().hour >= 6)) and datetime.datetime.now().hour <= 12:
                         ticker_df.drop(ticker_df.tail(1).index,inplace=True)
-                        print('dropped 1 because market open')
+                        #print('dropped 1 because market open')
                     if(os.path.exists("C:/Screener/minute_data/" + ticker + ".csv") == False):
                         ticker_df.dropna(inplace = True)
                         ticker_df.drop('datetime', axis = 1, inplace = True)
@@ -323,11 +329,12 @@ class Data:
                 except:
                     pass
                     #print(f"error minute {ticker}")
-
+        
     def isTickerUpdated(tickerandDate):
         ticker = tickerandDate.split(":")[0]
         lastDStock = tickerandDate.split(":")[1]
         if(os.path.exists("C:/Screener/daily_data/" + ticker + ".csv") == False):
+            
             return ticker
         else:
             try:
@@ -335,6 +342,7 @@ class Data:
                 lastDay = cs.iloc[len(cs)-1]['datetime'].to_pydatetime()
                 lastDStock = datetime.datetime.strptime(lastDStock, '%Y-%m-%d')
                 if (lastDay != lastDStock):
+                    
                     return ticker
                         
                 #print(f"approved {ticker}")
@@ -385,7 +393,7 @@ class Data:
            ticker = screener_data.iloc[i]['Ticker']
            tickers.append(f'{ticker}:{lastDStock}')
         remaining_tickers = []
-        Data.pool(Data.isTickerUpdated, tickers)
+        remaining_tickers = Data.pool(Data.isTickerUpdated, tickers)
        # with Pool(nodes=6) as pool:
             #remaining_tickers = pool.map(Data.isTickerUpdated, tickers)
         new_remaining = []
@@ -393,7 +401,9 @@ class Data:
             if(t != None) and t != '':
                 new_remaining.append(t)
         numLeft = len(new_remaining)
+       
         numIterations = math.ceil(float(numLeft/50))
+        batchsize = 20
         tickerBatches = []
         for i in range(numIterations):
             tickerString = ""
@@ -412,6 +422,7 @@ class Data:
                     else:
                         tickerString = tickerString + new_remaining[num]
             tickerBatches.append(tickerString)
+        
         Data.pool(Data.updatTick, tickerBatches)
         #with Pool(nodes=7) as pool:
             #pool.map(Data.updatTick, tickerBatches)

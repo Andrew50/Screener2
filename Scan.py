@@ -10,7 +10,7 @@ import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
 
-from Data5 import Data as data
+from Data6 import Data as data
 
 
 
@@ -33,7 +33,7 @@ class Scan:
                         return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
                         
                     except:
-                        print('retrying scan')
+                        
                         Scan.tryCloseLogout(browser)
 
         else:
@@ -109,7 +109,7 @@ class Scan:
         os.remove(downloaded_file)
 
 
-        percent = .01
+        percent = .03
 
         length = len(df) - 1
         left = 0
@@ -132,13 +132,15 @@ class Scan:
     def startFirefoxSession():
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+        options.headless = True
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
         FireFoxProfile = webdriver.FirefoxProfile()
         FireFoxProfile.set_preference("General.useragent.override", user_agent)
         browser = webdriver.Firefox(options=options, executable_path=FireFoxDriverPath)
         browser.implicitly_wait(7)
-        browser.maximize_window()
+        #browser.maximize_window()
+        browser.set_window_size(1920, 1080)
         url = "https://www.tradingview.com/screener/"
         browser.get(url)
         time.sleep(1.5)
@@ -219,7 +221,7 @@ class Scan:
     def tryCloseLogout(browser):
         if browser != None:
             try:
-                print('test')
+                
                 browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
             except AttributeError:
                 pass
