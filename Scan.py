@@ -10,35 +10,42 @@ import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
 
-from Data6 import Data as data
+from Data7 import Data as data
 
 
 
 
 class Scan:
 
-    def get(date, tf, browser = None):
+    def get(date = None, tf = None, refresh = False, browser = None):
         
+
+
+
         if data.isToday(date):
 
             if tf == 'd' or tf == 'w' or tf == 'm':
-                Scan.runDailyScan(None)
-                return pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+                if refresh:
+                    Scan.runDailyScan(None)
+                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather")
 
             else:
+                if not  refresh:
+                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
                         
                     except:
                         
                         Scan.tryCloseLogout(browser)
 
         else:
-            Scan.updateList()
-            return pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")
+            
+            Scan.updateList(refresh)
+            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather")
 
     
     def runDailyScan(brows):
@@ -75,7 +82,7 @@ class Scan:
             if screener_data.iloc[i]['Pre-market Change'] is None:
                     screener_data.at[i, 'Pre-market Change'] = 0
 
-        screener_data.to_csv(r"C:\Screener\tmp\screener_data.csv")
+        screener_data.to_feather(r"C:\Screener\tmp\screener_data.feather")
     
     def runIntradayScan(brows):
         browser = brows
@@ -109,7 +116,7 @@ class Scan:
         os.remove(downloaded_file)
 
 
-        percent = .03
+        percent = .045
 
         length = len(df) - 1
         left = 0
@@ -121,7 +128,7 @@ class Scan:
                 df.at[i, 'Exchange'] = "AMEX"
             if df.iloc[i]['Pre-market Change'] is None:
                     df.at[i, 'Pre-market Change'] = 0
-        df.to_csv(r"C:\Screener\tmp\screener_data_intraday.csv")
+        df.to_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
         time.sleep(0.1)
 
         return browser
@@ -230,14 +237,33 @@ class Scan:
 
 
 
-    def updateList():
-        df = pd.read_csv("C:/Screener/tmp/screener_data.csv")
+    def updateList(refresh = False):
+        df = pd.read_feather("C:/Screener/tmp/screener_data.feather")
         df = df.set_index('Ticker')
-        df2 = pd.read_csv("C:/Screener/tmp/full_ticker_list.csv")
+        df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
         df2 = df2.set_index('Ticker')
         df3 = df.merge(df2, left_index = True , right_index = True, how = 'outer')
+        if refresh:
+            removelist = []
+            for i in range(len(df3)):
+                ticker = str(df3.index[i])
+                if ticker not in df.index:
+                    if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
+                        removelist.append(ticker)
+
+
+         
+            for ticker in removelist:
+                try:
+                    df3.drop(df3.loc[ticker])
+                    print(f'removed {ticker}')
+                except:
+                    pass
+
         #df3 = df3.reset_index()  
-        df3.to_csv("C:/Screener/tmp/trest.csv")
+        df3 = df3.reset_index(drop = True)
+
+        df3.to_feather("C:/Screener/tmp/trest.feather")
 
         
 

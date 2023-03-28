@@ -2,7 +2,7 @@
 import statistics
 from Log3 import Log as log
 
-from Data6 import Data as data
+from Data7 import Data as data
 
 import pandas as pd
 
@@ -11,39 +11,16 @@ class Detection:
    
 
     def check(screenbar):
-        
         try:
-            
-
-
+          
             date = screenbar[0]
             ticker = screenbar[1]
             tf = screenbar[2]
             path = screenbar[3]
-
-            #print(f"{date} , {tf}, {ticker}")
-
-
-
             df = data.get(ticker,tf,date)
-
-
-
-
             if len(df) > 50:
-
-             
-
                 currentday = data.findex(df,date)
-
-               
-            
                 dolVol, adr = Detection.requirements(df,currentday)
-
-                
-                
-                
-
                 if tf == 'd':
                     if dolVol > 1000000 and adr > 3:
                         sEP = True
@@ -53,7 +30,6 @@ class Detection:
                         dolVolFilter = 10000000
             
                         if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
-                
                             Detection.EP(df,currentday, tf, ticker, path)
                         if(dolVol > .8 * dolVolFilter    and adr > 5 and sMR):
                             Detection.MR(df,currentday, tf, ticker, path)
@@ -64,77 +40,80 @@ class Detection:
 
             
                 if tf == '1min':
-                    z = 0
-                    log.log(df,currentday, tf, ticker, z, path , 'Intraday') 
+                    if dolVol > 20000 and adr > .08:
+                        Detection.Pop(df,currentday, tf, ticker, path)
                 if tf == '5min':
-                    pass
+                    if dolVol > 100000 and adr > .1:
+                        Detection.Pop(df,currentday, tf, ticker, path)
+                    
                 if tf == 'h':
                         
                     pass
             
-        except FileNotFoundError: 
-            pass
-            #print(f"{ticker} is delisted")
-        except pd.errors.EmptyDataError:
-            pass
-            #print('{ticker} is empty')
-        except:
-            pass
-            #print(f"{ticker} failed")
-
-     
         
+        except Exception as e: print(e)
+  
     def requirements(df,currentday):
 
+        dol_vol_l = 5
+        adr_l = 15
+
         try:
-            
-            
             if(currentday == None): 
-               
                 return 0, 0
             dolVol = []
-            for i in range(5):
-                dolVol.append(df.iloc[currentday-1-i][4]*df.iloc[currentday-1-i][5])
-            dolVol = statistics.mean(dolVol)
-
-       
-                            
+            for i in range(dol_vol_l):
+                dolVol.append(df.iloc[currentday-1-i][3]*df.iloc[currentday-1-i][4])
+            dolVol = statistics.mean(dolVol)              
             adr= []
-            for j in range(20): 
-                high = df.iloc[currentday-j-1][2]
-                low = df.iloc[currentday-j-1][3]
+            for j in range(adr_l): 
+                high = df.iloc[currentday-j-1][1]
+                low = df.iloc[currentday-j-1][2]
                 val = (high/low - 1) * 100
                 adr.append(val)
-                        
             adr = statistics.mean(adr)  
-       
             return dolVol, adr
         except:
+            pass
            
-            print('requirements failed')
-            return 0 , 0
+    def Pop(df,currentday, tf, ticker, path):
+        
+        i = 0
+        zfilter = 25
+       
+        data = []
+        length = 900
 
+        x = df.iloc[currentday - i][4] + df.iloc[currentday - i-1][4]
+        y = ((df.iloc[currentday - i][3]/df.iloc[currentday - i][0]) + (df.iloc[currentday - i][3]/df.iloc[currentday - i][0]) - 2)
+       
+        current_value = x*pow(y,2)
+        for i in range(length): 
+            x = df.iloc[currentday - i-1][4] + df.iloc[currentday - i-2][4]
+            y = ((df.iloc[currentday - i-1][3]/df.iloc[currentday - i-1][0]) + (df.iloc[currentday - i-1][3]/df.iloc[currentday - i-1][0]) - 2)
+            value = x*pow(y,2)
+            data.append(value)
+        
+        z = (current_value - statistics.mean(data))/statistics.stdev(data)
+        if ((z < -zfilter) or (z > zfilter)):
+            print
+            log.log(df,currentday, tf, ticker, z, path , 'Pop')  
 
 
     def EP(df,currentday, tf, ticker, path):
-        
-       
-
-        pmPrice = df.iloc[currentday][1]
+        pmPrice = df.iloc[currentday][0]
         
         zfilter = 5.5
-       
-        
-      
-        prevClose = df.iloc[currentday-1][4]
+
+        prevClose = df.iloc[currentday-1][3]
         gaps = []
         lows = []
         highs = []
         todayGapValue = ((pmPrice/prevClose)-1)
         for j in range(20): 
-            gaps.append((df.iloc[currentday-1-j][1]/df.iloc[currentday-2-j][4])-1)
-            lows.append(df.iloc[currentday-j-1][3])
-            highs.append(df.iloc[currentday-j-1][2])
+            gaps.append((df.iloc[currentday-1-j][0]/df.iloc[currentday-2-j][3])-1)
+            lows.append(df.iloc[currentday-j-1][2])
+            highs.append(df.iloc[currentday-j-1][1])
 
         z = (todayGapValue-statistics.mean(gaps))/statistics.stdev(gaps)
            
@@ -145,39 +124,37 @@ class Detection:
         elif (z < -zfilter) and pmPrice < min(lows):
             log.log(df,currentday, tf, ticker, z, path , 'NEP')  
 
-     
-    
  
     def MR(df,currentday, tf, ticker, path):
         
         
-        pmPrice = df.iloc[currentday][1]
+        pmPrice = df.iloc[currentday][0]
         
         zfilter = 3.5
         gapzfilter0 = 5.5
         gapzfilter1 = 4
         changezfilter = 2.5
       
-        prevClose = df.iloc[currentday-1][4]
+        prevClose = df.iloc[currentday-1][3]
         zdata = []
         zgaps = []
         zchange = []
             
         
-        if df.iloc[currentday-1][4] < df.iloc[currentday-1][1] and df.iloc[currentday-2][4] < df.iloc[currentday-2][1] and df.iloc[currentday-3][4] < df.iloc[currentday-3][1]:
+        if df.iloc[currentday-1][3] < df.iloc[currentday-1][0] and df.iloc[currentday-2][3] < df.iloc[currentday-2][0] and df.iloc[currentday-3][3] < df.iloc[currentday-3][0]:
 
               
             for i in range(30):
                 n = 29-i
-                gapvalue = abs((df.iloc[currentday-n-1][1]/df.iloc[currentday-n-2][4]) - 1)
-                changevalue = abs((df.iloc[currentday-n-1][4]/df.iloc[currentday-n-1][1]) - 1)
+                gapvalue = abs((df.iloc[currentday-n-1][0]/df.iloc[currentday-n-2][3]) - 1)
+                changevalue = abs((df.iloc[currentday-n-1][3]/df.iloc[currentday-n-1][0]) - 1)
                 lastCloses = 0
                     
                 for c in range(4): 
                     
-                    lastCloses += df.iloc[currentday-2-c-n][4]
+                    lastCloses += df.iloc[currentday-2-c-n][3]
                 fourSMA = (lastCloses/4)
-                datavalue = abs(fourSMA/df.iloc[currentday-n-1][1] - 1)
+                datavalue = abs(fourSMA/df.iloc[currentday-n-1][0] - 1)
                 if i == 29:
                     gapz1 = (gapvalue-statistics.mean(zgaps))/statistics.stdev(zgaps)
                 zgaps.append(gapvalue)
@@ -187,10 +164,10 @@ class Detection:
 
              
             todayGapValue = abs((pmPrice/prevClose)-1)
-            todayChangeValue = abs(df.iloc[currentday-1][4]/df.iloc[currentday-1][1] - 1)
+            todayChangeValue = abs(df.iloc[currentday-1][3]/df.iloc[currentday-1][0] - 1)
             lastCloses = 0
             for c in range(4): 
-                lastCloses = lastCloses + df.iloc[currentday-c-1][4]
+                lastCloses = lastCloses + df.iloc[currentday-c-1][3]
                 
             fourSMA = (lastCloses/4)
             value = (fourSMA)/pmPrice - 1
@@ -214,29 +191,29 @@ class Detection:
         lowergapzfilter = 1.5
         lowergapzfilter2 = 1.5
 
-        pmPrice = df.iloc[currentday][1]
+        pmPrice = df.iloc[currentday][0]
        
         
-        prevClose = df.iloc[currentday-1][4]
+        prevClose = df.iloc[currentday-1][3]
         zgaps = []
         for i in range(15):
             n = 14-i
-            gapvalue = abs((df.iloc[currentday-n-1][1]/df.iloc[currentday-n-2][4]) - 1)
+            gapvalue = abs((df.iloc[currentday-n-1][0]/df.iloc[currentday-n-2][3]) - 1)
             zgaps.append(gapvalue)
             
         todayGapValue = (pmPrice/prevClose)-1
         gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
         lastCloses = 0
         for c in range(4): 
-            lastCloses = lastCloses + df.iloc[currentday-c-1][4]
+            lastCloses = lastCloses + df.iloc[currentday-c-1][3]
                 
         ma3 = (lastCloses/4)
-        close1 = df.iloc[currentday-1][4]
-        close2 = df.iloc[currentday-2][4]
-        open1 = df.iloc[currentday-1][1]
-        open2 = df.iloc[currentday-2][1]
-        low1 = df.iloc[currentday-1][3]
-        high1 = df.iloc[currentday-1][2]
+        close1 = df.iloc[currentday-1][3]
+        close2 = df.iloc[currentday-2][3]
+        open1 = df.iloc[currentday-1][0]
+        open2 = df.iloc[currentday-2][0]
+        low1 = df.iloc[currentday-1][2]
+        high1 = df.iloc[currentday-1][1]
         z = gapz
         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
                 
@@ -251,7 +228,7 @@ class Detection:
 
     def Flag(df,currentday, tf, ticker, path):
 
-        pmPrice = df.iloc[currentday][1]
+        pmPrice = df.iloc[currentday][0]
        
         
         #if test:
@@ -280,7 +257,7 @@ class Detection:
                     
             for k in range(rsil):
                 
-                change = (df.iloc[currentday-k-j-1][4]/df.iloc[currentday-k-j-2][4]) - 1
+                change = (df.iloc[currentday-k-j-1][3]/df.iloc[currentday-k-j-2][3]) - 1
                 
                     
                 if change > 0:
@@ -308,7 +285,7 @@ class Detection:
                 ma3 = []
                 for k in range(3):
 
-                    ma3.append(df.iloc[currentday-j-k-1][4])
+                    ma3.append(df.iloc[currentday-j-k-1][3])
                 ma3 = statistics.mean(ma3)
                           
                 if j < int(l/2):
@@ -331,7 +308,7 @@ class Detection:
             zdata = []
             
             for i in range(zl):
-                pushvalue = df.iloc[currentday-i-1][2] - df.iloc[currentday-i-1][3]
+                pushvalue = df.iloc[currentday-i-1][1] - df.iloc[currentday-i-1][2]
                 zdata.append(pushvalue)
 
             z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
@@ -345,7 +322,7 @@ class Detection:
       
 
     def weeklyFlag(df,currentday, tf, ticker, path):
-        pmPrice = df.iloc[currentday][1]
+        pmPrice = df.iloc[currentday][0]
         
         zfilter = 5
         z2filter = -100
@@ -367,7 +344,7 @@ class Detection:
                     
                     
             for k in range(rsil):
-                change = (df.iloc[currentday-k-j-1][4]/df.iloc[currentday-k-j-2][4]) - 1
+                change = (df.iloc[currentday-k-j-1][3]/df.iloc[currentday-k-j-2][3]) - 1
                 if change > 0:
                     gains.append(change)
                 else:
@@ -393,7 +370,7 @@ class Detection:
                 ma3 = []
                 for k in range(3):
 
-                    ma3.append(df.iloc[currentday-j-k-1][4])
+                    ma3.append(df.iloc[currentday-j-k-1][3])
                 ma3 = statistics.mean(ma3)
                           
                 if j < int(l/2):
@@ -416,7 +393,7 @@ class Detection:
             zdata = []
             
             for i in range(zl):
-                pushvalue = df.iloc[currentday-i-1][2] - df.iloc[currentday-i-1][3]
+                pushvalue = df.iloc[currentday-i-1][1] - df.iloc[currentday-i-1][2]
                 zdata.append(pushvalue)
 
             z = (value - statistics.mean(zdata))/statistics.stdev(zdata)

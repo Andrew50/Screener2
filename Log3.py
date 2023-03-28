@@ -5,7 +5,7 @@ import mplfinance as mpf
 import statistics
 import pandas as pd
 import datetime
-from Data6 import Data
+from Data7 import Data
 
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
@@ -86,7 +86,11 @@ class Log:
                     'tf':[tf]}
         
             dfadd = pd.DataFrame(data)
-            dfadd.to_csv((r"C:/Screener/tmp/todays_setups.csv"), mode='a', index=False, header=False)
+            old = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+            new = pd.concat([old,dfadd])
+            
+            new = new.reset_index(drop = True)
+            new.to_feather(r"C:/Screener/tmp/todays_setups.feather")
 
         if path == 0 and False:
            

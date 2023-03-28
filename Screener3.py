@@ -6,7 +6,7 @@ import datetime
 import os
 import time
 from tqdm import tqdm
-from Data6 import Data as data
+from Data7 import Data as data
 
 from Detection1 import Detection as detection
 
@@ -29,11 +29,18 @@ class Screener:
         path = 0
         date_buffer = 20
 
-        if(os.path.exists("C:/Screener/data_csvs/todays_setups.csv")):
-            os.remove("C:/Screener/data_csvs/todays_setups.csv")
-        pd.DataFrame().to_csv(("C:/Screener/tmp/todays_setups.csv"),  header=False)
+        if(os.path.exists("C:/Screener/tmp/todays_setups.feather")):
+            os.remove("C:/Screener/tmp/todays_setups.feather")
+
+
+        df ={'Date': [],
+                    'Ticker':[],
+                    'Setup': [],
+                    'Z': [],
+                    'tf':[]}
+        pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
         if ticker == None:
-            ticker_list = scan.get(date,tf,browser)['Ticker'].tolist()
+            ticker_list = scan.get(date,tf,True,browser)['Ticker'].tolist()
 
         elif type(ticker) is str:
             path = 1
@@ -52,7 +59,7 @@ class Screener:
             if date == None:
                 if path == 0:
                     try:
-                        df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                        df = pd.read_feather(r"C:\Screener\tmp\setups.feather", header = None)
                         dt = df.iloc[-1][0]
                         startdate = datetime.datetime.strptime(dt, '%Y-%m-%d')
                     except:
@@ -78,7 +85,7 @@ class Screener:
 
             trim = sample[start_index:end_index]
             
-            date_list = trim['datetime'].tolist()
+            date_list = trim.index.tolist()
 
   
 
@@ -95,28 +102,25 @@ class Screener:
 
 
     def run(date_list,ticker_list,tf,path):
-
-
+        length = len(ticker_list)*len(date_list)
+        pbar = tqdm(total=length)
         container = []
         for date in date_list:
             
             for ticker in ticker_list:
                     
                     container.append([date,ticker,tf,path])
+                    pbar.update(1)
+                    
 
-                    #if len(container) > poolsize:
-                        #Screener.pool(container)
-
-                        #container = []
-
-       
+        pbar.close()
         data.pool(detection.check, container)
         
     
 
 
 if __name__ == '__main__':
-    test = True
+    test = False
     if test or  ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
         Screener.queue('0')
@@ -124,14 +128,18 @@ if __name__ == '__main__':
         ui.loop(ui,True)
          
         browser = scan.startFirefoxSession()
-      #  while True:
+        while datetime.datetime.now().hour < 13:
            
-       #     Screener.queue(tf = '1min', date = '0',browser = browser)
+            Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
+        #browser = scan.startFirefoxSession()
+        #while True:
+           
+          #  Screener.queue(tf = '1min', date = '0',browser = browser)
         #Screener.queue('0')
-        #Screener.queue(date = '2023-03-21')
-        Screener.queue(ticker = ['NVAX'])
+        Screener.queue(date = '2023-03-21')
+        #Screener.queue(date = '2023-03-23',tf = '1min')
         #.queue()
         #Screener.queue(tf = '1min', date = '0')
         #Screener.queue(date = '2023-03-16', tf = '2h',ticker = ['HOOD'], days = 1)

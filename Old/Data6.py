@@ -56,7 +56,7 @@ class Data:
             if type(dt) == str:
                 try:
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
-                except TimeoutError:
+                except:
                     dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
 
             if type(dt) == datetime.date:
@@ -136,9 +136,6 @@ class Data:
                     if new_close < low:
                         new_low = new_close
                 
-                    index = len(df) - 1
-
-                
 
                     new = pd.DataFrame({'datetime':[datetime.datetime.now()],
                                         'open':[new_open],
@@ -149,9 +146,6 @@ class Data:
 
                     new = new.set_index('datetime')
                     df = pd.concat([df,new])
-
-
-
 
 
 
