@@ -66,7 +66,7 @@ class Log:
         Log.sendDiscordIntradayPost('tmp/test.png')
 
     def log(df,currentday, tf, ticker, z, path, st):
- 
+     
         if path == 2:
             
             
@@ -74,35 +74,34 @@ class Log:
             
         if path == 1:
             
-            if df.iloc[currentday][0] == datetime.date.today(): 
-                dateString = '0'
+            if df.index[currentday] == datetime.date.today(): 
+                date = '0'
             else:
-                dateString = df.iloc[currentday][0]
-            pmPrice = df.iloc[currentday][1]
-            data ={'Date': [dateString],
-                    'Ticker':[ ticker],
-                    'Setup': [str(st)],
+                date = df.index[currentday]
+            
+            data ={'Date': [date],
+                    'Ticker':[ticker],
+                    'Setup': [st],
                     'Z': [z],
                     'tf':[tf]}
         
             dfadd = pd.DataFrame(data)
-            old = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+            try:
+                old = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+            except:
+                old = pd.DataFrame()
             new = pd.concat([old,dfadd])
             
             new = new.reset_index(drop = True)
             new.to_feather(r"C:/Screener/tmp/todays_setups.feather")
 
-        if path == 0 and False:
-           
-
+        if path == 0:
+            
+            
     
         
             cooldown = 20
 
-            dateString = str(data_daily.iloc[currentday][0])
-            
-           
-            
             #gap percent
             #adr
             #vol %
@@ -112,72 +111,64 @@ class Log:
             #3 d perf
             #10 ma perf
             #10 am perf time
-            tick = str(screenbar['Ticker'])
-            
-            
-
-            prevdate = data_daily.index[currentday - 1]
-
-
+       
             try:
-                scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                date = df.index[currentday]
+                try:
+                    full = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+                except:
+                    full = pd.DataFrame()
+                scan = full
 
             
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iloc[k][1] == tick:
-                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+                    if scan.iat[k,0] == ticker:
+                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
                 scan = scanholder
 
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iloc[k][2] == setup_type:
-                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+                    if scan.iat[k,1] == st:
+                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
                 scan = scanholder
                 
                 
                 try:
-                    str_recent_date = scan.iloc[-1][0]
-                    recent_date = datetime.datetime.strptime(str_recent_date, '%Y-%m-%d').date()
-                    #today_date = datetime.datetime.strptime(dateToSearch, '%Y-%m-%d').date()
-                    today_date = dateToSearch.date()
-                    delta = (today_date - recent_date).days
-                    #print(f"{delta} , {tick}")
+                    recent_date = scan.index[-1]
+                    delta = (date - recent_date).days
                     if delta <= cooldown:
                         exclude = True
-                        # print(f"excluded {tick} ///////////////////////")
-                    
                     else:
                         exclude = False
                 except IndexError:
                     exclude = False
             except pd.errors.EmptyDataError:
                 exclude = False
-            #except IndexError:
-                # exclude = False
+  
 
             
 
             if not exclude:
             
-                
+               
 
 
            
-                gap = round( (data_daily.iloc[currentday][1]/data_daily.iloc[currentday-1][4] - 1)*100,2)
+                gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
                 volma = []
                 for i in range(10):
-                    volma.append(data_daily.iloc[currentday-1-i][5])
-                vol = round((data_daily.iloc[currentday][5]/statistics.mean(volma) ),2)
+                    volma.append(df.iat[currentday-1-i,4])
+                vol = round((df.iat[currentday,4]/statistics.mean(volma) ),2)
 
-                q_data = Data.get('QQQ')#pd.read_csv("C:/Screener/data_csvs/QQQ_data.csv")
-                qcurrentday = Data.findex(q_data, dateToSearch)
+                q_data = Data.get('QQQ')
+                qcurrentday = Data.findex(q_data, date)
                 q10 = []
                 q20 = []
 
                 for i in range(21):
-                    close = q_data.iloc[qcurrentday - 1-i][4]
+                    close = q_data.iat[qcurrentday - 1-i,3]
 
                     q20.append(close)
                     if i >= 9:
@@ -195,24 +186,24 @@ class Log:
                 else:
                     q = False
             
-                one = round((data_daily.iloc[currentday][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
-                two =   round((data_daily.iloc[currentday+1][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
-                three =  round((data_daily.iloc[currentday+2][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
-                four = round((data_daily.iloc[currentday+3][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
-                five = round((data_daily.iloc[currentday+4][4] / data_daily.iloc[currentday][1] - 1) * 100,2)
+                one = round((df.iat[currentday,3] / df.iat[currentday,0] - 1) * 100,2)
+                two =   round((df.iat[currentday+1,3] / df.iat[currentday,0] - 1) * 100,2)
+                three =  round((df.iat[currentday+2,3] / df.iat[currentday,0] - 1) * 100,2)
+                four = round((df.iat[currentday+3,3] / df.iat[currentday,0] - 1) * 100,2)
+                five = round((df.iat[currentday+4,3] / df.iat[currentday,0] - 1) * 100,2)
 
-                change10 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-11][4] - 1) * 100,2)
-                change20 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-21][4] - 1) * 100,2)
-                change60 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-61][4] - 1) * 100,2)
-                change250 = round((data_daily.iloc[currentday-1][4] / data_daily.iloc[currentday-251][4] - 1) * 100,2)
+                change10 = round((df.iat[currentday-1,3] / df.iat[currentday-11,3] - 1) * 100,2)
+                change20 = round((df.iat[currentday-1,3] / df.iat[currentday-21,3] - 1) * 100,2)
+                change60 = round((df.iat[currentday-1,3] / df.iat[currentday-61,3] - 1) * 100,2)
+                change250 = round((df.iat[currentday-1,3] / df.iat[currentday-251,3] - 1) * 100,2)
                             
               
 
 
                 adr = []
                 for j in range(20): 
-                    high = data_daily.iloc[currentday-j-1][2]
-                    low = data_daily.iloc[currentday-j-1][3]
+                    high = df.iat[currentday-j-1,1]
+                    low = df.iat[currentday-j-1,2]
                     val = (high/low - 1) * 100
                     adr.append(val)
                         
@@ -224,9 +215,9 @@ class Log:
 
                     ma10 = []
                     for j in range(10):
-                        ma10.append((data_daily.iloc[currentday-j+i][4]))
+                        ma10.append((df.iat[currentday-j+i,3]))
                     ma10 = statistics.mean(ma10)
-                    close = data_daily.iloc[currentday+i][4]
+                    close = df.iat[currentday+i,3]
 
                     if i == 0:
                         if close > ma10:
@@ -247,7 +238,7 @@ class Log:
 
                     i += 1
 
-                ten = round( (data_daily.iloc[currentday+i][4] / data_daily.iloc[currentday][1] - 1)*100,2)
+                ten = round( (df.iat[currentday+i,3] / df.iat[currentday,0] - 1)*100,2)
                 time = i 
 
           
@@ -258,10 +249,11 @@ class Log:
 
         
 
-                data ={'Date': [dateString],
-                        'Ticker':[tick],
-                        'Setup': [str(setup_type)],
+                data = pd.DataFrame({'Date': [date],
+                        'Ticker':[ticker],
+                        'Setup': [st],
                         'Z': [z],
+                        'timeframe': [tf],
                         'gap': [gap],
                         'adr': [adr],
                         'vol': [vol],
@@ -271,18 +263,16 @@ class Log:
                         '3': [three],
                         '10': [ten],
                         'annotation': [""],
-                        #'rating': [""],
-                        'time': [time],
-                        'timeframe': [tf]
-  
-                        }
+                        'time': [time]
+ 
+                        })
         
-                dfadd = pd.DataFrame(data)
-
-
             
-            
-                dfadd.to_csv((r"C:/Screener/tmp/setups.csv"), mode='a', index=False, header=False)
+                df = pd.concat([full,data])
+                
+               
+                df = df.reset_index(drop = True)
+                df.to_feather(r"C:/Screener/tmp/setups.feather")
             
             
 

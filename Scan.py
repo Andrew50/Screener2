@@ -10,33 +10,65 @@ import pandas as pd
 import datetime
 from tvDatafeed import TvDatafeed
 
-from Data7 import Data as data
+
 
 
 
 
 class Scan:
+    def convert_date(dt):
+        if type(dt) == str:
+            try:
+                dt = datetime.datetime.strptime(dt, '%Y-%m-%d')
+            except:
+                dt = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+        if type(dt) == datetime.date:
+            time = datetime.time(9,30,0)
+            dt = datetime.datetime.combine(dt,time)
+        if dt.time() == datetime.time(0):
+            time = datetime.time(9,30,0)
+            dt = datetime.datetime.combine(dt.date(),time)
+        return(dt)
+
+    def isToday(dt):
+        if dt == None:
+            return False
+        if dt == 'Today' or dt == '0' or dt == 0:
+            return True
+        time = datetime.time(0,0,0)
+        today = datetime.date.today()
+        today = datetime.datetime.combine(today,time)
+        dt = Scan.convert_date(dt)
+        if dt >= today:
+            return True
+        return False
+
+
+
 
     def get(date = None, tf = None, refresh = False, browser = None):
         
 
 
 
-        if data.isToday(date):
+        if Scan.isToday(date):
 
             if tf == 'd' or tf == 'w' or tf == 'm':
+                
                 if refresh:
+                    
                     Scan.runDailyScan(None)
-                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather")
+                
+                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker')
 
             else:
                 if not  refresh:
-                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
                         
                     except:
                         
@@ -45,7 +77,7 @@ class Scan:
         else:
             
             Scan.updateList(refresh)
-            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather")
+            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather").set_index('Ticker')
 
     
     def runDailyScan(brows):
@@ -75,6 +107,7 @@ class Scan:
         time.sleep(0.1)
 
         numTickers = len(screener_data)
+       
         #Changing ARCA into AMEX
         for i in range(numTickers):
             if str(screener_data.iloc[i]['Exchange']) == "NYSE ARCA":
@@ -139,7 +172,7 @@ class Scan:
     def startFirefoxSession():
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-        options.headless = True
+        #options.headless = True
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
         FireFoxProfile = webdriver.FirefoxProfile()
@@ -238,16 +271,22 @@ class Scan:
 
 
     def updateList(refresh = False):
-        df = pd.read_feather("C:/Screener/tmp/screener_data.feather")
-        df = df.set_index('Ticker')
+        df1 = pd.read_feather("C:/Screener/tmp/screener_data.feather")
+        df1 = df1.set_index('Ticker')
         df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
+        
         df2 = df2.set_index('Ticker')
-        df3 = df.merge(df2, left_index = True , right_index = True, how = 'outer')
+
+       
+
+        #df3 = df.merge(df2, left_index = True , right_index = True, how = 'left')
+        df3 = pd.concat([df1,df2]).drop_duplicates()
+        print(f'added {len(df3) - len(df2)} to full ticker list')
         if refresh:
             removelist = []
             for i in range(len(df3)):
                 ticker = str(df3.index[i])
-                if ticker not in df.index:
+                if ticker not in df1.index:
                     if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
                         removelist.append(ticker)
 
@@ -260,11 +299,13 @@ class Scan:
                 except:
                     pass
 
-        #df3 = df3.reset_index()  
-        df3 = df3.reset_index(drop = True)
-
-        df3.to_feather("C:/Screener/tmp/trest.feather")
-
         
+        df3 = df3.reset_index()
+        
+        df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")
+
+if __name__ == '__main__':
+    Scan.updateList(True)
+    
 
 

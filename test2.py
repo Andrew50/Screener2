@@ -8,11 +8,15 @@ from Scan import Scan as scan
 import datetime
 from pyarrow import feather
 import pandas as pd
-from Scan import Scan as scan
+from Data7 import Data as data
 
 
 
-scan.get('2022-03-03', 'd',True)
 
+
+
+
+df = pd.read_feather(r"C:\Screener\tmp\todays_setups.feather")
+print(df)
 
 

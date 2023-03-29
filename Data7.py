@@ -83,7 +83,7 @@ class Data:
                 else:
                     break
             return i
-        except TimeoutError:
+        except IndexError:
             return None
 
     def get(ticker,tf = 'd',date = None,premarket = False):    
@@ -124,7 +124,9 @@ class Data:
                         new_high = new_close
                     if new_close < low:
                         new_low = new_close
-                    new = pd.DataFrame({'datetime':[datetime.datetime.now()],
+
+                    now = datetime.datetime.now()
+                    new = pd.DataFrame({'datetime':[now],
                                         'open':[new_open],
                                         'high':[new_high],
                                         'low':[new_low],
@@ -143,16 +145,18 @@ class Data:
                         'volume': 'sum' }
             df = df.resample(tf).apply(logic)
         if current and (tf == 'd' or tf == 'w' or tf == 'm'):
-            screenbar = feather.read_feather(r"C:\Screener\tmp\screener_data.feather").loc[ticker]
+
+            screenbar = Scan.Scan.get('0','d').loc[ticker]
             pm = screenbar['Price'] + screenbar['Pre-market Change']
-            date = datetime.datetime.today()
+            date = pd.Timestamp(datetime.date.today())
             row  =pd.DataFrame({'datetime': [date],
                    'open': [pm],
                    'high': [pm],
                    'low': [pm],
                    'close': [pm],
-                   'volume': [0]})
-            df = pd.concat([df, row]).set_index("datetime")
+                   'volume': [0]}).set_index("datetime")
+            df = pd.concat([df, row])
+        df.dropna(inplace = True)
         return (df)
         
     def update(bar):

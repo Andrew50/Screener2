@@ -32,14 +32,14 @@ class UI:
         self.annotation = False
         try:
             if current:
-                self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
+                self.setups_data =pd.read_feather(r"C:\Screener\tmp\todays_setups.feather")
                 self.historical = False
     
             else:
-                self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                self.setups_data =pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 self.historical = True
 
-        except:
+        except pd.FileNotFounderError:
             print('There were no setups')
             exit()
 
@@ -144,7 +144,7 @@ class UI:
     def lookup(self,ticker,date,setup,keyword,sortinput,timeframe):
         
         print(f"searching for {keyword}")
-        scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+        scan = pd.read_feather(r"C:\Screener\tmp\setups.feather")
         
         if timeframe  != "":
             scanholder = pd.DataFrame()
@@ -242,19 +242,19 @@ class UI:
         iss = str(i)
         if (os.path.exists("C:/Screener/tmp/charts/databasesmall" + iss + ".png") == False):
             try:
-                #print(f"fetching {i}")
+               
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
                 date = (setups_data.iloc[i][0])
                 
                
                 
-                ticker = str(setups_data.iloc[i][1])
-                setup = str(setups_data.iloc[i][2])
-                z= str(setups_data.iloc[i][3])
-                tf= str(setups_data.iloc[i][4])
+                ticker = setups_data.iloc[i][1]
+                setup = setups_data.iloc[i][2]
+                z= setups_data.iloc[i][3]
+                tf= setups_data.iloc[i][4]
                
-                zs = float(z)
+                zs = z
 
                 chartsize = 90
                 
@@ -315,7 +315,7 @@ class UI:
                 df4 = data.get(ticker,tf4)
 
                 
-
+                print(date)
                 l1 = data.findex(df1,date) - chartoffset
                 l2 = data.findex(df2,date) - chartoffset
                 l3 = data.findex(df3,date) - chartoffset
@@ -340,10 +340,7 @@ class UI:
                 df3 = df3[l3:r3]
                 df4 = df4[l4:r4]
 
-                df1.set_index('datetime', inplace = True)
-                df2.set_index('datetime', inplace = True)
-                df3.set_index('datetime', inplace = True)
-                df4.set_index('datetime', inplace = True)
+                
             
                 string1 = "1" + iss + ".png"
                 string2 = "2" + iss + ".png"
@@ -356,13 +353,14 @@ class UI:
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
 
 
+                #print(df1)
                 
                 
                 if data.isToday(date):
                     
                     
                   
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2)) + "   " + tf1), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   { setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
@@ -383,7 +381,7 @@ class UI:
                         dm = date
                         dh = date
                     
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + date + "   " + setup + "   " + str(round(zs,2)) + "   " + tf1), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
                     mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dm}")], alpha = .25))
@@ -499,12 +497,12 @@ class UI:
                 ]
                 self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
-                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+                df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 index = self.setups_data.index[previ]
                 print('saved annotation')
                 df.at[index, 12] = values["annotation"]
                 self.setups_data.at[index, 12] = values["annotation"]   
-                df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
+                df.to_feather(r"C:\Screener\tmp\setups.feather")
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
                 self.window["-gap-"].update(gap)
                 self.window["-adr-"].update(adr)
@@ -554,5 +552,5 @@ class UI:
            
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 

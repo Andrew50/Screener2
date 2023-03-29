@@ -8,7 +8,7 @@ import time
 from tqdm import tqdm
 from Data7 import Data as data
 
-from Detection1 import Detection as detection
+from Detection2 import Detection as detection
 
 from Scan import Scan as scan
 
@@ -40,7 +40,16 @@ class Screener:
                     'tf':[]}
         pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
         if ticker == None:
-            ticker_list = scan.get(date,tf,True,browser)['Ticker'].tolist()
+            ticker_list = scan.get(date,tf,True,browser).index.tolist()
+            if date == None:
+                try:
+                    df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+                
+                    god = df.loc['Ticker'].tolist()
+                    for ticker in god:
+                        ticker_list.remove(ticker)
+                except:
+                    pass
 
         elif type(ticker) is str:
             path = 1
@@ -57,71 +66,49 @@ class Screener:
             date_list = [date]
         else:
             if date == None:
-                if path == 0:
-                    try:
-                        df = pd.read_feather(r"C:\Screener\tmp\setups.feather", header = None)
-                        dt = df.iloc[-1][0]
-                        startdate = datetime.datetime.strptime(dt, '%Y-%m-%d')
-                    except:
-                        startdate = datetime.date(2008, 1, 1)
-                else:
-                    startdate = datetime.date(2008, 1, 1)
+                
+                startdate = datetime.date(2008, 1, 1)
                 enddate = datetime.datetime.now() - datetime.timedelta(date_buffer)
 
             else:
                 path = 1
                 startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
-               
                 enddate = startdate + datetime.timedelta(days)
 
-
-
             sample = data.get('AAPL',tf)
-            
             start_index = data.findex(sample,startdate)  
             end_index = data.findex(sample, enddate) 
-
-           
-
             trim = sample[start_index:end_index]
-            
             date_list = trim.index.tolist()
 
-  
-
         
-            
-
-        
-
         Screener.run(date_list, ticker_list, tf,path)
 
-        
-  
-
-
-
+    
     def run(date_list,ticker_list,tf,path):
         length = len(ticker_list)*len(date_list)
         pbar = tqdm(total=length)
         container = []
-        for date in date_list:
+        
             
-            for ticker in ticker_list:
+        for i in  range(len( ticker_list)):
+
+            ticker = ticker_list[i]
+            container.append([ticker, tf , path, []])
+
+            for date in date_list:
                     
-                    container.append([date,ticker,tf,path])
+                    container[i][3].append(date)
                     pbar.update(1)
                     
 
         pbar.close()
         data.pool(detection.check, container)
         
-    
-
 
 if __name__ == '__main__':
-    test = False
-    if test or  ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
+   
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
         Screener.queue('0')
          
@@ -133,17 +120,11 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
-        #browser = scan.startFirefoxSession()
-        #while True:
-           
-          #  Screener.queue(tf = '1min', date = '0',browser = browser)
-        #Screener.queue('0')
-        Screener.queue(date = '2023-03-21')
-        #Screener.queue(date = '2023-03-23',tf = '1min')
-        #.queue()
-        #Screener.queue(tf = '1min', date = '0')
-        #Screener.queue(date = '2023-03-16', tf = '2h',ticker = ['HOOD'], days = 1)
-        ui.loop(ui,True)
+        
+        Screener.queue()
+        ui.loop(ui,False)
+        #Screener.queue(date = '2023-03-10',tf = '1min')
+       
 
 
 
@@ -155,5 +136,6 @@ if __name__ == '__main__':
 
 
                      
+
 
 
