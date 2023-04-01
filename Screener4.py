@@ -41,14 +41,21 @@ class Screener:
         pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
         if ticker == None:
             ticker_list = scan.get(date,tf,True,browser).index.tolist()
+            print(len(ticker_list))
             if date == None:
                 try:
                     df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
-                
-                    god = df.loc['Ticker'].tolist()
+
+                    god = df['Ticker'].tolist()
+                    i = 0
                     for ticker in god:
-                        ticker_list.remove(ticker)
-                except:
+                        try:
+                            ticker_list.remove(ticker)
+                            i += 1
+                        except:
+                            pass
+                    print(f'already done {i}')
+                except TimeoutError:
                     pass
 
         elif type(ticker) is str:
@@ -90,18 +97,19 @@ class Screener:
         pbar = tqdm(total=length)
         container = []
         
-            
+        print(len(ticker_list))
         for i in  range(len( ticker_list)):
-
+            
             ticker = ticker_list[i]
+            
             container.append([ticker, tf , path, []])
 
             for date in date_list:
                     
-                    container[i][3].append(date)
-                    pbar.update(1)
+                container[i][3].append(date)
+                pbar.update(1)
                     
-
+        
         pbar.close()
         data.pool(detection.check, container)
         
@@ -121,8 +129,10 @@ if __name__ == '__main__':
 
     else:
         
-        Screener.queue()
-        ui.loop(ui,False)
+        browser = scan.startFirefoxSession()
+        while True:#datetime.datetime.now().hour < 13:
+           
+            Screener.queue(tf = '1min', date = '0',browser = browser)
         #Screener.queue(date = '2023-03-10',tf = '1min')
        
 

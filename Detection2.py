@@ -55,7 +55,7 @@ class Detection:
                                     Detection.Flag(df,currentday, tf, ticker, path)
 
                         if tf == '1min':
-                    
+                            
                             if dolVol > 20000 and adr > .08:
                             
                                 Detection.Pop(df,currentday, tf, ticker, path)
@@ -109,7 +109,7 @@ class Detection:
         y = ((df.iat[currentday - i,3]/df.iat[currentday - i,0]) + (df.iat[currentday - i,3]/df.iat[currentday - i,0]) - 2)
        
         current_value = x*pow(y,2)
-
+        
 
         '''
         
@@ -130,19 +130,22 @@ class Detection:
 
     '''
        # print(f'{len(df)} , {currentday}')
+      
         df = df[currentday-length:currentday + 1]
+    
         currentday = length - 1
+    
         for i in range(length): 
             x = df.iat[currentday - i-1, 4] + df.iat[currentday - i-2,4]
             y = ((df.iat[currentday - i-1,3]/df.iat[currentday - i-1,0]) + (df.iat[currentday - i-1,3]/df.iat[currentday - i-1,0]) - 2)
             value = x*pow(y,2)
             data.append(value)
-        
+    
         
         z = (current_value - statistics.mean(data))/statistics.stdev(data)
-        
+    
         if ((z < -zfilter) or (z > zfilter)):
-           
+        
             log.log(df,currentday, tf, ticker, z, path , 'Pop')  
             
 

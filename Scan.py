@@ -59,16 +59,16 @@ class Scan:
                     
                     Scan.runDailyScan(None)
                 
-                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker')
+                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker').dropna()
 
             else:
                 if not  refresh:
-                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker').dropna()
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker').dropna()
                         
                     except:
                         
@@ -77,7 +77,7 @@ class Scan:
         else:
             
             Scan.updateList(refresh)
-            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather").set_index('Ticker')
+            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather").set_index('Ticker')#.dropna()
 
     
     def runDailyScan(brows):
@@ -172,7 +172,7 @@ class Scan:
     def startFirefoxSession():
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-        #options.headless = True
+        options.headless = True
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
         FireFoxProfile = webdriver.FirefoxProfile()
@@ -281,25 +281,29 @@ class Scan:
 
         #df3 = df.merge(df2, left_index = True , right_index = True, how = 'left')
         df3 = pd.concat([df1,df2]).drop_duplicates()
-        print(f'added {len(df3) - len(df2)} to full ticker list')
+        #print(f"{len(df3)} ppjj")
+        #print(f'added {len(df3) - len(df2)} to full ticker list')
         if refresh:
             removelist = []
+            
             for i in range(len(df3)):
                 ticker = str(df3.index[i])
-                if ticker not in df1.index:
+                current = df1.index.to_list()
+                if ticker not in current or ticker == None or ticker == 'None':
                     if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
                         removelist.append(ticker)
+                        
 
-
-         
+           
+            #print(f"{len(removelist)} removed")
             for ticker in removelist:
                 try:
                     df3.drop(df3.loc[ticker])
-                    print(f'removed {ticker}')
+                   # print(f'removed {ticker}')
                 except:
                     pass
 
-        
+           
         df3 = df3.reset_index()
         
         df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")

@@ -225,7 +225,7 @@ class Data:
         minute = tv.get_hist('AAPL', 'NASDAQ', n_bars=2, interval=Interval.in_1_minute, extended_session = False)
         minute_last = daily.index[Data.isMarketOpen()]
 
-        screener_data = Scan.Scan.get()
+        screener_data = Scan.Scan.get(refresh = True)
         
         
         #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
@@ -233,7 +233,7 @@ class Data:
         
         batches = []
         for i in range(len(screener_data)):
-           ticker = screener_data.iloc[i]['Ticker']
+           ticker = screener_data.index[i]
            batches.append([ticker, daily_last, 'daily'])
            batches.append([ticker, minute_last, 'minute'])
         

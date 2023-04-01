@@ -56,12 +56,14 @@ class Log:
 
 
     def intraday(df,currentday, tf, ticker, z, path, st):
+        
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
         ourpath = pathlib.Path("C:/Screener/tmp")/ 'test.png'
+        print('4')
         z = round(z, 3)
         df = df[-100:]
-        df.set_index('datetime', inplace = True)
+        #df.set_index('datetime', inplace = True)
         mpf.plot(df, type='candle', mav=(10, 20), volume=True, title=f'{ticker}, {st}, {z}, {tf}', style=s, savefig=ourpath)
         Log.sendDiscordIntradayPost('tmp/test.png')
 
