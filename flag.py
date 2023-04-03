@@ -1,6 +1,7 @@
 
 
 from Data7 import Data as data
+from Scan import Scan as scan
 
 import pandas as pd
 import statistics
@@ -21,29 +22,50 @@ upper_stdev_filter2 = 1.5
 
 lower_stdev_filter2 = 1
 
-'''
-
-date_list = ['2023-03-10','2023-03-26','2020-08-12','2020-11-10','2023-01-05','2023-01-04','2023-02-16',
-			 '2023-03-22','2023-01-03','2023-01-04','2022-01-06','2022-10-18','2023-01-04','2022-12-09',
-			 '2022-09-06','2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-23','2023-08-03']
-
-ticker_list = ['riot','meli','tsla','tsla','elf','mlco','mlco','aehr','cweb','tme','nue','kold','orcl',
-			   'amat','enph','mdb','pump','oxy','mrna','celh','rytm']
 
 
-'''
+date_list = ['2023-03-10','2023-03-30','2020-08-12','2020-11-10','2023-01-05',
+			 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
+			 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
+			 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
+			 '2023-08-03']
 
-ticker = 'tsla'
+ticker_list = ['riot','meli','tsla','tsla','elf',
+			   'mlco','mlco','aehr','cweb','tme',
+			   'nue','kold','orcl','amat','enph',
+			   'mdb','pump','oxy','mrna','celh',
+			   'rytm']
 
-dfg = data.get(ticker)
+
+
+
+tickers = scan.get().index.to_list()
+
+
 
 
 
 while True:
-	ind = random.randint(0,len(dfg)-1)
+	
+	
 
-	date = dfg.index[ind]
+	'''
+for p in range(len(date_list)):
+
+	ticker = ticker_list[p]
+
+	date = date_list[p]
+	'''
+	
+	
 	try:
+		dh = random.randint(0,len(tickers) - 1)
+		ticker = tickers[dh]
+
+		dfg = data.get(ticker)
+		ind = random.randint(0,len(dfg)-1)
+
+		date = dfg.index[ind]
 		#date = date_list[i]
 		#ticker = ticker_list[i]
 
@@ -53,13 +75,13 @@ while True:
 
 
 		lmax = 100
-		lmin = 5
+		lmin = 7
 		mal = 5
 
 		mal2 = 2
 
 
-		coef = 0.02
+		coef = 0.01
 
 
 
@@ -67,7 +89,7 @@ while True:
 
 		df = data.get(ticker)
 		index = data.findex(df,date)
-		df = df[index - 300:index]
+		df = df[index - 200:index]
 		current = len(df) - 1
 		swings = np.empty([0,3])
 		slope = 0
@@ -126,7 +148,7 @@ while True:
 			val = abs(swings[i,0]/swings[i+1,0] - 1) * (1 - coef * swings[i,1])
 			if val > lval:
 				lval = val
-				move_size = abs(swings[i,0]/swings[i+1,0] - 1)
+				move_size = abs(swings[i,0] - swings[i+1,0])
 				l = swings[i,1] + int(mal/2)
 
 		#get swings for ma2
@@ -320,7 +342,7 @@ while True:
 
 			tightening = mh - ml
 
-			tightness = abs(((mh*(l/2) + bh ) - ( ml * (l/2) + bl)) )
+			tightness = bh - bl#abs(((mh*(l/2) + bh ) - ( ml * (l/2) + bl)) )
 
 			higher_lows = -ml
 
@@ -336,17 +358,41 @@ while True:
 			atr = statistics.mean(atr)  
 
 			flag = False
-			if z > 2 and abs(ml) < atr/3 and abs(mh) < atr/3 and tightness < atr * pow(l,.5):
+
+
+			oc = (df.iat[current - 1,0] + df.iat[current - 1,3])/2
+
+			oc_now = (df.iat[current ,0] + df.iat[current ,3])/2
+
+			avg_slope = ((ml + mh)/2)/atr
+
+			
+			high = df.iat[current,1]
+
+			low = df.iat[current,2]
+
+
+
+			if bh > bl and z >3  and bh + mh*l > bl + ml*l and oc < bh and (high > bh or low < bl):# and oc > bl and (oc_now > bh or oc_now < bl): # and  df.iat[current - 1,1]> bl + ml*1  and  df.iat[current - 1, 2] < bh + mh*1 :# and oc > bl + ml*1 and oc < bh + mh*1:
+
+
 				flag = True
 
+				
+			if flag :
+
+				val = avg_slope / atr
+
+				gg = False
+				if avg_slope < .07:
+					gg = True
 
 
-
-			line = df.index[-l]
-			mc = mpf.make_marketcolors(up='g',down='r')
-			s  = mpf.make_mpf_style(marketcolors=mc)
-			mpf.plot(df, type='candle', style=s, alines = points, title = str(f'{flag}'))#, alpha = .25))#vlines=dict(vlines=[line],
-			#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
+				line = df.index[-l]
+				mc = mpf.make_marketcolors(up='g',down='r')
+				s  = mpf.make_mpf_style(marketcolors=mc)
+				mpf.plot(df, type='candle', style=s, alines = points, title = str(f'{ticker} , {df.index[date]} , {z} , {val}'))#, alpha = .25))#vlines=dict(vlines=[line],
+				#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
 
 	except:
 		pass

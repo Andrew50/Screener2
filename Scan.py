@@ -59,16 +59,16 @@ class Scan:
                     
                     Scan.runDailyScan(None)
                 
-                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker').dropna()
+                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker')
 
             else:
                 if not  refresh:
-                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker').dropna()
+                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker').dropna()
+                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
                         
                     except:
                         
@@ -283,6 +283,7 @@ class Scan:
         df3 = pd.concat([df1,df2]).drop_duplicates()
         #print(f"{len(df3)} ppjj")
         #print(f'added {len(df3) - len(df2)} to full ticker list')
+        
         if refresh:
             removelist = []
             

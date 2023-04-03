@@ -23,6 +23,8 @@ class Detection:
             df = data.get(ticker,tf,date)
         except FileNotFoundError:
             return
+        except TypeError:
+            return
         
         for date in date_list:
             try:
