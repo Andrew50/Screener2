@@ -315,7 +315,7 @@ class UI:
                 df4 = data.get(ticker,tf4)
 
                 
-                print(date)
+                
                 l1 = data.findex(df1,date) - chartoffset
                 l2 = data.findex(df2,date) - chartoffset
                 l3 = data.findex(df3,date) - chartoffset

@@ -24,7 +24,7 @@ lower_stdev_filter2 = 1
 
 
 
-date_list = ['2023-03-10','2023-03-30','2020-08-12','2020-11-10','2023-01-05',
+date_list = ['2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
 			 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
 			 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
 			 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
@@ -42,34 +42,49 @@ ticker_list = ['riot','meli','tsla','tsla','elf',
 tickers = scan.get().index.to_list()
 
 
+test = False
 
-
+c = -1
 
 while True:
 	
-	
+	c += 1
 
-	'''
-for p in range(len(date_list)):
 
-	ticker = ticker_list[p]
-
-	date = date_list[p]
-	'''
-	
-	
 	try:
-		dh = random.randint(0,len(tickers) - 1)
-		ticker = tickers[dh]
+		if not test:
+			dh = random.randint(0,len(tickers) - 1)
+			ticker = tickers[dh]
 
-		dfg = data.get(ticker)
-		ind = random.randint(0,len(dfg)-1)
+			dfg = data.get(ticker)
+			ind = random.randint(0,len(dfg)-1)
 
-		date = dfg.index[ind]
+			date = dfg.index[ind]
+		else:
+			ticker = ticker_list[c]
+			date = date_list[c]
+
+
+
+
 		#date = date_list[i]
 		#ticker = ticker_list[i]
 
 
+
+
+
+
+		
+
+
+
+
+
+		df = data.get(ticker)
+		index = data.findex(df,date)
+		df = df[index - 200:index]
+		current = len(df) - 1
 
 
 
@@ -85,12 +100,6 @@ for p in range(len(date_list)):
 
 
 
-
-
-		df = data.get(ticker)
-		index = data.findex(df,date)
-		df = df[index - 200:index]
-		current = len(df) - 1
 		swings = np.empty([0,3])
 		slope = 0
 		prevma = []
@@ -235,6 +244,12 @@ for p in range(len(date_list)):
 
 				all_swings.append(swings[i,0])
 
+
+			#add most recent andle
+
+			
+
+
 			#fitler out high stdev points
 
 	
@@ -259,7 +274,7 @@ for p in range(len(date_list)):
 			#plt.scatter(x,y)
 			#plt.show()
 
-			for i in range(len(yh) -1,-1,-1):
+			for i in range(len(yl) -1,-1,-1):
 				z = (yl[i] - mean)/stdev
 				if z < -upper_stdev_filter2 or z > lower_stdev_filter2:
 					yl = np.delete(yl,i)
@@ -349,7 +364,7 @@ for p in range(len(date_list)):
 			z = move_size / tightness
 
 			atr= []
-			adr_l = 15
+			adr_l = int(l)
 			for j in range(adr_l): 
 				high = df.iat[current-j-1,1]
 				low = df.iat[current-j-1,2]
@@ -364,35 +379,68 @@ for p in range(len(date_list)):
 
 			oc_now = (df.iat[current ,0] + df.iat[current ,3])/2
 
-			avg_slope = ((ml + mh)/2)/atr
+			avg_slope = ((abs(ml) + abs(mh))/2)
 
 			
 			high = df.iat[current,1]
 
 			low = df.iat[current,2]
 
+			prev_close =df.iat[current-1,3]
 
+			prev_high = df.iat[current-1,1]
 
-			if bh > bl and z >3  and bh + mh*l > bl + ml*l and oc < bh and (high > bh or low < bl):# and oc > bl and (oc_now > bh or oc_now < bl): # and  df.iat[current - 1,1]> bl + ml*1  and  df.iat[current - 1, 2] < bh + mh*1 :# and oc > bl + ml*1 and oc < bh + mh*1:
+			prev_low = df.iat[current-1,2]
 
+			setup = 'None'
+			if (bh > bl and 
+			z >3  and
+		   bh + mh*l > bl + ml*l 
+		   and oc < bh): 
+				if prev_close < bh and prev_close > bl:
+					val = avg_slope / atr
 
-				flag = True
+					if val < .1:
+						val2 = tightening/atr
+						if val2 > 0:
+							flag = True
+						'''
+						if (high > bh and high > prev_high):
+							setup = 'Breakout'
+							flag = True
+
+						if (low < bl and low < prev_low):
+							setup = 'Breakdown'
+							flag = True
+				'''
+				
+				# and oc > bl and (oc_now > bh or oc_now < bl): # and  df.iat[current - 1,1]> bl + ml*1  and  df.iat[current - 1, 2] < bh + mh*1 :# and oc > bl + ml*1 and oc < bh + mh*1:
+
 
 				
-			if flag :
 
-				val = avg_slope / atr
+				
+			if test or flag :
 
-				gg = False
-				if avg_slope < .07:
-					gg = True
-
+				try:
+					val = val[0]
+				except:
+					pass
+				try:
+					val2 = val2[0]
+				except:
+					pass
+				
 
 				line = df.index[-l]
 				mc = mpf.make_marketcolors(up='g',down='r')
 				s  = mpf.make_mpf_style(marketcolors=mc)
-				mpf.plot(df, type='candle', style=s, alines = points, title = str(f'{ticker} , {df.index[date]} , {z} , {val}'))#, alpha = .25))#vlines=dict(vlines=[line],
-				#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
+				if test:
+					mpf.plot(df, type='candle', style=s, alines = points,title = str(f' {flag} , {round(val,3)} , {round(val2,3)} , {avg_slope} , {atr}'))#, alpha = .25))#vlines=dict(vlines=[line],
+				else:
+					mpf.plot(df, type='candle', style=s, alines = points)#, alpha = .25))#vlines=dict(vlines=[line],
+
+					#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
 
 	except:
 		pass
