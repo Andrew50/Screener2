@@ -86,7 +86,7 @@ class Data:
         except IndexError:
             return None
 
-    def get(ticker,tf = 'd',date = None,premarket = False):    
+    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
         current = Data.isToday(date)
 
         if tf == 'daily':

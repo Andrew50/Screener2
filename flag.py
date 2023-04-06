@@ -24,13 +24,13 @@ lower_stdev_filter2 = 1
 
 
 
-date_list = ['2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
+date_list = ['2022-07-28','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
 			 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
 			 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
 			 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
 			 '2023-08-03']
 
-ticker_list = ['riot','meli','tsla','tsla','elf',
+ticker_list = ['enph','dpst','riot','meli','tsla','tsla','elf',
 			   'mlco','mlco','aehr','cweb','tme',
 			   'nue','kold','orcl','amat','enph',
 			   'mdb','pump','oxy','mrna','celh',
@@ -42,7 +42,7 @@ ticker_list = ['riot','meli','tsla','tsla','elf',
 tickers = scan.get().index.to_list()
 
 
-test = False
+test = True
 
 c = -1
 
@@ -63,22 +63,6 @@ while True:
 		else:
 			ticker = ticker_list[c]
 			date = date_list[c]
-
-
-
-
-		#date = date_list[i]
-		#ticker = ticker_list[i]
-
-
-
-
-
-
-		
-
-
-
 
 
 		df = data.get(ticker)
@@ -203,7 +187,7 @@ while True:
 			ma = prevma
 			i += 1
 
-
+		print(l)
 		if l >= lmin and l < lmax:
 			i = 0
 
@@ -418,7 +402,7 @@ while True:
 
 
 				
-
+			print('gpd')
 				
 			if test or flag :
 

@@ -172,7 +172,7 @@ class Scan:
     def startFirefoxSession():
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-        options.headless = True
+        #options.headless = True
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
         FireFoxProfile = webdriver.FirefoxProfile()
@@ -180,7 +180,7 @@ class Scan:
         browser = webdriver.Firefox(options=options, executable_path=FireFoxDriverPath)
         browser.implicitly_wait(7)
         #browser.maximize_window()
-        browser.set_window_size(1920, 1080)
+        browser.set_window_size(2560, 1440)
         url = "https://www.tradingview.com/screener/"
         browser.get(url)
         time.sleep(1.5)
@@ -218,7 +218,7 @@ class Scan:
         filter_tab = browser.find_element(By.XPATH, '//div[@class="tv-screener-sticky-header-wrapper__fields-button-wrap"]')
         try:
             filter_tab.click()
-        except ElementNotInteractableException:
+        except:
             pass
         time.sleep(0.5)
         #Setting up the TV screener parameters
@@ -251,6 +251,9 @@ class Scan:
         tab14.click()
         tab15.click()
 
+        #//*[@id="close"]
+        browser.find_element(By.XPATH, '//*[@id="close"]').click()
+        
         time.sleep(0.5) 
         browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
         time.sleep(0.25)
@@ -311,6 +314,7 @@ class Scan:
 
 if __name__ == '__main__':
     Scan.updateList(True)
+    print(pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list())
     
 
 

@@ -409,7 +409,7 @@ class UI:
         lasttime = ttime.time()
         while True:
             laptime = round((ttime.time() - lasttime), 2)
-            if laptime < 3:
+            if laptime < 5:
 
                 try:
                     image1 = Image.open(r"C:\Screener\tmp\charts\1" + str(self.i) + ".png")

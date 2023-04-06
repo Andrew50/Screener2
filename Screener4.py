@@ -40,7 +40,9 @@ class Screener:
                     'tf':[]}
         pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
         if ticker == None:
+            
             ticker_list = scan.get(date,tf,True,browser).index.tolist()
+            
             print(len(ticker_list))
             if date == None:
                 try:
@@ -75,21 +77,23 @@ class Screener:
             if date == None:
                 
                 startdate = datetime.date(2008, 1, 1)
-                enddate = datetime.datetime.now() - datetime.timedelta(date_buffer)
+                enddate = datetime.datetime.now()# - datetime.timedelta(date_buffer)
+                
 
             else:
                 path = 1
                 startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
                 enddate = startdate + datetime.timedelta(days)
-                print(f'{startdate} ,{enddate}')
+              
 
             sample = data.get('AAPL',tf)
             start_index = data.findex(sample,startdate)  
             end_index = data.findex(sample, enddate)
             
-            print(f'{start_index} , {end_index}')
+         
             trim = sample[start_index:end_index]
             date_list = trim.index.tolist()
+            
 
         
         Screener.run(date_list, ticker_list, tf,path)
@@ -100,7 +104,7 @@ class Screener:
         pbar = tqdm(total=length)
         container = []
         
-        print(date_list)
+       
         for i in  range(len( ticker_list)):
             
             ticker = ticker_list[i]
@@ -132,8 +136,9 @@ if __name__ == '__main__':
 
     else:
         
-        
         Screener.queue('0')
+        #Screener.queue(ticker = 'coin',date = '2021-05-20')
+        #Screener.queue(date = '2015-01-01',days = 10)
         ui.loop(ui,True)
        
 
