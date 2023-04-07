@@ -49,9 +49,9 @@ class Detection:
 
 							
 							if dolVol > 1000000 and adr > 3:
-								sEP = True
-								sMR = True
-								sPivot = True
+								sEP = False
+								sMR = False
+								sPivot = False
 								sFlag = True
 								dolVolFilter = 10000000
 			
@@ -281,22 +281,12 @@ class Detection:
 		mal = 5
 
 		upper_stdev_filter = 1.5
-
 		lower_stdev_filter = .75
-
-
 		upper_stdev_filter2 = 1.5
 
 		lower_stdev_filter2 = 1
-
-
 		mal2 = 2
-
-
 		coef = 0.01
-
-
-
 		swings = np.empty([0,3])
 		slope = 0
 		prevma = []
@@ -306,9 +296,7 @@ class Detection:
 			for j in range(l):
 				ma.append(df.iat[i-j,3])
 				return statistics.mean(ma)
-
 		ma = MA(df,currentday - 1,mal)
-
 		i = 2
 		while True:
 			prevma = MA(df,currentday - i,mal)
@@ -347,8 +335,6 @@ class Detection:
 				lval = val
 				move_size = abs(swings[i,0] - swings[i+1,0])
 				l = swings[i,1] + int(mal/2)
-
-			#get swings for ma2
 		slope = 0
 		swings = np.empty([0,3])
 		ma = MA(df,currentday - 1,mal)
@@ -359,21 +345,14 @@ class Detection:
 			prevma = MA(df,currentday - i,mal2)
 			if slope == 1 and ma < prevma:
 				slope = -1
-	
-				#add = df.iat[current-i+1,3]
-				#add = prevma
 				add = df.iat[currentday-i,3]
 				swings = np.append(swings,[[add,i,0]],axis = 0)
 				add = df.iat[currentday-i,2]
-
 				swings = np.append(swings,[[add,i,0]],axis = 0)
 				if end:
 					break
 			elif slope == -1 and ma > prevma:
-		
 				slope = 1
-				#add = df.iat[current-i+1,3]
-				#add = prevma
 				add = df.iat[currentday-i,3]
 				swings = np.append(swings,[[add,i,1]],axis = 0)
 				add = df.iat[currentday-i,1]
@@ -385,28 +364,18 @@ class Detection:
 					slope = 1
 				else:
 					slope = -1
-
 			if i >= lmax:
 				end = True
 			ma = prevma
 			i += 1
-
-
 		if l >= lmin and l < lmax:
 			i = 0
-
-			#get swing points within l
-
 			while True:
 				if swings[i,1] > l:
 					swings = swings[0:i]
 					break
 				i += 1
-
-			#sort swings into highs and lows
-
 			n = len(swings)
-
 			xh = np.empty([0,1])
 			yh = np.empty(0)
 			xl = np.empty([0,1])
@@ -421,8 +390,6 @@ class Detection:
 					xl = np.append(xl,[[swings[i,1]]],axis = 0)
 					yl = np.append(yl,swings[i,0])
 				all_swings.append(swings[i,0])
-
-			#fitler out high stdev points
 			stdev = np.std(yl)
 			mean = np.mean(yl)
 			x = np.empty(0)
@@ -441,9 +408,6 @@ class Detection:
 				if z > upper_stdev_filter or z < -lower_stdev_filter:
 					yh = np.delete(yh,i)
 					xh = np.delete(xh,i,axis = 0)
-
-			#regress
-
 			modelh = LinearRegression().fit(xh, yh)
 			bh = modelh.intercept_
 			mh = modelh.coef_
@@ -465,117 +429,20 @@ class Detection:
 				atr.append(val)
 			atr = statistics.mean(atr)  
 			oc = (df.iat[currentday - 1,0] + df.iat[currentday - 1,3])/2
-
-			oc_now = (df.iat[currentday ,0] + df.iat[currentday ,3])/2
-
 			avg_slope = ((abs(ml) + abs(mh))/2)
-
-			
 			high = df.iat[currentday,1]
-
 			low = df.iat[currentday,2]
-
 			prev_close =df.iat[currentday-1,3]
-
-			prev_high = df.iat[currentday-1,1]
-
-			prev_low = df.iat[currentday-1,2]
-
-			
 			if (bh > bl and 
 			z >3  and
 			bh + mh*l > bl + ml*l 
 			and oc < bh): 
 				if prev_close < bh and prev_close > bl:
 					val = avg_slope / atr
-
 					if val < .1:
 						val2 = tightening/atr
 						if val2 > 0:
-							
-					
 							log.log(df,currentday, tf, ticker, z, path, 'Flag')  
 
 	  
 
-	def weeklyFlag(df,currentday, tf, ticker, path):
-		pmPrice = df.iat[currentday,0]
-		
-		zfilter = 5
-		z2filter = -100
-		lmin = 20
-		lmax = 50
-		rsil = 20
-		zl = 20
-		rsi_filter = 30
-		
-
-		
-			
-			
-		rsimax = 0
-		for j in range(lmax):
-				
-			gains = []
-			losses = []
-					
-					
-			for k in range(rsil):
-				change = (df.iat[currentday-k-j-1,3]/df.iat[currentday-k-j-2,3]) - 1
-				if change > 0:
-					gains.append(change)
-				else:
-					losses.append(-change)
-
-
-			RS = (sum(gains)/rsil) / (sum(losses)/rsil)
-			rsi = abs((100 - (100 / (1 + RS))) - 50)
-			   
-			if rsi > rsimax:
-				rsimax = rsi
-				l = j - 1
-				
-		  
-				
-		gaindata = []
-		flagdata = []
-			
-		halfdata = []
-				
-		if l > lmin and l < lmax - 2 and rsimax > rsi_filter:
-			for j in range(l * 2):
-				ma3 = []
-				for k in range(3):
-
-					ma3.append(df.iat[currentday-j-k-1,3])
-				ma3 = statistics.mean(ma3)
-						  
-				if j < int(l/2):
-					halfdata.append(ma3)
-
-				if j >=l:
-					gaindata.append(ma3)
-				else:
-
-					flagdata.append(ma3)
-					
-			gain = max(gaindata) - min(gaindata)
-			flag = max(flagdata) - min(flagdata)
-			   
-			halfflag = max(halfdata) - min(halfdata) 
-
-			value = gain - flag
-				
-
-			zdata = []
-			
-			for i in range(zl):
-				pushvalue = df.iat[currentday-i-1,1] - df.iat[currentday-i-1,2]
-				zdata.append(pushvalue)
-
-			z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
-			z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
-			 
-			if z > zfilter and z2 > z2filter:
-					
-				log.log(df,currentday, tf, ticker, z, path, 'WWFlg')  

@@ -251,8 +251,13 @@ class Scan:
         tab14.click()
         tab15.click()
 
+        '''
+        //*[@id="close"]
+        //*[@id="picker-header"]
+        '''
+
         #//*[@id="close"]
-        browser.find_element(By.XPATH, '//*[@id="close"]').click()
+        browser.find_element(By.XPATH, '//div[@id="close"]').click()
         
         time.sleep(0.5) 
         browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()

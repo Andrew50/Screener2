@@ -1,5 +1,90 @@
 ﻿
 
+WEEKLY FLAG --------------------------------------------------------------------------
+
+
+	def weeklyFlag(df,currentday, tf, ticker, path):
+		pmPrice = df.iat[currentday,0]
+		
+		zfilter = 5
+		z2filter = -100
+		lmin = 20
+		lmax = 50
+		rsil = 20
+		zl = 20
+		rsi_filter = 30
+		
+
+		
+			
+			
+		rsimax = 0
+		for j in range(lmax):
+				
+			gains = []
+			losses = []
+					
+					
+			for k in range(rsil):
+				change = (df.iat[currentday-k-j-1,3]/df.iat[currentday-k-j-2,3]) - 1
+				if change > 0:
+					gains.append(change)
+				else:
+					losses.append(-change)
+
+
+			RS = (sum(gains)/rsil) / (sum(losses)/rsil)
+			rsi = abs((100 - (100 / (1 + RS))) - 50)
+			   
+			if rsi > rsimax:
+				rsimax = rsi
+				l = j - 1
+				
+		  
+				
+		gaindata = []
+		flagdata = []
+			
+		halfdata = []
+				
+		if l > lmin and l < lmax - 2 and rsimax > rsi_filter:
+			for j in range(l * 2):
+				ma3 = []
+				for k in range(3):
+
+					ma3.append(df.iat[currentday-j-k-1,3])
+				ma3 = statistics.mean(ma3)
+						  
+				if j < int(l/2):
+					halfdata.append(ma3)
+
+				if j >=l:
+					gaindata.append(ma3)
+				else:
+
+					flagdata.append(ma3)
+					
+			gain = max(gaindata) - min(gaindata)
+			flag = max(flagdata) - min(flagdata)
+			   
+			halfflag = max(halfdata) - min(halfdata) 
+
+			value = gain - flag
+				
+
+			zdata = []
+			
+			for i in range(zl):
+				pushvalue = df.iat[currentday-i-1,1] - df.iat[currentday-i-1,2]
+				zdata.append(pushvalue)
+
+			z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
+			z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
+			 
+			if z > zfilter and z2 > z2filter:
+					
+				log.log(df,currentday, tf, ticker, z, path, 'WWFlg')  
+
 OLD PIVOT -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 

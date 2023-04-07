@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
     else:
         
-        Screener.queue('0')
+        Screener.queue(date = '2023-04-04')
         #Screener.queue(ticker = 'coin',date = '2021-05-20')
         #Screener.queue(date = '2015-01-01',days = 10)
         ui.loop(ui,True)
