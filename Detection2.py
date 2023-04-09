@@ -2,6 +2,10 @@
 import statistics
 from Log3 import Log as log
 
+from flag import Flag as flag
+
+
+
 from Data7 import Data as data
 from sklearn.linear_model import LinearRegression
 import numpy as np
@@ -63,7 +67,7 @@ class Detection:
 									
 									Detection.Pivot(df,currentday, tf, ticker, path)
 								if(dolVol > .7 * dolVolFilter   and adr > 4 and sFlag):
-									Detection.Flag(df,currentday, tf, ticker, path)
+									flag.flag(df,currentday, tf, ticker, path)
 
 						if tf == '1min':
 							
