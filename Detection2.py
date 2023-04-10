@@ -20,19 +20,24 @@ class Detection:
 		tf = bar[1]
 		path = bar[2]
 		date_list = bar[3]
+		
 		date = date_list[0]
+		
 		
 		try:
 			dff = data.get(ticker,tf,date)
 			
 		except FileNotFoundError:
+			print('7')
 			return
 		
 
 		except TypeError:
+			
 			return
 		
 		if len(dff) > 50:
+			
 			for date in date_list:
 				try:
 				
@@ -50,7 +55,7 @@ class Detection:
 						dolVol, adr = Detection.requirements(df,currentday)
 						
 						if tf == 'd':
-
+							
 							
 							if dolVol > 1000000 and adr > 3:
 								sEP = False
@@ -67,6 +72,7 @@ class Detection:
 									
 									Detection.Pivot(df,currentday, tf, ticker, path)
 								if(dolVol > .7 * dolVolFilter   and adr > 4 and sFlag):
+									
 									flag.flag(df,currentday, tf, ticker, path)
 
 						if tf == '1min':
@@ -84,7 +90,7 @@ class Detection:
 						
 							pass
 			
-				except :
+				except:
 					pass
 
 		#except Exception as e: print(e)

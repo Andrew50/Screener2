@@ -43,6 +43,11 @@ class UI:
             print('There were no setups')
             exit()
 
+        if len(self.setups_data ) == 0: 
+            print('There were no setups')
+            exit()
+
+        print(self.setups_data)
         self.sort = False
         self.preloadamount = 6
         self.preloadbuffer = self.preloadamount - 1

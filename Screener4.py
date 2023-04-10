@@ -74,25 +74,33 @@ class Screener:
                 path = 2
             date_list = [date]
         else:
+            sample = data.get('AAPL',tf)
             if date == None:
-                
+                '''
                 startdate = datetime.date(2008, 1, 1)
                 enddate = datetime.datetime.now()# - datetime.timedelta(date_buffer)
+
+                start_index = data.findex(sample,startdate)
+                end_index = data.findex(sample,enddate)
+                trim = sample[start_index:end_index]
+                
+                date_list = trim.index.tolist()
+                '''
+                date_list =sample.index.tolist()
                 
 
             else:
                 path = 1
-                startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
-                enddate = startdate + datetime.timedelta(days)
-              
+                #startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
+                
+                start_index = data.findex(sample,date)  
+                end_index = start_index + days
 
-            sample = data.get('AAPL',tf)
-            start_index = data.findex(sample,startdate)  
-            end_index = data.findex(sample, enddate)
+                trim = sample[start_index:end_index]
+                
+                date_list = trim.index.tolist()
+              
             
-         
-            trim = sample[start_index:end_index]
-            date_list = trim.index.tolist()
             
 
         
@@ -103,7 +111,6 @@ class Screener:
         length = len(ticker_list)*len(date_list)
         pbar = tqdm(total=length)
         container = []
-        
        
         for i in  range(len( ticker_list)):
             
@@ -136,9 +143,11 @@ if __name__ == '__main__':
 
     else:
         
-        Screener.queue(date = '2023-04-04')
+        Screener.queue(ticker = 'riot')
+       # Screener.queue(date = '2023-04-04')
         #Screener.queue(ticker = 'coin',date = '2021-05-20')
         #Screener.queue(date = '2015-01-01',days = 10)
+       
         ui.loop(ui,True)
        
 
