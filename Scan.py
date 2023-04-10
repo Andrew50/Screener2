@@ -205,7 +205,10 @@ class Scan:
         time.sleep(0.5)
         login_button = browser.find_element(By.XPATH, '//button[@class="tv-button tv-button--size_large tv-button--primary tv-button--loader"]')
         login_button.click()
-        time.sleep(7)
+        time.sleep(3)
+        browser.refresh();
+        print("TTTTTTTTTTTTTTTTTTT")
+        time.sleep(4)
         Scan.clickFilters(browser)
         return browser
     def clickFilters(browser):
@@ -257,7 +260,7 @@ class Scan:
         '''
 
         #//*[@id="close"]
-        browser.find_element(By.XPATH, '//div[@id="close"]').click()
+        browser.find_element(By.XPATH, '//div[@class="tv-screener__standalone-title-wrap"]').click()
         
         time.sleep(0.5) 
         browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
@@ -318,8 +321,10 @@ class Scan:
         df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")
 
 if __name__ == '__main__':
-    Scan.updateList(True)
-    print(pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list())
+    #Scan.updateList(True)
+    #print(pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list())
+    Scan.runDailyScan(None)
+
     
 
 
