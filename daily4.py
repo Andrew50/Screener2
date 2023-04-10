@@ -495,7 +495,7 @@ if __name__ == '__main__':
 
     premarket = False
 
-    if god and ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) :
+    if ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 46)) :
             Daily.runDaily(Daily, '0')
     else:
             
