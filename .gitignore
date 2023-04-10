@@ -25,3 +25,9 @@ daily_data_tester/
 minute_data_tester/
 data test subjects/
 test/
+data backup/
+minute/
+daily/
+data_test/
+Screener.bat
+Screener.lnk

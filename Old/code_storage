@@ -1,5 +1,299 @@
 ﻿
 
+WEEKLY FLAG --------------------------------------------------------------------------
+
+
+	def weeklyFlag(df,currentday, tf, ticker, path):
+		pmPrice = df.iat[currentday,0]
+		
+		zfilter = 5
+		z2filter = -100
+		lmin = 20
+		lmax = 50
+		rsil = 20
+		zl = 20
+		rsi_filter = 30
+		
+
+		
+			
+			
+		rsimax = 0
+		for j in range(lmax):
+				
+			gains = []
+			losses = []
+					
+					
+			for k in range(rsil):
+				change = (df.iat[currentday-k-j-1,3]/df.iat[currentday-k-j-2,3]) - 1
+				if change > 0:
+					gains.append(change)
+				else:
+					losses.append(-change)
+
+
+			RS = (sum(gains)/rsil) / (sum(losses)/rsil)
+			rsi = abs((100 - (100 / (1 + RS))) - 50)
+			   
+			if rsi > rsimax:
+				rsimax = rsi
+				l = j - 1
+				
+		  
+				
+		gaindata = []
+		flagdata = []
+			
+		halfdata = []
+				
+		if l > lmin and l < lmax - 2 and rsimax > rsi_filter:
+			for j in range(l * 2):
+				ma3 = []
+				for k in range(3):
+
+					ma3.append(df.iat[currentday-j-k-1,3])
+				ma3 = statistics.mean(ma3)
+						  
+				if j < int(l/2):
+					halfdata.append(ma3)
+
+				if j >=l:
+					gaindata.append(ma3)
+				else:
+
+					flagdata.append(ma3)
+					
+			gain = max(gaindata) - min(gaindata)
+			flag = max(flagdata) - min(flagdata)
+			   
+			halfflag = max(halfdata) - min(halfdata) 
+
+			value = gain - flag
+				
+
+			zdata = []
+			
+			for i in range(zl):
+				pushvalue = df.iat[currentday-i-1,1] - df.iat[currentday-i-1,2]
+				zdata.append(pushvalue)
+
+			z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
+			z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
+			 
+			if z > zfilter and z2 > z2filter:
+					
+				log.log(df,currentday, tf, ticker, z, path, 'WWFlg')  
+
+OLD PIVOT -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+       
+        lowergapzfilter = 1.5
+        lowergapzfilter2 = 1.5
+
+        pmPrice = df.iat[currentday,0]
+       
+        
+        prevClose = df.iat[currentday-1,3]
+        zgaps = []
+        for i in range(15):
+            n = 14-i
+            gapvalue = abs((df.iat[currentday-n-1,0]/df.iat[currentday-n-2,3]) - 1)
+            zgaps.append(gapvalue)
+            
+        todayGapValue = (pmPrice/prevClose)-1
+        gapz = (abs(todayGapValue)-statistics.mean(zgaps))/statistics.stdev(zgaps)
+        lastCloses = 0
+        for c in range(4): 
+            lastCloses = lastCloses + df.iat[currentday-c-1,3]
+                
+        ma3 = (lastCloses/4)
+        close1 = df.iat[currentday-1,3]
+        close2 = df.iat[currentday-2,3]
+        open1 = df.iat[currentday-1,0]
+        open2 = df.iat[currentday-2,0]
+        low1 = df.iat[currentday-1,2]
+        high1 = df.iat[currentday-1,1]
+        z = gapz
+
+         if gapz > lowergapzfilter and close1 < ma3  and close1 < close2 and close2 < open2 and close1 < open1 and open1 < close2 and pmPrice > high1 :
+                
+                
+           log.log(df,currentday, tf, ticker, z, path, 'Pivot')   
+
+        if gapz > lowergapzfilter2 and close1 > ma3  and close1 > close2 and close2 > open2 and close1 > open1 and open1 > close2 and pmPrice < low1:
+
+            log.log(df,currentday, tf, ticker, z, path, 'Pivot') 
+
+
+
+
+OLD FLAG DETECTION---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+pmPrice = df.iat[currentday,0]
+       
+        
+        #if test:
+           # zfilter = 4
+       # else:
+        zfilter = 8
+
+
+        z2filter = .25
+        lmin = 5
+        lmax = 20
+        rsil = 20
+        zl = 20
+        rsi_filter = 25
+        todayl = 0
+        currentvalue = 0
+
+       
+            
+        rsimax = 0
+        for j in range(lmax):
+                
+            gains = []
+            losses = []
+                    
+                    
+            for k in range(rsil):
+                
+                change = (df.iat[currentday-k-j-1,3]/df.iat[currentday-k-j-2,3]) - 1
+                
+                    
+                if change > 0:
+                    gains.append(change)
+                else:
+                    losses.append(-change)
+
+
+            RS = (sum(gains)/rsil) / (sum(losses)/rsil)
+            rsi = abs((100 - (100 / (1 + RS))) - 50)
+               
+            if rsi > rsimax:
+                rsimax = rsi
+                l = j - 1
+                
+          
+                
+        gaindata = []
+        flagdata = []
+            
+        halfdata = []
+                
+        if l > lmin and l < lmax - 2 and rsimax > rsi_filter:
+            for j in range(l * 2):
+                ma3 = []
+                for k in range(3):
+
+                    ma3.append(df.iat[currentday-j-k-1,3])
+                ma3 = statistics.mean(ma3)
+                          
+                if j < int(l/2):
+                    halfdata.append(ma3)
+
+                if j >=l:
+                    gaindata.append(ma3)
+                else:
+
+                    flagdata.append(ma3)
+                    
+            gain = max(gaindata) - min(gaindata)
+            flag = max(flagdata) - min(flagdata)
+               
+            halfflag = max(halfdata) - min(halfdata) 
+
+            value = gain - flag
+                
+
+            zdata = []
+            
+            for i in range(zl):
+                pushvalue = df.iat[currentday-i-1,1] - df.iat[currentday-i-1,2]
+                zdata.append(pushvalue)
+
+            z = (value - statistics.mean(zdata))/statistics.stdev(zdata)
+            z2 =  -((halfflag - statistics.mean(zdata))/statistics.stdev(zdata))
+             
+            
+            if z > zfilter and z2 > z2filter:
+                    
+                log.log(df,currentday, tf, ticker, z, path, 'Flag')  
+
+OLD Prgoress-----------------------------------------------------------------------------------------------------------
+
+
+def progress(size = None):
+        
+        if size == None:
+            f = open('progress.txt','r')
+            read = f.readlines()
+            
+            size = int(read[0])
+            num = int(read[1])
+            
+            num += 1 
+
+            f = open('progress.txt','w')
+            f.writelines(str(f'{size} \n {num}') )
+
+            
+            p = round((num / size)*100 , 3)
+            print(f'{p}%' , end='\r')
+        else:
+            f = open('progress.txt','w')
+            f.writelines(str(f'{size} \n 0') )
+
+OLD IDSCORD MESSAGE MAKER --------------------------------------------------------------------------------------------------------------------------------
+
+#Log.sendDiscordEmbedIntraday(ticker + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+        
+        
+        #discordintraday.post(file={"test": open('C:\Screener\tmp\test.png', "rb")})
+
+        if False:
+            openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+            changePrice = round(float(currPrice - openCandlePrice), 2)
+            change = round(screenbar["Change 1m, %"], 2)
+            dayChange = round(screenbar['Change %'], 2)
+            #changeFromOpen = round(screenbar['Change from Open'], 2)
+            #openValue = screenbar['Open']
+            currPrice = screenbar['Price']
+            volume = screenbar['Volume']
+            tick = screenbar['Ticker']
+            pmChange = screenbar['Pre-market Change']
+            currPrice = screenbar['Price']
+            volume = screenbar['Volume']
+            dolVol = screenbar['Volume*Price']
+            marketCap = round(screenbar['Market Capitalization'], 1)
+            marketCapText = round((marketCap / 1000000000), 2)
+            relativeVolAtTime = round(screenbar['Relative Volume at Time'], 1)
+            gapValuePercent = 0
+            prevClose = 0
+            pmPrice = 0
+            prevClose = currPrice
+            pmPrice = round((prevClose + pmChange), 2)
+            gapValuePercent = round(((pmPrice/prevClose) - 1)*100, 2)
+            lengthDf = len(setup_df)
+            setup_df = setup_df[lengthDf - 80:]
+
+        if(type == "Pop") and False:
+            openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+            changePrice = round(float(currPrice - openCandlePrice), 2)
+            mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+            log.sendDiscordEmbedIntraday(tick + f" Open of 1m:{openCandlePrice} >> Current: {currPrice} ▲ {changePrice} ({change}%)", f"Intraday % Gaining Setup, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            log.sendDiscordIntradayPost('tmp/test.png')
+
+        if(type == "Gainer") and False:
+            openCandlePrice = float(setup_df.iloc[len(setup_df)-1][1])
+            changePrice = round(float(currPrice - openCandlePrice), 2)
+            mpf.plot(setup_df, type='candle', mav=(10, 20), volume=True, title=tick, style=s, savefig=ourpath)
+            log.sendDiscordEmbedGainers(tick + f" PC:{prevClose} >> {currPrice} ▲ {currPrice} ({dayChange}%)", f"Top Gainer, Volume: {volume}, RelVol: {relativeVolAtTime}x, MCap: ${marketCapText}B")
+            log.sendDiscordGainersPost('tmp/test.png')
+
+
 OLDFINDEX -------------------------------------------
 def findexold(df,dt):
         

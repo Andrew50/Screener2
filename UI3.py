@@ -1,20 +1,20 @@
-from cmath import isnan
-from re import L
+
+
 import PySimpleGUI as sg
 import os 
+import numpy
 import pandas as pd
 import pathlib
 import mplfinance as mpf
 from PIL import Image
 import io
 import datetime
-import math
-import multiprocessing
-from time import sleep
-from Data5 import Data as data
+
+
+from Data7 import Data as data
 import time as ttime
 import shutil
-import concurrent.futures
+
 from pathos.multiprocessing import ProcessingPool as Pool
 
 
@@ -24,21 +24,24 @@ class UI:
 
     
 
-    def loop(self,current):
+    def loop(self,current = False):
         if os.path.exists("C:/Screener/tmp/charts"):
             shutil.rmtree("C:/Screener/tmp/charts")
         os.mkdir("C:/Screener/tmp/charts")
         self.i = 0
         self.annotation = False
-        if current:
-            self.setups_data =pd.read_csv(r"C:\Screener\tmp\todays_setups.csv", header = None)
-            self.historical = False
+        try:
+            if current:
+                self.setups_data =pd.read_feather(r"C:\Screener\tmp\todays_setups.feather")
+                self.historical = False
     
-        else:
-            self.setups_data =pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-            self.historical = True
+            else:
+                self.setups_data =pd.read_feather(r"C:\Screener\tmp\setups.feather")
+                self.historical = True
 
-            
+        except pd.FileNotFounderError:
+            print('There were no setups')
+            exit()
 
         self.sort = False
         self.preloadamount = 6
@@ -141,7 +144,7 @@ class UI:
     def lookup(self,ticker,date,setup,keyword,sortinput,timeframe):
         
         print(f"searching for {keyword}")
-        scan = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
+        scan = pd.read_feather(r"C:\Screener\tmp\setups.feather")
         
         if timeframe  != "":
             scanholder = pd.DataFrame()
@@ -230,6 +233,7 @@ class UI:
             
            
     def plot(slist):
+        
         i = slist[1]
         setups_data = slist[0]
         
@@ -238,38 +242,84 @@ class UI:
         iss = str(i)
         if (os.path.exists("C:/Screener/tmp/charts/databasesmall" + iss + ".png") == False):
             try:
-                print(f"fetching {i}")
+               
                 mc = mpf.make_marketcolors(up='g',down='r')
                 s  = mpf.make_mpf_style(marketcolors=mc)
-                chartdate = str(setups_data.iloc[i][0])
-                try:
-                    date = datetime.datetime.strptime(chartdate, '%Y-%m-%d')
-                except:
-                    date = chartdate
+                date = (setups_data.iloc[i][0])
+                
+               
+                
+                ticker = setups_data.iloc[i][1]
+                setup = setups_data.iloc[i][2]
+                z= setups_data.iloc[i][3]
+                tf= setups_data.iloc[i][4]
+               
+                zs = z
 
-                date = '0'
-                ticker = str(setups_data.iloc[i][1])
-                setup = str(setups_data.iloc[i][2])
-                z= str(setups_data.iloc[i][3])
-                zs = float(z)
-
-                chartsize = 80
-                chartoffset = 60
-                chartoffset2 = 10
-                chartoffset3 = 50
-
-                df1 = data.get(ticker,'w')
-                df2 = data.get(ticker,'d')
-                df3 = data.get(ticker,'h')
-                df4 = data.get(ticker,'1min')
-
+                chartsize = 90
+                
+                chartoffset = 50
                 
 
+          
 
+                if data.isToday(date):
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '15min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
+
+                else:
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
+
+
+
+                df1 = data.get(ticker,tf1,date)
+                df2 = data.get(ticker,tf2)
+                df3 = data.get(ticker,tf3)
+                df4 = data.get(ticker,tf4)
+
+                
+                
                 l1 = data.findex(df1,date) - chartoffset
                 l2 = data.findex(df2,date) - chartoffset
-                l3 = data.findex(df3,date) - chartoffset3
-                l4 = data.findex(df4,date) - chartoffset2
+                l3 = data.findex(df3,date) - chartoffset
+                l4 = data.findex(df4,date) - chartoffset
 
                 r1 = l1 + chartsize
                 r2 = l2 + chartsize
@@ -285,59 +335,66 @@ class UI:
                 if l4 < 0:
                     l4 = 0
            
-
-
                 df1 = df1[l1:r1]
                 df2 = df2[l2:r2]
                 df3 = df3[l3:r3]
                 df4 = df4[l4:r4]
 
-                df1.set_index('datetime', inplace = True)
-                df2.set_index('datetime', inplace = True)
-                df3.set_index('datetime', inplace = True)
-                df4.set_index('datetime', inplace = True)
+                
             
-
                 string1 = "1" + iss + ".png"
                 string2 = "2" + iss + ".png"
                 string3 = "3" + iss + ".png"
                 string4 = "4" + iss + ".png"
             
-
                 p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
                 p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
-            
-         
-                
-                if date == "0":
-                    pmPrice = (setups_data.iloc[i][4])
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True, hlines=dict(hlines=[pmPrice], alpha = .25))
-                else:
 
-                    mpf.plot(df1, type='candle', volume=True, title=str(ticker + "   " + chartdate + "   " + setup + "   " + str(round(zs,2))), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[chartdate], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, style=s, title=str('Daily'), savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[chartdate], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, style=s, title=str('Hourly'), savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[chartdate], alpha = .25))
-                    mpf.plot(df4, type='candle', volume=True, style=s, title=str('1 Minute'), savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[chartdate], alpha = .25))
+
+                #print(df1)
+                
+                
+                if data.isToday(date):
+                    
+                    
+                  
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   { setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                else:
+                    if tf == 'd':
+                        try:
+                            god = datetime.datetime.strptime(date, '%Y-%m-%d')
+                            dm = f"{date} 09:30"
+                            dh = f"{date} 09:00"
+                    
+                    
+                        except:
+                    
+                            
+                            dm = date
+                            dh = date
+                    else:
+                        dm = date
+                        dh = date
+                    
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dm}")], alpha = .25))
             except TimeoutError:
+                
                 print('preload failed')
                        
-        
-                
-            
-
-    
     def preload(self,init):
         arglist = []
         c = 0
         if not init:
             c = self.preloadbuffer
         for x in range(self.preloadamount - c):
-        #for x in range(len(self.setups_data)):
             
             v = (x + self.i + c)
             if v < len(self.setups_data):
@@ -345,16 +402,6 @@ class UI:
 
         with Pool(nodes=6) as pool:
             pool.map(self.plot, arglist)
-      
-        
-       
-            
-          
-
-       
-
-
-    
 
     def update(self, init,values,previ):
        
@@ -362,10 +409,7 @@ class UI:
         lasttime = ttime.time()
         while True:
             laptime = round((ttime.time() - lasttime), 2)
-            if laptime < 3:
-
-                
-
+            if laptime < 5:
 
                 try:
                     image1 = Image.open(r"C:\Screener\tmp\charts\1" + str(self.i) + ".png")
@@ -387,41 +431,33 @@ class UI:
                     image4.thumbnail((1050, 700))
                     bio4 = io.BytesIO()
                     image4.save(bio4, format="PNG")
-
                     break
-
                 except OSError:
                     pass
-                
                 except:
                     break
             else:
                 print("image timed out")
                 break
-            
-           
-     
-
+ 
         if self.historical:
-            gap = str(self.setups_data.iloc[self.i][4])
-            adr = str(self.setups_data.iloc[self.i][5])
-            vol = str(self.setups_data.iloc[self.i][6])
-            q = str(self.setups_data.iloc[self.i][7])
-            one = str(self.setups_data.iloc[self.i][8])
-            two = str(self.setups_data.iloc[self.i][9])
-            three = str(self.setups_data.iloc[self.i][10])
-            ten = str(self.setups_data.iloc[self.i][11])
-            annotation = str(self.setups_data.iloc[self.i][12])
+
+            gap = str(self.setups_data.iloc[self.i][5])
+            adr = str(self.setups_data.iloc[self.i][6])
+            vol = str(self.setups_data.iloc[self.i][7])
+            q = str(self.setups_data.iloc[self.i][8])
+            one = str(self.setups_data.iloc[self.i][9])
+            two = str(self.setups_data.iloc[self.i][10])
+            three = str(self.setups_data.iloc[self.i][11])
+            ten = str(self.setups_data.iloc[self.i][12])
+            annotation = str(self.setups_data.iloc[self.i][13])
             #rating = str(self.setups_data.iloc[self.i][13])
-            time = str(self.setups_data.iloc[self.i][13])
+            time = str(self.setups_data.iloc[self.i][14])
+            
                 
             if annotation == "nan":
                 annotation = ""
-            #if rating == "nan":
-                #rating = ""
-
-
-
+ 
             if init:
                 histstr = "Historical"
                 sg.theme('DarkGrey')
@@ -459,24 +495,14 @@ class UI:
                 #[(sg.Text("Time")),(sg.Text(time, key = '-time-'))] , 
                 [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load'), sg.Button('Toggle')]#, sg.Button('Sort')] 
                 ]
-                
                 self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
-               
-                df = pd.read_csv(r"C:\Screener\tmp\setups.csv", header = None)
-                
+                df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 index = self.setups_data.index[previ]
-                  
                 print('saved annotation')
-              
                 df.at[index, 12] = values["annotation"]
-                self.setups_data.at[index, 12] = values["annotation"]
-                   
-                    
-                df.to_csv(r"C:\Screener\tmp\setups.csv",header = False, index = False)
-                
-                
-                    
+                self.setups_data.at[index, 12] = values["annotation"]   
+                df.to_feather(r"C:\Screener\tmp\setups.feather")
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
                 self.window["-gap-"].update(gap)
                 self.window["-adr-"].update(adr)
@@ -498,9 +524,6 @@ class UI:
                 except:
                     print("image load failed")
                     
-                
-                    
-
         else:
             if init:
                 sg.theme('DarkGrey')
@@ -515,12 +538,7 @@ class UI:
                    
                         [sg.Button('Prev'), sg.Button('Next')] 
                 ]
-
-
-                
-                self.window = sg.Window('Window Title', layout,margins = (10,10))
-
-
+                self.window = sg.Window('Screener', layout,margins = (10,10))
             else:
                 try:
 
@@ -534,7 +552,5 @@ class UI:
            
 
 if __name__ == "__main__":
-    
-  
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 
