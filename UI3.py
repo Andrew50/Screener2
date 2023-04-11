@@ -7,6 +7,7 @@ import pandas as pd
 import pathlib
 import mplfinance as mpf
 from PIL import Image
+from matplotlib import pyplot as plt
 import io
 import datetime
 
@@ -47,7 +48,7 @@ class UI:
             print('There were no setups')
             exit()
 
-        print(self.setups_data)
+        
         self.sort = False
         self.preloadamount = 6
         self.preloadbuffer = self.preloadamount - 1
@@ -313,14 +314,13 @@ class UI:
                         tf4 = '5min'
 
 
-
+               
                 df1 = data.get(ticker,tf1,date)
                 df2 = data.get(ticker,tf2)
                 df3 = data.get(ticker,tf3)
                 df4 = data.get(ticker,tf4)
 
-                
-                
+             
                 l1 = data.findex(df1,date) - chartoffset
                 l2 = data.findex(df2,date) - chartoffset
                 l3 = data.findex(df3,date) - chartoffset
@@ -557,5 +557,5 @@ class UI:
            
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 

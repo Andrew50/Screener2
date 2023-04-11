@@ -372,7 +372,7 @@ class Flag:
 				else:
 
 					
-					log.log(df,current, tf, ticker, z, path, 'Flag')   
+					log.log(df,current, tf, ticker, l, path, 'Flag')   
 
 
 	
@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
 
 	tickers = scan.get().index.to_list()
-	test = True
+	test = False
 	c = -1
 	while True:
 		c += 1

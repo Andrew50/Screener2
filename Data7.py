@@ -84,6 +84,7 @@ class Data:
                     break
             return i
         except IndexError:
+           
             return None
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
