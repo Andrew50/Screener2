@@ -104,7 +104,7 @@ if __name__ == '__main__':
 	tf = 'd'
 
 	tickers = scan.get().index.to_list()
-	test = True
+	test = False
 	ccccc = -1
 
 
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 				ind = random.randint(0,len(dfg)-1)
 				date = dfg.index[ind]
 			else:
-				ticker = 'qqq'#ticker_list[ccccc]
+				ticker = 'spy'#ticker_list[ccccc]
 				date = date_list[ccccc]
 			l = 20
 			z_filter = 2

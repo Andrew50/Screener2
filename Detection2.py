@@ -44,7 +44,7 @@ class Detection:
 				
 					currentday = data.findex(dff,date)
 					
-					if currentday != None:
+					if currentday != None and currentday > 15:
 						
 						length = 500
 						start = currentday - length
@@ -59,7 +59,7 @@ class Detection:
 							
 							
 							if dolVol > 1000000 and adr > 3:
-								if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
+								if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 									sEP = True
 									sMR = True
 									sPivot = True
@@ -97,7 +97,7 @@ class Detection:
 						
 							pass
 			
-				except TimeoutError:
+				except:
 					pass
 
 		#except Exception as e: print(e)

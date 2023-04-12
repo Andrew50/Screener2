@@ -246,153 +246,150 @@ class UI:
         
         
         iss = str(i)
-        if (os.path.exists("C:/Screener/tmp/charts/databasesmall" + iss + ".png") == False):
+        if (os.path.exists("C:/Screener/tmp/charts/1" + iss + ".png") == False):
+               
+            mc = mpf.make_marketcolors(up='g',down='r')
+            s  = mpf.make_mpf_style(marketcolors=mc)
+            date = (setups_data.iloc[i][0])
+            ticker = setups_data.iloc[i][1]
+            setup = setups_data.iloc[i][2]
+            z= setups_data.iloc[i][3]
+            tf= setups_data.iloc[i][4] 
+            zs = z
+            chartsize = 90
+            chartoffset = 50
+
+            if data.isToday(date):
+                if tf == 'd':
+                    tf1 = 'd'
+                    tf2 = 'w'
+                    tf3 = 'h'
+                    tf4 = '15min'
+                if tf == 'h':
+                    tf1 = 'h'
+                    df2 = 'd'
+                    df3 = '15min'
+                    df4 = '1min'
+                if tf == '5min':
+                    tf1 = '5min'
+                    tf2 = 'd'
+                    tf3 = 'h'
+                    tf4 = '1min'
+                if tf == '1min':
+                    tf1 = '1min'
+                    tf2 = 'd'
+                    tf3 = 'h'
+                    tf4 = '5min'
+            else:
+                if tf == 'd':
+                    tf1 = 'd'
+                    tf2 = 'w'
+                    tf3 = 'h'
+                    tf4 = '1min'
+                if tf == 'h':
+                    tf1 = 'h'
+                    df2 = 'd'
+                    df3 = '15min'
+                    df4 = '1min'
+                if tf == '5min':
+                    tf1 = '5min'
+                    tf2 = 'd'
+                    tf3 = 'h'
+                    tf4 = '1min'
+                if tf == '1min':
+                    tf1 = '1min'
+                    tf2 = 'd'
+                    tf3 = 'h'
+                    tf4 = '5min'
+
             try:
-               
-                mc = mpf.make_marketcolors(up='g',down='r')
-                s  = mpf.make_mpf_style(marketcolors=mc)
-                date = (setups_data.iloc[i][0])
-                
-               
-                
-                ticker = setups_data.iloc[i][1]
-                setup = setups_data.iloc[i][2]
-                z= setups_data.iloc[i][3]
-                tf= setups_data.iloc[i][4]
-               
-                zs = z
-
-                chartsize = 90
-                
-                chartoffset = 50
-                
-
-          
-
-                if data.isToday(date):
-                    if tf == 'd':
-                        tf1 = 'd'
-                        tf2 = 'w'
-                        tf3 = 'h'
-                        tf4 = '15min'
-                    if tf == 'h':
-                        tf1 = 'h'
-                        df2 = 'd'
-                        df3 = '15min'
-                        df4 = '1min'
-                    if tf == '5min':
-                        tf1 = '5min'
-                        tf2 = 'd'
-                        tf3 = 'h'
-                        tf4 = '1min'
-                    if tf == '1min':
-                        tf1 = '1min'
-                        tf2 = 'd'
-                        tf3 = 'h'
-                        tf4 = '5min'
-
-                else:
-                    if tf == 'd':
-                        tf1 = 'd'
-                        tf2 = 'w'
-                        tf3 = 'h'
-                        tf4 = '1min'
-                    if tf == 'h':
-                        tf1 = 'h'
-                        df2 = 'd'
-                        df3 = '15min'
-                        df4 = '1min'
-                    if tf == '5min':
-                        tf1 = '5min'
-                        tf2 = 'd'
-                        tf3 = 'h'
-                        tf4 = '1min'
-                    if tf == '1min':
-                        tf1 = '1min'
-                        tf2 = 'd'
-                        tf3 = 'h'
-                        tf4 = '5min'
-
-
-               
                 df1 = data.get(ticker,tf1,date)
-                df2 = data.get(ticker,tf2)
-                df3 = data.get(ticker,tf3)
-                df4 = data.get(ticker,tf4)
-
-             
                 l1 = data.findex(df1,date) - chartoffset
-                l2 = data.findex(df2,date) - chartoffset
-                l3 = data.findex(df3,date) - chartoffset
-                l4 = data.findex(df4,date) - chartoffset
-
                 r1 = l1 + chartsize
-                r2 = l2 + chartsize
-                r3 = l3 + chartsize
-                r4 = l4 + chartsize
-
                 if l1 < 0:
                     l1 = 0
+                df1 = df1[l1:r1]
+                string1 = "1" + iss + ".png"
+                p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
+                if data.isToday(date):
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                else:
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+            except:
+                print('preload 1 failed')
+
+            try:
+                df2 = data.get(ticker,tf2)
+                l2 = data.findex(df2,date) - chartoffset
+                r2 = l2 + chartsize
                 if l2 < 0:
                     l2 = 0
+                df2 = df2[l2:r2]
+                string2 = "2" + iss + ".png"
+                p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
+                if data.isToday(date):
+                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                else:
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+
+            except:
+                print('preload 2 failed')
+
+            try:
+                df3 = data.get(ticker,tf3)
+                l3 = data.findex(df3,date) - chartoffset
+                r3 = l3 + chartsize
                 if l3 < 0:
                     l3 = 0
+                df3 = df3[l3:r3]
+                string3 = "3" + iss + ".png"
+                p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
+                if data.isToday(date):
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                else:
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
+
+            except:
+                print('preaload 3 failed')
+
+            try:
+                df4 = data.get(ticker,tf4)
+                l4 = data.findex(df4,date) - chartoffset
+                r4 = l4 + chartsize
                 if l4 < 0:
                     l4 = 0
-           
-                df1 = df1[l1:r1]
-                df2 = df2[l2:r2]
-                df3 = df3[l3:r3]
                 df4 = df4[l4:r4]
-
-                
-            
-                string1 = "1" + iss + ".png"
-                string2 = "2" + iss + ".png"
-                string3 = "3" + iss + ".png"
                 string4 = "4" + iss + ".png"
-            
-                p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
-                p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
-                p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
-
-
-                #print(df1)
-                
-                
                 if data.isToday(date):
-                    
-                    
-                  
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   { setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
+                    mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+            except:
+                print('preaload 4 failed')
+                   
+            '''
+                    
                     if tf == 'd':
-                        try:
-                            god = datetime.datetime.strptime(date, '%Y-%m-%d')
-                            dm = f"{date} 09:30"
-                            dh = f"{date} 09:00"
+
+
+
+            try:
+                god = datetime.datetime.strptime(date, '%Y-%m-%d')
+                dm = f"{date} 09:30"
+                dh = f"{date} 09:00"
                     
                     
-                        except:
+            except:
                     
                             
-                            dm = date
-                            dh = date
-                    else:
-                        dm = date
-                        dh = date
-                    
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
-                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dm}")], alpha = .25))
-            except TimeoutError:
-                
-                print('preload failed')
+                dm = date
+                dh = date
+        else:
+            dm = date
+            dh = date
+                '''  
+               
                        
     def preload(self,init):
         arglist = []
@@ -412,39 +409,73 @@ class UI:
        
         
         lasttime = ttime.time()
+        image1 = None
+        image2 = None
+        image3 = None
+        image4 = None
         while True:
             laptime = round((ttime.time() - lasttime), 2)
-            if laptime < 5:
+            if laptime < .5:
 
-                try:
-                    image1 = Image.open(r"C:\Screener\tmp\charts\1" + str(self.i) + ".png")
-                    image1.thumbnail((1050, 700))
-                    bio1 = io.BytesIO()
-                    image1.save(bio1, format="PNG")
-           
-                    image2 = Image.open(r"C:\Screener\tmp\charts\2" + str(self.i) + ".png")
-                    image2.thumbnail((1050, 700))
-                    bio2 = io.BytesIO()
-                    image2.save(bio2, format="PNG")
+                
+                if image1 == None:
+                    try:
+                        image1 = Image.open(r"C:\Screener\tmp\charts\1" + str(self.i) + ".png")
+                    except:
+                        pass
+                 
+                if image2 == None:
+                    try:
+                        image2 = Image.open(r"C:\Screener\tmp\charts\2" + str(self.i) + ".png")
+                    except :
+                        pass
+                if image3 == None:
+                    try:
+                        image3 = Image.open(r"C:\Screener\tmp\charts\3" + str(self.i) + ".png")
+                    except:
+                        pass
+                if image4 == None:
+                    try:
+                        image4 = Image.open(r"C:\Screener\tmp\charts\4" + str(self.i) + ".png")
+                    except:
+                        pass
 
-                    image3 = Image.open(r"C:\Screener\tmp\charts\3" + str(self.i) + ".png")
-                    image3.thumbnail((1050, 700))
-                    bio3 = io.BytesIO()
-                    image3.save(bio3, format="PNG")
-
-                    image4 = Image.open(r"C:\Screener\tmp\charts\4" + str(self.i) + ".png")
-                    image4.thumbnail((1050, 700))
-                    bio4 = io.BytesIO()
-                    image4.save(bio4, format="PNG")
+                if image1 != None and image2 != None and image3 != None and image4 != None:
                     break
-                except OSError:
-                    pass
-                except:
-                    break
+                
             else:
+
                 print("image timed out")
+                if image1 == None:
+                    image1 = Image.open(r"C:\Screener\tmp\blank.png")
+               
+                if image2 == None:
+                    image2 = Image.open(r"C:\Screener\tmp\blank.png")
+             
+                if image3 == None:
+                    image3 = Image.open(r"C:\Screener\tmp\blank.png")
+           
+                if image4 == None:
+                    image4 = Image.open(r"C:\Screener\tmp\blank.png")
+               
                 break
- 
+
+        image1.thumbnail((1220, 500))
+        bio1 = io.BytesIO()
+        image1.save(bio1, format="PNG")
+           
+        image2.thumbnail((1220, 500))
+        bio2 = io.BytesIO()
+        image2.save(bio2, format="PNG")
+
+        image3.thumbnail((1220, 500))
+        bio3 = io.BytesIO()
+        image3.save(bio3, format="PNG")
+
+        image4.thumbnail((1220, 500))
+        bio4 = io.BytesIO()
+        image4.save(bio4, format="PNG")
+
         if self.historical:
 
             gap = str(self.setups_data.iloc[self.i][5])
@@ -505,8 +536,9 @@ class UI:
                 df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 index = self.setups_data.index[previ]
                 print('saved annotation')
-                df.at[index, 12] = values["annotation"]
-                self.setups_data.at[index, 12] = values["annotation"]   
+                df.at[index, 'annotation'] = values["annotation"]
+                self.setups_data.at[index, 'annotation'] = values["annotation"]   
+                
                 df.to_feather(r"C:\Screener\tmp\setups.feather")
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
                 self.window["-gap-"].update(gap)
@@ -557,5 +589,5 @@ class UI:
            
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 

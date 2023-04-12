@@ -16,7 +16,7 @@ from Data7 import Data as data
 
 
 #df.to_feather("C:/Screener/tmp/screener_data.feather")
-df = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+df = pd.read_feather("C:/Screener/tmp/setups.feather")
 
 
 print(df)

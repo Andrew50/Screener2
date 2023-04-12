@@ -75,12 +75,15 @@ class Log:
             Log.intraday(df,currentday, tf, ticker, z, path, st)
             
         if path == 1:
-            
+            '''
             if df.index[currentday] == datetime.date.today(): 
                 date = '0'
             else:
                 date = df.index[currentday]
-            
+            '''
+            if date == '0':
+                date = df.index[currentday]
+           
             data ={'Date': [date],
                     'Ticker':[ticker],
                     'Setup': [st],
@@ -95,6 +98,7 @@ class Log:
             new = pd.concat([old,dfadd])
             
             new = new.reset_index(drop = True)
+           
             new.to_feather(r"C:/Screener/tmp/todays_setups.feather")
 
         if path == 0:
