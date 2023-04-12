@@ -10,70 +10,23 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import random
-
+from Log3 import Log as log
 from multiprocessing  import Pool
 
 
 
 
 
+class Pivot:
+	def pivot(df,current, tf, ticker, path):
 
 
-date_list = ['2021-05-20','2023-03-29','2022-11-10','2022-09-13','2022-08-10','2022-07-27',
-			 '2022-11-10','2023-01-06','2023-01-20','2023-01-09']
-
-ticker_list = ['coin','qqq','qqq','qqq','qqq','qqq',
-			   'mgni','aehr','nflx','coin']
-
-
-tf = 'd'
-
-tickers = scan.get().index.to_list()
-test = True
-ccccc = -1
-
-
-startdate = datetime.date(2020, 1, 1)
-enddate = datetime.datetime.now()# - datetime.timedelta(date_buffer)
-                
-
-
-
-sample = data.get('AAPL',tf)
-start_index = data.findex(sample,startdate)  
-end_index = data.findex(sample, enddate)
-            
-#print(f'{start_index} , {end_index}')
-trim = sample[start_index:end_index]
-date_list = trim.index.tolist()
-
-
-
-
-while True:
-	ccccc += 1
-	try:
-		if not test:
-			dh = random.randint(0,len(tickers) - 1)
-			ticker = tickers[dh]
-			dfg = data.get(ticker)
-			ind = random.randint(0,len(dfg)-1)
-			date = dfg.index[ind]
-		else:
-			ticker = 'qqq'#ticker_list[ccccc]
-			date = date_list[ccccc]
-		l = 20
-		z_filter = 2
-		df = data.get(ticker)
-		index = data.findex(df,date)+1
-		df = df[index - 200:index]
-		current = len(df) - 1
-
-		dol_vol_l = 5
-		dolVol = []
-		for i in range(dol_vol_l):
-			dolVol.append(df.iat[current-1-i,3]*df.iat[current-1-i,4])
-		dolVol = statistics.mean(dolVol)              
+		########################################################################
+		
+		z_filter = 1.5
+		coef_filter = .5
+		
+		
 		atr= []
 		adr_l = 14
 		for j in range(adr_l): 
@@ -82,14 +35,6 @@ while True:
 			val = (high - low ) 
 			atr.append(val)
 		atr = statistics.mean(atr) 
-		vol_filter = 5 * 1000000
-		setup = False
-
-
-		########################################################################
-		
-		z_filter = 1.5
-		coef_filter = .5
 
 		i = 2
 
@@ -120,17 +65,16 @@ while True:
 		z = (val - statistics.mean(d))/statistics.stdev(d)
 
 		coef = (df.iat[current,0] - df.iat[current-1,3])/(df.iat[current-i,0] - df.iat[current-1,3])
-	
-		if coef > coef_filter and z > z_filter and df.iat[current-2,3] > df.iat[current-1,3] and df.iat[current-2,3] - df.iat[current-2,0] < atr/3 and dolVol > vol_filter and df.iat[current,0] > df.iat[current-1,0]:
-			setup = True
+		setup  = None
+		if coef > coef_filter and z > z_filter and df.iat[current-2,3] > df.iat[current-1,3] and df.iat[current-2,3] - df.iat[current-2,0] < atr/3 and df.iat[current,0] > df.iat[current-1,0]:
+			setup = 'P'
 
+		if coef > coef_filter and z < -z_filter and df.iat[current-2,3] < df.iat[current-1,3] and df.iat[current-2,0] - df.iat[current-2,3] < atr/3  and df.iat[current,0] < df.iat[current-1,0]:
+			setup = 'NP'
 
-
-
-###########################################################################################
 		mc = mpf.make_marketcolors(up='g',down='r')
 		s  = mpf.make_mpf_style(marketcolors=mc)
-		if setup:
+		if setup != None:
 
 			high = 0
 			low = df.iat[current-1,2]
@@ -139,15 +83,83 @@ while True:
 				if val > high:
 					high = val
 				
-
-
 			val = (high - low)/atr
-			#if test:
-			mpf.plot(df, type='candle', style=s,title = str(f' {setup} , {round(z,3)} , {coef} '))#, alpha = .25))#vlines=dict(vlines=[line],
-			#else:
-				#mpf.plot(df, type='candle', style = s, title = str(val))#, alpha = .25))#vlines=dict(vlines=[line],
+			if path == None:
+				mpf.plot(df, type='candle', style=s,title = str(f' {setup} , {round(z,3)} , {coef} '))
+			else:
+				log.log(df,current, tf, ticker, z, path, setup)  
 
 
-	except:
-		pass
+
+
+if __name__ == '__main__':
+
+	date_list = ['2021-05-20','2023-03-29','2022-11-10','2022-09-13','2022-08-10','2022-07-27',
+				 '2022-11-10','2023-01-06','2023-01-20','2023-01-09']
+
+	ticker_list = ['coin','qqq','qqq','qqq','qqq','qqq',
+				   'mgni','aehr','nflx','coin']
+
+
+	tf = 'd'
+
+	tickers = scan.get().index.to_list()
+	test = True
+	ccccc = -1
+
+
+	startdate = datetime.date(2020, 1, 1)
+	enddate = datetime.datetime.now()# - datetime.timedelta(date_buffer)
+                
+
+
+
+	sample = data.get('AAPL',tf)
+	start_index = data.findex(sample,startdate)  
+	end_index = data.findex(sample, enddate)
+            
+	#print(f'{start_index} , {end_index}')
+	trim = sample[start_index:end_index]
+	date_list = trim.index.tolist()
+
+
+
+
+	while True:
+		ccccc += 1
+		try:
+			if not test:
+				dh = random.randint(0,len(tickers) - 1)
+				ticker = tickers[dh]
+				dfg = data.get(ticker)
+				ind = random.randint(0,len(dfg)-1)
+				date = dfg.index[ind]
+			else:
+				ticker = 'qqq'#ticker_list[ccccc]
+				date = date_list[ccccc]
+			l = 20
+			z_filter = 2
+			df = data.get(ticker)
+			index = data.findex(df,date)+1
+			df = df[index - 200:index]
+			current = len(df) - 1
+
+			dol_vol_l = 5
+			dolVol = []
+			for i in range(dol_vol_l):
+				dolVol.append(df.iat[current-1-i,3]*df.iat[current-1-i,4])
+			dolVol = statistics.mean(dolVol)              
+		
+			vol_filter = 5 * 1000000
+			path = None
+			if dolVol > vol_filter:
+				Pivot.pivot(df,current, tf, ticker, path)
+
+
+
+		except:
+			pass
+
+
+
 

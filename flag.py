@@ -337,7 +337,8 @@ class Flag:
 						if val < .1:
 							
 							val2 = tightening/atr
-							if val2 > 0:
+							val5 = (avg_slope*pow(l,.7))/atr
+							if val2 > 0 and val5 < .65:
 							
 								flag = True
 								
@@ -354,7 +355,7 @@ class Flag:
 				except:
 					pass
 				
-				val5 = (avg_slope*pow(l,.5))/atr
+				
 
 
 				line = df.index[-l]
@@ -362,10 +363,8 @@ class Flag:
 				s  = mpf.make_mpf_style(marketcolors=mc)
 				
 				if path == None:
-					if test:
-						mpf.plot(df, type='candle', style=s, alines = points,title = str(f' {flag} , {round(val,3)} , {round(val2,3)} , {avg_slope} , {atr}'))#, alpha = .25))#vlines=dict(vlines=[line],
-					else:
-						mpf.plot(df, type='candle', style=s, alines = points, title = f'{ticker} , {date} , {val5}')#, alpha = .25))#vlines=dict(vlines=[line],
+					#if val5 > .35 and val5 < .4:
+					mpf.plot(df, type='candle', style=s, alines = points, title = f'{ticker} , {date} , {val5}')#, alpha = .25))#vlines=dict(vlines=[line],
 
 						#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
 
@@ -393,11 +392,13 @@ if __name__ == '__main__':
 
 
 	tickers = scan.get().index.to_list()
-	test = False
+	test = True
 	c = -1
+	index = -1
 	while True:
 		c += 1
 		try:
+			index += 1
 			if not test:
 				dh = random.randint(0,len(tickers) - 1)
 				ticker = tickers[dh]
@@ -407,13 +408,13 @@ if __name__ == '__main__':
 
 				date = dfg.index[ind]
 			else:
-				ticker = ticker_list[c]
-				date = date_list[c]
+				ticker = 'amzn'#ticker_list[c]
+				#date = date_list[c]
 
 
 
 			df = data.get(ticker)
-			index = data.findex(df,date)
+			#index = data.findex(df,date)
 			df = df[index - 200:index]
 			current = len(df) - 1
 

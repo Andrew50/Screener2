@@ -3,6 +3,7 @@ import statistics
 from Log3 import Log as log
 
 from flag import Flag as flag
+from pivot import Pivot as pivot
 
 import datetime
 
@@ -66,8 +67,8 @@ class Detection:
 								else:
 									sEP = False
 									sMR = False
-									sPivot = False
-									sFlag = True
+									sPivot = True
+									sFlag = False
 								dolVolFilter = 10000000
 			
 								if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
@@ -76,7 +77,7 @@ class Detection:
 									Detection.MR(df,currentday, tf, ticker, path)
 								if(dolVol > .8* dolVolFilter   and adr > 3.5 and sPivot):
 									
-									Detection.Pivot(df,currentday, tf, ticker, path)
+									pivot.pivot(df,currentday, tf, ticker, path)
 								if(dolVol > .7 * dolVolFilter   and adr > 4 and sFlag):
 									
 									flag.flag(df,currentday, tf, ticker, path)
@@ -96,7 +97,7 @@ class Detection:
 						
 							pass
 			
-				except:
+				except TimeoutError:
 					pass
 
 		#except Exception as e: print(e)
