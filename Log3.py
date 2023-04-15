@@ -81,9 +81,9 @@ class Log:
             else:
                 date = df.index[currentday]
             '''
-            if date == '0':
-                date = df.index[currentday]
-           
+            #if date == '0':
+                #date = df.index[currentday]
+            date = df.index[currentday]
             data ={'Date': [date],
                     'Ticker':[ticker],
                     'Setup': [st],
@@ -104,9 +104,7 @@ class Log:
         if path == 0:
             
             
-    
-        
-            cooldown = 20
+            cooldown = 10
 
             #gap percent
             #adr
@@ -118,49 +116,50 @@ class Log:
             #10 ma perf
             #10 am perf time
        
+            
+            date = df.index[currentday]
             try:
-                date = df.index[currentday]
-                try:
-                    full = pd.read_feather(r"C:\Screener\tmp\setups.feather")
-                except:
-                    full = pd.DataFrame()
+                full = pd.read_feather("C:/Screener/tmp/setups.feather")
+                    
                 scan = full
+                   
 
             
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iat[k,0] == ticker:
-                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
+                    if scan.iat[k,1] == ticker:
+                        scanholder = pd.concat([scanholder,(scan.iloc[k]).to_frame()])
                 scan = scanholder
 
+              
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iat[k,1] == st:
-                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
+                    if scan.iat[k,2] == st:
+                        scanholder = pd.concat([scanholder,(scan.iloc[k]).to_frame()])
                 scan = scanholder
                 
-                
-                try:
-                    recent_date = scan.index[-1]
+                print(scan)
+                if len(scan) > 0:
+                        
+                    recent_date = scan.at[-1,'Date']
                     delta = (date - recent_date).days
-                    if delta <= cooldown:
+                    if abs(delta) <= cooldown:
                         exclude = True
+                        print(f'excluded {ticker} , {date} , {st}')
                     else:
                         exclude = False
-                except IndexError:
+                else:
                     exclude = False
-            except pd.errors.EmptyDataError:
+            except FileNotFoundError:
+                full = pd.DataFrame()
                 exclude = False
-  
-
+            except IndexError:
+                exclude = False
             
-
+                
+            
             if not exclude:
-            
-               
-
-
-           
+            #
                 gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
                 volma = []
@@ -198,10 +197,19 @@ class Log:
                 four = round((df.iat[currentday+3,3] / df.iat[currentday,0] - 1) * 100,2)
                 five = round((df.iat[currentday+4,3] / df.iat[currentday,0] - 1) * 100,2)
 
-                change10 = round((df.iat[currentday-1,3] / df.iat[currentday-11,3] - 1) * 100,2)
-                change20 = round((df.iat[currentday-1,3] / df.iat[currentday-21,3] - 1) * 100,2)
-                change60 = round((df.iat[currentday-1,3] / df.iat[currentday-61,3] - 1) * 100,2)
-                change250 = round((df.iat[currentday-1,3] / df.iat[currentday-251,3] - 1) * 100,2)
+                change10 = 0
+                change20 = 0
+                change60 = 0
+                change250 = 0
+
+                try:
+                    change10 = round((df.iat[currentday-1,3] / df.iat[currentday-11,3] - 1) * 100,2)
+
+                    change20 = round((df.iat[currentday-1,3] / df.iat[currentday-21,3] - 1) * 100,2)
+                    change60 = round((df.iat[currentday-1,3] / df.iat[currentday-61,3] - 1) * 100,2)
+                    change250 = round((df.iat[currentday-1,3] / df.iat[currentday-251,3] - 1) * 100,2)
+                except:
+                    pass
                             
               
 
@@ -217,6 +225,7 @@ class Log:
            
                 i = 0
 
+                
                 while True:
 
                     ma10 = []
@@ -239,21 +248,15 @@ class Log:
                             break
                    
                     
-                    if i > 150:
+                    if i == len(df):
                         break
 
                     i += 1
+                
 
                 ten = round( (df.iat[currentday+i,3] / df.iat[currentday,0] - 1)*100,2)
                 time = i 
 
-          
-
-
-
-
-
-        
 
                 data = pd.DataFrame({'Date': [date],
                         'Ticker':[ticker],
@@ -272,11 +275,10 @@ class Log:
                         'time': [time]
  
                         })
-        
-            
+ 
                 df = pd.concat([full,data])
                 
-               
+                
                 df = df.reset_index(drop = True)
                 df.to_feather(r"C:/Screener/tmp/setups.feather")
             

@@ -24,7 +24,7 @@ from UI3 import UI as ui
 class Screener:
 
 
-    def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None):
+    def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None, fpath = None):
         
         path = 0
         date_buffer = 20
@@ -43,22 +43,24 @@ class Screener:
             
             ticker_list = scan.get(date,tf,True,browser).index.tolist()
             
-            print(len(ticker_list))
+           
             if date == None:
+                i = 0
                 try:
                     df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
 
                     god = df['Ticker'].tolist()
-                    i = 0
+                    
                     for ticker in god:
                         try:
                             ticker_list.remove(ticker)
                             i += 1
                         except:
                             pass
-                    print(f'already done {i}')
+                    
                 except FileNotFoundError:
                     pass
+                print(f'already done {i}')
 
         elif type(ticker) is str:
             path = 1
@@ -101,7 +103,8 @@ class Screener:
                 date_list = trim.index.tolist()
               
             
-            
+        if fpath != None:
+            path = fpath
 
         
         Screener.run(date_list, ticker_list, tf,path)
@@ -143,10 +146,9 @@ if __name__ == '__main__':
 
     else:
         
-        Screener.queue()
-       # Screener.queue(date = '2023-04-04')
-        #Screener.queue(ticker = 'coin',date = '2021-05-20')
-        #Screener.queue(date = '2015-01-01',days = 10)
+        Screener.queue(ticker = 'coin',fpath = 0)
+        ui.loop(ui,False)
+       
        
        
 

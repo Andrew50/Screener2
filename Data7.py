@@ -57,6 +57,7 @@ class Data:
 
     def findex(df,dt):
         try:
+            
             if Data.isToday(dt):
                 return len(df) - 1
             dt = Data.convert_date(dt)
@@ -72,6 +73,7 @@ class Data:
                     i += k
                 if k == 0:
                     break
+                
             while True:
                 if df.index[i].to_pydatetime() < dt:
                     i += 1
@@ -84,7 +86,9 @@ class Data:
                     break
             return i
         except IndexError:
-           
+            if i == len(df):
+                return i
+            
             return None
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
@@ -149,7 +153,7 @@ class Data:
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
             pm = screenbar['Price'] + screenbar['Pre-market Change']
-            date = pd.Timestamp(datetime.date.today())
+            date = pd.Timestamp(datetime.datetime.today())
             row  =pd.DataFrame({'datetime': [date],
                    'open': [pm],
                    'high': [pm],

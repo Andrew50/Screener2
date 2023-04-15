@@ -37,7 +37,7 @@ class Detection:
 			
 			return
 		
-		if len(dff) > 50:
+		if len(dff) > 20:
 			
 			for date in date_list:
 				try:
@@ -55,6 +55,9 @@ class Detection:
 					
 						dolVol, adr = Detection.requirements(df,currentday)
 						
+
+						
+
 						if tf == 'd':
 							
 							
@@ -70,7 +73,7 @@ class Detection:
 									sPivot = True
 									sFlag = False
 								dolVolFilter = 10000000
-			
+								
 								if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
 									Detection.EP(df,currentday, tf, ticker, path)
 								if(dolVol > .7 * dolVolFilter    and adr > 5 and sMR):
@@ -81,7 +84,7 @@ class Detection:
 								if(dolVol > .7 * dolVolFilter   and adr > 4 and sFlag):
 									
 									flag.flag(df,currentday, tf, ticker, path)
-
+									
 						if tf == '1min':
 							
 							if dolVol > 20000 and adr > .08:
@@ -97,7 +100,7 @@ class Detection:
 						
 							pass
 			
-				except:
+				except IndexError:
 					pass
 
 		#except Exception as e: print(e)

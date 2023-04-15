@@ -251,6 +251,7 @@ class UI:
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
             date = (setups_data.iloc[i][0])
+           
             ticker = setups_data.iloc[i][1]
             setup = setups_data.iloc[i][2]
             z= setups_data.iloc[i][3]
@@ -316,7 +317,8 @@ class UI:
                 else:
                     mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
             except:
-                print('preload 1 failed')
+                print(ticker)
+                #print('preload 1 failed')
 
             try:
                 df2 = data.get(ticker,tf2)
@@ -333,7 +335,8 @@ class UI:
                     mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
 
             except:
-                print('preload 2 failed')
+                pass
+                #print('preload 2 failed')
 
             try:
                 df3 = data.get(ticker,tf3)
@@ -347,10 +350,11 @@ class UI:
                 if data.isToday(date):
                     mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[str(f"{dh}")], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
 
             except:
-                print('preaload 3 failed')
+                pass
+                #print('preaload 3 failed')
 
             try:
                 df4 = data.get(ticker,tf4)
@@ -366,7 +370,8 @@ class UI:
                 else:
                     mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
             except:
-                print('preaload 4 failed')
+                pass
+                #print('preaload 4 failed')
                    
             '''
                     
@@ -415,7 +420,7 @@ class UI:
         image4 = None
         while True:
             laptime = round((ttime.time() - lasttime), 2)
-            if laptime < .5:
+            if laptime < .3:
 
                 
                 if image1 == None:
