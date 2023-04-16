@@ -54,10 +54,7 @@ class Detection:
 						currentday = data.findex(df,date)
 					
 						dolVol, adr = Detection.requirements(df,currentday)
-						
-
-						
-
+	
 						if tf == 'd':
 							
 							
@@ -102,7 +99,10 @@ class Detection:
 			
 				except IndexError:
 					pass
-
+				except TypeError:
+					pass
+				except ValueError:
+					pass
 		#except Exception as e: print(e)
   
 	def requirements(df,currentday):

@@ -283,47 +283,60 @@ class Scan:
 
     def updateList(refresh = False):
         df1 = pd.read_feather("C:/Screener/tmp/screener_data.feather")
-        df1 = df1.set_index('Ticker')
+        #df1 = df1.set_index('Ticker')
         df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
         
-        df2 = df2.set_index('Ticker')
+        #df2 = df2.set_index('Ticker')
 
        
 
         #df3 = df.merge(df2, left_index = True , right_index = True, how = 'left')
-        df3 = pd.concat([df1,df2]).drop_duplicates()
+        df3 = pd.concat([df1,df2]).drop_duplicates(subset = ['Ticker'])
+        
         #print(f"{len(df3)} ppjj")
-        #print(f'added {len(df3) - len(df2)} to full ticker list')
+        print(f'added {len(df3) - len(df2)} to full ticker list')
         
         if refresh:
             removelist = []
-            
-            for i in range(len(df3)):
-                ticker = str(df3.index[i])
-                current = df1.index.to_list()
+            full = df3['Ticker'].to_list()
+            current = df1['Ticker'].to_list()
+            for ticker in full:
+                #ticker = str(ticker)
+                
                 if ticker not in current or ticker == None or ticker == 'None':
+                    ticker = str(ticker)
                     if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
                         removelist.append(ticker)
                         
 
            
-            #print(f"{len(removelist)} removed")
+            print(f"removed {len(removelist)} from full ticker list")
+            df3 = df3.set_index('Ticker')
             for ticker in removelist:
+                ticker = str(ticker)
                 try:
-                    df3.drop(df3.loc[ticker])
-                   # print(f'removed {ticker}')
+                    dropee = df3.loc[ticker]
+                    #print(dropee)
+                    df3 = df3.drop(dropee)
                 except:
                     pass
-
-           
-        df3 = df3.reset_index()
+                    
+                   # print(f'removed {ticker}')
+                
+                
+        #print(removelist)
+        #print(df3)
+        try:
+            df3 = df3.reset_index()
+        except:
+            pass
         
         df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")
 
 if __name__ == '__main__':
     #Scan.updateList(True)
     #print(pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list())
-    Scan.runDailyScan(None)
+    Scan.updateList(True)
 
     
 

@@ -40,7 +40,7 @@ class UI:
                 self.setups_data =pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 self.historical = True
 
-        except pd.FileNotFounderError:
+        except:
             print('There were no setups')
             exit()
 
@@ -259,7 +259,7 @@ class UI:
             zs = z
             chartsize = 90
             chartoffset = 50
-
+            
             if data.isToday(date):
                 if tf == 'd':
                     tf1 = 'd'
@@ -303,7 +303,18 @@ class UI:
                     tf3 = 'h'
                     tf4 = '5min'
 
+            datedaily = f"{date}"
+            datehourly = f"{date} 09:00"
+            dateminute = f"{date} 09:30"
+
+
             try:
+                if 'h' in tf1:
+                    d1 = datehourly
+                elif 'min' in tf1:
+                    d1 = dateminute
+                else:
+                    d1 = datedaily
                 df1 = data.get(ticker,tf1,date)
                 l1 = data.findex(df1,date) - chartoffset
                 r1 = l1 + chartsize
@@ -315,12 +326,18 @@ class UI:
                 if data.isToday(date):
                     mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
             except:
                 print(ticker)
                 #print('preload 1 failed')
 
             try:
+                if 'h' in tf2:
+                    d2 = datehourly
+                elif 'min' in tf2:
+                    d2 = dateminute
+                else:
+                    d2 = datedaily
                 df2 = data.get(ticker,tf2)
                 l2 = data.findex(df2,date) - chartoffset
                 r2 = l2 + chartsize
@@ -332,13 +349,19 @@ class UI:
                 if data.isToday(date):
                     mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
 
             except:
                 pass
                 #print('preload 2 failed')
 
             try:
+                if 'h' in tf3:
+                    d3 = datehourly
+                elif 'min' in tf3:
+                    d3 = dateminute
+                else:
+                    d3 = datedaily
                 df3 = data.get(ticker,tf3)
                 l3 = data.findex(df3,date) - chartoffset
                 r3 = l3 + chartsize
@@ -350,13 +373,19 @@ class UI:
                 if data.isToday(date):
                     mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
 
             except:
                 pass
                 #print('preaload 3 failed')
 
             try:
+                if 'h' in tf4:
+                    d4 = datehourly
+                elif 'min' in tf4:
+                    d4 = dateminute
+                else:
+                    d4 = datedaily
                 df4 = data.get(ticker,tf4)
                 l4 = data.findex(df4,date) - chartoffset
                 r4 = l4 + chartsize
@@ -365,10 +394,11 @@ class UI:
                 df4 = df4[l4:r4]
                 string4 = "4" + iss + ".png"
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
+                
                 if data.isToday(date):
                     mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df2, type='candle', volume=True, title = str(tf2),style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[date], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
             except:
                 pass
                 #print('preaload 4 failed')

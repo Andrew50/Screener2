@@ -14,6 +14,10 @@ from Scan import Scan as scan
 
 from UI3 import UI as ui
 
+from Consolidator import consolidate
+
+
+
 #from pathos.multiprocessing import ProcessingPool as Pool
 
 
@@ -29,10 +33,9 @@ class Screener:
         path = 0
         date_buffer = 20
 
-        if(os.path.exists("C:/Screener/tmp/todays_setups.feather")):
-            os.remove("C:/Screener/tmp/todays_setups.feather")
+        consolidate.consolidate()
 
-
+        
         df ={'Date': [],
                     'Ticker':[],
                     'Setup': [],
@@ -49,6 +52,7 @@ class Screener:
                 try:
                     df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
 
+                    
                     god = df['Ticker'].tolist()
                     
                     for ticker in god:
@@ -60,7 +64,7 @@ class Screener:
                     
                 except FileNotFoundError:
                     pass
-                print(f'already done {i}')
+                print(f'{i} tickers already completed')
 
         elif type(ticker) is str:
             path = 1
@@ -146,8 +150,9 @@ if __name__ == '__main__':
 
     else:
         
-        Screener.queue(ticker = 'coin',fpath = 0)
-        ui.loop(ui,False)
+        #Screener.queue(date = '2022-01-01',fpath = 0,days = 5)
+        Screener.queue()
+        #ui.loop(ui,False)
        
        
        

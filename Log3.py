@@ -6,6 +6,9 @@ import statistics
 import pandas as pd
 import datetime
 from Data7 import Data
+import pyarrow
+import multiprocessing
+import os
 
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
@@ -118,8 +121,13 @@ class Log:
        
             
             date = df.index[currentday]
+
+            file_path = "C:/Screener/tmp/subsetups/" + str(os.getpid()) + ".feather"
+
+            
+
             try:
-                full = pd.read_feather("C:/Screener/tmp/setups.feather")
+                full = pd.read_feather(file_path)
                     
                 scan = full
                    
@@ -128,24 +136,24 @@ class Log:
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
                     if scan.iat[k,1] == ticker:
-                        scanholder = pd.concat([scanholder,(scan.iloc[k]).to_frame()])
+                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
                 scan = scanholder
 
               
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
                     if scan.iat[k,2] == st:
-                        scanholder = pd.concat([scanholder,(scan.iloc[k]).to_frame()])
+                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
                 scan = scanholder
                 
-                print(scan)
+            
                 if len(scan) > 0:
-                        
-                    recent_date = scan.at[-1,'Date']
+                    
+                    recent_date = scan.iloc[-1]['Date']
                     delta = (date - recent_date).days
                     if abs(delta) <= cooldown:
                         exclude = True
-                        print(f'excluded {ticker} , {date} , {st}')
+                        #print(f'excluded {ticker} , {date} , {st}')
                     else:
                         exclude = False
                 else:
@@ -155,7 +163,12 @@ class Log:
                 exclude = False
             except IndexError:
                 exclude = False
-            
+            except pyarrow.lib.ArrowInvalid:
+
+                #full = pd.DataFrame()
+                exclude = True
+            except OSError:
+                exclude = True
                 
             
             if not exclude:
@@ -280,7 +293,8 @@ class Log:
                 
                 
                 df = df.reset_index(drop = True)
-                df.to_feather(r"C:/Screener/tmp/setups.feather")
+                #print(df)
+                df.to_feather(file_path)
             
             
 
