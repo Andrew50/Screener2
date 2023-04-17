@@ -191,29 +191,28 @@ class UI:
             scan = scanholder
         
         if sortinput != "":
-          
+            print(scan)
             idex = 0
             if sortinput == 'z':
-                idex = 3
+                idex = 'Z'
             if sortinput == 'gap':
-                idex = 4
+                idex = 'gap'
             if sortinput == 'adr':
-                idex = 5
+                idex = 'adr'
             if sortinput == 'vol':
-                idex = 6
+                idex = 'vol'
             #if sortinput == 'q':
                # idex = 7
             if sortinput == '1':
-                idex = 8
+                idex = '1'
             if sortinput == '2':
-                idex = 9
+                idex = '2'
             if sortinput == '3':
-                idex = 10
+                idex = '3'
             if sortinput == '10':
-                idex = 11
+                idex = '10'
             if sortinput == 'time':
-                idex = 13
-
+                idex = 'time'
 
             if idex != 0:
 
