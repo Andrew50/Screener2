@@ -151,11 +151,13 @@ class UI:
         
         print(f"searching for {keyword}")
         scan = pd.read_feather(r"C:\Screener\tmp\setups.feather")
-        
+
+        #print(timeframe)
+        #print(scan)
         if timeframe  != "":
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
-                if scan.iloc[k][14] == timeframe:
+                if scan.iloc[k][4] == timeframe:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         if ticker  != "":
@@ -179,14 +181,14 @@ class UI:
         if keyword  != "":
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
-                if  str(keyword) in str(scan.iloc[k][12]) :
+                if  str(keyword) in str(scan.iloc[k][13]) :
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         if self.annotation:
             scanholder = pd.DataFrame()
             for k in range(len(scan)):
                
-                if scan.iloc[k][12] !=  scan.iloc[k][12]: # == "" or scan.iloc[k][12] == None:
+                if scan.iloc[k][13] !=  scan.iloc[k][13] or scan.iloc[k][13] != "": # == "" or scan.iloc[k][12] == None:
                     scanholder = pd.concat([scanholder,scan.iloc[[k]]])
             scan = scanholder
         
@@ -235,17 +237,15 @@ class UI:
             os.mkdir("C:/Screener/tmp/charts")
             self.preload(self, True)
 
-            
-           
     def plot(slist):
         
         i = slist[1]
         setups_data = slist[0]
         
-        
-        
         iss = str(i)
         if (os.path.exists("C:/Screener/tmp/charts/1" + iss + ".png") == False):
+
+            print(f'preloading {i}')
                
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
@@ -256,8 +256,7 @@ class UI:
             z= setups_data.iloc[i][3]
             tf= setups_data.iloc[i][4] 
             zs = z
-            chartsize = 90
-            chartoffset = 50
+            
             
             if data.isToday(date):
                 if tf == 'd':
@@ -306,16 +305,29 @@ class UI:
             datehourly = f"{date} 09:00"
             dateminute = f"{date} 09:30"
 
+            chartsize = 150
+           
+            ch = 50
+            cd = 110
+            cm = 0
+
+            fw = 20
+            fh = 7
+
+            fs = .8
 
             try:
                 if 'h' in tf1:
+                    c1 = ch
                     d1 = datehourly
                 elif 'min' in tf1:
                     d1 = dateminute
+                    c1 = cm
                 else:
+                    c1 = cd
                     d1 = datedaily
                 df1 = data.get(ticker,tf1,date)
-                l1 = data.findex(df1,date) - chartoffset
+                l1 = data.findex(df1,date) - c1
                 r1 = l1 + chartsize
                 if l1 < 0:
                     l1 = 0
@@ -323,22 +335,24 @@ class UI:
                 string1 = "1" + iss + ".png"
                 p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
                 if data.isToday(date):
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
             except:
                 print(ticker)
-                #print('preload 1 failed')
-
+                
             try:
                 if 'h' in tf2:
+                    c2 = ch
                     d2 = datehourly
                 elif 'min' in tf2:
                     d2 = dateminute
+                    c2 = cm
                 else:
                     d2 = datedaily
+                    c2 = cd
                 df2 = data.get(ticker,tf2)
-                l2 = data.findex(df2,date) - chartoffset
+                l2 = data.findex(df2,date) - c2
                 r2 = l2 + chartsize
                 if l2 < 0:
                     l2 = 0
@@ -346,23 +360,25 @@ class UI:
                 string2 = "2" + iss + ".png"
                 p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
                 if data.isToday(date):
-                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, savefig=p2, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
+                    mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, savefig=p2, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
 
             except:
                 pass
-                #print('preload 2 failed')
-
+             
             try:
                 if 'h' in tf3:
                     d3 = datehourly
+                    c3 = ch
                 elif 'min' in tf3:
                     d3 = dateminute
+                    c3 = cm
                 else:
+                    c3 = cd
                     d3 = datedaily
                 df3 = data.get(ticker,tf3)
-                l3 = data.findex(df3,date) - chartoffset
+                l3 = data.findex(df3,date) - c3
                 r3 = l3 + chartsize
                 if l3 < 0:
                     l3 = 0
@@ -370,23 +386,26 @@ class UI:
                 string3 = "3" + iss + ".png"
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 if data.isToday(date):
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
+                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
 
             except:
                 pass
-                #print('preaload 3 failed')
+      
 
             try:
                 if 'h' in tf4:
+                    c4 = ch
                     d4 = datehourly
                 elif 'min' in tf4:
+                    c4 = cm
                     d4 = dateminute
                 else:
+                    c4 = cd
                     d4 = datedaily
                 df4 = data.get(ticker,tf4)
-                l4 = data.findex(df4,date) - chartoffset
+                l4 = data.findex(df4,date) - c4
                 r4 = l4 + chartsize
                 if l4 < 0:
                     l4 = 0
@@ -395,35 +414,12 @@ class UI:
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
                 
                 if data.isToday(date):
-                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                 else:
-                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (32,14), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
+                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
             except:
                 pass
-                #print('preaload 4 failed')
-                   
-            '''
-                    
-                    if tf == 'd':
-
-
-
-            try:
-                god = datetime.datetime.strptime(date, '%Y-%m-%d')
-                dm = f"{date} 09:30"
-                dh = f"{date} 09:00"
-                    
-                    
-            except:
-                    
-                            
-                dm = date
-                dh = date
-        else:
-            dm = date
-            dh = date
-                '''  
-               
+           
                        
     def preload(self,init):
         arglist = []
@@ -479,7 +475,7 @@ class UI:
                 
             else:
 
-                print("image timed out")
+                #print("image timed out")
                 if image1 == None:
                     image1 = Image.open(r"C:\Screener\tmp\blank.png")
                
@@ -494,19 +490,19 @@ class UI:
                
                 break
 
-        image1.thumbnail((1220, 500))
+       # image1.thumbnail((1220, 500))
         bio1 = io.BytesIO()
         image1.save(bio1, format="PNG")
            
-        image2.thumbnail((1220, 500))
+        #image2.thumbnail((1220, 500))
         bio2 = io.BytesIO()
         image2.save(bio2, format="PNG")
 
-        image3.thumbnail((1220, 500))
+       # image3.thumbnail((1220, 500))
         bio3 = io.BytesIO()
         image3.save(bio3, format="PNG")
 
-        image4.thumbnail((1220, 500))
+        #image4.thumbnail((1220, 500))
         bio4 = io.BytesIO()
         image4.save(bio4, format="PNG")
 
@@ -569,7 +565,7 @@ class UI:
             else:
                 df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 index = self.setups_data.index[previ]
-                print('saved annotation')
+                #print('saved annotation')
                 df.at[index, 'annotation'] = values["annotation"]
                 self.setups_data.at[index, 'annotation'] = values["annotation"]   
                 
