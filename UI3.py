@@ -10,7 +10,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import io
 import datetime
-
+import matplotlib.ticker as mticker
 
 from Data7 import Data as data
 import time as ttime
@@ -308,8 +308,13 @@ class UI:
             chartsize = 150
            
             ch = 50
-            cd = 110
+            cd = 100
             cm = 0
+
+
+            sh = 200
+            sd = 150
+            sm = 300
 
             fw = 20
             fh = 7
@@ -320,50 +325,83 @@ class UI:
                 if 'h' in tf1:
                     c1 = ch
                     d1 = datehourly
+                    s1 = sh
                 elif 'min' in tf1:
                     d1 = dateminute
                     c1 = cm
+                    s1 = sm
                 else:
                     c1 = cd
                     d1 = datedaily
+                    s1 = sd
                 df1 = data.get(ticker,tf1,date)
                 l1 = data.findex(df1,date) - c1
-                r1 = l1 + chartsize
+                r1 = l1 + s1
                 if l1 < 0:
                     l1 = 0
                 df1 = df1[l1:r1]
                 string1 = "1" + iss + ".png"
                 p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
                 if data.isToday(date):
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    fig, axlist  =  mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    ax = axlist[0]
+                 
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p1, bbox_inches='tight')
+                    
                 else:
-                    mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
-            except:
-                print(ticker)
+                    #mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, savefig=p1,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                    fig, axlist = mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                    ax = axlist[0]
+                  
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                    #ax.ticklabel_format(style='plain', axis = 'y')
+                    
+                    plt.savefig(p1, bbox_inches='tight')
+            except TimeoutError:
+                pass
+                #print(ticker)
                 
             try:
                 if 'h' in tf2:
                     c2 = ch
                     d2 = datehourly
+                    s2 = sh
                 elif 'min' in tf2:
                     d2 = dateminute
                     c2 = cm
+                    s2 = sm
                 else:
                     d2 = datedaily
                     c2 = cd
+                    s2 = sd
                 df2 = data.get(ticker,tf2)
                 l2 = data.findex(df2,date) - c2
-                r2 = l2 + chartsize
+                r2 = l2 + s2
                 if l2 < 0:
                     l2 = 0
                 df2 = df2[l2:r2]
                 string2 = "2" + iss + ".png"
                 p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
                 if data.isToday(date):
-                    mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  savefig=p2, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    fig, axlist = mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    ax = axlist[0]
+                 
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p2, bbox_inches='tight')
                 else:
-                    mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, savefig=p2, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
-
+                    fig, axlist =  mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
+                    ax = axlist[0]
+                 
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p2, bbox_inches='tight')
             except:
                 pass
              
@@ -371,25 +409,39 @@ class UI:
                 if 'h' in tf3:
                     d3 = datehourly
                     c3 = ch
+                    s3 = sh
                 elif 'min' in tf3:
                     d3 = dateminute
                     c3 = cm
+                    s3 = sm
                 else:
                     c3 = cd
                     d3 = datedaily
+                    s3 = sd
                 df3 = data.get(ticker,tf3)
                 l3 = data.findex(df3,date) - c3
-                r3 = l3 + chartsize
+                r3 = l3 + s3
                 if l3 < 0:
                     l3 = 0
                 df3 = df3[l3:r3]
                 string3 = "3" + iss + ".png"
                 p3 = pathlib.Path("C:/Screener/tmp/charts") / string3
                 if data.isToday(date):
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    fig, axlist = mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  returnfig = True, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    ax = axlist[0]
+                    
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p3, bbox_inches='tight')
                 else:
-                    mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  savefig=p3, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
-
+                    fig, axlist = mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
+                    ax = axlist[0]
+                   
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p3, bbox_inches='tight')
             except:
                 pass
       
@@ -398,15 +450,18 @@ class UI:
                 if 'h' in tf4:
                     c4 = ch
                     d4 = datehourly
+                    s4 = sh
                 elif 'min' in tf4:
                     c4 = cm
                     d4 = dateminute
+                    s4 = sm
                 else:
                     c4 = cd
                     d4 = datedaily
+                    s4 = sd
                 df4 = data.get(ticker,tf4)
                 l4 = data.findex(df4,date) - c4
-                r4 = l4 + chartsize
+                r4 = l4 + s4
                 if l4 < 0:
                     l4 = 0
                 df4 = df4[l4:r4]
@@ -414,9 +469,21 @@ class UI:
                 p4 = pathlib.Path("C:/Screener/tmp/charts") / string4
                 
                 if data.isToday(date):
-                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, savefig=p4, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    plot, axlist =  mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    ax = axlist[0]
+                    
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p4, bbox_inches='tight')
                 else:
-                    mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s,  savefig=p4, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
+                    plot, axlist = mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
+                    ax = axlist[0]
+                    
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                   
+                    plt.savefig(p4, bbox_inches='tight')
             except:
                 pass
            
