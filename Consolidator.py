@@ -10,6 +10,9 @@ class consolidate:
     def consolidate():
 
 
+
+
+
         path = "C:/Screener/tmp/subsetups/"
 
         dir_list = os.listdir(path)
@@ -20,14 +23,25 @@ class consolidate:
         except:
             setups = pd.DataFrame()
 
+
+        todays_setups = pd.DataFrame()
+
+
         if len(dir_list) > 0:
             for f in dir_list:
-                df = pd.read_feather(path + f)
-                setups = pd.concat([setups,df])
+                if "today" in f:
+                    df = pd.read_feather(path + f)
+                    todays_setups = pd.concat([todays_setups,df])
+                else:
+                    df = pd.read_feather(path + f)
+                    setups = pd.concat([setups,df])
 
         
             setups.reset_index(inplace = True,drop = True)
             setups.to_feather(r"C:\Screener\tmp\setups.feather")
+
+            todays_setups.reset_index(inplace = True,drop = True)
+            todays_setups.to_feather(r"C:\Screener\tmp\todays_setups.feather")
 
 
         if os.path.exists("C:/Screener/tmp/subsetups"):

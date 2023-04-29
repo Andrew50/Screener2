@@ -12,15 +12,9 @@ from Detection2 import Detection as detection
 
 from Scan import Scan as scan
 
-from UI3 import UI as ui
+from UI4 import UI as ui
 
 from Consolidator import consolidate
-
-
-
-#from pathos.multiprocessing import ProcessingPool as Pool
-
-
 
 
 
@@ -31,7 +25,7 @@ class Screener:
     def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None, fpath = None):
         
         path = 0
-        date_buffer = 20
+    
 
         consolidate.consolidate()
 
@@ -82,22 +76,13 @@ class Screener:
         else:
             sample = data.get('AAPL',tf)
             if date == None:
-                '''
-                startdate = datetime.date(2008, 1, 1)
-                enddate = datetime.datetime.now()# - datetime.timedelta(date_buffer)
-
-                start_index = data.findex(sample,startdate)
-                end_index = data.findex(sample,enddate)
-                trim = sample[start_index:end_index]
-                
-                date_list = trim.index.tolist()
-                '''
+              
                 date_list =sample.index.tolist()
                 
 
             else:
                 path = 1
-                #startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
+            
                 
                 start_index = data.findex(sample,date)  
                 end_index = start_index + days
@@ -112,6 +97,7 @@ class Screener:
 
         
         Screener.run(date_list, ticker_list, tf,path)
+        consolidate.consolidate()
 
     
     def run(date_list,ticker_list,tf,path):
@@ -119,6 +105,10 @@ class Screener:
         pbar = tqdm(total=length)
         container = []
        
+
+
+
+
         for i in  range(len( ticker_list)):
             
             ticker = ticker_list[i]
@@ -128,6 +118,11 @@ class Screener:
             for date in date_list:
                     
                 container[i][3].append(date)
+
+
+
+
+
                 pbar.update(1)
                     
         
@@ -137,9 +132,10 @@ class Screener:
 
 if __name__ == '__main__':
    
-    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 
         Screener.queue('0')
+
          
         ui.loop(ui,True)
          
@@ -151,8 +147,8 @@ if __name__ == '__main__':
     else:
         
         #Screener.queue(date = '2022-01-01',fpath = 0,days = 5)
-        Screener.queue()
-        #ui.loop(ui,False)
+        Screener.queue(date = '2023-04-25', tf = '5min')
+        ui.loop(ui,True)
        
        
        

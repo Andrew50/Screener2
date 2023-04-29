@@ -78,6 +78,9 @@ class Log:
             Log.intraday(df,currentday, tf, ticker, z, path, st)
             
         if path == 1:
+
+
+            file_path = "C:/Screener/tmp/subsetups/today" + str(os.getpid()) + ".feather"
             '''
             if df.index[currentday] == datetime.date.today(): 
                 date = '0'
@@ -95,16 +98,19 @@ class Log:
         
             dfadd = pd.DataFrame(data)
             try:
-                old = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+                old = pd.read_feather(file_path)
             except:
                 old = pd.DataFrame()
             new = pd.concat([old,dfadd])
             
             new = new.reset_index(drop = True)
            
-            new.to_feather(r"C:/Screener/tmp/todays_setups.feather")
+            new.to_feather(file_path)
 
         if path == 0:
+
+
+
             
             
             cooldown = 10
@@ -172,6 +178,37 @@ class Log:
                 
             
             if not exclude:
+
+                data = pd.DataFrame({'Date': [date],
+                        'Ticker':[ticker],
+                        'Setup': [st],
+                        'Z': [z],
+                        'timeframe': [tf],
+                        'annotation': [""]
+                        
+                        })
+ 
+                df = pd.concat([full,data])
+                
+                
+                df = df.reset_index(drop = True)
+                #print(df)
+                df.to_feather(file_path)
+
+
+                '''
+
+
+
+
+
+
+
+
+
+
+
+
             #
                 gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
@@ -299,5 +336,5 @@ class Log:
             
 
             
-
+                '''
 

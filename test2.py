@@ -1,34 +1,17 @@
-
-
-
-
-
-from tvDatafeed import TvDatafeed, Interval
-from Scan import Scan as scan
-import datetime
-from pyarrow import feather
+import time
+from multiprocessing import Pool, current_process
 import pandas as pd
-from Data7 import Data as data
+import Scan 
 
-
-
-#df = pd.DataFrame()
 
 
 df = pd.read_feather("C:/Screener/tmp/setups.feather")
+'''
+df['gap'] = df['annotation']
+df = df.drop(['adr','vol','q','1','2','3','10','time','annotation'], axis = 1)
+df = df.rename(columns = {"gap":'annotation'})
+
+df.to_feather(r"C:\Screener\tmp\setups.feather")
 
 '''
-
-
-df = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list()
-
-for i in df:
-    if i == 'GOOG':
-        print('god')
-print(len(df))
-
-
-
-'''
-
 print(df)

@@ -76,7 +76,7 @@ class Scan:
 
         else:
             
-            Scan.updateList(refresh)
+            Scan.updateList()
             return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather").set_index('Ticker')#.dropna()
 
     
@@ -172,7 +172,7 @@ class Scan:
     def startFirefoxSession():
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-        options.headless = True
+        options.headless = False
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
         FireFoxProfile = webdriver.FirefoxProfile()
@@ -207,7 +207,7 @@ class Scan:
         login_button.click()
         time.sleep(3)
         browser.refresh();
-        print("TTTTTTTTTTTTTTTTTTT")
+      
         time.sleep(4)
         Scan.clickFilters(browser)
         return browser
@@ -281,51 +281,37 @@ class Scan:
 
 
 
-    def updateList(refresh = False):
+    def updateList():
         df1 = pd.read_feather("C:/Screener/tmp/screener_data.feather")
-        #df1 = df1.set_index('Ticker')
+      
         df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
-        
-        #df2 = df2.set_index('Ticker')
-
        
-
-        #df3 = df.merge(df2, left_index = True , right_index = True, how = 'left')
         df3 = pd.concat([df1,df2]).drop_duplicates(subset = ['Ticker'])
+       
+        if len(df3) - len(df2) > 0:
+            print(f'added {len(df3) - len(df2)} to full ticker list')
         
-        #print(f"{len(df3)} ppjj")
-        print(f'added {len(df3) - len(df2)} to full ticker list')
         
-        if refresh:
-            removelist = []
-            full = df3['Ticker'].to_list()
-            current = df1['Ticker'].to_list()
-            for ticker in full:
-                #ticker = str(ticker)
+        removelist = []
+        full = df3['Ticker'].to_list()
+        current = df1['Ticker'].to_list()
+        for ticker in full:
+             
                 
-                if ticker not in current or ticker == None or ticker == 'None':
-                    ticker = str(ticker)
-                    if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
-                        removelist.append(ticker)
+            if ticker not in current: #or ticker == None or ticker == 'None':
+                ticker = str(ticker)
+                if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
+                    removelist.append(ticker)
                         
 
-           
-            print(f"removed {len(removelist)} from full ticker list")
-            df3 = df3.set_index('Ticker')
-            for ticker in removelist:
-                ticker = str(ticker)
-                try:
-                    dropee = df3.loc[ticker]
-                    #print(dropee)
-                    df3 = df3.drop(dropee)
-                except:
-                    pass
-                    
-                   # print(f'removed {ticker}')
+        df3 = df3.set_index('Ticker')
+        for ticker in removelist:
+            ticker = str(ticker)
                 
-                
-        #print(removelist)
-        #print(df3)
+                 
+            df3 = df3.drop(index = ticker)
+            print(f'removed {ticker}')
+             
         try:
             df3 = df3.reset_index()
         except:
@@ -334,8 +320,7 @@ class Scan:
         df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")
 
 if __name__ == '__main__':
-    #Scan.updateList(True)
-    #print(pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")['Ticker'].to_list())
+
     Scan.updateList(True)
 
     
