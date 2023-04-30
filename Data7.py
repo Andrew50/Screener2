@@ -19,7 +19,7 @@ class Data:
 
     def pool(deff,arg,nodes = 7):
             pool = Pool(processes = nodes)
-            data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
+            data = list(tqdm(pool.map(deff, arg), total=len(arg)))
             return(data)
 
 

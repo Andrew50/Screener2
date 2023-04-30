@@ -1,6 +1,7 @@
 
 from UI4 import UI as ui
 import pandas as pd
+from Data7 import Data as data
 
 
 
@@ -16,17 +17,32 @@ df = df.reset_index()
 length = len(df)
 
 
+container = []
 
 
-for i in range(length):
 
-    ticker = df.iat[i,2]
-    date = df.iat[i,1]
+def god (s):
+    ticker = s[2]
+    date = s[1]
     traits = ui.traits(ticker,date)
-    row = df.iloc[i]
-    row = row.append(pd.Series(traits))
-    df.loc[i] = row
-    print(i/length * 100)
+ 
+    row = s.append(pd.Series(traits))
+    return row
+ 
+
+
+
+
+
+
+for index, row in df.iterrows():
+    container.append(row)
+
+
+df = data.pool(god,container)
+
+
+
 
 print(df)
 
