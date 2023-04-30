@@ -25,7 +25,7 @@ def god (s):
 if __name__ == '__main__':
 
     setup = "EP"
-    size = 1000
+    size = 500
 
 
 
