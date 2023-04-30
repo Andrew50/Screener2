@@ -32,3 +32,5 @@ data_test/
 Screener.bat
 Screener.lnk
 /hwtest.py
+UI.bat
+UI.lnk

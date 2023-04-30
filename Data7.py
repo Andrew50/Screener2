@@ -66,11 +66,7 @@ class Data:
 
 
 
-
-
-
-
-
+    
 
     def findex(df,dt):
         try:

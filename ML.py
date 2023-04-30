@@ -10,8 +10,8 @@ from Data7 import Data as data
 
 
 def god (s):
-    ticker = s[2]
-    date = s[1]
+    ticker = s[1]
+    date = s[0]
     traits = ui.traits(ticker,date)
  
     row = s.append(pd.Series(traits))
@@ -27,23 +27,44 @@ if __name__ == '__main__':
     #filter out all setups wihtout an annotation
     df = df[df['annotation'] != ""]
 
-    #calculate traits for each setup
-    df = df.reset_index()
-    length = len(df)
-
-
+    #format shit
+    df = df.reset_index(drop = True)
+   
+    
+    #create list of series so that it can be multiprocessed
     container = []
-
-
     for index, row in df.iterrows():
         container.append(row)
 
-    
+    #calculate traits for each setup
     df = data.pool(god,container)
 
+    #change list of series into df
     df = pd.DataFrame(df)
+
+    #format column titles to str so that it can be worked with
     df.columns = df.columns.astype(str)
-    #df = df.fillna(None)
+ 
+
+
+
+    #rename columns to descriptors
+    df.rename(columns={'0':'gap',
+                       '1':'adr',
+                       '2':'vol',
+                       '3':'q',
+                       '4':'one',
+                       '5':'two',
+                       '6':'three',
+                       '7':'ten',
+                       '8':'time',
+                       '9':'vol1'}, inplace = True)
+
+    #replace qqq boolean with int
+    df['q'].replace({False:0, True:1}, inplace = True)
+
+
+
     print(df)
 
 
