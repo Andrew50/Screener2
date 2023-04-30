@@ -184,7 +184,7 @@ class UI:
                 scan = scan[scan['annotation'] == "" ]
             
             if sortinput != "":
-                print(scan)
+             
                 idex = 0
                 if sortinput == 'z':
                     idex = 'Z'
@@ -557,11 +557,11 @@ class UI:
 
 
             '''
-            start = datetime.datetime.now()
+           
             
-            traits = UI.traits(self,ticker,date)
+            traits = UI.traits(ticker,date)
 
-            print(datetime.datetime.now()-start)
+         
 
             
 
@@ -579,11 +579,6 @@ class UI:
 
 
 
-
-
-            
-
-           
  
             if init:
                 
@@ -663,7 +658,7 @@ class UI:
            
 
 
-    def traits(self,ticker,date):
+    def traits(ticker,date):
 
         df = data.get(ticker,'d')
         df_m = data.get(ticker,'1min')
