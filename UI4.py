@@ -660,6 +660,11 @@ class UI:
 
     def traits(ticker,date):
 
+
+        start = datetime.datetime.now()
+
+
+
         df = data.get(ticker,'d')
         df_m = data.get(ticker,'1min')
 
@@ -677,7 +682,7 @@ class UI:
         try:
             vol1 = round(( df_m.iat[currentmin,4]/statistics.mean(volma)),2) * 100
         except:
-            vol1 = 'NA'
+            vol1 = None
 
         q_data = data.get('QQQ')
         qcurrentday = data.findex(q_data, date)
@@ -706,6 +711,8 @@ class UI:
         one = round((df.iat[currentday,3] / df.iat[currentday,0] - 1) * 100,2)
         two =   round((df.iat[currentday+1,3] / df.iat[currentday,0] - 1) * 100,2)
         three =  round((df.iat[currentday+2,3] / df.iat[currentday,0] - 1) * 100,2)
+
+        '''
         four = round((df.iat[currentday+3,3] / df.iat[currentday,0] - 1) * 100,2)
         five = round((df.iat[currentday+4,3] / df.iat[currentday,0] - 1) * 100,2)
 
@@ -725,7 +732,7 @@ class UI:
                             
               
 
-
+        '''
         adr = []
         for j in range(20): 
             high = df.iat[currentday-j-1,1]
@@ -768,6 +775,11 @@ class UI:
 
         ten = round( (df.iat[currentday+i,3] / df.iat[currentday,0] - 1)*100,2)
         time = i 
+
+
+
+        #print(datetime.datetime.now()-start)
+
 
         return [gap,adr,vol,q,one,two,three,ten,time,vol1]
 

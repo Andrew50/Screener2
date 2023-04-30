@@ -111,7 +111,7 @@ class Data:
 
 
         try:
-            path = str(filread godddddddd)
+            path = "C:/Screener"
         except:
             path = "C:/Screener"
 
@@ -302,6 +302,7 @@ class Data:
 
 
 if __name__ == '__main__':
+    
     Data.runUpdate()
     
 

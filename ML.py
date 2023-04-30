@@ -6,18 +6,6 @@ from Data7 import Data as data
 
 
 
-#get setups df
-df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
-
-#filter out all setups wihtout an annotation
-df = df[df['annotation'] != ""]
-
-#calculate traits for each setup
-df = df.reset_index()
-length = len(df)
-
-
-container = []
 
 
 
@@ -31,20 +19,39 @@ def god (s):
  
 
 
+if __name__ == '__main__':
+
+    #get setups df
+    df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+
+    #filter out all setups wihtout an annotation
+    df = df[df['annotation'] != ""]
+
+    #calculate traits for each setup
+    df = df.reset_index()
+    length = len(df)
+
+
+    container = []
+
+
+    for index, row in df.iterrows():
+        container.append(row)
+
+    
+    df = data.pool(god,container)
+
+    df = pd.DataFrame(df)
+    df.columns = df.columns.astype(str)
+    #df = df.fillna(None)
+    print(df)
+
+
+    df.to_feather(r"C:\Screener\tmp\ml.feather")
 
 
 
-
-for index, row in df.iterrows():
-    container.append(row)
-
-
-df = data.pool(god,container)
-
-
-
-
-print(df)
+  
 
 
 
