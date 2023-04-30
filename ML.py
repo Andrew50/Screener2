@@ -10,23 +10,36 @@ from Data7 import Data as data
 
 
 def god (s):
-    ticker = s[1]
-    date = s[0]
-    traits = ui.traits(ticker,date)
+    try:
+        ticker = s[1]
+        date = s[0]
+        traits = ui.traits(ticker,date)
  
-    row = s.append(pd.Series(traits))
-    return row
+        row = s.append(pd.Series(traits))
+        return row
+    except:
+        pass
  
 
 
 if __name__ == '__main__':
 
+    setup = "EP"
+    size = 1000
+
+
+
+
+
+
+
     #get setups df
     df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
 
     #filter out all setups wihtout an annotation
-    df = df[df['annotation'] != ""]
-
+    #df = df[df['annotation'] != ""]
+    df = df[df['Setup'] == setup]
+    df = df.sample(size)
     #format shit
     df = df.reset_index(drop = True)
    
@@ -68,7 +81,7 @@ if __name__ == '__main__':
     print(df)
 
 
-    df.to_feather(r"C:\Screener\tmp\ml.feather")
+    df.to_feather(r"C:\Screener\tmp\ml"+setup+".feather")
 
 
 
