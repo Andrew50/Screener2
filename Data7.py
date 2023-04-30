@@ -16,7 +16,11 @@ import Scan
 
 
 class Data:
-
+    path = ""
+    if os.path.exists("F:/Screener/Ffile.txt"):
+        path = "F:/Screener"
+    else: 
+        path = "C:/Screener"
     def pool(deff,arg,nodes = 7):
             pool = Pool(processes = nodes)
             data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
@@ -108,12 +112,7 @@ class Data:
 
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
-
-
-        try:
-            path = "C:/Screener"
-        except:
-            path = "C:/Screener"
+        path = Data.path
 
 
         current = Data.isToday(date)
@@ -201,6 +200,7 @@ class Data:
         return (df)
         
     def update(bar):
+        path = Data.path
         try:
             ticker = bar[0]
             lastDStock = bar[1]
@@ -240,7 +240,7 @@ class Data:
                 ydf.drop(ydf.tail(1),inplace=True)
             ydf.dropna(inplace = True)
   
-            if(os.path.exists("C:/Screener/"+tf+"/" + ticker + ".feather") == False):
+            if(os.path.exists(path + "/"+tf+"/" + ticker + ".feather") == False):
                 df = ydf
                 print(f'created {ticker}')
             else:
@@ -256,7 +256,7 @@ class Data:
 
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
-            feather.write_feather(df,"C:/Screener/"+tf+"/" + ticker + ".feather")
+            feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
         except:
             pass
     
