@@ -19,7 +19,7 @@ class Data:
 
     def pool(deff,arg,nodes = 7):
             pool = Pool(processes = nodes)
-            data = list(tqdm(pool.map(deff, arg), total=len(arg)))
+            data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
             return(data)
 
 
@@ -108,6 +108,14 @@ class Data:
 
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
+
+
+        try:
+            path = str(filread godddddddd)
+        except:
+            path = "C:/Screener"
+
+
         current = Data.isToday(date)
 
         if tf == 'daily':
@@ -116,7 +124,7 @@ class Data:
             tf = '1min'
 
         if tf == 'd' or tf == 'w' or tf == 'm':
-            df = feather.read_feather(r"C:/Screener/daily/" + ticker + ".feather")
+            df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
         else:
             if current:
                 tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
@@ -155,7 +163,7 @@ class Data:
                                         'volume':[new_vol]}).set_index("datetime")
                     df = pd.concat([df,new])
             else:
-                df = feather.read_feather(r"C:/Screener/minute/" + ticker + ".feather")
+                df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                 if not premarket:
                     df = df.between_time('09:30' , '15:59')
 
