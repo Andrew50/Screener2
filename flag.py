@@ -35,7 +35,9 @@ lower_stdev_filter2 = 1
 
 
 class Flag:
-	def flag(df,currentday, tf, ticker, path):
+	def flag(df,current, tf, ticker, path):
+
+		
 
 		lmax = 100
 		lmin = 7
@@ -129,6 +131,7 @@ class Flag:
 
 		
 		if l >= lmin and l < lmax:
+			
 			i = 0
 
 
@@ -318,20 +321,30 @@ class Flag:
 
 			setup = 'None'
 
+			
+
 			if (bh > bl and 
 			z >3  and
 			bh + mh*l > bl + ml*l 
 			and oc < bh): 
-				if oc < bh and oc > bl and prev_close < bh and prev_close > bl:
-					val = avg_slope / atr
+				
+				if oc < bh and oc > bl:
+				
+					if prev_close < bh and prev_close > bl:
+						val = avg_slope / atr
+						
 
-					if val < .1:
-						val2 = tightening/atr
-						if val2 > 0:
-							flag = True
+						if val < .1:
+							
+							val2 = tightening/atr
+							val5 = (avg_slope*pow(l,.7))/atr
+							if val2 > 0 and val5 < .65:
+							
+								flag = True
 								
 						
-			if test or flag :
+			if  flag: #or test :
+
 
 				try:
 					val = val[0]
@@ -342,86 +355,84 @@ class Flag:
 				except:
 					pass
 				
-				val5 = (avg_slope*pow(l,.5))/atr
+				
 
 
 				line = df.index[-l]
 				mc = mpf.make_marketcolors(up='g',down='r')
 				s  = mpf.make_mpf_style(marketcolors=mc)
+				
 				if path == None:
-					if test:
-						mpf.plot(df, type='candle', style=s, alines = points,title = str(f' {flag} , {round(val,3)} , {round(val2,3)} , {avg_slope} , {atr}'))#, alpha = .25))#vlines=dict(vlines=[line],
-					else:
-						mpf.plot(df, type='candle', style=s, alines = points, title = f'{ticker} , {date} , {val5}')#, alpha = .25))#vlines=dict(vlines=[line],
+					#if val5 > .35 and val5 < .4:
+					mpf.plot(df, type='candle', style=s, alines = points, title = f'{ticker} , {date} , {val5}')#, alpha = .25))#vlines=dict(vlines=[line],
 
 						#mpf.plot(df, type='candle', style=s,vlines=dict(vlines=[line]))
 
 				else:
-					log.log(df,current, tf, ticker, z, path, 'Flag')   
+
+					
+					log.log(df,current, tf, ticker, l, path, 'Flag')   
 
 
 	
-
+if __name__ == '__main__':
 	
 
-date_list = ['2022-07-28','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
-			 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
-			 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
-			 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
-			 '2023-08-03']
+	date_list = ['2022-07-28','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
+				 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
+				 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
+				 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
+				 '2023-08-03']
 
-ticker_list = ['enph','dpst','riot','meli','tsla','tsla','elf',
-			   'mlco','mlco','aehr','cweb','tme',
-			   'nue','kold','orcl','amat','enph',
-			   'mdb','pump','oxy','mrna','celh',
-			   'rytm']
-
-
-tickers = scan.get().index.to_list()
-test = False
-c = -1
-while True:
-	c += 1
-	try:
-		if not test:
-			dh = random.randint(0,len(tickers) - 1)
-			ticker = tickers[dh]
-
-			dfg = data.get(ticker)
-			ind = random.randint(0,len(dfg)-1)
-
-			date = dfg.index[ind]
-		else:
-			ticker = ticker_list[c]
-			date = date_list[c]
+	ticker_list = ['enph','dpst','riot','meli','tsla','tsla','elf',
+				   'mlco','mlco','aehr','cweb','tme',
+				   'nue','kold','orcl','amat','enph',
+				   'mdb','pump','oxy','mrna','celh',
+				   'rytm']
 
 
+	tickers = scan.get().index.to_list()
+	test = True
+	c = -1
+	index = -1
+	while True:
+		c += 1
+		try:
+			index += 1
+			if not test:
+				dh = random.randint(0,len(tickers) - 1)
+				ticker = tickers[dh]
 
+				dfg = data.get(ticker)
+				ind = random.randint(0,len(dfg)-1)
 
+				date = dfg.index[ind]
+			else:
+				ticker = 'amzn'#ticker_list[c]
+				#date = date_list[c]
 
 
 
-
-		df = data.get(ticker)
-		index = data.findex(df,date)
-		df = df[index - 200:index]
-		current = len(df) - 1
-
+			df = data.get(ticker)
+			#index = data.findex(df,date)
+			df = df[index - 200:index]
+			current = len(df) - 1
 
 
-		dol_vol_l = 5
-		dolVol = []
-		for i in range(dol_vol_l):
-			dolVol.append(df.iat[current-1-i,3]*df.iat[current-1-i,4])
-		dolVol = statistics.mean(dolVol)  
 
-		tf = 'd'
-		path = None
-		dol_vol_filter = 10*1000000
+			dol_vol_l = 5
+			dolVol = []
+			for i in range(dol_vol_l):
+				dolVol.append(df.iat[current-1-i,3]*df.iat[current-1-i,4])
+			dolVol = statistics.mean(dolVol)  
 
-		if dolVol > dol_vol_filter:
-			Flag.flag(df,current, tf, ticker, path)
+			tf = 'd'
+			path = None
+			dol_vol_filter = 10*1000000
 
-	except:
-		pass
+			if dolVol > dol_vol_filter:
+				Flag.flag(df,current, tf, ticker, path)
+
+		except:
+			pass
 

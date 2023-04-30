@@ -35,8 +35,17 @@ class Con:
 
 if __name__ == "__main__":
     #l = pd.read_csv(r"C:\Screener\tmp\full_ticker_list.csv")['Ticker'].tolist()
+
+    #print(pd.read_feather(r"C:\Screener\tmp\setups.feather"))
+    
+    
+
+
     df = pd.read_csv('C:/Screener/tmp/full_ticker_list - backup.csv')
     df.to_feather('C:/Screener/tmp/full_ticker_list.feather')
+
+
+    
 
     '''
    

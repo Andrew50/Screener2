@@ -1,21 +1,15 @@
 
 
 
-from ast import Mult, Num
-import numpy
 from pyarrow import feather
 from tqdm import tqdm
 import pandas as pd
 import datetime
-import sys
-import numpy as np
-import re
 from tvDatafeed import TvDatafeed, Interval
 import os 
 import datetime
 from multiprocessing  import Pool
 import warnings
-import math
 import yfinance as yf
 warnings.filterwarnings("ignore")
 import Scan
@@ -27,6 +21,12 @@ class Data:
             pool = Pool(processes = nodes)
             data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
             return(data)
+
+
+
+
+
+
 
     def convert_date(dt):
         if type(dt) == str:
@@ -42,6 +42,11 @@ class Data:
             dt = datetime.datetime.combine(dt.date(),time)
         return(dt)
 
+
+
+
+
+
     def isToday(dt):
         if dt == None:
             return False
@@ -55,8 +60,17 @@ class Data:
             return True
         return False
 
+
+
+
+
+
+
+
+
     def findex(df,dt):
         try:
+            
             if Data.isToday(dt):
                 return len(df) - 1
             dt = Data.convert_date(dt)
@@ -72,6 +86,7 @@ class Data:
                     i += k
                 if k == 0:
                     break
+                
             while True:
                 if df.index[i].to_pydatetime() < dt:
                     i += 1
@@ -84,7 +99,13 @@ class Data:
                     break
             return i
         except IndexError:
+            if i == len(df):
+                return i
+            
             return None
+
+
+
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
         current = Data.isToday(date)
@@ -137,6 +158,9 @@ class Data:
                 df = feather.read_feather(r"C:/Screener/minute/" + ticker + ".feather")
                 if not premarket:
                     df = df.between_time('09:30' , '15:59')
+
+
+
         if tf != 'd' and tf != '1min':
             logic = {'open'  : 'first',
                         'high'  : 'max',
@@ -147,15 +171,24 @@ class Data:
         if current and (tf == 'd' or tf == 'w' or tf == 'm'):
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
-            pm = screenbar['Price'] + screenbar['Pre-market Change']
-            date = pd.Timestamp(datetime.date.today())
-            row  =pd.DataFrame({'datetime': [date],
-                   'open': [pm],
-                   'high': [pm],
-                   'low': [pm],
-                   'close': [pm],
-                   'volume': [0]}).set_index("datetime")
-            df = pd.concat([df, row])
+            pmchange =  screenbar['Pre-market Change']
+            #if type(pmchange) != int():
+           #     pmchange = 0
+                
+          
+            try:
+                pm = df.iat[-1,3] + pmchange
+                date = pd.Timestamp(datetime.datetime.today())
+                row  =pd.DataFrame({'datetime': [date],
+                       'open': [pm],
+                       'high': [pm],
+                       'low': [pm],
+                       'close': [pm],
+                       'volume': [0]}).set_index("datetime")
+                df = pd.concat([df, row])
+          
+            except IndexError:
+                pass
         df.dropna(inplace = True)
         return (df)
         
@@ -201,6 +234,7 @@ class Data:
   
             if(os.path.exists("C:/Screener/"+tf+"/" + ticker + ".feather") == False):
                 df = ydf
+                print(f'created {ticker}')
             else:
  
                 scrapped_data_index = Data.findex(ydf, lastDay) 
@@ -223,9 +257,9 @@ class Data:
         daily = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
         daily_last = daily.index[Data.isMarketOpen()]
         minute = tv.get_hist('AAPL', 'NASDAQ', n_bars=2, interval=Interval.in_1_minute, extended_session = False)
-        minute_last = daily.index[Data.isMarketOpen()]
+        minute_last = minute.index[Data.isMarketOpen()]
 
-        screener_data = Scan.Scan.get(refresh = True)
+        screener_data = Scan.Scan.get()
         
         
         #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],

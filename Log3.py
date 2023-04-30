@@ -6,6 +6,9 @@ import statistics
 import pandas as pd
 import datetime
 from Data7 import Data
+import pyarrow
+import multiprocessing
+import os
 
 discordtopGainers = Discord(url="https://discord.com/api/webhooks/1071666210514669648/dSLYGAB5CWQuulV46ePmExwgljauPexCG10R2ZqZctTl7lyya-Zs7lJ7ecLjQEruAfYw")
 discordintraday = Discord(url="https://discord.com/api/webhooks/1071667193709858847/qwHcqShmotkEPkml8BSMTTnSp38xL1-bw9ESFRhBe5jPB9o5wcE9oikfAbt-EKEt7d3c")
@@ -75,12 +78,18 @@ class Log:
             Log.intraday(df,currentday, tf, ticker, z, path, st)
             
         if path == 1:
-            
+
+
+            file_path = "C:/Screener/tmp/subsetups/today" + str(os.getpid()) + ".feather"
+            '''
             if df.index[currentday] == datetime.date.today(): 
                 date = '0'
             else:
                 date = df.index[currentday]
-            
+            '''
+            #if date == '0':
+                #date = df.index[currentday]
+            date = df.index[currentday]
             data ={'Date': [date],
                     'Ticker':[ticker],
                     'Setup': [st],
@@ -89,20 +98,22 @@ class Log:
         
             dfadd = pd.DataFrame(data)
             try:
-                old = pd.read_feather("C:/Screener/tmp/todays_setups.feather")
+                old = pd.read_feather(file_path)
             except:
                 old = pd.DataFrame()
             new = pd.concat([old,dfadd])
             
             new = new.reset_index(drop = True)
-            new.to_feather(r"C:/Screener/tmp/todays_setups.feather")
+           
+            new.to_feather(file_path)
 
         if path == 0:
+
+
+
             
             
-    
-        
-            cooldown = 20
+            cooldown = 10
 
             #gap percent
             #adr
@@ -114,49 +125,91 @@ class Log:
             #10 ma perf
             #10 am perf time
        
+            
+            date = df.index[currentday]
+
+            file_path = "C:/Screener/tmp/subsetups/" + str(os.getpid()) + ".feather"
+
+            
+
             try:
-                date = df.index[currentday]
-                try:
-                    full = pd.read_feather(r"C:\Screener\tmp\setups.feather")
-                except:
-                    full = pd.DataFrame()
+                full = pd.read_feather(file_path)
+                    
                 scan = full
+                   
 
             
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iat[k,0] == ticker:
-                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
+                    if scan.iat[k,1] == ticker:
+                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
                 scan = scanholder
 
+              
                 scanholder = pd.DataFrame()
                 for k in range(len(scan)):
-                    if scan.iat[k,1] == st:
-                        scanholder = pd.concat([scanholder,scan.iat[[k]]])
+                    if scan.iat[k,2] == st:
+                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
                 scan = scanholder
                 
-                
-                try:
-                    recent_date = scan.index[-1]
+            
+                if len(scan) > 0:
+                    
+                    recent_date = scan.iloc[-1]['Date']
                     delta = (date - recent_date).days
-                    if delta <= cooldown:
+                    if abs(delta) <= cooldown:
                         exclude = True
+                        #print(f'excluded {ticker} , {date} , {st}')
                     else:
                         exclude = False
-                except IndexError:
+                else:
                     exclude = False
-            except pd.errors.EmptyDataError:
+            except FileNotFoundError:
+                full = pd.DataFrame()
                 exclude = False
-  
+            except IndexError:
+                exclude = False
+            except pyarrow.lib.ArrowInvalid:
 
+                #full = pd.DataFrame()
+                exclude = True
+            except OSError:
+                exclude = True
+                
             
-
             if not exclude:
-            
-               
+
+                data = pd.DataFrame({'Date': [date],
+                        'Ticker':[ticker],
+                        'Setup': [st],
+                        'Z': [z],
+                        'timeframe': [tf],
+                        'annotation': [""]
+                        
+                        })
+ 
+                df = pd.concat([full,data])
+                
+                
+                df = df.reset_index(drop = True)
+                #print(df)
+                df.to_feather(file_path)
 
 
-           
+                '''
+
+
+
+
+
+
+
+
+
+
+
+
+            #
                 gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
                 volma = []
@@ -194,10 +247,19 @@ class Log:
                 four = round((df.iat[currentday+3,3] / df.iat[currentday,0] - 1) * 100,2)
                 five = round((df.iat[currentday+4,3] / df.iat[currentday,0] - 1) * 100,2)
 
-                change10 = round((df.iat[currentday-1,3] / df.iat[currentday-11,3] - 1) * 100,2)
-                change20 = round((df.iat[currentday-1,3] / df.iat[currentday-21,3] - 1) * 100,2)
-                change60 = round((df.iat[currentday-1,3] / df.iat[currentday-61,3] - 1) * 100,2)
-                change250 = round((df.iat[currentday-1,3] / df.iat[currentday-251,3] - 1) * 100,2)
+                change10 = 0
+                change20 = 0
+                change60 = 0
+                change250 = 0
+
+                try:
+                    change10 = round((df.iat[currentday-1,3] / df.iat[currentday-11,3] - 1) * 100,2)
+
+                    change20 = round((df.iat[currentday-1,3] / df.iat[currentday-21,3] - 1) * 100,2)
+                    change60 = round((df.iat[currentday-1,3] / df.iat[currentday-61,3] - 1) * 100,2)
+                    change250 = round((df.iat[currentday-1,3] / df.iat[currentday-251,3] - 1) * 100,2)
+                except:
+                    pass
                             
               
 
@@ -213,6 +275,7 @@ class Log:
            
                 i = 0
 
+                
                 while True:
 
                     ma10 = []
@@ -235,21 +298,15 @@ class Log:
                             break
                    
                     
-                    if i > 150:
+                    if i == len(df):
                         break
 
                     i += 1
+                
 
                 ten = round( (df.iat[currentday+i,3] / df.iat[currentday,0] - 1)*100,2)
                 time = i 
 
-          
-
-
-
-
-
-        
 
                 data = pd.DataFrame({'Date': [date],
                         'Ticker':[ticker],
@@ -268,16 +325,16 @@ class Log:
                         'time': [time]
  
                         })
-        
-            
+ 
                 df = pd.concat([full,data])
                 
-               
+                
                 df = df.reset_index(drop = True)
-                df.to_feather(r"C:/Screener/tmp/setups.feather")
+                #print(df)
+                df.to_feather(file_path)
             
             
 
             
-
+                '''
 
