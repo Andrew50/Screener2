@@ -15,8 +15,6 @@ df = df[df['annotation'] != ""]
 df = df.reset_index()
 length = len(df)
 
-for i in df:
-    print(i)
 
 
 
