@@ -94,7 +94,9 @@ class UI:
                         date = values["input-date"]
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
-                        previ = 0
+                        #previ = 0
+                        previ = self.i
+                        self.i = 0
                         sortinput = ""
                         self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
                         self.update(self,False,values,previ)
@@ -253,10 +255,6 @@ class UI:
             tf= setups_data.iloc[i][4] 
             zs = z
 
-            
-
-            
-            
             if data.isToday(date):
                 if tf == 'd':
                     tf1 = 'd'
@@ -305,13 +303,13 @@ class UI:
             dateminute = f"{date} 09:30"
             
            
-            ch = 50
-            cd = 100
+            ch = 100
+            cd = 200
             cm = 0
 
-            sh = 200
-            sd = 150
-            sm = 300
+            sh = 250
+            sd = sh
+            sm = 390
 
             fw = 20
             fh = 7

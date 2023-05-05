@@ -8,6 +8,7 @@ import datetime
 from tvDatafeed import TvDatafeed, Interval
 import os 
 import datetime
+import numpy
 from multiprocessing  import Pool
 import warnings
 import yfinance as yf
@@ -175,6 +176,10 @@ class Data:
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
             pmchange =  screenbar['Pre-market Change']
+
+
+            if numpy.isnan(pmchange):
+                pmchange = 0
             #if type(pmchange) != int():
            #     pmchange = 0
                 
