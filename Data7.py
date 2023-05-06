@@ -208,16 +208,18 @@ class Data:
             tf = bar[2]
 
 
-
+            exists = True
             try:
                 cs = Data.get(ticker,tf)
                 lastDay = cs.index[-1]
                 if (lastDay == lastDStock):
                     return
+            except FileNotFoundError:
+                exists = False
+            except IndexError:
+                exists = False
             except:
-                pass
-
-
+                exists = False
             if tf == 'daily':
                 ytf = '1d'
                 period = '25y'
@@ -241,7 +243,7 @@ class Data:
                 ydf.drop(ydf.tail(1),inplace=True)
             ydf.dropna(inplace = True)
   
-            if(os.path.exists(path + "/"+tf+"/" + ticker + ".feather") == False):
+            if not exists:
                 df = ydf
                 print(f'created {ticker}')
             else:

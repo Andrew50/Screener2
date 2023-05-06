@@ -4,6 +4,7 @@ import pandas as pd
 import Scan 
 
 import yfinance as yf
+from Data7 import Data as data
 
 
 
@@ -38,21 +39,9 @@ df.to_feather(r"C:\Screener\tmp\full_ticker_list.feather")
 
 
 '''
-ticker = '^VIX'
-ytf = '1d'
-period = '25y'
+df = pd.read_feather(r"C:\Screener\minute - Copy\META.feather")
 
-        
-ydf = yf.download(tickers =  ticker,  
-    period = period,  group_by='ticker',      
-    interval = ytf,      
-    ignore_tz = True,  
-    progress=False,
-    show_errors = False,
-    threads = False,
-    prepost = False) 
-
-print(ydf)
+print(df)
 
 '''
 df = pd.read_csv(r"C:\Screener\tmp\pnl\log.csv")
