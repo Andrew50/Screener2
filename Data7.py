@@ -258,7 +258,7 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except:
+        except TimeoutError:
             pass
     
     def runUpdate():
@@ -271,8 +271,8 @@ class Data:
         screener_data = Scan.Scan.get()
         
         
-        #screener_data = pd.DataFrame({'Ticker': ['COIN', 'HOOD'],
-                 #                     'Exchange':['NASDAQ' , 'NASDAQ']})
+        #screener_data = pd.DataFrame({'Ticker': ['^VIX']
+                               #       }).set_index('Ticker')
         
         batches = []
         for i in range(len(screener_data)):
