@@ -284,6 +284,13 @@ class Scan:
 
 
     def updateList():
+
+
+        path = ""
+        if os.path.exists("F:/Screener/Ffile.txt"):
+            path = "F:/Screener"
+        else: 
+            path = "C:/Screener"
         df1 = pd.read_feather("C:/Screener/tmp/screener_data.feather")
       
         df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
@@ -302,7 +309,7 @@ class Scan:
                 
             if ticker not in current: #or ticker == None or ticker == 'None':
                 ticker = str(ticker)
-                if not os.path.exists("C:/Screener/minute/" + ticker + ".feather"):
+                if not os.path.exists(path+"/minute/" + ticker + ".feather"):
                     removelist.append(ticker)
                         
 

@@ -39,8 +39,8 @@ df.to_feather(r"C:\Screener\tmp\full_ticker_list.feather")
 
 
 '''
-df = pd.read_feather(r"C:\Screener\minute - Copy\META.feather")
-
+#df = pd.read_feather(r"C:\Screener\minute - Copy\META.feather")
+df = pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather")
 print(df)
 
 '''
