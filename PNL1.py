@@ -123,11 +123,6 @@ class PNL():
                 else:
                     direction = -1
 
-
-
-               
-
-
                 h10 = 0
                 h20 = 0
                 h50 = 0
