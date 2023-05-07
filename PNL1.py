@@ -15,15 +15,15 @@ import os
 import numpy
 import statistics
 
+
+from Account import Account as account
+
+
 from Log import Log as log
 
 
 class PNL():
 
-    def account(self,values):
-
-        pass
-    
     def traits(self):
         
         if self.event == 'Load' or self.event == "Traits":
