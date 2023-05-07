@@ -41,6 +41,13 @@ print(df)
 '''
 
 
+df = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather")
+
+df.to_csv(r"C:\Screener\tmp\pnl\pnlgod.csv")
+
+
+
+'''
 df = pd.read_csv(r"C:\Screener\tmp\pnl\log.csv")
 df['Datetime'] =  pd.to_datetime(df['Datetime'])
 
@@ -57,3 +64,4 @@ df.to_feather(r"C:\Screener\tmp\pnl\log.feather")
 
 
 
+'''

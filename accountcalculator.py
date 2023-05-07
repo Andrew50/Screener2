@@ -15,6 +15,9 @@ import os
 import numpy
 import statistics
 
+
+from Data7 import Data as data
+
 class accountcalculator: 
 
 
@@ -86,11 +89,10 @@ class accountcalculator:
             else:
                 accdata = pd.DataFrame()
 
-        appleDf = pd.read_feather(r"" + path + "/minute/AAPL.feather")
-        orderDf = pd.read_feather("C:/Screener/tmp/log.feather")
-        orderDf = orderDf.sort_values(by='Datetime', ascending =True)
-        orderDf = orderDf.reset_index()
-        firstDateTime = orderDf.at[0, 'Datetime']
+        appleDf = data.get('AAPL','1min')
+        orderDf = pd.read_feather("C:/Screener/tmp/log.feather").sort_values(by='Datetime', ascending =True).reset_index()
+      
+        firstDateTime = orderDf.at[0, 'Datetime'] 
         appleIndex = data.findex(appleDf, firstDateTime)
         accdata = appleDf[appleIndex-1:]
         accdata = accdata.drop(axis=1, labels=['open', 'high', 'low', 'close', 'volume'])

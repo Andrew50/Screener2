@@ -16,7 +16,8 @@ import numpy
 import statistics
 
 
-from accountcalculator import accountcalculator as account
+#from accountcalculator import accountcalculator as account
+from Account import Account as account
 
 
 from Log import Log as log
@@ -366,7 +367,7 @@ class PNL():
             try:
                 self.df_pnl = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather")
             except:
-                self.df_pnl = None
+                self.df_pnl = pd.DataFrame()
             self.menu = "Log"
         else:
             self.window.close()
