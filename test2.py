@@ -35,7 +35,7 @@ df = pd.concat([df,add])
 df = df.reset_index(drop = True)
 print(df)
 
-df.to_feather(r"C:\Screener\tmp\full_ticker_list.feather")
+
 
 
 '''
