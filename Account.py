@@ -21,7 +21,7 @@ class Account:
 
     def calcaccount(self,date = None):
 
-        print(self.df_log)
+        
         if date == None:
             date = self.df_log.iat[0,1]
 
@@ -38,17 +38,24 @@ class Account:
 
         pos = []
 
-        
-        
-        
+
+
+
         try:
             pnl = self.df_pnl.iat[-1,4]
             deposits = self.df_pnl.iat[-1,6]
         except:
             pnl = 0
             deposits = 0
+
+
         df_list = []
+
+
         pbar = tqdm(total=len(date_list))
+
+
+
         for date in date_list:
 
             pnlvol = 0
@@ -107,6 +114,11 @@ class Account:
                     nex = self.df_log.iat[log_index,1]
                 except: 
                     nex = datetime.datetime.now()
+
+
+
+
+
             pnlh = pnl
             pnll = pnl
             
@@ -154,7 +166,7 @@ class Account:
 
         
         self.df_pnl = pd.concat(df_list).reset_index()
-        print(self.df_pnl)
+        #print(self.df_pnl)
         #self.df_pnl.set_index('Datetime',drop = True)
         
         self.df_pnl.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
