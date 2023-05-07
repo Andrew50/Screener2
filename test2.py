@@ -9,7 +9,9 @@ from Data7 import Data as data
 
 
 
-
+df = data.get('RES','1min')
+index = data.findex(df,'2022-11-09 09:31:00')
+print(df.iat[index,3])
 '''
 
 
@@ -40,9 +42,18 @@ print(df)
 
 '''
 
+'''
+df = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather")
 
-df = pd.read_feather(r"C:/Screener/tmp/log.feather")
+df.to_csv(r"C:\Screener\tmp\pnl\pnlgod.csv")
+
+'''
+
+'''
+df = pd.read_csv(r"C:\Screener\tmp\pnl\log.csv")
+df['Datetime'] =  pd.to_datetime(df['Datetime'])
 
 df.to_csv(r"C:/Screener/tmp/log.csv")
 
 
+'''

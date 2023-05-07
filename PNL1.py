@@ -16,7 +16,8 @@ import numpy
 import statistics
 
 
-#from Account import Account as account
+#from accountcalculator import accountcalculator as account
+from Account import Account as account
 
 
 from Log import Log as log
@@ -395,7 +396,14 @@ class PNL():
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
             log.log(self)
         if self.menu == "Account":
+            layout =[
+            [sg.Image(key = '-CHART-')],
+            [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
+            [(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
+            [sg.Button('Load')],
+            [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            account.account(self)
         if self.menu == "Traits":
             layout = [
             [sg.Image(key = '-CHART-')],
@@ -448,7 +456,7 @@ class PNL():
                     elif self.menu == "Plot":
                         self.plot(self)
                     elif self.menu == "Account":
-                        self.account(self)
+                        account.account(self)
                     elif self.menu == "Log":
                         log.log(self)
 if __name__ == "__main__":
