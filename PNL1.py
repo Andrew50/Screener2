@@ -15,6 +15,8 @@ import os
 import numpy
 import statistics
 
+from Log import Log as log
+
 
 class PNL():
 
@@ -212,51 +214,11 @@ class PNL():
 
 
 
-
-
-
-
-
-
-
         #self.df_traits.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
 
-    def log(self):
+    
 
-        if self.event == "Enter":
-            
-            ticker = str(self.values['input-ticker'])
 
-            if ticker != "":
-                dt = self.values['input-datetime']
-                dt  = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
-                shares = float(self.values['input-shares'])
-                price = float(self.values['input-price'])
-                setup = str(self.values['input-setup'])
-
-                add = pd.DataFrame({
-            
-                    'Ticker': [ticker],
-                    'Datetime':[dt],
-                    'Shares': [shares],
-                    'Price': [price],
-                    'Setup': [setup]
-                    })
-
-                self.df_log = pd.concat([self.df_log,add])
-                self.df_log.reset_index(inplace = True, drop = True)
-                self.df_log.to_feather(r"C:\Screener\tmp\pnl\log.feather")
-            
-            print(self.df_log)
-        elif self.event == "Clear":
-
-            self.window["input-ticker"].update("")
-            self.window["input-shares"].update("")
-            self.window["input-price"].update("")
-            self.window["input-setup"].update("")
-            self.window["input-datetime"].update("")
-
-        self.df_log = self.df_log.sort_values(by='Datetime')
 
     def plot(self):
         
@@ -309,12 +271,6 @@ class PNL():
             percent = round(bar[0][2]*((price / bar[0][3]) - 1) * 100 / abs(bar[0][2]),2)
             
             table.append([date,shares,price,percent])
-
-              
-
-
-        
-
 
 
         bio1 = io.BytesIO()
@@ -396,6 +352,7 @@ class PNL():
 
 
     def update(self):
+        
         if self.menu == None:
             sg.theme('DarkGrey')
             try:
@@ -415,15 +372,28 @@ class PNL():
             self.window.close()
         print(self.menu)
         if self.menu == "Log":
-            layout = [  
+
+
+
+            toprow = ['Ticker        ','Datetime         ','Shares    ', 'Price      ','Setup    ']
+            c1 = [  
             [(sg.Text("Ticker    ")),sg.InputText(key = 'input-ticker')],
             [(sg.Text("Datetime")),sg.InputText(key = 'input-datetime')],
             [(sg.Text("Shares   ")),sg.InputText(key = 'input-shares')],
             [(sg.Text("Price     ")),sg.InputText(key = 'input-price')],
             [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
-            [sg.Button('Clear'),sg.Button('Enter')],
+            [sg.Button('Delete'),sg.Button('Clear'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
+    
+            c2 = [[sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
+         
+
+            layout = [
+            [sg.Column(c1),
+             sg.VSeperator(),
+             sg.Column(c2),]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            log.log(self)
         if self.menu == "Account":
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
         if self.menu == "Traits":
@@ -461,6 +431,8 @@ class PNL():
             self.preloadamount = 15
             self.i = 0
             self.menu = None
+            self.event = [None]
+            self.index = None
             self.update(self)
             while True:
                 self.event, self.values = self.window.read()
@@ -468,6 +440,7 @@ class PNL():
                     self.menu = self.event
                     self.update(self)
                 elif self.event != "":
+                    
                     #print(self.menu)
                     if self.menu == "Traits":
 
@@ -477,7 +450,7 @@ class PNL():
                     elif self.menu == "Account":
                         self.account(self)
                     elif self.menu == "Log":
-                        self.log(self)
+                        log.log(self)
 if __name__ == "__main__":
     PNL.loop(PNL)
 
