@@ -16,7 +16,7 @@ import numpy
 import statistics
 
 
-from Account import Account as account
+from accountcalculator import accountcalculator as account
 
 
 from Log import Log as log
@@ -366,7 +366,7 @@ class PNL():
             try:
                 self.df_pnl = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather")
             except:
-                self.df_pnl = pd.DataFrame()
+                self.df_pnl = None
             self.menu = "Log"
         else:
             self.window.close()
@@ -395,7 +395,14 @@ class PNL():
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
             log.log(self)
         if self.menu == "Account":
+            layout =[
+            [sg.Image(key = '-CHART-')],
+            [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
+            [(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
+            [sg.Button('Load')],
+            [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            account.account(self)
         if self.menu == "Traits":
             layout = [
             [sg.Image(key = '-CHART-')],
