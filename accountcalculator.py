@@ -86,37 +86,47 @@ class accountcalculator:
             else:
                 accdata = pd.DataFrame()
 
-            appleDf = pd.read_feather(r"" + path + "/minute/AAPL.feather")
-            orderDf = pd.read_feather("C:/Screener/tmp/log.feather")
-            orderDf = orderDf.sort_values(by='Datetime', ascending =True)
-            orderDf = orderDf.reset_index()
-            firstDateTime = orderDf.at[0, 'Datetime']
-            appleIndex = data.findex(appleDf, firstDateTime)
-            #print(appleDf.iloc[appleIndex])
-            accdata = appleDf[appleIndex-1:]
-            accdata = accdata.drop(axis=1, labels=['open', 'high', 'low', 'close', 'volume'])
-            print(orderDf)
-            accdata.loc[appleDf.index[appleIndex-1], cols] = ['0', '0', '0', '0', '0', 
-                                    '0', '0', '', '', '']
-            print(accdata)
-            for i in range(len(orderDf)-1):
-                firstIndex, secondIndex = accountcalculator.sectionIndexes(orderDf, accdata, i)
-                if(i == 0): 
-                    firstIndex = 0
-                accountcalculator.nextSection(accdata, firstIndex, secondIndex, orderDf, i)
-            
-        def sectionIndexes(orderDf, accDf, currentOrderIndex):
-            df = orderDf
-            firstIndex = data.findex(accDf, orderDf.at[currentOrderIndex, 'Datetime'])
-            secondIndex = data.findex(accDf, orderDf.at[currentOrderIndex+1, 'Datetime'])
-            return firstIndex, secondIndex
+        appleDf = pd.read_feather(r"" + path + "/minute/AAPL.feather")
+        orderDf = pd.read_feather("C:/Screener/tmp/log.feather")
+        orderDf = orderDf.sort_values(by='Datetime', ascending =True)
+        orderDf = orderDf.reset_index()
+        firstDateTime = orderDf.at[0, 'Datetime']
+        appleIndex = data.findex(appleDf, firstDateTime)
+        accdata = appleDf[appleIndex-1:]
+        accdata = accdata.drop(axis=1, labels=['open', 'high', 'low', 'close', 'volume'])
+        #print(orderDf)
+        accdata.loc[appleDf.index[appleIndex-1], cols] = [0, 0, 0, 0, 0, 
+                                0, 0, "!", "!", "!"]
+        print(accdata)
 
-        def nextSection(accdata, index1, index2, orderDf, orderIndex):
-            if(orderDf.at[orderIndex, 'Ticker'] == 'Deposit'):
-                accdata.at[index1, 'Cash'] = float(accdata.at[index1, 'Cash']) + float(orderDf.at[orderIndex, 'Price'])
-                print('test')
-        def nextRow():
-            pass
+        for i in range(len(orderDf)-1):
+            firstIndex, secondIndex = accountcalculator.sectionIndexes(orderDf, accdata, i)
+            accountcalculator.nextSection(accdata, firstIndex, secondIndex, orderDf, i)
+            
+    def sectionIndexes(orderDf, accDf, currentOrderIndex):
+        df = orderDf
+        firstIndex = data.findex(accDf, orderDf.at[currentOrderIndex, 'Datetime'])
+        secondIndex = data.findex(accDf, orderDf.at[currentOrderIndex+1, 'Datetime'])
+        #print(f"{firstIndex} {secondIndex}")
+        return firstIndex, secondIndex
+
+    def nextSection(accdata, index1, index2, orderDf, orderIndex):
+        if(orderDf.at[orderIndex, 'Ticker'] == 'Deposit'):
+            index1time = accdata.index[index1]
+            accdata.at[index1time, 'Cash'] = float(accdata.iloc[(index1)-1]['Cash']) + float(orderDf.iloc[orderIndex]['Price'])
+        else:
+            if(accdata.iloc[(index1)-1]['Positions'] == "!"):
+                print("TEST")
+                index1time = accdata.index[index1]
+                accdata.at[index1time, 'Positions'] = str(orderDf.iloc[orderIndex]['Ticker'])
+                accdata.at[index1time, 'Shares'] = orderDf.iloc[orderIndex]['Shares']
+                accdata.at[index1time, 'Average'] = orderDf.iloc[orderIndex]['Price']
+        #print(accdata[(index1):index1+1])
+        for i in range((index2-index1)+1):
+            accountcalculator.nextRow()
+
+    def nextRow():
+        pass
     
 
 
