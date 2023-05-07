@@ -39,11 +39,8 @@ print(df)
 
 
 '''
-#df = pd.read_feather(r"C:\Screener\minute - Copy\META.feather")
 
-#print(df)
 
-'''
 df = pd.read_csv(r"C:\Screener\tmp\pnl\log.csv")
 df['Datetime'] =  pd.to_datetime(df['Datetime'])
 
@@ -59,7 +56,4 @@ print(df)
 df.to_feather(r"C:\Screener\tmp\pnl\log.feather")
 
 
-'''
 
-df = pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather")
-print(df)
