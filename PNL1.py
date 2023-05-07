@@ -456,7 +456,7 @@ class PNL():
                     elif self.menu == "Plot":
                         self.plot(self)
                     elif self.menu == "Account":
-                        self.account(self)
+                        account.account(self)
                     elif self.menu == "Log":
                         log.log(self)
 if __name__ == "__main__":

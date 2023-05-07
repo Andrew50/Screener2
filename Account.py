@@ -81,7 +81,7 @@ class Account:
                     if pos_index == None:
                         try:
                             df = data.get(ticker,'1min')
-                            pos_index = len(pos) - 1
+                            pos_index = len(pos)
                             data.findex(df,date) + 1
                             pos.append([ticker,shares,df])
                             
@@ -94,8 +94,8 @@ class Account:
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
                         pnl += gosh
-                        if gosh > 100:
-                            print(f'{c1} , {price} , {shares} , {ticker} , {df.index[ind]} , {date}')
+                        #if gosh > 100:
+                           # print(f'{c1} , {price} , {shares} , {ticker} , {df.index[ind]} , {date}')
                         pnlvol += abs(shares*price)
 
                         if remove:
@@ -167,7 +167,7 @@ class Account:
 
         else:
             date = None
-            tf = 'd'
+            tf = '15min'
 
         if self.df_pnl.empty:
             Account.calcaccount(self)
@@ -190,6 +190,7 @@ class Account:
         fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
 
         plt.savefig(p1, bbox_inches='tight')
+        plt.show()
         bio1 = io.BytesIO()
         image1 = Image.open(r"C:\Screener\tmp\pnl\pnl.png")
         image1.save(bio1, format="PNG")
