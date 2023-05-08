@@ -9,9 +9,9 @@ from Data7 import Data as data
 
 
 
-df = data.get('RES','1min')
-index = data.findex(df,'2022-11-09 09:31:00')
-print(df.iat[index,3])
+df = data.get('VERV','1min')
+#index = data.findex(df,'2022-11-09 09:31:00')
+print(df.index[-1])
 '''
 
 

@@ -207,6 +207,8 @@ class Data:
             lastDStock = bar[1]
             tf = bar[2]
 
+            if ticker == None or "/" in ticker  or '.' in ticker:
+                return
 
             exists = True
             try:
@@ -214,10 +216,7 @@ class Data:
                 lastDay = cs.index[-1]
                 if (lastDay == lastDStock):
                     return
-            except FileNotFoundError:
-                exists = False
-            except IndexError:
-                exists = False
+            
             except:
                 exists = False
             if tf == 'daily':
@@ -245,7 +244,7 @@ class Data:
   
             if not exists:
                 df = ydf
-                print(f'created {ticker}')
+                print(f'created {ticker} {tf}')
             else:
  
                 scrapped_data_index = Data.findex(ydf, lastDay) 
@@ -260,7 +259,7 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except TimeoutError:
+        except FileNotFoundError:
             pass
     
     def runUpdate():

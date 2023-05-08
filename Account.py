@@ -42,8 +42,8 @@ class Account:
 
 
         try:
-            pnl = self.df_pnl.iat[-1,4]
-            deposits = self.df_pnl.iat[-1,6]
+            pnl = self.df_pnl.iat[-1,3]
+            deposits = self.df_pnl.iat[-1,5]
         except:
             pnl = 0
             deposits = 0
@@ -170,6 +170,7 @@ class Account:
         #self.df_pnl.set_index('Datetime',drop = True)
         
         self.df_pnl.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
+        self.df_pnl = self.df_pnl.set_index('Datetime',drop = True)
 
     def account(self,date = None):
 
@@ -179,12 +180,12 @@ class Account:
 
         else:
             date = None
-            tf = '15min'
+            tf = 'd'
 
         if self.df_pnl.empty:
             Account.calcaccount(self)
 
-        df = self.df_pnl.set_index('Datetime',drop = True)
+        df = self.df_pnl
         if tf == '':
             tf = 'd'
         if tf != "1min":
@@ -202,7 +203,8 @@ class Account:
         fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
 
         plt.savefig(p1, bbox_inches='tight')
-        plt.show()
+        #plt.show()
+        
         bio1 = io.BytesIO()
         image1 = Image.open(r"C:\Screener\tmp\pnl\pnl.png")
         image1.save(bio1, format="PNG")

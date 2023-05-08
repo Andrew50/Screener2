@@ -64,7 +64,7 @@ class UI:
                         self.i += 1
                         self.update(self,False,values,previ)
                         self.window.refresh()
-                        self.preload(self,self.i + self.preloadamount)
+                        self.preload(self,self.i + self.preloadamount - 1)
     
                 if event == 'Prev':
                 
@@ -243,11 +243,12 @@ class UI:
         
         if (os.path.exists("C:/Screener/tmp/charts/1" + iss + ".png") == False):
 
-            print(f'preloading {i}')
+            #print(f'preloading {i}')
                
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
             date = (setups_data.iloc[i][0])
+            #print(date)
            
             ticker = setups_data.iloc[i][1]
             setup = setups_data.iloc[i][2]
@@ -305,6 +306,7 @@ class UI:
            
             ch = 100
             cd = 200
+            
             cm = 0
 
             sh = 250
@@ -315,6 +317,16 @@ class UI:
             fh = 7
 
             fs = .8
+
+            if data.isToday(date):
+                cm = sm - 2
+                cd = sd - 2
+                ch = sh - 2
+                fs = 1.08
+                fw = 15
+                fh = 7
+
+            
 
             try:
                 if 'h' in tf1:
@@ -329,7 +341,8 @@ class UI:
                     c1 = cd
                     d1 = datedaily
                     s1 = sd
-                df1 = data.get(ticker,tf1,date)
+                #df1 = data.get(ticker,tf1,date)
+                df1 = data.get(ticker,tf1)
                 l1 = data.findex(df1,date) - c1
                 r1 = l1 + s1
                 if l1 < 0:
@@ -339,21 +352,16 @@ class UI:
                 p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
                 if data.isToday(date):
                     fig, axlist  =  mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    ax = axlist[0]
-                 
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-                   
-                    plt.savefig(p1, bbox_inches='tight')
+                    
                     
                 else:
                     fig, axlist = mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker}   {date}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
-                    ax = axlist[0]
+                ax = axlist[0]
                   
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                ax.set_yscale('log')
+                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
-                    plt.savefig(p1, bbox_inches='tight')
+                plt.savefig(p1, bbox_inches='tight')
             except:
                 pass
                 #print(ticker)
@@ -375,6 +383,7 @@ class UI:
                     c2 = cd
                     s2 = sd
                 df2 = data.get(ticker,tf2)
+                df2 = data.get(ticker,tf2)
                 l2 = data.findex(df2,date) - c2
                 r2 = l2 + s2
                 if l2 < 0:
@@ -384,20 +393,15 @@ class UI:
                 p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
                 if data.isToday(date):
                     fig, axlist = mpf.plot(df2, type='candle', volume=True, title = str(tf2), style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    ax = axlist[0]
-                 
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-                   
-                    plt.savefig(p2, bbox_inches='tight')
+                    
                 else:
                     fig, axlist =  mpf.plot(df2, type='candle', volume=True, title=str(tf2), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
-                    ax = axlist[0]
+                ax = axlist[0]
                  
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                ax.set_yscale('log')
+                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
-                    plt.savefig(p2, bbox_inches='tight')
+                plt.savefig(p2, bbox_inches='tight')
             except:
                 pass
              
@@ -426,20 +430,16 @@ class UI:
                 
                 if data.isToday(date):
                     fig, axlist = mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  returnfig = True, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    ax = axlist[0]
                     
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-                   
-                    plt.savefig(p3, bbox_inches='tight')
                 else:
                     fig, axlist = mpf.plot(df3, type='candle', volume=True, title = str(tf3),style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
-                    ax = axlist[0]
+                    
+                ax = axlist[0]
+                    
+                ax.set_yscale('log')
+                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-                   
-                    plt.savefig(p3, bbox_inches='tight')
+                plt.savefig(p3, bbox_inches='tight')
             except:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p3)
       
@@ -465,25 +465,23 @@ class UI:
                 r4 = l4 + s4
                 if l4 < 0:
                     l4 = 0
+
+                #print(f'{l4} , {r4} , {len(df4)}')
                 df4 = df4[l4:r4]
+                
                 
                 
                 if data.isToday(date):
                     plot, axlist =  mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
-                    ax = axlist[0]
-                    
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
-                    plt.savefig(p4, bbox_inches='tight')
                 else:
                     plot, axlist = mpf.plot(df4, type='candle', volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
-                    ax = axlist[0]
+                ax = axlist[0]
                     
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                ax.set_yscale('log')
+                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
-                    plt.savefig(p4, bbox_inches='tight')
+                plt.savefig(p4, bbox_inches='tight')
             except:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p4)
         
@@ -785,6 +783,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 
 
