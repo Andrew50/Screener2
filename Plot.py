@@ -22,7 +22,7 @@ import statistics
 class Plot:
     def plot(self):
         if self.event == 'Load':
-            scan = pd.read_feather(r"C:\Screener\tmp\pnl\traits.feather")
+            scan = pd.read_feather(r"C:\Screener\sync\traits.feather")
 
 
             ticker = self.values['input-ticker']

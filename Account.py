@@ -203,7 +203,7 @@ class Account:
 
         if self.df_pnl.empty or self.event == "Recalc":
             df = Account.calcaccount(self)
-            df.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
+            df.to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_pnl = df.set_index('datetime',drop = True)
 
       

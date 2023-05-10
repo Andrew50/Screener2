@@ -19,7 +19,7 @@ class consolidate:
 
 
         try:
-            setups = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+            setups = pd.read_feather(r"C:\Screener\sync\setups.feather")
         except:
             setups = pd.DataFrame()
 
@@ -38,7 +38,7 @@ class consolidate:
 
         
             setups.reset_index(inplace = True,drop = True)
-            setups.to_feather(r"C:\Screener\tmp\setups.feather")
+            setups.to_feather(r"C:\Screener\sync\setups.feather")
 
             todays_setups.reset_index(inplace = True,drop = True)
             todays_setups.to_feather(r"C:\Screener\tmp\todays_setups.feather")

@@ -36,15 +36,15 @@ class PNL():
         if self.menu == None:
             sg.theme('DarkGrey')
             try:
-                self.df_log = pd.read_feather(r"C:\Screener\tmp\pnl\log.feather")
+                self.df_log = pd.read_feather(r"C:\Screener\sync\log.feather")
             except:
                 self.df_log = pd.DataFrame()
             try:
-                self.df_traits = pd.read_feather(r"C:\Screener\tmp\pnl\traits.feather").sort_values(by='Datetime',ascending = False)
+                self.df_traits = pd.read_feather(r"C:\Screener\sync\traits.feather").sort_values(by='Datetime',ascending = False)
             except:
                 self.df_traits = pd.DataFrame()
             try:
-                self.df_pnl = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather").set_index('datetime', drop = True)
+                self.df_pnl = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime', drop = True)
             except:
                 self.df_pnl = pd.DataFrame()
           
