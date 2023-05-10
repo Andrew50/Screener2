@@ -76,7 +76,7 @@ class Log:
                 account.update(self,dt)
                 traits.update(self,add.values.tolist()[0])
                 
-                self.df_log.to_feather(r"C:\Screener\tmp\pnl\log.feather")
+                self.df_log.to_feather(r"C:\Screener\tmp\log.feather")
                 
         if self.event == "Delete":
             if self.index != None:

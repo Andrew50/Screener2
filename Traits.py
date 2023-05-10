@@ -61,7 +61,7 @@ class Traits:
                 df = Traits.calc(self,short_logs)
                 self.df_traits = pd.concat([self.df_traits,df])
                 self.df_traits = self.df_traits.sort_values(by='Datetime',ascending = False).reset_index(drop = True)
-                self.df_traits.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
+                self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
    
  
     def calc(self,df):
@@ -306,7 +306,7 @@ class Traits:
             
             #df = self.df_log.sort_values(by='Datetime')
             self.df_traits = Traits.calc(self,df)
-            self.df_traits.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
+            self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
 
         bins = 50
         try:

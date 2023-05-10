@@ -15,10 +15,11 @@ Test.py
 Testt.py
 /TT_data.csv
 /TEST_data.csv
-
+laptop.txt
 minute/
-daily/
+daily/  
 
 data_test/
 /hwtest.py
 minute - Copy/
+__pycache__/
