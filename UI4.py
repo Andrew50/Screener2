@@ -481,7 +481,7 @@ class UI:
                 
                 
                 
-                if data.isToday(date):
+                if data.isToday(date) or tf4 == '1min':
                     plot, axlist =  mpf.plot(df4, type='candle', volume=True,axisoff=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                    
                 else:
@@ -604,9 +604,9 @@ class UI:
                 (sg.Text("|   time")),(sg.Text(time, key = '-time-'))],
                 [sg.Multiline(annotation,size=(150, 5), key='annotation')],
                 [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
-                [(sg.Text("Ticker      ")),sg.InputText(key = 'input-ticker')],
-                [(sg.Text("Date        ")),sg.InputText(key = 'input-date')],
-                [(sg.Text("Setup      ")),sg.InputText(key = 'input-setup')],
+                [(sg.Text("Ticker       ")),sg.InputText(key = 'input-ticker')],
+                [(sg.Text("Date         ")),sg.InputText(key = 'input-date')],
+                [(sg.Text("Setup       ")),sg.InputText(key = 'input-setup')],
                 [(sg.Text("Keyword  ")),sg.InputText(key = 'input-keyword')],
               #  [(sg.Text("Trait        ")),sg.InputText(key = 'input-trait')],
                 [(sg.Text("Redate    ")),sg.InputText(key = 'input-redate')],

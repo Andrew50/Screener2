@@ -1,4 +1,63 @@
-﻿
+﻿OLD get data v7 -------------------------------------------------------------------------------------
+
+
+def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
+        path = Data.path
+
+
+        current = Data.isToday(date)
+
+        if tf == 'daily':
+            tf = 'd'
+        if tf == 'minute':
+            tf = '1min'
+
+        if tf == 'd' or tf == 'w' or tf == 'm':
+            df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+        else:
+            if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+
+                tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+                screener_data = feather.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+                screener_data.set_index('Ticker', inplace = True)
+                exchange = str(screener_data.loc[ticker]['Exchange'])
+                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
+                df.drop('symbol', axis = 1, inplace = True)
+                df.index = df.index + pd.Timedelta(hours=4)
+                seconds = datetime.datetime.now().second
+                bar = df.iloc[-1]
+                df.drop(df.tail(1).index,inplace = True)
+                if seconds > 30:
+                    mult = pow((60 / seconds),.6)
+                    openn = bar['open']
+                    high = bar['high']
+                    low = bar['low']
+                    close = bar['close']
+                    vol = bar['volume']
+                    new_open = openn
+                    new_close = close + (close - openn) * mult 
+                    new_vol = vol*mult 
+                    new_high = high
+                    new_low = low
+                    if new_close > high:
+                        new_high = new_close
+                    if new_close < low:
+                        new_low = new_close
+
+                    now = datetime.datetime.now()
+                    new = pd.DataFrame({'datetime':[now],
+                                        'open':[new_open],
+                                        'high':[new_high],
+                                        'low':[new_low],
+                                        'close':[new_close],
+                                        'volume':[new_vol]}).set_index("datetime")
+                    df = pd.concat([df,new])
+            else:
+                df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                if not premarket:
+                    df = df.between_time('09:30' , '15:59')
+
+
 
 OLD UI 4 =---------------------------------------
 

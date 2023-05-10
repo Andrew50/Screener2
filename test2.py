@@ -5,13 +5,21 @@ import Scan
 
 import yfinance as yf
 from Data7 import Data as data
+import datetime
 
 
 
+df = data.get('AAPL','1min',datetime.datetime.now(),account = True)\
+
+print(df)
+
+
+'''
 
 df = data.get('VERV','1min')
 #index = data.findex(df,'2022-11-09 09:31:00')
 print(df)
+'''
 '''
 
 

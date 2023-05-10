@@ -108,7 +108,7 @@ class Data:
 
 
 
-    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
+    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False):    
         path = Data.path
 
 
@@ -131,34 +131,50 @@ class Data:
                 df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
                 df.drop('symbol', axis = 1, inplace = True)
                 df.index = df.index + pd.Timedelta(hours=4)
-                seconds = datetime.datetime.now().second
-                bar = df.iloc[-1]
-                df.drop(df.tail(1).index,inplace = True)
-                if seconds > 30:
-                    mult = pow((60 / seconds),.6)
-                    openn = bar['open']
-                    high = bar['high']
-                    low = bar['low']
-                    close = bar['close']
-                    vol = bar['volume']
-                    new_open = openn
-                    new_close = close + (close - openn) * mult 
-                    new_vol = vol*mult 
-                    new_high = high
-                    new_low = low
-                    if new_close > high:
-                        new_high = new_close
-                    if new_close < low:
-                        new_low = new_close
 
-                    now = datetime.datetime.now()
-                    new = pd.DataFrame({'datetime':[now],
-                                        'open':[new_open],
-                                        'high':[new_high],
-                                        'low':[new_low],
-                                        'close':[new_close],
-                                        'volume':[new_vol]}).set_index("datetime")
-                    df = pd.concat([df,new])
+                if not account:
+
+                    seconds = datetime.datetime.now().second
+                    bar = df.iloc[-1]
+                    df.drop(df.tail(1).index,inplace = True)
+                    if seconds > 30:
+                        mult = pow((60 / seconds),.6)
+                        openn = bar['open']
+                        high = bar['high']
+                        low = bar['low']
+                        close = bar['close']
+                        vol = bar['volume']
+                        new_open = openn
+                        new_close = close + (close - openn) * mult 
+                        new_vol = vol*mult 
+                        new_high = high
+                        new_low = low
+                        if new_close > high:
+                            new_high = new_close
+                        if new_close < low:
+                            new_low = new_close
+
+                        now = datetime.datetime.now()
+                        new = pd.DataFrame({'datetime':[now],
+                                            'open':[new_open],
+                                            'high':[new_high],
+                                            'low':[new_low],
+                                            'close':[new_close],
+                                            'volume':[new_vol]}).set_index("datetime")
+                        df = pd.concat([df,new])
+
+                else:
+                    #fetch fiole
+                    dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+                    lastday = dff.index[-1]
+                    scrapped_data_index = Data.findex(df,lastday) 
+                    if not scrapped_data_index == None:
+                        pass
+                        
+                    else:
+                        df = df[scrapped_data_index + 1:]
+                        df = pd.concat([dff,df])
+
             else:
                 df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                 if not premarket:
@@ -240,7 +256,7 @@ class Data:
             ydf = ydf.drop(axis=1, labels="Adj Close")
             ydf.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'}, inplace = True)
             if Data.isMarketOpen() == 1 :
-                ydf.drop(ydf.tail(1),inplace=True)
+                ydf.drop(ydf.tail(1).index,inplace=True)
             ydf.dropna(inplace = True)
   
             if not exists:

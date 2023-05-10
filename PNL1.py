@@ -52,11 +52,17 @@ class PNL():
         else:
             self.window.close()
         print(self.menu)
+
+        scalelog = 6
+        scaleplot = 4.5
+        scaleaccount = 5
+        scaletraits = 4
+       
         if self.menu == "Log":
 
 
 
-            toprow = ['Ticker        ','Datetime         ','Shares    ', 'Price      ','Setup    ']
+            toprow = ['Ticker        ','Datetime        ','Shares ', 'Price   ','Setup    ']
             c1 = [  
             [(sg.Text("Ticker    ")),sg.InputText(key = 'input-ticker')],
             [(sg.Text("Datetime")),sg.InputText(key = 'input-datetime')],
@@ -66,14 +72,14 @@ class PNL():
             [sg.Button('Delete'),sg.Button('Clear'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
     
-            c2 = [[sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
+            c2 = [[sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,num_rows = 30,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
          
 
             layout = [
             [sg.Column(c1),
              sg.VSeperator(),
              sg.Column(c2),]]
-            self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scalelog,finalize = True)
             log.log(self)
         if self.menu == "Account":
             layout =[
@@ -82,7 +88,7 @@ class PNL():
             [(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
             [sg.Button('Recalc'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
-            self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleaccount,finalize = True)
             account.account(self)
         if self.menu == "Traits":
             layout = [
@@ -90,25 +96,36 @@ class PNL():
             [(sg.Text("Trait  ")),sg.InputText(key = 'input-trait')],
             [sg.Button('Recalc'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
-            self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+            self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaletraits,finalize = True)
             traits.traits(self)
         if self.menu == "Plot":
-            toprow = ['Date             ','Shares   ','Price    ', 'Percent      ',' Timedelta    ','% size    ']
-            layout = [  
+            toprow = ['Date             ','Shares   ','Price  ', 'Percent  ',' Timedelta   ','% size']
+            c2 = [  
+             [sg.Image(key = '-IMAGE3-')],
+             [sg.Image(key = '-IMAGE1-')]]
+            c1 = [
              [sg.Image(key = '-IMAGE2-')],
-             [sg.Image(key = '-IMAGE1-')],
-             [(sg.Text((str(f"{self.i + 1} of {len(self.df_traits)}")), key = '-number-')), sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left', expand_y = False)],
+             [(sg.Text((str(f"{self.i + 1} of {len(self.df_traits)}")), key = '-number-'))], 
+              [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left', 
+                       expand_y = False)],
             [(sg.Text("Ticker  ")),sg.InputText(key = 'input-ticker')],
             [(sg.Text("Date   ")),sg.InputText(key = 'input-datetime')],
             [(sg.Text("Setup  ")),sg.InputText(key = 'input-setup')],
             [(sg.Text("Sort    ")),sg.InputText(key = 'input-sort')],
-            [[sg.Button('Prev'),sg.Button('Next'),sg.Button('Load')]],
+            [sg.Button('Prev'),sg.Button('Next'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
-            self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
+
+
+            layout = [
+            [sg.Column(c1),
+             sg.VSeperator(),
+             sg.Column(c2)],]
+
+            self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleplot,finalize = True)
             plot.plot(self)
 
 
-
+        self.window.maximize()
 
 
     def loop(self):

@@ -305,10 +305,11 @@ class Traits:
             self.df_traits = pd.DataFrame()
             
             #df = self.df_log.sort_values(by='Datetime')
-            self.df_traits = Traits.calc(self,df)
+            self.df_traits = Traits.calc(self,self.df_log)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
 
         bins = 50
+        size = (49,25)
         try:
             inp = self.values['input-trait']
         except:
@@ -317,7 +318,7 @@ class Traits:
             plt.clf()
             fifty = self.df_traits[inp].to_list()
             plt.hist(fifty, bins, alpha=1, ec='black',label='Percent') 
-            plt.gcf().set_size_inches(28, 14)
+            plt.gcf().set_size_inches(size)
             plt.legend(loc='upper right')
             string1 = "traits.png"
             p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1

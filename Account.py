@@ -216,9 +216,14 @@ class Account:
 
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
-        fw = 30
-        fh = 12
-        fs = 1.8
+        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+            fw = 30
+            fh = 13.8
+            fs = 3.4
+        else:
+            fw = 30
+            fh = 18
+            fs = 1.8
         string1 = "pnl.png"
         p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
 

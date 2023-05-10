@@ -16,9 +16,6 @@ import numpy
 import statistics
 
 
-
-
-
 class Plot:
     def plot(self):
         if self.event == 'Load':
@@ -100,6 +97,7 @@ class Plot:
             try:
                 image1 = Image.open(r"C:\Screener\tmp\pnl\charts" + f"\{self.i}" + "1min.png")
                 image2 = Image.open(r"C:\Screener\tmp\pnl\charts" + f"\{self.i}" + "d.png")
+                image3 = Image.open(r"C:\Screener\tmp\pnl\charts" + f"\{self.i}" + "h.png")
             except:
                 pass
 
@@ -131,24 +129,34 @@ class Plot:
         image1.save(bio1, format="PNG")
         bio2 = io.BytesIO()
         image2.save(bio2, format="PNG")
+        bio3 = io.BytesIO()
+        image3.save(bio3, format="PNG")
 
         self.window["-IMAGE1-"].update(data=bio1.getvalue())
         self.window["-IMAGE2-"].update(data=bio2.getvalue())
+        self.window["-IMAGE3-"].update(data=bio3.getvalue())
         self.window["-number-"].update(str(f"{self.i + 1} of {len(self.df_traits)}"))
         self.window["-table-"].update(table)
 
         
     def create(bar):
 
-        tflist = ['1min','d']
+        tflist = ['1min','h','d']
 
         i = bar[0]
         
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
-        fw = 30
-        fh = 6
-        fs = .85
+
+        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+            fw = 24
+            fh = 13
+            fs = 1.95
+
+        else:
+            fw = 30
+            fh = 6
+            fs = .85
         df = bar[1]
         
         ticker = df.iat[i,0]
@@ -187,8 +195,12 @@ class Plot:
 
                 #ap = mpf.make_addplot(0.99*df1['Low'],type='scatter',marker=mymarkers,markersize=45,color=color)
             
-                fig, axlist = mpf.plot(df1, type='candle', volume=True, title=str(f'{ticker} , {tf}'), style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), 
-                                       tight_layout = True,vlines=dict(vlines=datelist, colors = colorlist, alpha = .2,linewidths=1))
+                fig, axlist = mpf.plot(df1, type='candle', volume=True, 
+                                       title=str(f'{ticker} , {tf}'), 
+                                       style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
+                                       figscale=fs, panel_ratios = (5,1), mav=(10,20), 
+                                       tight_layout = True,vlines=dict(vlines=datelist, 
+                                      colors = colorlist, alpha = .2,linewidths=1))
                 ax = axlist[0]
                 #for k in range(len(df.iat[i,2])):
                  #   ax.text()
