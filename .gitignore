@@ -15,23 +15,13 @@ Test.py
 Testt.py
 /TT_data.csv
 /TEST_data.csv
-intraday_data/
-minute_data/
-daily_data/
-daily_data_actual/
-minute_data_actual/
+i
+__pycache__/
 
-daily_data_tester/
-minute_data_tester/
-data test subjects/
-test/
-data backup/
 minute/
 daily/
+
 data_test/
-Screener.bat
-Screener.lnk
 /hwtest.py
-UI.bat
-UI.lnk
-minute - Copy/
+
+m

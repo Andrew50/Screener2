@@ -40,13 +40,14 @@ class PNL():
             except:
                 self.df_log = pd.DataFrame()
             try:
-                self.df_traits = pd.read_feather(r"C:\Screener\tmp\pnl\traits.feather")
+                self.df_traits = pd.read_feather(r"C:\Screener\tmp\pnl\traits.feather").sort_values(by='Datetime',ascending = False)
             except:
                 self.df_traits = pd.DataFrame()
             try:
-                self.df_pnl = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather").set_index('Datetime', drop = True)
+                self.df_pnl = pd.read_feather(r"C:\Screener\tmp\pnl\pnl.feather").set_index('datetime', drop = True)
             except:
                 self.df_pnl = pd.DataFrame()
+          
             self.menu = "Log"
         else:
             self.window.close()
@@ -79,7 +80,7 @@ class PNL():
             [sg.Image(key = '-CHART-')],
             [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
             [(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
-            [sg.Button('Load')],
+            [sg.Button('Recalc'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
             account.account(self)
@@ -87,7 +88,7 @@ class PNL():
             layout = [
             [sg.Image(key = '-CHART-')],
             [(sg.Text("Trait  ")),sg.InputText(key = 'input-trait')],
-            [sg.Button('Enter')],
+            [sg.Button('Recalc'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),finalize = True)
             traits.traits(self)
@@ -116,7 +117,7 @@ class PNL():
             if os.path.exists("C:/Screener/tmp/pnl/charts"):
                 shutil.rmtree("C:/Screener/tmp/pnl/charts")
             os.mkdir("C:/Screener/tmp/pnl/charts")
-            self.preloadamount = 15
+            self.preloadamount = 7
             self.i = 0
             self.menu = None
             self.event = [None]

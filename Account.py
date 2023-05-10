@@ -19,42 +19,66 @@ from tqdm import tqdm
 
 class Account:
 
+    def update(self,date):
+
+
+        del_index = data.findex(self.df_pnl,date) 
+        df2 = self.df_pnl[:del_index]
+        df = Account.calcaccount(self,date)
+      
+        self.df_pnl = pd.concat([df2.reset_index(),df]).sort_values(by='datetime')
+        
+        #df.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
+        self.df_pnl = self.df_pnl.set_index('datetime',drop = True)
+       
+
+
+
+
+
     def calcaccount(self,date = None):
+        df_aapl = data.get('AAPL','1min')
 
-        
-        if date == None:
+        #initial conditions
+        if date != None:
+            
+            index = data.findex(self.df_pnl,date)
+            #index = 0
+            
+            bar = self.df_pnl.iloc[index]
+
+            pnl = bar['close']
+            deposits = bar['deposits']
+            positions = bar['positions'].split(',')
+            shares = bar['shares'].split(',')
+            pos = []
+            for i in range(len(shares)):
+                ticker = positions[i]
+                share = float(shares[i])
+                df = data.get(ticker,'1min')
+                pos.append([ticker,share,df])
+
+
+            log_index = data.findex(self.df_log.set_index('Datetime'),date) 
+            nex = self.df_log.iloc[log_index]['Datetime']
+          
+            
+
+        else:
             date = self.df_log.iat[0,1]
-
-        df = data.get('AAPL','1min')
-
-        start_index = data.findex(df,date) 
-        
-
-        date_list = df[start_index-1:].index.to_list()
-
-        nex = date
-
-        log_index = 0
-
-        pos = []
-
-
-
-
-        try:
-            pnl = self.df_pnl.iat[-1,3]
-            deposits = self.df_pnl.iat[-1,5]
-        except:
+            
             pnl = 0
             deposits = 0
-
-
+            pos = []
+            index = 0
+            log_index = 0
+            nex = date
+ 
+        start_index = data.findex(df_aapl,date)
+        date_list = df_aapl[start_index:].index.to_list()
+  
         df_list = []
-
-
         pbar = tqdm(total=len(date_list))
-
-
 
         for date in date_list:
 
@@ -84,7 +108,6 @@ class Account:
                             if pos[i][1] == 0:
                                 remove = True
 
-
                     if pos_index == None:
                         try:
                             df = data.get(ticker,'1min')
@@ -101,22 +124,17 @@ class Account:
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
                         pnl += gosh
-                        #if gosh > 100:
-                           # print(f'{c1} , {price} , {shares} , {ticker} , {df.index[ind]} , {date}')
+                     
                         pnlvol += abs(shares*price)
 
                         if remove:
                             del pos[pos_index]
-
 
                 log_index += 1
                 try:
                     nex = self.df_log.iat[log_index,1]
                 except: 
                     nex = datetime.datetime.now()
-
-
-
 
 
             pnlh = pnl
@@ -134,28 +152,30 @@ class Account:
                 o = df.iat[index,0]
                 h = df.iat[index,1]
                 l = df.iat[index,2]
-
+              
                 pnl += (c - prevc) * shares
                 pnlh += (h - prevc) * shares
                 pnll += (l - prevc) * shares
                 pnlo += (o - prevc) * shares
-
-                positions += (str(ticker) + ",")
-                god_shares += (str(shares) + ",")
-
+                if i >= 1:
+                    positions += "," + (str(ticker))
+                    god_shares += "," + (str(shares))
+                else:
+                    positions += str(ticker)
+                    god_shares += str(shares)
             
 
             add = pd.DataFrame({
-                'Datetime':[date],
+                'datetime':[date],
                 'open':[pnlo],
                 'high':[pnlh],
                 'low':[pnll],
                 'close':[pnl],
                 'volume':[pnlvol],
-                'Deposits':[deposits],
-                'Account':[deposits + pnl],
-                'Positions':[positions],
-                'Shares':[god_shares]
+                'deposits':[deposits],
+                'account':[deposits + pnl],
+                'positions':[positions],
+                'shares':[god_shares]
                 })
 
 
@@ -165,12 +185,11 @@ class Account:
 
 
         
-        self.df_pnl = pd.concat(df_list).reset_index()
-        #print(self.df_pnl)
+        df = pd.concat(df_list).reset_index(drop = True)
+     
         #self.df_pnl.set_index('Datetime',drop = True)
+        return df 
         
-        self.df_pnl.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
-        self.df_pnl = self.df_pnl.set_index('Datetime',drop = True)
 
     def account(self,date = None):
 
@@ -182,9 +201,12 @@ class Account:
             date = None
             tf = 'd'
 
-        if self.df_pnl.empty:
-            Account.calcaccount(self)
+        if self.df_pnl.empty or self.event == "Recalc":
+            df = Account.calcaccount(self)
+            df.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
+            self.df_pnl = df.set_index('datetime',drop = True)
 
+      
         df = self.df_pnl
         if tf == '':
             tf = 'd'

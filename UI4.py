@@ -319,9 +319,9 @@ class UI:
             fs = .8
 
             if data.isToday(date):
-                cm = sm - 2
-                cd = sd - 2
-                ch = sh - 2
+                cm = sm - 1
+                cd = sd - 1
+                ch = sh - 1
                 fs = 1.08
                 fw = 15
                 fh = 7
@@ -341,8 +341,8 @@ class UI:
                     c1 = cd
                     d1 = datedaily
                     s1 = sd
-                #df1 = data.get(ticker,tf1,date)
-                df1 = data.get(ticker,tf1)
+                df1 = data.get(ticker,tf1,date)
+                #df1 = data.get(ticker,tf1)
                 l1 = data.findex(df1,date) - c1
                 r1 = l1 + s1
                 if l1 < 0:
@@ -382,8 +382,8 @@ class UI:
                     d2 = datedaily
                     c2 = cd
                     s2 = sd
-                df2 = data.get(ticker,tf2)
-                df2 = data.get(ticker,tf2)
+               
+                df2 = data.get(ticker,tf2,date)
                 l2 = data.findex(df2,date) - c2
                 r2 = l2 + s2
                 if l2 < 0:
@@ -421,7 +421,7 @@ class UI:
                     c3 = cd
                     d3 = datedaily
                     s3 = sd
-                df3 = data.get(ticker,tf3)
+                df3 = data.get(ticker,tf3,date)
                 l3 = data.findex(df3,date) - c3
                 r3 = l3 + s3
                 if l3 < 0:
@@ -460,7 +460,7 @@ class UI:
                     c4 = cd
                     d4 = datedaily
                     s4 = sd
-                df4 = data.get(ticker,tf4)
+                df4 = data.get(ticker,tf4,date)
                 l4 = data.findex(df4,date) - c4
                 r4 = l4 + s4
                 if l4 < 0:
@@ -482,7 +482,7 @@ class UI:
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
                 plt.savefig(p4, bbox_inches='tight')
-            except:
+            except TimeoutError:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p4)
         
       
@@ -783,6 +783,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 
 
