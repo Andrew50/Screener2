@@ -125,8 +125,9 @@ class Data:
             if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
                 tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-                screener_data = feather.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+                screener_data = feather.read_feather(r"C:\Screener\sync\screener_data_intraday.feather")
                 screener_data.set_index('Ticker', inplace = True)
+                #print(screener_data)
                 exchange = str(screener_data.loc[ticker]['Exchange'])
                 df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
                 df.drop('symbol', axis = 1, inplace = True)

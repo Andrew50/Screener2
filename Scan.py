@@ -63,12 +63,12 @@ class Scan:
 
             else:
                 if not  refresh:
-                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                    return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                        return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
                         
                     except:
                         
@@ -161,7 +161,7 @@ class Scan:
                 df.at[i, 'Exchange'] = "AMEX"
             if df.iloc[i]['Pre-market Change'] is None:
                     df.at[i, 'Pre-market Change'] = 0
-        df.to_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+        df.to_feather(r"C:\Screener\sync\screener_data_intraday.feather")
         time.sleep(0.1)
 
         return browser

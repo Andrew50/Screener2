@@ -9,7 +9,7 @@ import datetime
 
 
 
-df = data.get('AAPL','1min',datetime.datetime.now(),account = True)\
+df = data.get('BFRG','1min',datetime.datetime.now(),account = True)\
 
 print(df)
 
