@@ -21,6 +21,42 @@ import statistics
 
 class Plot:
     def plot(self):
+        if self.event == 'Load':
+            scan = pd.read_feather(r"C:\Screener\tmp\pnl\traits.feather")
+
+
+            ticker = self.values['input-ticker']
+            dt = self.values['input-datetime']
+            setup = self.values['input-setup']
+            sort = self.values['input-sort']
+
+
+            if ticker  != "":
+                scan = scan[scan['Ticker'] == ticker]
+            
+            if dt  != "":
+                scan = scan[scan["Datetime"] == dt]
+
+            if setup  != "":
+                scan = scan[scan['Setup'] == setup]
+     
+            if len(scan) < 1:
+                sg.Popup('No Setups Found')
+                return
+            
+
+            if sort != "":
+                try:
+                    scan = scan.sort_values(by=[sort], ascending=False)
+                except KeyError:
+                    sg.Popup('Not a Trait')
+                    return
+
+            self.df_traits = scan
+            if os.path.exists("C:/Screener/tmp/pnl/charts"):
+                shutil.rmtree("C:/Screener/tmp/pnl/charts")
+            os.mkdir("C:/Screener/tmp/pnl/charts")
+            self.i = 0
         
         if self.event == 'Next' :
             if self.i == len(self.df_traits) - 1:
@@ -30,17 +66,31 @@ class Plot:
             if self.i == 0:
                 return
             self.i -= 1
-        if self.i + self.preloadamount < len(self.df_traits):
-            if self.i == 0:
+
+        
+            i = list(range(len(self.df_traits)))
+            #i = list(range(self.preloadamoun))
+            
+
+
+        if self.i == 0:
+            if len(self.df_traits) < self.preloadamount:
+                i = list(range(len(self.df_traits)))
+            else:
                 i = list(range(self.preloadamount))
+
+        else:
+            if self.i + self.preloadamount < len(self.df_traits):
+                i = []
             else:
                 i = [self.i + self.preloadamount - 1]
-            pool = self.pool
+               
+        pool = self.pool
   
-            arglist = []
-            for index in i:
-                arglist.append([index,self.df_traits])
-            pool.map_async(Plot.create,arglist)
+        arglist = []
+        for index in i:
+            arglist.append([index,self.df_traits])
+        pool.map_async(Plot.create,arglist)
 
         image1 = None
         image2 = None
@@ -59,7 +109,7 @@ class Plot:
 
 
         table = []
-        bar = self.df_traits.iat[self.i,2]
+        bar = self.df_traits.iat[self.i,3]
         
         for k in range(len(bar)):
                      
@@ -113,12 +163,12 @@ class Plot:
             try:
                 datelist = []
                 colorlist = []
-                for k in range(len(df.iat[i,2])):
-                    date = datetime.datetime.strptime(df.iat[i,2][k][1], '%Y-%m-%d %H:%M:%S')
+                for k in range(len(df.iat[i,3])):
+                    date = datetime.datetime.strptime(df.iat[i,3][k][1], '%Y-%m-%d %H:%M:%S')
                     if tf == 'd':
                         date = date.date()
                     
-                    val = float(df.iat[i,2][k][2])
+                    val = float(df.iat[i,3][k][2])
                     if val > 0:
                         colorlist.append('g')
                     else:
@@ -127,8 +177,8 @@ class Plot:
             
                 
                 df1 = data.get(ticker,tf)
-                startdate = df.iat[i,2][0][1]
-                enddate = df.iat[i,2][-1][1]
+                startdate = df.iat[i,3][0][1]
+                enddate = df.iat[i,3][-1][1]
                 l1 = data.findex(df1,startdate) - 50
                 r1 = data.findex(df1,enddate) + 50
                 df1 = df1[l1:r1]
@@ -150,5 +200,5 @@ class Plot:
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                 plt.savefig(p1, bbox_inches='tight')
-            except:
+            except TimeoutError:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p1)

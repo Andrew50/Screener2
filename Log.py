@@ -17,6 +17,9 @@ import os
 import numpy
 import statistics
 
+from Traits import Traits as traits
+from Account import Account as account
+
 
 
 class Log:
@@ -69,12 +72,22 @@ class Log:
                     self.df_log.iat[self.index,2] = shares
                     self.df_log.iat[self.index,3] = price
                     self.df_log.iat[self.index,4] = setup
+                self.df_log = self.df_log.sort_values(by='Datetime', ascending = True)
+                account.update(self,dt)
+                traits.update(self,add.values.tolist()[0])
+                
                 self.df_log.to_feather(r"C:\Screener\tmp\pnl\log.feather")
                 
         if self.event == "Delete":
             if self.index != None:
+                bar = self.df_log.iloc[self.index].to_list()
                 self.df_log = self.df_log.drop(self.index).reset_index(drop = True)
-            #print(self.df_log)
+                self.df_log = self.df_log.sort_values(by='Datetime', ascending = True)
+                account.update(self,bar[1])
+                traits.update(self,bar)
+                
+
+           
         elif self.event == "Clear":
             self.index = None
             self.window["input-ticker"].update("")
@@ -88,5 +101,5 @@ class Log:
         self.df_log.to_feather(r"C:\Screener\tmp\pnl\log.feather")
         table = self.df_log.values.tolist()
 
-        #print(table)
+       
         self.window["-table-"].update(table)

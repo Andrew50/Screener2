@@ -122,7 +122,8 @@ class Data:
         if tf == 'd' or tf == 'w' or tf == 'm':
             df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
         else:
-            if current:
+            if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+
                 tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
                 screener_data = feather.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
                 screener_data.set_index('Ticker', inplace = True)
@@ -172,7 +173,7 @@ class Data:
                         'close' : 'last',
                         'volume': 'sum' }
             df = df.resample(tf).apply(logic)
-        if current and (tf == 'd' or tf == 'w' or tf == 'm'):
+        if current and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
             pmchange =  screenbar['Pre-market Change']
