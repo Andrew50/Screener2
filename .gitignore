@@ -23,3 +23,6 @@ data_test/
 /hwtest.py
 minute - Copy/
 __pycache__/
+/daily_data
+/intraday_data
+/minute_data

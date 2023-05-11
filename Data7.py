@@ -53,6 +53,8 @@ class Data:
 
 
     def isToday(dt):
+        if dt == 'now':
+            return True
         if dt == None:
             return False
         if dt == 'Today' or dt == '0' or dt == 0:
@@ -66,15 +68,14 @@ class Data:
         return False
 
 
-
-    
-
-    def findex(df,dt):
+    def findex(df,dt,order = 1):
+     
         try:
             
-            if Data.isToday(dt):
-                return len(df) - 1
+          #  if Data.isToday(dt):
+          #      return len(df) - 1
             dt = Data.convert_date(dt)
+            print(dt)
             i = int(len(df)/2)
             k = i
            
@@ -82,24 +83,28 @@ class Data:
                 k = int(k/2)
                 date = df.index[i].to_pydatetime()
                 if date > dt:
-                    i -= k
+                    i -= k*order
                 elif date < dt:
-                    i += k
+                    i += k*order
                 if k == 0:
                     break
                 
+
+             
+                
             while True:
                 if df.index[i].to_pydatetime() < dt:
-                    i += 1
+       
+                    i += 1*order
                 else:
                     break
             while True:
                 if df.index[i].to_pydatetime() > dt:
-                    i -= 1
+                    i -= 1*order
                 else:
                     break
             return i
-        except IndexError:
+        except TimeoutError:
             if i == len(df):
                 return i
             
@@ -110,7 +115,8 @@ class Data:
 
     def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False):    
         path = Data.path
-
+        if account:
+            date = 'now'
 
         current = Data.isToday(date)
 
@@ -125,11 +131,12 @@ class Data:
             if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
                 tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-                screener_data = feather.read_feather(r"C:\Screener\sync\screener_data_intraday.feather")
+                
+                screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
                 screener_data.set_index('Ticker', inplace = True)
-                #print(screener_data)
+            
                 exchange = str(screener_data.loc[ticker]['Exchange'])
-                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
+                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
                 df.drop('symbol', axis = 1, inplace = True)
                 df.index = df.index + pd.Timedelta(hours=4)
 
@@ -165,15 +172,20 @@ class Data:
                         df = pd.concat([df,new])
 
                 else:
-                    #fetch fiole
-                    dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+                    #fetch file
+                    dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                    dff = dff.between_time('09:30' , '15:59')
                     lastday = dff.index[-1]
+                   
                     scrapped_data_index = Data.findex(df,lastday) 
-                    if not scrapped_data_index == None:
+                    if scrapped_data_index == None:
+                        
                         pass
                         
                     else:
+                       
                         df = df[scrapped_data_index + 1:]
+                      
                         df = pd.concat([dff,df])
 
             else:

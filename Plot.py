@@ -18,21 +18,21 @@ import statistics
 
 class Plot:
     def plot(self):
+        
         if self.event == 'Load':
             scan = pd.read_feather(r"C:\Screener\sync\traits.feather")
-
+            dt = self.values['input-datetime']
 
             ticker = self.values['input-ticker']
-            dt = self.values['input-datetime']
+            
             setup = self.values['input-setup']
             sort = self.values['input-sort']
-
+            print(dt)
 
             if ticker  != "":
                 scan = scan[scan['Ticker'] == ticker]
             
-            if dt  != "":
-                scan = scan[scan["Datetime"] == dt]
+            
 
             if setup  != "":
                 scan = scan[scan['Setup'] == setup]
@@ -53,41 +53,46 @@ class Plot:
             if os.path.exists("C:/Screener/tmp/pnl/charts"):
                 shutil.rmtree("C:/Screener/tmp/pnl/charts")
             os.mkdir("C:/Screener/tmp/pnl/charts")
-            self.i = 0
-        
+            
+            if dt != "":
+
+                self.i = data.findex(self.df_traits.set_index('datetime',drop = True),dt,-1)
+            else:
+                self.i = 0
+            print(self.df_traits)
         if self.event == 'Next' :
             if self.i == len(self.df_traits) - 1:
-                return
-            self.i += 1
+                self.i = 0
+            else:
+                self.i += 1
         if self.event == 'Prev':
+  
             if self.i == 0:
-                return
-            self.i -= 1
+                self.i = len(self.df_traits) - 1
+            else:
+                self.i -= 1
 
         
-            i = list(range(len(self.df_traits)))
+            #i = list(range(len(self.df_traits)))
             #i = list(range(self.preloadamoun))
             
 
 
-        if self.i == 0:
-            if len(self.df_traits) < self.preloadamount:
-                i = list(range(len(self.df_traits)))
-            else:
-                i = list(range(self.preloadamount))
-
+        print(f'iiiiii{self.i}')
+        i = list(range(self.i,self.preloadamount+self.i))
+        if self.i < 5:
+            i += list(range(len(self.df_traits) - 1,len(self.df_traits) - self.preloadamount - 1,-1))
         else:
-            if self.i + self.preloadamount < len(self.df_traits):
-                i = []
-            else:
-                i = [self.i + self.preloadamount - 1]
-               
-        pool = self.pool
+            i += list(range(self.i,self.i - self.preloadamount,-1))
+                
+
+        
   
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
-        pool.map(Plot.create,arglist)
+        pool = self.pool
+        pool.map_async(Plot.create,arglist)
 
         image1 = None
         image2 = None
@@ -140,18 +145,23 @@ class Plot:
 
         
     def create(bar):
-
-        tflist = ['1min','h','d']
-
         i = bar[0]
-        
-        mc = mpf.make_marketcolors(up='g',down='r')
-        s  = mpf.make_mpf_style(marketcolors=mc)
 
-        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-            fw = 24
-            fh = 13
-            fs = 1.95
+        if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+
+        
+
+            tflist = ['1min','h','d']
+
+            i = bar[0]
+            print(i)
+            mc = mpf.make_marketcolors(up='g',down='r')
+            s  = mpf.make_mpf_style(marketcolors=mc)
+
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                fw = 24
+                fh = 13
+                fs = 1.95
 
         else:
             fw = 15
@@ -159,13 +169,13 @@ class Plot:
             fs = .85
         df = bar[1]
         
-        ticker = df.iat[i,0]
+            ticker = df.iat[i,0]
         
 
 
-        for tf in tflist:
-            string1 = str(i) + str(tf) + ".png"
-            p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
+            for tf in tflist:
+                string1 = str(i) + str(tf) + ".png"
+                p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
 
         
             try:
@@ -199,12 +209,12 @@ class Plot:
                     datelist.append(date)
               
                 
-                df1 = data.get(ticker,tf)
-                startdate = df.iat[i,3][0][1]
-                enddate = df.iat[i,3][-1][1]
-                l1 = data.findex(df1,startdate) - 50
-                r1 = data.findex(df1,enddate) + 50
-                df1 = df1[l1:r1]
+                    df1 = data.get(ticker,tf)
+                    startdate = df.iat[i,3][0][1]
+                    enddate = df.iat[i,3][-1][1]
+                    l1 = data.findex(df1,startdate) - 50
+                    r1 = data.findex(df1,enddate) + 50
+                    df1 = df1[l1:r1]
 
 
                 tradeDf = pd.concat(trades).reset_index(drop = True)
@@ -279,9 +289,9 @@ class Plot:
 
 
 
-                ax.set_yscale('log')
-                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                    ax.set_yscale('log')
+                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
-                plt.savefig(p1, bbox_inches='tight')
-            except TimeoutError:
-                shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                    plt.savefig(p1, bbox_inches='tight')
+                except:
+                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
