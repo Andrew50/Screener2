@@ -18,54 +18,71 @@ import statistics
 from tqdm import tqdm
 
 class Account:
+    
 
-    def update(self,date):
+
+    def calcaccount(df_pnl,df_log,startdate = None,tf = None,bars = None):
 
 
-        del_index = data.findex(self.df_pnl,date) 
-        df2 = self.df_pnl[:del_index]
-        df = Account.calcaccount(self,date)
-      
-        self.df_pnl = pd.concat([df2.reset_index(),df]).sort_values(by='datetime')
+
+
+
+        account = False
+        if startdate == 'now':
+            account = True
+
+
+        df_aapl = data.get('AAPL','1min',account = account)
+        print(f"{startdate} , {df_aapl.index[-1]}")
+        if startdate != 'now' and startdate > df_aapl.index[-1]:
+            return df_pnl
         
-        #df.to_feather(r"C:\Screener\tmp\pnl\pnl.feather")
-        self.df_pnl = self.df_pnl.set_index('datetime',drop = True)
-       
-
-
-
-
-
-    def calcaccount(self,date = None):
-        df_aapl = data.get('AAPL','1min')
+        if startdate != None:
+            if startdate == 'now':
+                startdate = df_pnl.index[-1]
+                index = -1
+            else:
+                del_index = data.findex(df_pnl,startdate) 
+                df_pnl = df_pnl[:del_index]
+                index = data.findex(df_pnl,startdate)
+      
+        
+        
 
         #initial conditions
-        if date != None:
+       
             
-            index = data.findex(self.df_pnl,date)
+            
             #index = 0
-            
-            bar = self.df_pnl.iloc[index]
+            print(index)
+            if index == None or index >= len(df_pnl):
+                index = -1
+            bar = df_pnl.iloc[index]
 
             pnl = bar['close']
             deposits = bar['deposits']
             positions = bar['positions'].split(',')
             shares = bar['shares'].split(',')
             pos = []
+         
             for i in range(len(shares)):
+               
                 ticker = positions[i]
-                share = float(shares[i])
-                df = data.get(ticker,'1min')
-                pos.append([ticker,share,df])
+                if ticker != '':
+                    share = float(shares[i])
+                    df = data.get(ticker,'1min',account = account)
+                    pos.append([ticker,share,df])
 
-
-            log_index = data.findex(self.df_log.set_index('Datetime'),date) 
-            nex = self.df_log.iloc[log_index]['Datetime']
+            try:
+                log_index = data.findex(df_log.set_index('Datetime'),startdate) 
+                nex = df_log.iloc[log_index]['Datetime']
+            except:
+                nex = datetime.datetime.now()
           
             
 
         else:
-            date = self.df_log.iat[0,1]
+            date = df_log.iat[0,1]
             
             pnl = 0
             deposits = 0
@@ -74,12 +91,12 @@ class Account:
             log_index = 0
             nex = date
  
-        start_index = data.findex(df_aapl,date)
+        start_index = data.findex(df_aapl,startdate)
         date_list = df_aapl[start_index:].index.to_list()
   
         df_list = []
         pbar = tqdm(total=len(date_list))
-
+        
         for date in date_list:
 
             pnlvol = 0
@@ -88,9 +105,9 @@ class Account:
             while date > nex:
                 remove = False
                 skip = False
-                ticker = self.df_log.iat[log_index,0]
-                shares = self.df_log.iat[log_index,2]
-                price = self.df_log.iat[log_index,3]
+                ticker = df_log.iat[log_index,0]
+                shares = df_log.iat[log_index,2]
+                price = df_log.iat[log_index,3]
 
                 if ticker == 'Deposit':
                     deposits += price
@@ -110,7 +127,7 @@ class Account:
 
                     if pos_index == None:
                         try:
-                            df = data.get(ticker,'1min')
+                            df = data.get(ticker,'1min',account = account)
                             pos_index = len(pos)
                             data.findex(df,date) + 1
                             pos.append([ticker,shares,df])
@@ -132,7 +149,7 @@ class Account:
 
                 log_index += 1
                 try:
-                    nex = self.df_log.iat[log_index,1]
+                    nex = df_log.iat[log_index,1]
                 except: 
                     nex = datetime.datetime.now()
 
@@ -179,63 +196,91 @@ class Account:
                 })
 
 
-            #self.df_pnl = pd.concat([self.df_pnl,add])
+            #df_pnl = pd.concat([df_pnl,add])
             df_list.append(add)
             pbar.update(1)
 
 
         
-        df = pd.concat(df_list).reset_index(drop = True)
+        df = pd.concat(df_list)
      
-        #self.df_pnl.set_index('Datetime',drop = True)
-        return df 
+        #df_pnl.set_index('Datetime',drop = True)
+        if date != None:
+            df = pd.concat([df_pnl.reset_index(),df]).sort_values(by='datetime')
+        
+        df = df.reset_index(drop = True).set_index('datetime',drop = True)
+       
+        if tf == None:
+            return df 
+        else:
+            return [df,tf,bars]
         
 
     def account(self,date = None):
 
         if self.event == "Load":
             tf = self.values['input-timeframe']
-            date = self.values['input-datetime']
+            bars = self.values['input-bars']
 
         else:
-            date = None
+            bars = 200
             tf = 'd'
 
         if self.df_pnl.empty or self.event == "Recalc":
-            df = Account.calcaccount(self)
+            df = Account.calcaccount(self.df_pnl,self.df_log)
             df.to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_pnl = df.set_index('datetime',drop = True)
 
-      
+        
         df = self.df_pnl
-        if tf == '':
-            tf = 'd'
-        if tf != "1min":
-            logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
-            df = df.resample(tf).apply(logic).dropna()
+        bar = [df,tf,bars]
+        Account.account_plot(bar)
+        Account.plot_update(self)
+        
 
-        mc = mpf.make_marketcolors(up='g',down='r')
-        s  = mpf.make_mpf_style(marketcolors=mc)
-        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-            fw = 30
-            fh = 13.8
-            fs = 3.4
-        else:
-            fw = 30
-            fh = 18
-            fs = 1.8
-        string1 = "pnl.png"
-        p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
 
-        fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
 
-        plt.savefig(p1, bbox_inches='tight')
+
+    def account_plot(bar):
+        try:
+            df = bar[0]
+            tf = bar[1]
+            bars = int(bar[2])
+
+            if tf == '':
+                tf = 'd'
+            if tf != "1min":
+                logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
+                df = df.resample(tf).apply(logic).dropna()
+            df = df[-bars:]
+            mc = mpf.make_marketcolors(up='g',down='r')
+            s  = mpf.make_mpf_style(marketcolors=mc)
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                fw = 30
+                fh = 13.8
+                fs = 3.4
+            else:
+                fw = 30
+                fh = 18
+                fs = 1.8
+            string1 = "pnl.png"
+            p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
+
+            fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
+
+            plt.savefig(p1, bbox_inches='tight')
+
+        except Exception as e: print(e)
         #plt.show()
         
+        
+        
+        
+    def plot_update(self):
         bio1 = io.BytesIO()
         image1 = Image.open(r"C:\Screener\tmp\pnl\pnl.png")
         image1.save(bio1, format="PNG")
-        self.window["-CHART-"].update(data=bio1.getvalue())
+        self.window["-CHART-"].update(bio1.getvalue())
 
 
 

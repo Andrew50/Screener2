@@ -9,9 +9,8 @@ import datetime
 
 
 
-df = data.get('BFRG','1min',datetime.datetime.now(),account = True)\
-
-print(df)
+df = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime', drop = True)
+print(df.index[-1])
 
 
 '''

@@ -40,8 +40,8 @@ class PNL():
             except:
                 self.df_log = pd.DataFrame()
             try:
-                self.df_traits = pd.read_feather(r"C:\Screener\sync\traits.feather").sort_values(by='Datetime',ascending = False)
-            except:
+                self.df_traits = pd.read_feather(r"C:\Screener\sync\traits.feather").sort_values(by='datetime',ascending = False)
+            except FileNotFoundError:
                 self.df_traits = pd.DataFrame()
             try:
                 self.df_pnl = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime', drop = True)
@@ -85,7 +85,8 @@ class PNL():
             layout =[
             [sg.Image(key = '-CHART-')],
             [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
-            [(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
+            #[(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
+            [(sg.Text("Bars  ")),sg.InputText(key = 'input-bars')],
             [sg.Button('Recalc'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleaccount,finalize = True)
@@ -140,14 +141,16 @@ class PNL():
             self.event = [None]
             self.index = None
             self.update(self)
+            lap = datetime.datetime.now()
             while True:
-                self.event, self.values = self.window.read()
+                
+                self.event, self.values = self.window.read(timeout=50000)
+               
                 if self.event == "Traits" or self.event == "Plot" or self.event == "Account" or self.event == "Log":
                     self.menu = self.event
                     self.update(self)
-                elif self.event != "":
+                elif self.event != '__TIMEOUT__':
                     
-                    #print(self.menu)
                     if self.menu == "Traits":
 
                         traits.traits(self)
@@ -157,6 +160,22 @@ class PNL():
                         account.account(self)
                     elif self.menu == "Log":
                         log.log(self)
+
+                else:
+                  
+                    if self.menu == "Account":
+                     
+                        account.plot_update(self)
+                        pool = self.pool
+                        tf = self.values['input-timeframe']
+                        bars = self.values['input-bars']
+                        if tf == '':
+                            tf = 'd'
+                        if bars == '':
+                            bars = '300'
+                        pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars), callback = account.account_plot)
+                       
+                        
 if __name__ == "__main__":
     PNL.loop(PNL)
 

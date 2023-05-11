@@ -32,7 +32,7 @@ class Traits:
             df = self.df_traits
             df['index'] = df.index
            
-            df =df.set_index('Datetime',drop = True)
+            df =df.set_index('datetime',drop = True)
             df = df[df['Ticker'] == ticker]
 
 
@@ -95,9 +95,9 @@ class Traits:
                             bar = pos[i]
                             add = pd.DataFrame({
             
-                            'Ticker': [bar[0]],
-                            'Datetime':[bar[1]],
-                            'Trades': [bar[3]]
+                            'ticker': [bar[0]],
+                            'datetime':[bar[1]],
+                            'trades': [bar[3]]
                             
                             })
 
@@ -121,9 +121,9 @@ class Traits:
             bar = pos[i]
             add = pd.DataFrame({
             
-            'Ticker': [bar[0]],
-            'Datetime':[bar[1]],
-            'Trades': [bar[3]]
+            'ticker': [bar[0]],
+            'datetime':[bar[1]],
+            'trades': [bar[3]]
             })
 
             df_traits = pd.concat([df_traits,add])
@@ -133,7 +133,7 @@ class Traits:
             del pos[i]
             break
 
-        df_traits = df_traits.sort_values(by='Datetime', ascending = False).reset_index(drop = True)
+        df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
             
 
         #traits///////////////////////////////////////////////////////////////////////////////////////
@@ -180,9 +180,10 @@ class Traits:
             for i in range(len(trades)):
                 pnl -= float(trades[i][2]) * float(trades[i][3])
             #print(type(date))
-            
-            account_val = self.df_pnl.iloc[data.findex(self.df_pnl,date)]['account']
-
+            try:
+                account_val = self.df_pnl.iloc[data.findex(self.df_pnl,date)]['account']
+            except:
+                account_val = self.df_pnl.iloc[-1]['account']
             pnl_pcnt = ((pnl / size) ) *100
             #print(f'{pnl} , {size} , {pnl_pcnt}')
             pnl_account = (pnl/ account_val ) * 100
@@ -243,10 +244,10 @@ class Traits:
             #final concat
                 
             add = pd.DataFrame({
-                'Ticker': [ticker],
-            'Datetime':[date],
-            'Setup':[setup],
-            'Trades': [trades],
+                'ticker': [ticker],
+            'datetime':[date],
+            'setup':[setup],
+            'trades': [trades],
             'pnl':[pnl],
             'percent':[pnl_pcnt],
             'account':[pnl_account],
@@ -270,7 +271,7 @@ class Traits:
         df = df.reset_index(drop = True)
         #df.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
         
-        return df.sort_values(by='Datetime',ascending = False)
+        return df.sort_values(by='datetime',ascending = False)
 
 
 
