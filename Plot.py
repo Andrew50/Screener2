@@ -163,11 +163,11 @@ class Plot:
                 fh = 13
                 fs = 1.95
 
-        else:
-            fw = 15
-            fh = 6
-            fs = .85
-        df = bar[1]
+            else:
+                fw = 15
+                fh = 6
+                fs = .85
+            df = bar[1]
         
             ticker = df.iat[i,0]
         
@@ -289,9 +289,9 @@ class Plot:
 
 
 
-                    ax.set_yscale('log')
-                    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+                ax.set_yscale('log')
+                ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
-                    plt.savefig(p1, bbox_inches='tight')
-                except:
-                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                plt.savefig(p1, bbox_inches='tight')
+            except:
+                shutil.copy(r"C:\Screener\tmp\blank.png",p1)

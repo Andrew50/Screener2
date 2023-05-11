@@ -28,6 +28,9 @@ class Detection:
 		try:
 			dff = data.get(ticker,tf,date)
 			
+		except TimeoutError:
+			pass
+		
 		except FileNotFoundError:
 			
 			return
@@ -38,7 +41,7 @@ class Detection:
 			return
 		
 		if len(dff) > 20:
-			
+		
 			for date in date_list:
 				try:
 				
@@ -96,6 +99,8 @@ class Detection:
 						if tf == 'h':
 						
 							pass
+				except TimeoutError:
+					pass
 			
 				except IndexError:
 					pass
@@ -103,6 +108,7 @@ class Detection:
 					pass
 				except ValueError:
 					pass
+				
 		#except Exception as e: print(e)
   
 	def requirements(df,currentday):

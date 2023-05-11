@@ -175,6 +175,7 @@ class PNL():
                         pool = self.pool
                         tf = self.values['input-timeframe']
                         bars = self.values['input-bars']
+                        print('refresh')
                         if tf == '':
                             tf = 'd'
                         if bars == '':
