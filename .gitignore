@@ -24,3 +24,5 @@ data_test/
 minute - Copy/
 __pycache__/
 /daily_data
+/intraday_data
+/minute_data
