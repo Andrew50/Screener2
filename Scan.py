@@ -59,16 +59,16 @@ class Scan:
                     
                     Scan.runDailyScan(None)
                 
-                return pd.read_feather(r"C:\Screener\tmp\screener_data.feather").set_index('Ticker')
+                return pd.read_feather(r"C:\Screener\sync\screener_data.feather").set_index('Ticker')
 
             else:
                 if not  refresh:
-                    return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                    return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
                 while True:
                     try:
                     
                         browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather").set_index('Ticker')
+                        return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
                         
                     except:
                         
@@ -77,7 +77,7 @@ class Scan:
         else:
             
             Scan.updateList()
-            return pd.read_feather(r"C:\Screener\tmp\full_ticker_list.feather").set_index('Ticker')#.dropna()
+            return pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather").set_index('Ticker')#.dropna()
 
     
     def runDailyScan(brows):
@@ -103,7 +103,7 @@ class Scan:
         os.rename(downloaded_file, new_name)
         os.replace(r"C:\Downloads\screener_data.csv", r"C:\Screener\tmp\screener_data.csv")
         tv = TvDatafeed(username="password",password="password")
-        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
+        screener_data = pd.read_csv(r"C:\Screener\sync\screener_data.csv")
         time.sleep(0.1)
 
         numTickers = len(screener_data)
@@ -115,7 +115,7 @@ class Scan:
             if screener_data.iloc[i]['Pre-market Change'] is None:
                     screener_data.at[i, 'Pre-market Change'] = 0
 
-        screener_data.to_feather(r"C:\Screener\tmp\screener_data.feather")
+        screener_data.to_feather(r"C:\Screener\sync\screener_data.feather")
     
     def runIntradayScan(brows):
         browser = brows
@@ -161,7 +161,7 @@ class Scan:
                 df.at[i, 'Exchange'] = "AMEX"
             if df.iloc[i]['Pre-market Change'] is None:
                     df.at[i, 'Pre-market Change'] = 0
-        df.to_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+        df.to_feather(r"C:\Screener\sync\screener_data_intraday.feather")
         time.sleep(0.1)
 
         return browser
@@ -291,9 +291,9 @@ class Scan:
             path = "F:/Screener"
         else: 
             path = "C:/Screener"
-        df1 = pd.read_feather("C:/Screener/tmp/screener_data.feather")
+        df1 = pd.read_feather("C:/Screener/sync/screener_data.feather")
       
-        df2 = pd.read_feather("C:/Screener/tmp/full_ticker_list.feather")
+        df2 = pd.read_feather("C:/Screener/sync/full_ticker_list.feather")
        
         df3 = pd.concat([df1,df2]).drop_duplicates(subset = ['Ticker'])
        
@@ -326,11 +326,11 @@ class Scan:
         except:
             pass
         
-        df3.to_feather("C:/Screener/tmp/full_ticker_list.feather")
+        df3.to_feather("C:/Screener/sync/full_ticker_list.feather")
 
 if __name__ == '__main__':
 
-    Scan.updateList(True)
+    Scan.get(datetime.datetime.now(),'d',True)
 
     
 

@@ -15,24 +15,11 @@ Test.py
 Testt.py
 /TT_data.csv
 /TEST_data.csv
-intraday_data/
-minute_data/
-daily_data/
-daily_data_actual/
-minute_data_actual/
-
-daily_data_tester/
-minute_data_tester/
-data test subjects/
-test/
-data backup/
+laptop.txt
 minute/
-daily/
-data_test/
-Screener.bat
-Screener.lnk
-/hwtest.py
+daily/  
 UI.bat
-UI.lnk
+data_test/
+/hwtest.py
 minute - Copy/
-/__pycache__/Account.cpython-311.pyc
+__pycache__/

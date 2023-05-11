@@ -53,6 +53,8 @@ class Data:
 
 
     def isToday(dt):
+        if dt == 'now':
+            return True
         if dt == None:
             return False
         if dt == 'Today' or dt == '0' or dt == 0:
@@ -66,15 +68,14 @@ class Data:
         return False
 
 
-
-    
-
-    def findex(df,dt):
+    def findex(df,dt,order = 1):
+     
         try:
             
-            if Data.isToday(dt):
-                return len(df) - 1
+          #  if Data.isToday(dt):
+          #      return len(df) - 1
             dt = Data.convert_date(dt)
+            print(dt)
             i = int(len(df)/2)
             k = i
            
@@ -82,24 +83,28 @@ class Data:
                 k = int(k/2)
                 date = df.index[i].to_pydatetime()
                 if date > dt:
-                    i -= k
+                    i -= k*order
                 elif date < dt:
-                    i += k
+                    i += k*order
                 if k == 0:
                     break
                 
+
+             
+                
             while True:
                 if df.index[i].to_pydatetime() < dt:
-                    i += 1
+       
+                    i += 1*order
                 else:
                     break
             while True:
                 if df.index[i].to_pydatetime() > dt:
-                    i -= 1
+                    i -= 1*order
                 else:
                     break
             return i
-        except IndexError:
+        except TimeoutError:
             if i == len(df):
                 return i
             
@@ -108,9 +113,10 @@ class Data:
 
 
 
-    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False):    
+    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False):    
         path = Data.path
-
+        if account:
+            date = 'now'
 
         current = Data.isToday(date)
 
@@ -122,42 +128,66 @@ class Data:
         if tf == 'd' or tf == 'w' or tf == 'm':
             df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
         else:
-            if current:
+            if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+
                 tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-                screener_data = feather.read_feather(r"C:\Screener\tmp\screener_data_intraday.feather")
+                
+                screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
                 screener_data.set_index('Ticker', inplace = True)
+            
                 exchange = str(screener_data.loc[ticker]['Exchange'])
-                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=1000, extended_session = premarket)
+                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
                 df.drop('symbol', axis = 1, inplace = True)
                 df.index = df.index + pd.Timedelta(hours=4)
-                seconds = datetime.datetime.now().second
-                bar = df.iloc[-1]
-                df.drop(df.tail(1).index,inplace = True)
-                if seconds > 30:
-                    mult = pow((60 / seconds),.6)
-                    openn = bar['open']
-                    high = bar['high']
-                    low = bar['low']
-                    close = bar['close']
-                    vol = bar['volume']
-                    new_open = openn
-                    new_close = close + (close - openn) * mult 
-                    new_vol = vol*mult 
-                    new_high = high
-                    new_low = low
-                    if new_close > high:
-                        new_high = new_close
-                    if new_close < low:
-                        new_low = new_close
 
-                    now = datetime.datetime.now()
-                    new = pd.DataFrame({'datetime':[now],
-                                        'open':[new_open],
-                                        'high':[new_high],
-                                        'low':[new_low],
-                                        'close':[new_close],
-                                        'volume':[new_vol]}).set_index("datetime")
-                    df = pd.concat([df,new])
+                if not account:
+
+                    seconds = datetime.datetime.now().second
+                    bar = df.iloc[-1]
+                    df.drop(df.tail(1).index,inplace = True)
+                    if seconds > 30:
+                        mult = pow((60 / seconds),.6)
+                        openn = bar['open']
+                        high = bar['high']
+                        low = bar['low']
+                        close = bar['close']
+                        vol = bar['volume']
+                        new_open = openn
+                        new_close = close + (close - openn) * mult 
+                        new_vol = vol*mult 
+                        new_high = high
+                        new_low = low
+                        if new_close > high:
+                            new_high = new_close
+                        if new_close < low:
+                            new_low = new_close
+
+                        now = datetime.datetime.now()
+                        new = pd.DataFrame({'datetime':[now],
+                                            'open':[new_open],
+                                            'high':[new_high],
+                                            'low':[new_low],
+                                            'close':[new_close],
+                                            'volume':[new_vol]}).set_index("datetime")
+                        df = pd.concat([df,new])
+
+                else:
+                    #fetch file
+                    dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                    dff = dff.between_time('09:30' , '15:59')
+                    lastday = dff.index[-1]
+                   
+                    scrapped_data_index = Data.findex(df,lastday) 
+                    if scrapped_data_index == None:
+                        
+                        pass
+                        
+                    else:
+                       
+                        df = df[scrapped_data_index + 1:]
+                      
+                        df = pd.concat([dff,df])
+
             else:
                 df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                 if not premarket:
@@ -172,7 +202,7 @@ class Data:
                         'close' : 'last',
                         'volume': 'sum' }
             df = df.resample(tf).apply(logic)
-        if current and (tf == 'd' or tf == 'w' or tf == 'm'):
+        if current and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
             pmchange =  screenbar['Pre-market Change']
@@ -207,6 +237,8 @@ class Data:
             lastDStock = bar[1]
             tf = bar[2]
 
+            if ticker == None or "/" in ticker  or '.' in ticker:
+                return
 
             exists = True
             try:
@@ -214,10 +246,7 @@ class Data:
                 lastDay = cs.index[-1]
                 if (lastDay == lastDStock):
                     return
-            except FileNotFoundError:
-                exists = False
-            except IndexError:
-                exists = False
+            
             except:
                 exists = False
             if tf == 'daily':
@@ -240,12 +269,12 @@ class Data:
             ydf = ydf.drop(axis=1, labels="Adj Close")
             ydf.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'}, inplace = True)
             if Data.isMarketOpen() == 1 :
-                ydf.drop(ydf.tail(1),inplace=True)
+                ydf.drop(ydf.tail(1).index,inplace=True)
             ydf.dropna(inplace = True)
   
             if not exists:
                 df = ydf
-                print(f'created {ticker}')
+                print(f'created {ticker} {tf}')
             else:
  
                 scrapped_data_index = Data.findex(ydf, lastDay) 
@@ -260,7 +289,7 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except TimeoutError:
+        except FileNotFoundError:
             pass
     
     def runUpdate():
