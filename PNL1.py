@@ -109,12 +109,15 @@ class PNL():
             traits.traits(self)
         if self.menu == "Plot":
             toprow = ['Date             ','Shares   ','Price  ', 'Percent  ',' Timedelta   ','% size']
+            toprow2 = ['Actual  ','Fsell  ','Fbuy  ', '10h    ','20h    ','50h    ','5d    ','10d    ']
             c2 = [  
              [sg.Image(key = '-IMAGE3-')],
              [sg.Image(key = '-IMAGE1-')]]
             c1 = [
              [sg.Image(key = '-IMAGE2-')],
              [(sg.Text((str(f"{self.i + 1} of {len(self.df_traits)}")), key = '-number-'))], 
+             [sg.Table([],headings=toprow2,num_rows = 2, key = '-table2-',auto_size_columns=True,justification='left', 
+                       expand_y = False)],
               [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left', 
                        expand_y = False)],
             [(sg.Text("Ticker  ")),sg.InputText(key = 'input-ticker')],
@@ -152,7 +155,7 @@ class PNL():
             lap = datetime.datetime.now()
             while True:
                 
-                self.event, self.values = self.window.read(timeout=5000)
+                self.event, self.values = self.window.read(timeout=15000)
                
                 if self.event == "Traits" or self.event == "Plot" or self.event == "Account" or self.event == "Log":
                     self.menu = self.event

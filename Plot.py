@@ -145,15 +145,20 @@ class Plot:
             table.append([date,shares,price,percent,timedelta,size])
 
         #tabel2
-
-
+        table2 = [[],[]]
+        print(self.df_traits.iloc[self.i])
+        for i in range(6,14):
+            table2[0].append(round(self.df_traits.iat[self.i,i],2))
+        for i in range(14,22):
+            table2[1].append(round(self.df_traits.iat[self.i,i],2))
+        '''
         pnl = 0
         for i in range(len(bar)):
             price = float(bar[k][3])
             shares = float(bar[k][2])
             dollars = price*shares
             pnl -= dollars
-
+        '''
 
 
 
