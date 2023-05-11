@@ -76,7 +76,7 @@ class Data:
             if Data.isToday(dt):
                 return len(df) - 1
             dt = Data.convert_date(dt)
-            print(dt)
+        
             i = int(len(df)/2)
             k = i
            

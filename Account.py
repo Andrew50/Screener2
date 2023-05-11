@@ -31,9 +31,9 @@ class Account:
         if startdate == 'now':
             account = True
 
-
         df_aapl = data.get('AAPL','1min',account = account)
-        print(f"{startdate} , {df_aapl.index[-1]}")
+        
+        #print(f"{startdate} , {df_aapl.index[-1]}")
         if startdate != 'now' and startdate > df_aapl.index[-1]:
             return df_pnl
         
@@ -54,7 +54,7 @@ class Account:
             
             
             #index = 0
-            print(index)
+            #print(index)
             if index == None or index >= len(df_pnl):
                 index = -1
             bar = df_pnl.iloc[index]
@@ -151,7 +151,7 @@ class Account:
                 try:
                     nex = df_log.iat[log_index,1]
                 except: 
-                    nex = datetime.datetime.now()
+                    nex = datetime.datetime.now() + datetime.timedelta(days=10)
 
 
             pnlh = pnl
@@ -209,7 +209,7 @@ class Account:
             df = pd.concat([df_pnl.reset_index(),df]).sort_values(by='datetime')
         
         df = df.reset_index(drop = True).set_index('datetime',drop = True)
-       
+        
         if tf == None:
             return df 
         else:
@@ -218,13 +218,21 @@ class Account:
 
     def account(self,date = None):
 
-        if self.event == "Load":
+
+
+            
+
+
+        if self.event == "Load" or self.event == "Recalc":
             tf = self.values['input-timeframe']
             bars = self.values['input-bars']
-
+            if tf == "":
+                tf = 'd'
+            if bars == "":
+                bars = 300
         else:
-            bars = 200
             tf = 'd'
+            bars = 300
 
         if self.df_pnl.empty or self.event == "Recalc":
             df = Account.calcaccount(self.df_pnl,self.df_log)
@@ -242,10 +250,15 @@ class Account:
 
 
     def account_plot(bar):
+
+
+        
         try:
             df = bar[0]
             tf = bar[1]
             bars = int(bar[2])
+
+            print(df)
 
             if tf == '':
                 tf = 'd'
@@ -269,7 +282,7 @@ class Account:
             fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
 
             plt.savefig(p1, bbox_inches='tight')
-
+            
         except Exception as e: print(e)
         #plt.show()
         

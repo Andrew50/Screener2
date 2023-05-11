@@ -51,18 +51,20 @@ class PNL():
             self.menu = "Log"
         else:
             self.window.close()
-        print(self.menu)
+        print(f'{self.menu} menu')
 
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+
+            scalelog = 6
+            scaleplot = 4
+            scaleaccount = 5
+            scaletraits = 4
+            
+        else:
             scalelog = 3
             scaleplot = 3
             scaleaccount = 3
             scaletraits = 3
-        else:
-            scalelog = 6
-            scaleplot = 2
-            scaleaccount = 5
-            scaletraits = 4
        
         if self.menu == "Log":
 
@@ -150,7 +152,7 @@ class PNL():
             lap = datetime.datetime.now()
             while True:
                 
-                self.event, self.values = self.window.read(timeout=50000)
+                self.event, self.values = self.window.read(timeout=5000)
                
                 if self.event == "Traits" or self.event == "Plot" or self.event == "Account" or self.event == "Log":
                     self.menu = self.event
