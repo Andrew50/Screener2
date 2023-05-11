@@ -92,7 +92,7 @@ class Plot:
         for index in i:
             arglist.append([index,self.df_traits])
         pool = self.pool
-        pool.map_async(Plot.create,arglist)
+        pool.map(Plot.create,arglist)
 
         image1 = None
         image2 = None
@@ -163,13 +163,13 @@ class Plot:
                 fh = 13
                 fs = 1.95
 
-        else:
-            fw = 15
-            fh = 6
-            fs = .85
-        df = bar[1]
+            else:
+                fw = 15
+                fh = 6
+                fs = .85
+                df = bar[1]
         
-            ticker = df.iat[i,0]
+                ticker = df.iat[i,0]
         
 
 
@@ -274,7 +274,6 @@ class Plot:
                     pass
                 else:  
                     apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=200,marker='v',color='r'))
-                    PRINT("ELRKTJ")
 
                 fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                        title=str(f'{ticker} , {tf}'), 
@@ -283,15 +282,12 @@ class Plot:
                                        tight_layout = True,vlines=dict(vlines=datelist, 
                                       colors = colorlist, alpha = .2,linewidths=1), addplot=apds)
                 ax = axlist[0]
-                #for k in range(len(df.iat[i,2])):
-                 #   ax.text()
-
-
-
-
+                for k in range(len(df.iat[i,2])):
+                    ax.text()
                     ax.set_yscale('log')
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except:
-                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+            except:
+                #shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                pass
