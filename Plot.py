@@ -87,7 +87,7 @@ class Plot:
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
-        pool.map_async(Plot.create,arglist)
+        pool.map(Plot.create,arglist)
 
         image1 = None
         image2 = None
@@ -154,7 +154,7 @@ class Plot:
             fs = 1.95
 
         else:
-            fw = 30
+            fw = 15
             fh = 6
             fs = .85
         df = bar[1]
@@ -171,6 +171,7 @@ class Plot:
             try:
                 datelist = []
                 colorlist = []
+                trades = []
                 for k in range(len(df.iat[i,3])):
                     date = datetime.datetime.strptime(df.iat[i,3][k][1], '%Y-%m-%d %H:%M:%S')
                     if tf == 'd':
@@ -179,10 +180,24 @@ class Plot:
                     val = float(df.iat[i,3][k][2])
                     if val > 0:
                         colorlist.append('g')
+                        add = pd.DataFrame({
+                                'Datetime':[df.iat[i,3][k][1]], 
+                                'Symbol':[df.iat[i,3][k][0]],
+                                'Action':"Buy",
+                                'Price':[float(df.iat[i,3][k][3])]
+                                })
+                        trades.append(add)
                     else:
                         colorlist.append('r')
+                        add = pd.DataFrame({
+                                'Datetime':[df.iat[i,3][k][1]], 
+                                'Symbol':[df.iat[i,3][k][0]],
+                                'Action':"Sell",
+                                'Price':[float(df.iat[i,3][k][3])]
+                                })
+                        trades.append(add)
                     datelist.append(date)
-            
+              
                 
                 df1 = data.get(ticker,tf)
                 startdate = df.iat[i,3][0][1]
@@ -192,15 +207,71 @@ class Plot:
                 df1 = df1[l1:r1]
 
 
+                tradeDf = pd.concat(trades).reset_index(drop = True)
+                tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
+                times = df1.index.to_list()
+                tradelist = []
+                for t in range(len(tradeDf)):
+                    tradeTime = tradeDf.iloc[t]['Datetime']
+                    for q in range(len(times)):
+                        
+                        if(q+1 != len(times)):
+                            if(times[q+1] > tradeTime):
+                                add = pd.DataFrame({
+                                    'Datetime':[times[q]],
+                                    'Symbol':[tradeDf.iloc[t]['Symbol']],
+                                    'Action':[tradeDf.iloc[t]['Action']],
+                                    'Price':[tradeDf.iloc[t]['Price']]
+                                    })
+                                tradelist.append(add)
+                                break
+                df2 = pd.concat(tradelist).reset_index(drop = True)
+                buy = df2[df2['Action'] == 'Buy']
+                buy['Datetime'] = pd.to_datetime(buy['Datetime'])
+                buy = buy.sort_values(by=['Datetime'])
+                sell = df2[df2['Action'] == 'Sell']
+                sell['Datetime'] = pd.to_datetime(sell['Datetime'])
+                sell = sell.sort_values(by=['Datetime'])
+                buy["TradeDate_count"] = buy.groupby("Datetime").cumcount() + 1
+                sell["TradeDate_count"] = sell.groupby("Datetime").cumcount() + 1
+                newbuys = (buy.pivot(index='Datetime', columns='TradeDate_count', values="Price")
+                        .rename(columns="price{}".format)
+                        .rename_axis(columns=None))
+                newsells = (sell.pivot(index='Datetime', columns='TradeDate_count', values="Price")
+                        .rename(columns="price{}".format)
+                        .rename_axis(columns=None))
+                timesdf = []
+                test = df1.index.to_list()
+                for _ in range(len(df1)):
+                     ad = pd.DataFrame({
+                            'Datetime':[test[_]]
+                            })
+                     timesdf.append(ad)
+                mainindidf = pd.concat(timesdf).reset_index(drop = True)
+                newbuys = newbuys.reset_index()
+                newsells = newsells.reset_index()
+                buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
+                sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
+                print(buyseries)
+                print(sellseries)
+                apds = [mpf.make_addplot(mainindidf)]
+                if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
+                    pass
+                else:  
+                    apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=200,marker='^',color='g'))
+                    print("WLEKRJELWK")
+                if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
+                    pass
+                else:  
+                    apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=200,marker='v',color='r'))
+                    PRINT("ELRKTJ")
 
-                #ap = mpf.make_addplot(0.99*df1['Low'],type='scatter',marker=mymarkers,markersize=45,color=color)
-            
                 fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                        title=str(f'{ticker} , {tf}'), 
                                        style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
                                        figscale=fs, panel_ratios = (5,1), mav=(10,20), 
                                        tight_layout = True,vlines=dict(vlines=datelist, 
-                                      colors = colorlist, alpha = .2,linewidths=1))
+                                      colors = colorlist, alpha = .2,linewidths=1), addplot=apds)
                 ax = axlist[0]
                 #for k in range(len(df.iat[i,2])):
                  #   ax.text()

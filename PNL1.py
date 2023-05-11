@@ -53,10 +53,16 @@ class PNL():
             self.window.close()
         print(self.menu)
 
-        scalelog = 6
-        scaleplot = 4.5
-        scaleaccount = 5
-        scaletraits = 4
+        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+            scalelog = 3
+            scaleplot = 3
+            scaleaccount = 3
+            scaletraits = 3
+        else:
+            scalelog = 6
+            scaleplot = 2
+            scaleaccount = 5
+            scaletraits = 4
        
         if self.menu == "Log":
 
