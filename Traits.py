@@ -258,12 +258,12 @@ class Traits:
 
                 for i  in range(len(trades)):
 
-                    sprice = trades[i][3]
-                    shares = trades[i][2]
+                    sprice = float(trades[i][3])
+                    shares = float(trades[i][2])
                     sdate = trades[i][0]
                     if shares > 0:
                         color = 'g'
-                        syumbol = '^'
+                        symbol = '^'
                     else:
                         color = 'r'
                         symbol = 'v'
@@ -280,7 +280,9 @@ class Traits:
                 try:
                     hourly = data.get(ticker,'h')
                     daily = data.get(ticker,'d')
-                    run = True
+                    startd = data.findex(daily,date)
+                    if startd != None:
+                        run = True
                 except FileNotFoundError:
                     pass
                 if run:
@@ -326,8 +328,8 @@ class Traits:
 
 
                     
-                    start = data.findex(daily,date)
-             
+                    start = startd 
+                    
                     prices = []
                     for i in range(10):
                         prices.append(daily.iat[i + start - 10,3])
@@ -352,44 +354,50 @@ class Traits:
                         prices.append(daily.iat[start+i,3])
 
                 
-                df_1min = data.get(ticker,'1min')
+                    df_1min = data.get(ticker,'1min')
 
-                open_date = daily.index[data.findex[daily,date]]
-
-
+                    open_date = daily.index[data.findex(daily,date)]
 
 
-                open_index = data.findex(df_1min,open_date)
 
 
-                or1 = df_1min.iat[open_index,0]
-                low = 1000000000
-                entered = False
-                i = open_index
-                stopped = False
-                stop = (maxloss/100 + 1) * openprice
-
-                #theoretical or1 entry and max amount down after trade
-                while True:
-                    clow = df_1min.iat[i,2]
-                    chigh = df_1min.iat[i,1]
-                    cdate = df_1min.index[i]
-                    if (cdate - open_date).days > 2:
-                        break
-                    if clow < low:
-                        low = clow
-                    if chigh > or1 and not entered:
-                        entered == True
-                        risk = (low/or1 - 1) * 100
-                        low = 1000000000000
-                    #independent from all this other shit above as this is caclulating if you get therotcically stopped 
-                    #based on your actuall entry
-                    if cdate > date and  clow < stop and not stopped:
-                        stopped = True
-                        arrow_list.append([str(cdate),str(stop),'b',symbol])
-                low = (low/or1 - 1)
+                    open_index = data.findex(df_1min,open_date)
 
 
+                    or1 = df_1min.iat[open_index,0]
+                    low = 1000000000
+                    entered = False
+                    i = open_index
+                    stopped = False
+                    stop = (maxloss/100 + 1) * openprice
+
+                    #theoretical or1 entry and max amount down after trade
+                
+                    while True:
+                        clow = df_1min.iat[i,2]
+                        chigh = df_1min.iat[i,1]
+                        cdate = df_1min.index[i]
+                        #print(f'{cdate} , {open_date}')
+                        if (cdate - open_date).days > 2:
+                            break
+                        if clow < low:
+                            low = clow
+                        if chigh > or1 and not entered:
+                            entered == True
+                            risk = (low/or1 - 1) * 100
+                            low = 1000000000000
+                        #independent from all this other shit above as this is caclulating if you get therotcically stopped 
+                        #based on your actuall entry
+                        if cdate > date and  clow < stop and not stopped:
+                            stopped = True
+                            arrow_list.append([str(cdate),str(stop),'b',symbol])
+                        i += 1
+                    low = (low/or1 - 1)
+
+
+                else:
+                    low = None
+                    risk = None
 
 
 
@@ -416,20 +424,13 @@ class Traits:
                 rfsell = fsell - pnl_pcnt
                 rfbuy = fbuy - pnl_pcnt
 
-
-                ivix = data.findex(df_vix,date)
-                vix = df_vix.iat[ivix,0]
+                try:
+                    ivix = data.findex(df_vix,date)
+                    vix = df_vix.iat[ivix,0]
+                except:
+                    vix = 0
 
                 
-
-
-                
-
-
-
-
-
-
 
 
 
