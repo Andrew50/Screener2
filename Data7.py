@@ -76,7 +76,7 @@ class Data:
             if Data.isToday(dt):
                 return len(df) - 1
             dt = Data.convert_date(dt)
-            print(dt)
+        
             i = int(len(df)/2)
             k = i
            
@@ -127,7 +127,8 @@ class Data:
             tf = '1min'
 
         if tf == 'd' or tf == 'w' or tf == 'm':
-            df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+            #df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+            df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
         else:
             if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
@@ -196,7 +197,7 @@ class Data:
 
 
 
-        if tf != 'd' and tf != '1min':
+        if tf != '1min':# and tf != 'd':
             logic = {'open'  : 'first',
                         'high'  : 'max',
                         'low'   : 'min',

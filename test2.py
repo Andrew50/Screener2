@@ -6,17 +6,19 @@ import Scan
 import yfinance as yf
 from Data7 import Data as data
 import datetime
+from Plot import Plot as plot
+
+df = pd.read_feather("C:/Screener/sync/traits.feather")
+bar = []
+bar = [199, df]
+plot.create(bar)
 
 
 
 
+#scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
 
-
-
-
-scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
-
-print(scan)
+#print(scan)
 
 
 '''
