@@ -289,14 +289,12 @@ class Plot:
                             .rename(columns="price{}".format)
                             .rename_axis(columns=None))
                     timesdf = []
-                    test = df1.index.to_list()
                     for _ in range(len(df1)):
                          ad = pd.DataFrame({
-                                'Datetime':[test[_]]
+                                'Datetime':[df1.index[_]]
                                 })
                          timesdf.append(ad)
-                    mainindidf = pd.concat(timesdf).reset_index(drop = True)
-                    mainindidf = mainindidf.set_index('Datetime', drop=True)
+                    mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
                     #for rr in range(len(buyseries)):
