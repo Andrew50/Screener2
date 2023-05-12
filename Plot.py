@@ -255,6 +255,7 @@ class Plot:
 
                     
                     tradeDf = pd.concat(trades).reset_index(drop = True)
+                    print("TRADEDF ====")
                     print(tradeDf)
                     tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
                     times = df1.index.to_list()
