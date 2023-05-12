@@ -302,21 +302,33 @@ class Plot:
                     #for rr in range(len(buyseries)):
                         #print(buyseries.iloc[rr])
                     
+                        
+
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=100,marker='^', color='g'))
+                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=300,alpha = .6,marker='^',edgecolors='black', color='g'))
                         #print("W")
                     if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=100,marker='v', color='r'))
+                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=300,alpha = .6,marker='v',edgecolors='black', color='r'))
                     
+
+
+                    if tf == 'h':
+                        mav = (10,20,50)
+                    elif tf == 'd':
+                        mav = (5,10)
+                    else:
+                        mav = ()
+
+
                     fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
-                                           figscale=fs, panel_ratios = (5,1), mav=(10,20), 
+                                           figscale=fs, panel_ratios = (5,1), mav=mav, 
                                            tight_layout = True,
                                         #   vlines=dict(vlines=datelist, 
                                           #colors = colorlist, alpha = .2,linewidths=1),
@@ -332,7 +344,7 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except TimeoutError:
+                except:
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
-                    print("lolol")
+                   
                     
