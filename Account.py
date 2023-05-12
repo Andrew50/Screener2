@@ -71,6 +71,7 @@ class Account:
                 if ticker != '':
                     share = float(shares[i])
                     df = data.get(ticker,'1min',account = account)
+                    print(df)
                     pos.append([ticker,share,df])
 
             try:
@@ -151,7 +152,7 @@ class Account:
                 try:
                     nex = df_log.iat[log_index,1]
                 except: 
-                    nex = datetime.datetime.now() + datetime.timedelta(days=10)
+                    nex = datetime.datetime.now() + datetime.timedelta(days=100)
 
 
             pnlh = pnl
@@ -218,10 +219,7 @@ class Account:
 
     def account(self,date = None):
 
-
-
-            
-
+        
 
         if self.event == "Load" or self.event == "Recalc":
             tf = self.values['input-timeframe']
@@ -235,7 +233,7 @@ class Account:
             bars = 300
 
         if self.df_pnl.empty or self.event == "Recalc":
-            df = Account.calcaccount(self.df_pnl,self.df_log)
+            df = Account.calcaccount(self.df_pnl,self.df_log,date)
             df.to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_pnl = df.set_index('datetime',drop = True)
 

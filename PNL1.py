@@ -56,7 +56,7 @@ class PNL():
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 
             scalelog = 6
-            scaleplot = 4
+            scaleplot = 4.5
             scaleaccount = 5
             scaletraits = 4
             
@@ -108,8 +108,8 @@ class PNL():
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaletraits,finalize = True)
             traits.traits(self)
         if self.menu == "Plot":
-            toprow = ['Date             ','Shares   ','Price  ', 'Percent  ',' Timedelta   ','% size']
-            toprow2 = ['Actual  ','Fsell  ','Fbuy  ', '10h    ','20h    ','50h    ','5d    ','10d    ']
+            toprow = ['Date             ','Shares   ','Price  ', 'Percent  ',' Timedelta   ','Size  ']
+            toprow2 = ['Actual  ','Fsell  ','Fbuy   ', '10h     ','20h     ','50h     ','5d     ','10d     ']
             c2 = [  
              [sg.Image(key = '-IMAGE3-')],
              [sg.Image(key = '-IMAGE1-')]]

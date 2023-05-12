@@ -27,7 +27,7 @@ class Plot:
             
             setup = self.values['input-setup']
             sort = self.values['input-sort']
-            print(dt)
+        
 
             if ticker  != "":
                 scan = scan[scan['Ticker'] == ticker]
@@ -59,7 +59,7 @@ class Plot:
                 self.i = data.findex(self.df_traits.set_index('datetime',drop = True),dt,-1)
             else:
                 self.i = 0
-            print(self.df_traits)
+         
         if self.event == 'Next' :
             if self.i == len(self.df_traits) - 1:
                 self.i = 0
@@ -130,10 +130,10 @@ class Plot:
             startdate = datetime.datetime.strptime(bar[0][1], '%Y-%m-%d %H:%M:%S')
             date  = datetime.datetime.strptime(bar[k][1], '%Y-%m-%d %H:%M:%S')
             
-            shares = round(float(bar[k][2]))
+            shares = (float(bar[k][2]))
             price = float(bar[k][3])
             try:
-                size = round(shares / maxsize * 100)
+                size = f'{round(shares / maxsize * 100)} %'
             except:
                 size = 'NA'
             timedelta = (date - startdate)
@@ -146,11 +146,11 @@ class Plot:
 
         #tabel2
         table2 = [[],[]]
-        print(self.df_traits.iloc[self.i])
+       
         for i in range(6,14):
-            table2[0].append(round(self.df_traits.iat[self.i,i],2))
+            table2[0].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
         for i in range(14,22):
-            table2[1].append(round(self.df_traits.iat[self.i,i],2))
+            table2[1].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
         '''
         pnl = 0
         for i in range(len(bar)):
@@ -192,7 +192,7 @@ class Plot:
             tflist = ['1min','h','d']
 
             i = bar[0]
-            print(i)
+          
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
 
@@ -314,10 +314,18 @@ class Plot:
                         apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=200,marker='v',color='r'))
                         PRINT("ELRKTJ")
                     '''
+
+
+                    if tf == 'h':
+                        mav = (10,20,50)
+                    elif tf == 'd':
+                        mav = (5,10)
+                    else:
+                        mav = ()
                     fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
-                                           figscale=fs, panel_ratios = (5,1), mav=(10,20), 
+                                           figscale=fs, panel_ratios = (5,1), mav=mav, 
                                            tight_layout = True,vlines=dict(vlines=datelist, 
                                           colors = colorlist, alpha = .2,linewidths=1))#, addplot=apds)
                     ax = axlist[0]
