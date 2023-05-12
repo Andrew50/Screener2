@@ -79,7 +79,7 @@ class Log:
             
         if path == 1:
 
-
+            print('god')
             file_path = "C:/Screener/tmp/subsetups/today" + str(os.getpid()) + ".feather"
             '''
             if df.index[currentday] == datetime.date.today(): 

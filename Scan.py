@@ -99,13 +99,17 @@ class Scan:
         time.sleep(1.5)
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
+
+        screener_data = pd.read_csv(r"C:\Downloads\america_" + today + ".csv")
+
+        '''
         new_name = r"C:\Downloads\screener_data.csv"
         os.rename(downloaded_file, new_name)
-        os.replace(r"C:\Downloads\screener_data.csv", r"C:\Screener\tmp\screener_data.csv")
+        os.replace(r"C:\Downloads\screener_data.csv", r"C:\Screener\sync\screener_data.csv")
         tv = TvDatafeed(username="password",password="password")
-        screener_data = pd.read_csv(r"C:\Screener\sync\screener_data.csv")
+        screener_data = pd.read_csv(r"C:\Screener\tmp\screener_data.csv")
         time.sleep(0.1)
-
+        '''
         numTickers = len(screener_data)
        
         #Changing ARCA into AMEX

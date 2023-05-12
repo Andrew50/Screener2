@@ -71,11 +71,12 @@ class Data:
     def findex(df,dt,order = 1):
      
         try:
-            
-          #  if Data.isToday(dt):
-          #      return len(df) - 1
+            #if dt == '0':
+            #    return len(df) - 1
+            if Data.isToday(dt):
+                return len(df) - 1
             dt = Data.convert_date(dt)
-            print(dt)
+        
             i = int(len(df)/2)
             k = i
            
@@ -104,7 +105,7 @@ class Data:
                 else:
                     break
             return i
-        except TimeoutError:
+        except:
             if i == len(df):
                 return i
             

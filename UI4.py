@@ -145,7 +145,7 @@ class UI:
         arglist = []
         for index in i:
             arglist.append([self.setups_data,index])
-        pool.map_async(self.plot,arglist)
+        pool.map(self.plot,arglist)
 
     def redate(self,previ,new):
         df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
@@ -220,7 +220,7 @@ class UI:
                 scan = scan.sample(frac=1)
 
         else:
-            scan = pd.read_feather(r"C:\Screener\tmp\todays_setups.feather")
+            scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
 
         if len(scan) < 1:
             sg.Popup('No Setups Found')
@@ -792,6 +792,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 
 

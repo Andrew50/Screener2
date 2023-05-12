@@ -8,17 +8,29 @@ from Data7 import Data as data
 import datetime
 
 
+
+
+
+
+
+
+scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
+
+print(scan)
+
+
 '''
 df = data.get('AAPL','1min',datetime.datetime.now(),account = True)\
 
 print(df)
 '''
-
+'''
 import pandas as pd
 import numpy as np
 import io
 
 data = '''
+'''
 Date Symbol Action Price
 2020-03-01 AAPL Buy 80
 2020-04-01 AAPL Sell 130
@@ -31,7 +43,9 @@ Date Symbol Action Price
 2020-11-01 AAPL Buy 125
 2020-12-01 AAPL Sell 140
 2021-01-01 AAPL Buy 115
+
 2021-02-01 AAPL Sell 135
+'''
 '''
 
 df = pd.read_csv(io.StringIO(data), delim_whitespace=True)
@@ -57,7 +71,7 @@ ap = [mpf.make_addplot(buy2['Price'], type='scatter', marker='^', markersize=200
      ]
       
 mpf.plot(data, type='candle', ylabel='Candle', addplot=ap, volume=False)
-
+'''
 
 
 
