@@ -19,6 +19,9 @@ laptop.txt
 minute/
 daily/  
 UI.bat
+UI.lnk
+Screener.bat/
+Screener.lnk/
 data_test/
 /hwtest.py
 minute - Copy/

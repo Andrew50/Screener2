@@ -245,6 +245,38 @@ class Traits:
                 d5time = 0
                 d10time = 0
                 run = False
+
+
+
+                #arrow list shitt
+
+
+
+
+
+                arrow_list = []
+
+                for i  in range(len(trades)):
+
+                    sprice = trades[i][3]
+                    shares = trades[i][2]
+                    sdate = trades[i][0]
+                    if shares > 0:
+                        color = 'g'
+                        syumbol = '^'
+                    else:
+                        color = 'r'
+                        symbol = 'v'
+
+                    arrow_list.append([str(sdate),str(sprice),str(color),str(symbol)])
+
+                if direction > 0:
+                    symbol = 'v'
+                else:
+                    symbol = '^'
+
+
+
                 try:
                     hourly = data.get(ticker,'h')
                     daily = data.get(ticker,'d')
@@ -252,9 +284,6 @@ class Traits:
                 except FileNotFoundError:
                     pass
                 if run:
-
-                    
-
 
                     start = data.findex(hourly,date)
                     prices = []
@@ -275,14 +304,21 @@ class Traits:
                             if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
                            
                                 h10 = direction*(close/openprice - 1)*100
-                                h10time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                                cdate = hourly.index[start + i + 1]
+                                h10time = ( cdate- date).total_seconds() / 3600
+                                arrow_list.append([str(cdate),str(close),'m',str(symbol)])
+
+
                             if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
+                                cdate = hourly.index[start + i + 1]
                                 h20 = direction*(close/openprice - 1)*100
                                 h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                                arrow_list.append([str(cdate),str(close),'b',str(symbol)])
                             if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
+                                cdate = hourly.index[start + i + 1]
                                 h50 = direction*(close/openprice - 1)*100
                                 h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-
+                                arrow_list.append([str(cdate),str(close),'c',str(symbol)])
                             
                             i += 1
                             prices.append(hourly.iat[start + i,3])
@@ -302,16 +338,61 @@ class Traits:
                         if (d10 != maxloss and d5 != maxloss) or (direction*(low/openprice - 1) < -.02 and i >= 1):
                             break
                         if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
+                            cdate = hourly.index[start + i + 1]
                             d5 = direction*(close/openprice - 1)*100
                             d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'y',str(symbol)])
                         if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
+                            cdate = hourly.index[start + i + 1]
                             d10 = direction*(close/openprice - 1)*100
                             d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'w',str(symbol)])
                         
                         i += 1
                         prices.append(daily.iat[start+i,3])
 
                 
+                df_1min = data.get(ticker,'1min')
+
+                open_date = daily.index[data.findex[daily,date]]
+
+
+
+
+                open_index = data.findex(df_1min,open_date)
+
+
+                or1 = df_1min.iat[open_index,0]
+                low = 1000000000
+                entered = False
+                i = open_index
+                stopped = False
+                stop = (maxloss/100 + 1) * openprice
+
+                #theoretical or1 entry and max amount down after trade
+                while True:
+                    clow = df_1min.iat[i,2]
+                    chigh = df_1min.iat[i,1]
+                    cdate = df_1min.index[i]
+                    if (cdate - open_date).days > 2:
+                        break
+                    if clow < low:
+                        low = clow
+                    if chigh > or1 and not entered:
+                        entered == True
+                        risk = (low/or1 - 1) * 100
+                        low = 1000000000000
+                    #independent from all this other shit above as this is caclulating if you get therotcically stopped 
+                    #based on your actuall entry
+                    if cdate > date and  clow < stop and not stopped:
+                        stopped = True
+                        arrow_list.append([str(cdate),str(stop),'b',symbol])
+                low = (low/or1 - 1)
+
+
+
+
+
                 
                 if h10 < maxloss:
                     h10 = maxloss
@@ -327,9 +408,6 @@ class Traits:
 
 
 
-
-                
-
                 r10 = h10 - pnl_pcnt
                 r20 = h20 - pnl_pcnt
                 r50 = h50 - pnl_pcnt
@@ -343,6 +421,20 @@ class Traits:
                 vix = df_vix.iat[ivix,0]
 
                 
+
+
+                
+
+
+
+
+
+
+
+
+
+
+
                 add = pd.DataFrame({
                     'ticker': [ticker],
                 'datetime':[date],
@@ -379,11 +471,14 @@ class Traits:
                 't10':[h10time],
                 't50':[h50time],
                 't5d':[d5time],
+                'arrows':[arrow_list],
 
-                'vix':[vix]
+                'vix':[vix],
             
 
-
+                'low':[low],
+                'risk':[risk]
+                
                 
                     
                     })

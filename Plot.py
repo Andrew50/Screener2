@@ -256,6 +256,7 @@ class Plot:
 
                     
                     tradeDf = pd.concat(trades).reset_index(drop = True)
+                    print(tradeDf)
                     tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
                     times = df1.index.to_list()
                     tradelist = []
@@ -300,7 +301,9 @@ class Plot:
                     #for rr in range(len(buyseries)):
                         #print(buyseries.iloc[rr])
                     
-                        
+                    print(sellseries)
+                    print(buyseries)
+                    print(mainindidf)
 
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
