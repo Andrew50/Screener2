@@ -128,3 +128,17 @@ df.to_csv(r"C:/Screener/tmp/log.csv")
 
 
 '''
+
+df = # Lists inside of a list. [Setup][]
+
+colors = []
+dfsByColor = []
+for i in range(len(df)):
+    if(df.iloc[i][2] not in colors):
+        colors.append(df.iloc[i][2])
+        
+for i in range(len(colors)):
+    colordf = df.loc[df[2] == colors[i]] 
+    dfsByColor.append(colordf)
+
+    

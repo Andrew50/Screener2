@@ -92,7 +92,7 @@ class Plot:
         for index in i:
             arglist.append([index,self.df_traits])
         pool = self.pool
-        pool.map_async(Plot.create,arglist)
+        pool.map(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         image1 = None
         image2 = None
@@ -210,7 +210,6 @@ class Plot:
             ticker = df.iat[i,0]
         
 
-
             for tf in tflist:
                 string1 = str(i) + str(tf) + ".png"
                 p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
@@ -298,6 +297,7 @@ class Plot:
                     mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
+                    print(buyseries)
                     #for rr in range(len(buyseries)):
                         #print(buyseries.iloc[rr])
                     
