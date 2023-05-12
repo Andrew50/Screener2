@@ -34,7 +34,7 @@ class Traits:
             df['index'] = df.index
            
             df =df.set_index('datetime',drop = True)
-            df = df[df['Ticker'] == ticker]
+            df = df[df['ticker'] == ticker]
 
 
             if not df.empty:
@@ -75,7 +75,7 @@ class Traits:
             if ticker != 'Deposit':
                 shares = row[2]
                 date = row[1]
-                #print(type(date))
+            
                 index = None
                 for i in range(len(pos)):
                     if pos[i][0] == ticker:
@@ -114,7 +114,6 @@ class Traits:
 
 
 
-            #print(pos)
 
         for i in range(len(pos)-1,-1,-1):
            
@@ -141,14 +140,15 @@ class Traits:
 
         df_list = []
         pbar = tqdm(total=len(df_traits))
+        df_vix = data.get('^VIX','d')
         for k in range(len(df_traits)):
             bar = df_traits.iloc[k]
             ticker = bar[0]
             date = bar[1]
             trades = bar[2]
-            #print(trades)
+      
            
-            price = float(trades[0][3])
+            openprice = float(trades[0][3])
 
 
             #setup
@@ -170,7 +170,7 @@ class Traits:
                 shg += sh
                 if abs(size) > abs(maxsize):
                     maxsize = (size)
-                    maxshares = abs(shg)
+                    maxshares = shg
 
             if shg != 0:
                 closed = False
@@ -179,8 +179,7 @@ class Traits:
             
 
             if closed:
-             #   print(size)
-              #  print(ticker)
+            
                 size = maxsize
 
                 ###direction
@@ -193,13 +192,13 @@ class Traits:
                 pnl = 0
                 for i in range(len(trades)):
                     pnl -= float(trades[i][2]) * float(trades[i][3])
-                #print(type(date))
+             
                 try:
                     account_val = self.df_pnl.iloc[data.findex(self.df_pnl,date)]['account']
                 except:
                     account_val = self.df_pnl.iloc[-1]['account']
                 pnl_pcnt = ((pnl / abs(size)) ) *100
-                #print(f'{pnl} , {size} , {pnl_pcnt}')
+          
                 pnl_account = (pnl/ account_val ) * 100
 
 
@@ -210,14 +209,13 @@ class Traits:
                 df = None
                 buys = 0
                 fs = None
-              #  print(trades)
+         
                 for i in range(len(trades)):
                     price = float(trades[i][3])
                     sh = float(trades[i][2])
-                    #print(price)
-                #    print(shares)
+                
                     dollars = price * sh
-                 #   print(dollars*direction)
+               
                     if dollars*direction < 0:
                         if fs == None:
                             fs = price
@@ -225,27 +223,39 @@ class Traits:
                     else:
                         buys -= dollars
                     
-                fbuy = (pnl/fb) * 100
-                fsell = (fs*maxshares + buys)/size * 100
+                fbuy = (pnl/fb) * 100 * direction
+                fsell = (fs*maxshares + buys)/size * 100 * direction
                 
                    
 
 
 
-
-                h10 = 0
-                h20 = 0
-                h50 = 0
-                d5 = 0
-                d10 = 0
+                if pnl_pcnt < -2:
+                    maxloss = pnl_pcnt
+                else:
+                    maxloss = -2
+                h10 = maxloss
+                h20 = maxloss
+                h50 = maxloss
+                d5 = maxloss
+                d10 = maxloss
                 h10time = 0
                 h20time = 0
                 h50time = 0
                 d5time = 0
                 d10time = 0
-                
+                run = False
                 try:
                     hourly = data.get(ticker,'h')
+                    daily = data.get(ticker,'d')
+                    run = True
+                except FileNotFoundError:
+                    pass
+                if run:
+
+                    
+
+
                     start = data.findex(hourly,date)
                     prices = []
                     if start != None:
@@ -258,38 +268,67 @@ class Traits:
                             close = hourly.iat[start+i,3]
                             low = hourly.iat[start + 1,3]
 
-                            #print(f"{close} , {statistics.mean(prices[-10:])}")
+                            if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or direction*(low/openprice - 1) < -.02:
+                                break
+                     
                             
-                            if direction * close < direction * statistics.mean(prices[-10:]) and h10 == 0:
-                                #print(f'{type(direction)} , {type(close)} , {type(price)}')
-                                h10 = direction*(close/price - 1)*100
+                            if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
+                           
+                                h10 = direction*(close/openprice - 1)*100
                                 h10time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            if direction * close < direction * statistics.mean(prices[-20:]) and h20 == 0:
-                                h20 = direction*(close/price - 1)*100
+                            if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
+                                h20 = direction*(close/openprice - 1)*100
                                 h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            if direction * close < direction * statistics.mean(prices[-50:]) and h50 == 0:
-                                h50 = direction*(close/price - 1)*100
+                            if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
+                                h50 = direction*(close/openprice - 1)*100
                                 h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
 
-                            if (h20 != 0 and h10 != 0 and h50 != 0) or direction*(low/price - 1) < -.02:
-                                break
+                            
                             i += 1
                             prices.append(hourly.iat[start + i,3])
 
 
 
-                    daily = data.get(ticker,'d')
+                    
                     start = data.findex(daily,date)
+             
                     prices = []
-                    for i in range(50):
+                    for i in range(10):
                         prices.append(daily.iat[i + start - 10,3])
+                    i = 0
+                    while True:
+                        close = daily.iat[start+i,3]
+                        low = daily.iat[start+i,3]
+                        if (d10 != maxloss and d5 != maxloss) or (direction*(low/openprice - 1) < -.02 and i >= 1):
+                            break
+                        if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
+                            d5 = direction*(close/openprice - 1)*100
+                            d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                        if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
+                            d10 = direction*(close/openprice - 1)*100
+                            d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                        
+                        i += 1
+                        prices.append(daily.iat[start+i,3])
 
-                except FileNotFoundError:
-                    pass
-                except IndexError:
-                    pass
+                
+                
+                if h10 < maxloss:
+                    h10 = maxloss
+                if h20 < maxloss:
+                    h20 = maxloss
+                if h50 < maxloss:
+                    h50 = maxloss
+                if d5 < maxloss:
+                    d5 = maxloss
+                if d10 < maxloss:
+                    d10 = maxloss
 
 
+
+
+
+                
 
                 r10 = h10 - pnl_pcnt
                 r20 = h20 - pnl_pcnt
@@ -298,7 +337,11 @@ class Traits:
                 r10d = d10 - pnl_pcnt
                 rfsell = fsell - pnl_pcnt
                 rfbuy = fbuy - pnl_pcnt
-                #final conca 
+
+
+                ivix = data.findex(df_vix,date)
+                vix = df_vix.iat[ivix,0]
+
                 
                 add = pd.DataFrame({
                     'ticker': [ticker],
@@ -335,7 +378,9 @@ class Traits:
                 't20':[h20time],
                 't10':[h10time],
                 't50':[h50time],
-                't5d':[d5time]
+                't5d':[d5time],
+
+                'vix':[vix]
             
 
 
