@@ -30,12 +30,12 @@ class Plot:
         
 
             if ticker  != "":
-                scan = scan[scan['Ticker'] == ticker]
+                scan = scan[scan['ticker'] == ticker]
             
             
 
             if setup  != "":
-                scan = scan[scan['Setup'] == setup]
+                scan = scan[scan['setup'] == setup]
      
             if len(scan) < 1:
                 sg.Popup('No Setups Found')
@@ -92,7 +92,7 @@ class Plot:
         for index in i:
             arglist.append([index,self.df_traits])
         pool = self.pool
-        pool.map(Plot.create,arglist)
+        pool.map_async(Plot.create,arglist)
 
         image1 = None
         image2 = None
@@ -185,8 +185,8 @@ class Plot:
     def create(bar):
         i = bar[0]
 
-        if True: #(os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
-
+        if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+            print(i)
         
 
             tflist = ['1min','h','d']
@@ -299,26 +299,28 @@ class Plot:
                     mainindidf = mainindidf.set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
-                    for rr in range(len(buyseries)):
-                        print(buyseries.iloc[rr])
+                    #for rr in range(len(buyseries)):
+                        #print(buyseries.iloc[rr])
                     
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=20,marker='^', color='g'))
-                        print("W")
+                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=100,marker='^', color='g'))
+                        #print("W")
                     if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=20,marker='v', color='r'))
+                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=100,marker='v', color='r'))
                     
                     fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
                                            figscale=fs, panel_ratios = (5,1), mav=(10,20), 
-                                           tight_layout = True,vlines=dict(vlines=datelist, 
-                                          colors = colorlist, alpha = .2,linewidths=1))#, addplot=apds)
+                                           tight_layout = True,
+                                        #   vlines=dict(vlines=datelist, 
+                                          #colors = colorlist, alpha = .2,linewidths=1),
+                                          addplot=apds)
                     ax = axlist[0]
                     #for k in range(len(df.iat[i,2])):
                      #   ax.text()
