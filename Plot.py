@@ -185,14 +185,14 @@ class Plot:
     def create(bar):
         i = bar[0]
 
-        if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+        if True: #(os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
 
         
 
             tflist = ['1min','h','d']
 
             i = bar[0]
-            print(i)
+            #print(i)
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
 
@@ -207,7 +207,7 @@ class Plot:
                 fs = .85
             df = bar[1]
         
-                ticker = df.iat[i,0]
+            ticker = df.iat[i,0]
         
 
 
@@ -254,7 +254,7 @@ class Plot:
                     r1 = data.findex(df1,enddate) + 50
                     df1 = df1[l1:r1]
 
-                    '''
+                    
                     tradeDf = pd.concat(trades).reset_index(drop = True)
                     tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
                     times = df1.index.to_list()
@@ -296,30 +296,29 @@ class Plot:
                                 })
                          timesdf.append(ad)
                     mainindidf = pd.concat(timesdf).reset_index(drop = True)
-                    newbuys = newbuys.reset_index()
-                    newsells = newsells.reset_index()
+                    mainindidf = mainindidf.set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
-                    print(buyseries)
-                    print(sellseries)
+                    for rr in range(len(buyseries)):
+                        print(buyseries.iloc[rr])
+                    
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=200,marker='^',color='g'))
-                        print("WLEKRJELWK")
+                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=20,marker='^', color='g'))
+                        print("W")
                     if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=200,marker='v',color='r'))
-                        PRINT("ELRKTJ")
-                    '''
+                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=20,marker='v', color='r'))
+                    
                     fig, axlist = mpf.plot(df1, type='candle', volume=True, 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
                                            figscale=fs, panel_ratios = (5,1), mav=(10,20), 
-                                           tight_layout = True,vlines=dict(vlines=datelist, 
-                                          colors = colorlist, alpha = .2,linewidths=1))#, addplot=apds)
+                                           tight_layout = True, addplot=apds)
+                    # vlines=dict(vlines=datelist, colors = colorlist, alpha = .2,linewidths=1)
                     ax = axlist[0]
                     #for k in range(len(df.iat[i,2])):
                      #   ax.text()
@@ -331,6 +330,7 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-            except:
-                #shutil.copy(r"C:\Screener\tmp\blank.png",p1)
-                pass
+                except TimeoutError:
+                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                    print("lolol")
+                    
