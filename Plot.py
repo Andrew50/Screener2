@@ -293,6 +293,8 @@ class Plot:
                             .rename_axis(columns=None))
                         
                         series = mainindidf.merge(newdf, how='left', left_index=True, right_index=True)[newdf.columns]
+                        if tf == 'h':
+                            print(f'{series} , {df1}')
                         if series.isnull().values.all(axis=0)[0]:
                             pass
                         else: 
