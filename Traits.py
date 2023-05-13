@@ -448,7 +448,7 @@ class Traits:
                     ma = []
                     for i in range(51):
                         
-                        ma.append(df_qqq.iat[i,3])
+                        ma.append(df_qqq.iat[iqqq+i-50,3])
                         if i == 49:
                             ma50 = statistics.mean(ma)
                     
@@ -560,6 +560,8 @@ class Traits:
         try:
             inp = self.values['input-trait']
         except:
+            inp = 'account'
+        if inp == "":
             inp = 'account'
         try:
 
