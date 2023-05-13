@@ -259,7 +259,11 @@ class Plot:
                     enddate = dfall.iloc[-1]['Datetime']
                     l1 = data.findex(df1,startdate) - 50
                     r1 = data.findex(df1,enddate) + 50
+                    minmax = 300
+                #    if tf == '1min' and r1 - l1 > minmax:
+                   #     r1 = l1 + minmax
                     df1 = df1[l1:r1]
+
                     times = df1.index.to_list()
                     timesdf = []
                     for _ in range(len(df1)):
@@ -293,8 +297,7 @@ class Plot:
                             .rename_axis(columns=None))
                         
                         series = mainindidf.merge(newdf, how='left', left_index=True, right_index=True)[newdf.columns]
-                        if tf == 'h':
-                            print(f'{series} , {df1}')
+                        
                         if series.isnull().values.all(axis=0)[0]:
                             pass
                         else: 
