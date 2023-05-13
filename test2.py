@@ -133,7 +133,7 @@ df = # Lists inside of a list. [Setup][]
 
 colors = []
 dfsByColor = []
-for i in range(len(df)):
+for i in range(len(dfd)):
     if(df.iloc[i][2] not in colors):
         colors.append(df.iloc[i][2])
         
@@ -142,8 +142,17 @@ for i in range(len(colors)):
     dfsByColor.append(colordf)
 
 apds = []
+
 for i in range(len(dfsByColor)):
     currentDf = dfsByColor[i].sort_values(by=0)
+
+    df1 = data.get(ticker, tf)
+    startdate = currentDf[0][0]
+    enddate = currentDf[-1][0]
+    l1 = data.findex(df1, startdate) - 50
+    r1 = data.findex(df1,enddate) + 50
+    df1 = df1[l1:r1]
+
 
     
 
