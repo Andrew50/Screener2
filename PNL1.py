@@ -48,7 +48,7 @@ class PNL():
             except:
                 self.df_pnl = pd.DataFrame()
           
-            self.menu = "Log"
+            self.menu = "Account"
         else:
             self.window.close()
         print(f'{self.menu} menu')
@@ -61,8 +61,8 @@ class PNL():
             scaletraits = 4
             
         else:
-            scalelog = 3
-            scaleplot = 3
+            scalelog = 3.7
+            scaleplot = 2.98
             scaleaccount = 3
             scaletraits = 3
        
@@ -118,7 +118,7 @@ class PNL():
              [(sg.Text((str(f"{self.i + 1} of {len(self.df_traits)}")), key = '-number-'))], 
              [sg.Table([],headings=toprow2,num_rows = 2, key = '-table2-',auto_size_columns=True,justification='left', 
                        expand_y = False)],
-              [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left', 
+              [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left',num_rows = 5, 
                        expand_y = False)],
             [(sg.Text("Ticker  ")),sg.InputText(key = 'input-ticker')],
             [(sg.Text("Date   ")),sg.InputText(key = 'input-datetime')],

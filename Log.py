@@ -57,11 +57,11 @@ class Log:
 
                 add = pd.DataFrame({
             
-                    'Ticker': [ticker],
-                    'Datetime':[dt],
-                    'Shares': [shares],
-                    'Price': [price],
-                    'Setup': [setup]
+                    'ticker': [ticker],
+                    'datetime':[dt],
+                    'shares': [shares],
+                    'price': [price],
+                    'setup': [setup]
                     })
                 if self.index == None:
                     self.df_log = pd.concat([self.df_log,add])
@@ -72,7 +72,7 @@ class Log:
                     self.df_log.iat[self.index,2] = shares
                     self.df_log.iat[self.index,3] = price
                     self.df_log.iat[self.index,4] = setup
-                self.df_log = self.df_log.sort_values(by='Datetime', ascending = True)
+                self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
                 self.df_pnl = account.calcaccount(self.df_pnl,self.df_log,dt)
                 traits.update(self,add.values.tolist()[0])
                 
@@ -96,7 +96,7 @@ class Log:
             self.window["input-setup"].update("")
             self.window["input-datetime"].update("")
 
-        self.df_log = self.df_log.sort_values(by='Datetime', ascending = True)
+        self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
         self.df_log = self.df_log.reset_index(drop = True)
         self.df_log.to_feather(r"C:\Screener\sync\log.feather")
         table = self.df_log.values.tolist()
