@@ -141,12 +141,15 @@ class Traits:
         df_list = []
         pbar = tqdm(total=len(df_traits))
         df_vix = data.get('^VIX','d')
+
         for k in range(len(df_traits)):
+            
             bar = df_traits.iloc[k]
             ticker = bar[0]
             date = bar[1]
             trades = bar[2]
       
+          
            
             openprice = float(trades[0][3])
 
@@ -157,9 +160,8 @@ class Traits:
                 if trades[i][4] != 'None':
                     setup = trades[i][4]
                     break
-
-                
-
+         
+  
             ##size
             size = 0
             maxsize = 0
@@ -177,7 +179,7 @@ class Traits:
             else:
                 closed = True
             
-
+           
             if closed:
             
                 size = maxsize
@@ -201,7 +203,7 @@ class Traits:
           
                 pnl_account = (pnl/ account_val ) * 100
 
-
+               
                 #theoretical exits
 
                 fb = float(trades[0][3])  *   maxshares
@@ -227,7 +229,7 @@ class Traits:
                 fsell = (fs*maxshares + buys)/size * 100 * direction
                 
                    
-
+               
 
 
                 if pnl_pcnt < -2:
@@ -250,17 +252,13 @@ class Traits:
 
                 #arrow list shitt
 
-
-
-
-
                 arrow_list = []
 
-                for i  in range(len(trades)):
+                for i in range(len(trades)):
 
                     sprice = float(trades[i][3])
                     shares = float(trades[i][2])
-                    sdate = trades[i][0]
+                    sdate = trades[i][1]
                     if shares > 0:
                         color = 'g'
                         symbol = '^'
@@ -281,55 +279,57 @@ class Traits:
                     hourly = data.get(ticker,'h')
                     daily = data.get(ticker,'d')
                     startd = data.findex(daily,date)
-                    if startd != None:
+                    start = data.findex(hourly,date)
+                    if startd != None and start != None:
                         run = True
                 except FileNotFoundError:
                     pass
                 if run:
 
-                    start = data.findex(hourly,date)
+                    
                     prices = []
-                    if start != None:
-                        for i in range(50):
-                            prices.append(hourly.iat[i + start - 50,3])
+                    
+                    for i in range(50):
+                        prices.append(hourly.iat[i + start - 50,3])
                 
 
-                        i = 0
-                        while True:
-                            close = hourly.iat[start+i,3]
-                            low = hourly.iat[start + 1,3]
+                    i = 0
+                   
+                    while True:
+                        close = hourly.iat[start+i,3]
+                        low = hourly.iat[start + 1,3]
 
-                            if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or direction*(low/openprice - 1) < -.02:
-                                break
+                        if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or direction*(low/openprice - 1) < -.02 or i > 1000:
+                            break
                      
                             
-                            if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
+                        if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
                            
-                                h10 = direction*(close/openprice - 1)*100
-                                cdate = hourly.index[start + i + 1]
-                                h10time = ( cdate- date).total_seconds() / 3600
-                                arrow_list.append([str(cdate),str(close),'m',str(symbol)])
+                            h10 = direction*(close/openprice - 1)*100
+                            cdate = hourly.index[start + i + 1]
+                            h10time = ( cdate- date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'m',str(symbol)])
 
 
-                            if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
-                                cdate = hourly.index[start + i + 1]
-                                h20 = direction*(close/openprice - 1)*100
-                                h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                                arrow_list.append([str(cdate),str(close),'b',str(symbol)])
-                            if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
-                                cdate = hourly.index[start + i + 1]
-                                h50 = direction*(close/openprice - 1)*100
-                                h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                                arrow_list.append([str(cdate),str(close),'c',str(symbol)])
+                        if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
+                            cdate = hourly.index[start + i + 1]
+                            h20 = direction*(close/openprice - 1)*100
+                            h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'b',str(symbol)])
+                        if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
+                            cdate = hourly.index[start + i + 1]
+                            h50 = direction*(close/openprice - 1)*100
+                            h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'c',str(symbol)])
                             
-                            i += 1
-                            prices.append(hourly.iat[start + i,3])
+                        i += 1
+                        prices.append(hourly.iat[start + i,3])
 
 
 
                     
                     start = startd 
-                    
+                  
                     prices = []
                     for i in range(10):
                         prices.append(daily.iat[i + start - 10,3])
@@ -337,15 +337,15 @@ class Traits:
                     while True:
                         close = daily.iat[start+i,3]
                         low = daily.iat[start+i,3]
-                        if (d10 != maxloss and d5 != maxloss) or (direction*(low/openprice - 1) < -.02 and i >= 1):
+                        if (d10 != maxloss and d5 != maxloss) or (direction*(low/openprice - 1) < -.02 and i >= 1) or i > 100:
                             break
                         if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
-                            cdate = hourly.index[start + i + 1]
+                            cdate = daily.index[start + i + 1]
                             d5 = direction*(close/openprice - 1)*100
                             d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
                             arrow_list.append([str(cdate),str(close),'y',str(symbol)])
                         if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
-                            cdate = hourly.index[start + i + 1]
+                            cdate = daily.index[start + i + 1]
                             d10 = direction*(close/openprice - 1)*100
                             d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
                             arrow_list.append([str(cdate),str(close),'w',str(symbol)])
@@ -364,7 +364,7 @@ class Traits:
                     open_index = data.findex(df_1min,open_date)
 
 
-                    or1 = df_1min.iat[open_index,0]
+                  
                     low = 1000000000
                     entered = False
                     i = open_index
@@ -372,63 +372,64 @@ class Traits:
                     stop = (maxloss/100 + 1) * openprice
 
                     #theoretical or1 entry and max amount down after trade
-                
+                  
                     while True:
-                        clow = df_1min.iat[i,2]
-                        chigh = df_1min.iat[i,1]
+                        if direction > 0:
+                            clow = df_1min.iat[i,2] #low
+                        else:
+                            clow = df_1min.iat[i,3] #high
+
+                 
                         cdate = df_1min.index[i]
                         #print(f'{cdate} , {open_date}')
-                        if (cdate - open_date).days > 2:
+                        if (cdate - date).days > 2 or i - open_index > 800:
                             break
-                        if clow < low:
+                        if clow*direction < low*direction:
                             low = clow
-                        if chigh > or1 and not entered:
-                            entered == True
-                            risk = (low/or1 - 1) * 100
+                        if cdate >= date and not entered:
+                            entered = True
+                            
+                            risk = (direction*(low - openprice))/openprice * 100
                             low = 1000000000000
                         #independent from all this other shit above as this is caclulating if you get therotcically stopped 
                         #based on your actuall entry
                         if cdate > date and  clow < stop and not stopped:
                             stopped = True
-                            arrow_list.append([str(cdate),str(stop),'b',symbol])
+                            arrow_list.append([str(cdate),str(stop),'k',symbol])
                         i += 1
-                    low = (low/or1 - 1)
-
-
-                else:
-                    low = None
-                    risk = None
-
+                    low = (low/openprice - 1) * 100
 
 
                 
-                if h10 < maxloss:
-                    h10 = maxloss
-                if h20 < maxloss:
-                    h20 = maxloss
-                if h50 < maxloss:
-                    h50 = maxloss
-                if d5 < maxloss:
-                    d5 = maxloss
-                if d10 < maxloss:
-                    d10 = maxloss
+
+                
+                    if h10 < maxloss:
+                        h10 = maxloss
+                    if h20 < maxloss:
+                        h20 = maxloss
+                    if h50 < maxloss:
+                        h50 = maxloss
+                    if d5 < maxloss:
+                        d5 = maxloss
+                    if d10 < maxloss:
+                        d10 = maxloss
 
 
 
 
-                r10 = h10 - pnl_pcnt
-                r20 = h20 - pnl_pcnt
-                r50 = h50 - pnl_pcnt
-                r5d = d5 - pnl_pcnt
-                r10d = d10 - pnl_pcnt
-                rfsell = fsell - pnl_pcnt
-                rfbuy = fbuy - pnl_pcnt
+                    r10 = h10 - pnl_pcnt
+                    r20 = h20 - pnl_pcnt
+                    r50 = h50 - pnl_pcnt
+                    r5d = d5 - pnl_pcnt
+                    r10d = d10 - pnl_pcnt
+                    rfsell = fsell - pnl_pcnt
+                    rfbuy = fbuy - pnl_pcnt
 
-                try:
-                    ivix = data.findex(df_vix,date)
-                    vix = df_vix.iat[ivix,0]
-                except:
-                    vix = 0
+                    try:
+                        ivix = data.findex(df_vix,date)
+                        vix = df_vix.iat[ivix,0]
+                    except:
+                        vix = 0
 
                 
 
@@ -436,56 +437,56 @@ class Traits:
 
 
 
-                add = pd.DataFrame({
-                    'ticker': [ticker],
-                'datetime':[date],
-                'setup':[setup],
-                'trades': [trades],
-                'pnl':[pnl],
-                'account':[pnl_account],
+                    add = pd.DataFrame({
+                        'ticker': [ticker],
+                    'datetime':[date],
+                    'setup':[setup],
+                    'trades': [trades],
+                    'pnl':[pnl],
+                    'account':[pnl_account],
 
 
 
 
-                'percent':[pnl_pcnt],
-                'fsell':[fsell],
-                'fbuy':[fbuy],
-                'p10':[h10],
-                'p20':[h20],
-                'p50':[h50],
-                'p5d':[d5],
-                'p10d':[d10],
+                    'percent':[pnl_pcnt],
+                    'fsell':[fsell],
+                    'fbuy':[fbuy],
+                    'p10':[h10],
+                    'p20':[h20],
+                    'p50':[h50],
+                    'p5d':[d5],
+                    'p10d':[d10],
 
-                'rpercent':[0],
-                'rfsell':[rfsell],
-                'rfbuy':[rfbuy],
-                'r10':[r10],
-                'r20':[r20],
-                'r50':[r50],
-                'r5d':[r5d],
-                'r10d':[r10d],
+                    'rpercent':[0],
+                    'rfsell':[rfsell],
+                    'rfbuy':[rfbuy],
+                    'r10':[r10],
+                    'r20':[r20],
+                    'r50':[r50],
+                    'r5d':[r5d],
+                    'r10d':[r10d],
             
 
 
-                't10d':[d10time],
-                't20':[h20time],
-                't10':[h10time],
-                't50':[h50time],
-                't5d':[d5time],
-                'arrows':[arrow_list],
+                    't10d':[d10time],
+                    't20':[h20time],
+                    't10':[h10time],
+                    't50':[h50time],
+                    't5d':[d5time],
+                    'arrows':[arrow_list],
 
-                'vix':[vix],
+                    'vix':[vix],
             
 
-                'low':[low],
-                'risk':[risk]
+                    'low':[low],
+                    'risk':[risk]
                 
                 
                     
-                    })
-         
-                df_list.append(add)
-                pbar.update(1)
+                        })
+                    #print(arrow_list)
+                    df_list.append(add)
+            pbar.update(1)
 
 
 
