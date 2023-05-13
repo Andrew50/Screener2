@@ -14,7 +14,7 @@ import io
 import pathlib
 import shutil
 import os
-import numpy
+import numpy as np
 import statistics
 from tqdm import tqdm
 from Data7 import Data as data
@@ -141,6 +141,7 @@ class Traits:
         df_list = []
         pbar = tqdm(total=len(df_traits))
         df_vix = data.get('^VIX','d')
+        df_qqq = data.get('QQQ','d')
 
         for k in range(len(df_traits)):
             
@@ -365,7 +366,9 @@ class Traits:
 
 
                   
-                    low = 1000000000
+                    
+                    low = 1000000000*direction
+                    
                     entered = False
                     i = open_index
                     stopped = False
@@ -377,27 +380,30 @@ class Traits:
                         if direction > 0:
                             clow = df_1min.iat[i,2] #low
                         else:
-                            clow = df_1min.iat[i,3] #high
-
-                 
+                            clow = df_1min.iat[i,1] #high
                         cdate = df_1min.index[i]
-                        #print(f'{cdate} , {open_date}')
+                     
                         if (cdate - date).days > 2 or i - open_index > 800:
                             break
+
                         if clow*direction < low*direction:
+                            #print(clow*direction)
                             low = clow
+
                         if cdate >= date and not entered:
                             entered = True
                             
                             risk = (direction*(low - openprice))/openprice * 100
-                            low = 1000000000000
+                            
+                            low = 1000000000000*direction
                         #independent from all this other shit above as this is caclulating if you get therotcically stopped 
                         #based on your actuall entry
-                        if cdate > date and  clow < stop and not stopped:
+                        if cdate > date and  direction*clow < stop*direction and not stopped:
                             stopped = True
                             arrow_list.append([str(cdate),str(stop),'k',symbol])
                         i += 1
-                    low = (low/openprice - 1) * 100
+
+                    low = (direction*(low - openprice)/openprice) * 100
 
 
                 
@@ -425,15 +431,28 @@ class Traits:
                     rfsell = fsell - pnl_pcnt
                     rfbuy = fbuy - pnl_pcnt
 
+                    
+
+                
+
+                    #market shit
+
                     try:
                         ivix = data.findex(df_vix,date)
                         vix = df_vix.iat[ivix,0]
                     except:
                         vix = 0
 
-                
+                    iqqq = data.findex(df_qqq,date)
 
-
+                    ma = []
+                    for i in range(51):
+                        
+                        ma.append(df_qqq.iat[iqqq+i-50,3])
+                        if i == 49:
+                            ma50 = statistics.mean(ma)
+                    
+                    m50 = (statistics.mean(ma[-50:])/ma50 - 1) * 100
 
 
 
@@ -479,7 +498,10 @@ class Traits:
             
 
                     'low':[low],
-                    'risk':[risk]
+                    'risk':[risk],
+
+
+                    'm50':[m50]
                 
                 
                     
@@ -539,12 +561,27 @@ class Traits:
             inp = self.values['input-trait']
         except:
             inp = 'account'
+        if inp == "":
+            inp = 'account'
         try:
+
+
             plt.clf()
-            fifty = self.df_traits[inp].to_list()
-            plt.hist(fifty, bins, alpha=1, ec='black',label='Percent') 
+            if ':'  in inp:
+                inp = inp.split(':')
+                inp1 = inp[0]
+                inp2 = inp[1]
+                x = self.df_traits[inp1].to_list()
+                y = self.df_traits[inp2].to_list()
+                plt.scatter(x,y)
+                z = np.polyfit(x, y, 1)
+                p = np.poly1d(z)
+                plt.plot(x,p(x),"r--")
+            else:
+                fifty = self.df_traits[inp].to_list()
+                plt.hist(fifty, bins, alpha=1, ec='black',label='Percent') 
             plt.gcf().set_size_inches(size)
-            plt.legend(loc='upper right')
+            #plt.legend(loc='upper right')
             string1 = "traits.png"
             p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
                 
@@ -556,6 +593,7 @@ class Traits:
             self.window["-CHART-"].update(data=bio1.getvalue())
             #plt.show()
         except KeyError:
+            sg.popup('Not a Key')
             pass
         
 
