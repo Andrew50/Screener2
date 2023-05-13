@@ -55,13 +55,13 @@ class Traits:
                 if log_date > date:
                     log_date = date
                 logs = self.df_log
-                short_logs = logs[logs['Ticker'] == ticker]
-                short_logs = short_logs[short_logs['Datetime'] >= log_date]
+                short_logs = logs[logs['ticker'] == ticker]
+                short_logs = short_logs[short_logs['datetime'] >= log_date]
                 short_logs = short_logs.reset_index(drop = True)
  
                 df = Traits.calc(self,short_logs)
                 self.df_traits = pd.concat([self.df_traits,df])
-                self.df_traits = self.df_traits.sort_values(by='Datetime',ascending = False).reset_index(drop = True)
+                self.df_traits = self.df_traits.sort_values(by='datetime',ascending = False).reset_index(drop = True)
                 self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
    
  
@@ -274,98 +274,33 @@ class Traits:
                 else:
                     symbol = '^'
 
+                
 
+
+
+
+                
 
                 try:
                     hourly = data.get(ticker,'h')
                     daily = data.get(ticker,'d')
                     startd = data.findex(daily,date)
                     start = data.findex(hourly,date)
+                    df_1min = data.get(ticker,'1min')
                     if startd != None and start != None:
                         run = True
                 except FileNotFoundError:
                     pass
                 if run:
 
-                    
-                    prices = []
-                    
-                    for i in range(50):
-                        prices.append(hourly.iat[i + start - 50,3])
-                
-
-                    i = 0
-                   
-                    while True:
-                        close = hourly.iat[start+i,3]
-                        low = hourly.iat[start + 1,3]
-
-                        if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or direction*(low/openprice - 1) < -.02 or i > 1000:
-                            break
-                     
-                            
-                        if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
-                           
-                            h10 = direction*(close/openprice - 1)*100
-                            cdate = hourly.index[start + i + 1]
-                            h10time = ( cdate- date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'m',str(symbol)])
-
-
-                        if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
-                            cdate = hourly.index[start + i + 1]
-                            h20 = direction*(close/openprice - 1)*100
-                            h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'b',str(symbol)])
-                        if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
-                            cdate = hourly.index[start + i + 1]
-                            h50 = direction*(close/openprice - 1)*100
-                            h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'c',str(symbol)])
-                            
-                        i += 1
-                        prices.append(hourly.iat[start + i,3])
-
 
 
                     
-                    start = startd 
-                  
-                    prices = []
-                    for i in range(10):
-                        prices.append(daily.iat[i + start - 10,3])
-                    i = 0
-                    while True:
-                        close = daily.iat[start+i,3]
-                        low = daily.iat[start+i,3]
-                        if (d10 != maxloss and d5 != maxloss) or (direction*(low/openprice - 1) < -.02 and i >= 1) or i > 100:
-                            break
-                        if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
-                            cdate = daily.index[start + i + 1]
-                            d5 = direction*(close/openprice - 1)*100
-                            d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'y',str(symbol)])
-                        if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
-                            cdate = daily.index[start + i + 1]
-                            d10 = direction*(close/openprice - 1)*100
-                            d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'w',str(symbol)])
-                        
-                        i += 1
-                        prices.append(daily.iat[start+i,3])
-
-                
-                    df_1min = data.get(ticker,'1min')
 
                     open_date = daily.index[data.findex(daily,date)]
 
-
-
-
                     open_index = data.findex(df_1min,open_date)
 
-
-                  
                     
                     low = 1000000000*direction
                     
@@ -373,6 +308,8 @@ class Traits:
                     i = open_index
                     stopped = False
                     stop = (maxloss/100 + 1) * openprice
+
+                    stopdate = datetime.datetime.now() + datetime.timedelta(days = 100)
 
                     #theoretical or1 entry and max amount down after trade
                   
@@ -396,17 +333,94 @@ class Traits:
                             risk = (direction*(low - openprice))/openprice * 100
                             
                             low = 1000000000000*direction
-                        #independent from all this other shit above as this is caclulating if you get therotcically stopped 
-                        #based on your actuall entry
+                    
                         if cdate > date and  direction*clow < stop*direction and not stopped:
                             stopped = True
                             arrow_list.append([str(cdate),str(stop),'k',symbol])
+                            stopdate = cdate
                         i += 1
 
                     low = (direction*(low - openprice)/openprice) * 100
 
 
+
+
+
+
+                    
+                    prices = []
+                    
+                    for i in range(50):
+                        prices.append(hourly.iat[i + start - 50,3])
                 
+
+                    i = 0
+                    
+                    while True:
+                        close = hourly.iat[start+i,3]
+                
+                        cdate = hourly.index[start + i + 1]
+
+                        if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or cdate > stopdate or i > 1000 or i + start >= len(hourly):
+                            break
+                     
+                            
+                        if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
+                           
+                            h10 = direction*(close/openprice - 1)*100
+                           
+                            h10time = ( cdate- date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'m',str(symbol)])
+
+
+                        if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
+                            
+                            h20 = direction*(close/openprice - 1)*100
+                            h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'b',str(symbol)])
+                        if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
+                          
+                            h50 = direction*(close/openprice - 1)*100
+                            h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'c',str(symbol)])
+                            
+                        i += 1
+                        prices.append(hourly.iat[start + i,3])
+                    
+
+
+                    
+                    start = startd 
+                  
+                    prices = []
+                    for i in range(10):
+                        prices.append(daily.iat[i + start - 10,3])
+                    i = 0
+                    while True:
+                        close = daily.iat[start+i,3]
+                   
+                        cdate = daily.index[start + i + 1]
+                        if (d10 != maxloss and d5 != maxloss) or cdate > stopdate or i > 100 or i + start >= len(daily):
+                            break
+                        if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
+                            
+                            d5 = direction*(close/openprice - 1)*100
+                            d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'y',str(symbol)])
+                        if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
+                            
+                            d10 = direction*(close/openprice - 1)*100
+                            d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                            arrow_list.append([str(cdate),str(close),'w',str(symbol)])
+                        
+                        i += 1
+                        prices.append(daily.iat[start+i,3])
+
+                
+                    
+
+
+                    
 
                 
                     if h10 < maxloss:
@@ -556,7 +570,10 @@ class Traits:
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
 
         bins = 50
-        size = (49,25)
+        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+            size = (49,25)
+        else:
+            size = (32,15)
         try:
             inp = self.values['input-trait']
         except:

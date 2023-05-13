@@ -11,6 +11,12 @@ import numpy as np
 import io
 
 
-df = pd.read_csv(r"F:/Screener/logss.csv")
+df = pd.read_feather(r"C:/Screener/sync/log.feather")
 
-df.to_feather("C:/Screener/tmp/log.feather")
+print(df)
+df.rename(columns={'Datetime':'datetime','Price':'price','Setup':'setup','Ticker':'ticker','Shares':'shares'}, inplace = True)
+
+
+print(df)
+
+df.to_feather(r"C:/Screener/sync/log.feather")

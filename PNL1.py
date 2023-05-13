@@ -62,7 +62,7 @@ class PNL():
             
         else:
             scalelog = 3
-            scaleplot = 3
+            scaleplot = 3.1
             scaleaccount = 3
             scaletraits = 3
        

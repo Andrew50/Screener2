@@ -186,7 +186,7 @@ class Plot:
         i = bar[0]
 
         if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
-            print(i)
+            #print(i)
         
 
             tflist = ['1min','h','d']
@@ -202,9 +202,9 @@ class Plot:
                 fs = 1.95
 
             else:
-                fw = 15
-                fh = 6
-                fs = .85
+                fw = 14
+                fh = 7
+                fs = .92
             df = bar[1]
         
             ticker = df.iat[i,0]
@@ -293,8 +293,7 @@ class Plot:
                             .rename_axis(columns=None))
                         
                         series = mainindidf.merge(newdf, how='left', left_index=True, right_index=True)[newdf.columns]
-                        if tf == 'h':
-                            print(f'{series} , {df1}')
+                      
                         if series.isnull().values.all(axis=0)[0]:
                             pass
                         else: 
@@ -368,7 +367,8 @@ class Plot:
                     
                     plt.savefig(p1, bbox_inches='tight')
                 except Exception as e:
-                    print(e)
+                    if ticker == 'HIBS':
+                        print(e)
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     
