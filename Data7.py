@@ -127,8 +127,8 @@ class Data:
             tf = '1min'
 
         if tf == 'd' or tf == 'w' or tf == 'm':
-            #df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
-            df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+            df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+            #df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
         else:
             if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
@@ -196,7 +196,8 @@ class Data:
                     df = df.between_time('09:30' , '15:59')
 
 
-
+        if 'h' in tf:
+            df.index = df.index + pd.Timedelta(minutes = -30)
         if tf != '1min':# and tf != 'd':
             logic = {'open'  : 'first',
                         'high'  : 'max',
@@ -204,6 +205,8 @@ class Data:
                         'close' : 'last',
                         'volume': 'sum' }
             df = df.resample(tf).apply(logic)
+        if 'h' in tf:
+            df.index = df.index + pd.Timedelta(minutes = 30)
         if current and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
             screenbar = Scan.Scan.get('0','d').loc[ticker]
