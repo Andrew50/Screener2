@@ -235,13 +235,7 @@ class Plot:
                             trades.append(add)
                         else:
                             colorlist.append('r')
-                            add = pd.DataFrame({
-                                    'Datetime':[df.iat[i,3][k][1]], 
-                                    'Symbol':[df.iat[i,3][k][0]],
-                                    'Action':"Sell",
-                                    'Price':[float(df.iat[i,3][k][3])]
-                                    })
-                            trades.append(add)
+
                         datelist.append(date)
                     
                     god = bar[1].iloc[i]['arrows']
@@ -258,8 +252,6 @@ class Plot:
                     for i in range(len(colors)):
                         colordf = dfall.loc[dfall['Color'] == colors[i]] 
                         dfsByColor.append(colordf)
-                    for datafram in dfsByColor:
-                        print(datafram)
 
 
                     df1 = data.get(ticker,tf)
@@ -268,25 +260,51 @@ class Plot:
                     l1 = data.findex(df1,startdate) - 50
                     r1 = data.findex(df1,enddate) + 50
                     df1 = df1[l1:r1]
-               
-                    tradeDf = pd.concat(trades).reset_index(drop = True)
-                    tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
+                    if tf == 'h':
+                        print(df1)
+                    if tf == 'd':
+                        print(df1)
                     times = df1.index.to_list()
-                    tradelist = []
-                    for t in range(len(tradeDf)):
-                        tradeTime = tradeDf.iloc[t]['Datetime']
-                        for q in range(len(times)):
+                    timesdf = []
+                    for _ in range(len(df1)):
+                        nextTime = pd.DataFrame({ 
+                            'Datetime':[df1.index[_]]
+                            })
+                        timesdf.append(nextTime)
+                    mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
+                    apds = [mpf.make_addplot(mainindidf)]
+                    for datafram in dfsByColor:
+                        datafram['Datetime'] = pd.to_datetime(datafram['Datetime'])
+                        tradelist = []
+                        for t in range(len(datafram)): 
+                            tradeTime = datafram.iloc[t]['Datetime']
+                            for q in range(len(times)):
+                                if(q+1 != len(times)):
+                                    if(times[q+1] > tradeTime):
+                                        test = pd.DataFrame({
+                                            'Datetime':[times[q]],
+                                            'Marker':[datafram.iloc[t]['Marker']],
+                                            'Price':[float(datafram.iloc[t]['Price'])]
+                                            })
+                                        tradelist.append(test)
+                                        break
+                        df2 = pd.concat(tradelist).reset_index(drop = True)
+                        df2['Datetime'] = pd.to_datetime(df2['Datetime'])
+                        df2 = df2.sort_values(by=['Datetime'])
+                        df2['TradeDate_count'] = df2.groupby("Datetime").cumcount() + 1
+                        newdf = (df2.pivot(index='Datetime', columns='TradeDate_count', values="Price")
+                            .rename(columns="price{}".format)
+                            .rename_axis(columns=None))
                         
-                            if(q+1 != len(times)):
-                                if(times[q+1] > tradeTime):
-                                    add = pd.DataFrame({
-                                        'Datetime':[times[q]],
-                                        'Symbol':[tradeDf.iloc[t]['Symbol']],
-                                        'Action':[tradeDf.iloc[t]['Action']],
-                                        'Price':[tradeDf.iloc[t]['Price']]
-                                        })
-                                    tradelist.append(add)
-                                    break
+                        series = mainindidf.merge(newdf, how='left', left_index=True, right_index=True)[newdf.columns]
+                        if series.isnull().values.all(axis=0)[0]:
+                            pass
+                        else: 
+                            apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .6,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
+
+                        
+
+                    '''
                     df2 = pd.concat(tradelist).reset_index(drop = True)
                     buy = df2[df2['Action'] == 'Buy']
                     buy['Datetime'] = pd.to_datetime(buy['Datetime'])
@@ -321,7 +339,7 @@ class Plot:
                         pass
                     else:  
                         apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=300,alpha = .6,marker='v',edgecolors='black', color='r'))
-                    
+                    '''
 
 
                     if tf == 'h':
@@ -351,7 +369,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except TimeoutError:
+                except Exception as e:
+                    print(e)
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     
