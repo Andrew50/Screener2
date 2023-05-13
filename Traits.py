@@ -365,7 +365,9 @@ class Traits:
 
 
                   
-                    low = 1000000000
+                    
+                    low = 1000000000*direction
+                    
                     entered = False
                     i = open_index
                     stopped = False
@@ -377,27 +379,30 @@ class Traits:
                         if direction > 0:
                             clow = df_1min.iat[i,2] #low
                         else:
-                            clow = df_1min.iat[i,3] #high
-
-                 
+                            clow = df_1min.iat[i,1] #high
                         cdate = df_1min.index[i]
-                        #print(f'{cdate} , {open_date}')
+                     
                         if (cdate - date).days > 2 or i - open_index > 800:
                             break
+
                         if clow*direction < low*direction:
+                            #print(clow*direction)
                             low = clow
+
                         if cdate >= date and not entered:
                             entered = True
                             
                             risk = (direction*(low - openprice))/openprice * 100
-                            low = 1000000000000
+                            
+                            low = 1000000000000*direction
                         #independent from all this other shit above as this is caclulating if you get therotcically stopped 
                         #based on your actuall entry
-                        if cdate > date and  clow < stop and not stopped:
+                        if cdate > date and  direction*clow < stop*direction and not stopped:
                             stopped = True
                             arrow_list.append([str(cdate),str(stop),'k',symbol])
                         i += 1
-                    low = (low/openprice - 1) * 100
+
+                    low = (direction*(low - openprice)/openprice) * 100
 
 
                 
