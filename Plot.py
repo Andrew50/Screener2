@@ -198,13 +198,13 @@ class Plot:
 
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
                 fw = 24
-                fh = 13
+                fh = 12
                 fs = 1.95
 
             else:
-                fw = 14
-                fh = 7
-                fs = .92
+                fw = 26
+                fh = 13
+                fs = 1.16
             df = bar[1]
         
             ticker = df.iat[i,0]
@@ -299,7 +299,7 @@ class Plot:
                         else: 
                             apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .6,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
 
-                        
+                    #print(f'{ticker} , {dfall}')
 
                     '''
                     df2 = pd.concat(tradelist).reset_index(drop = True)

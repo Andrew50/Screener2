@@ -149,6 +149,8 @@ class Traits:
             ticker = bar[0]
             date = bar[1]
             trades = bar[2]
+
+            
       
           
            
@@ -167,14 +169,15 @@ class Traits:
             size = 0
             maxsize = 0
             shg = 0
+            maxshares = 0
             for i in range(len(trades)):
                 sh = float(trades[i][2])
                 size += sh*float(trades[i][3])
                 shg += sh
                 if abs(size) > abs(maxsize):
                     maxsize = (size)
-                    maxshares = shg
-
+                maxshares += abs(sh)
+            maxshares = maxshares/2
             if shg != 0:
                 closed = False
             else:
@@ -191,6 +194,9 @@ class Traits:
                 else:
                     direction = -1
 
+
+
+               
                 #proift
                 pnl = 0
                 for i in range(len(trades)):
@@ -208,7 +214,10 @@ class Traits:
                 #theoretical exits
 
                 fb = float(trades[0][3])  *   maxshares
-                pnl = -fb
+
+
+
+                pnl = -fb 
                 df = None
                 buys = 0
                 fs = None
@@ -216,9 +225,17 @@ class Traits:
                 for i in range(len(trades)):
                     price = float(trades[i][3])
                     sh = float(trades[i][2])
-                
+                    
                     dollars = price * sh
-               
+                    
+                    if sh*direction > 0:
+                        #dt  = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+                        last_open_date = datetime.datetime.strptime(trades[i][1],'%Y-%m-%d %H:%M:%S')
+
+
+
+
+
                     if dollars*direction < 0:
                         if fs == None:
                             fs = price
@@ -227,6 +244,8 @@ class Traits:
                         buys -= dollars
                     
                 fbuy = (pnl/fb) * 100 * direction
+
+                
                 fsell = (fs*maxshares + buys)/size * 100 * direction
                 
                    
@@ -307,21 +326,26 @@ class Traits:
                     entered = False
                     i = open_index
                     stopped = False
-                    stop = (maxloss/100 + 1) * openprice
+                    stop = ((maxloss/100)*direction + 1) * openprice
 
                     stopdate = datetime.datetime.now() + datetime.timedelta(days = 100)
 
                     #theoretical or1 entry and max amount down after trade
-                  
+                    max_days = 10
                     while True:
+
+                        if i >= len(df_1min):
+                            break
                         if direction > 0:
                             clow = df_1min.iat[i,2] #low
                         else:
                             clow = df_1min.iat[i,1] #high
                         cdate = df_1min.index[i]
-                     
-                        if (cdate - date).days > 2 or i - open_index > 800:
+                        if  (cdate - date).days > 10 or i - open_index > 360*max_days :
                             break
+                        
+                     
+                        
 
                         if clow*direction < low*direction:
                             #print(clow*direction)
@@ -334,10 +358,15 @@ class Traits:
                             
                             low = 1000000000000*direction
                     
-                        if cdate > date and  direction*clow < stop*direction and not stopped:
+                        if cdate > last_open_date and  direction*clow < stop*direction and not stopped:
+                       
                             stopped = True
-                            arrow_list.append([str(cdate),str(stop),'k',symbol])
-                            stopdate = cdate
+                            copen = df_1min.iat[i,0]
+                            if direction*copen < direction*stop:
+                                stop = copen
+                            stopdate = df_1min.index[i+1]
+                            arrow_list.append([str(stopdate),str(stop),'k',symbol])
+                            
                         i += 1
 
                     low = (direction*(low - openprice)/openprice) * 100
@@ -359,7 +388,7 @@ class Traits:
                     while True:
                         close = hourly.iat[start+i,3]
                 
-                        cdate = hourly.index[start + i + 1]
+                        cdate = hourly.index[start + i] + datetime.timedelta(hours = 1)
 
                         if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or cdate > stopdate or i > 1000 or i + start >= len(hourly):
                             break

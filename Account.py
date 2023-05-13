@@ -271,9 +271,9 @@ class Account:
                 fh = 13.8
                 fs = 3.4
             else:
-                fw = 30
+                fw = 42
                 fh = 18
-                fs = 1.8
+                fs = 2.1
             string1 = "pnl.png"
             p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
 
