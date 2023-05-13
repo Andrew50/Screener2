@@ -192,7 +192,7 @@ class Plot:
             tflist = ['1min','h','d']
 
             i = bar[0]
-          
+            
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
 
@@ -208,8 +208,7 @@ class Plot:
             df = bar[1]
         
             ticker = df.iat[i,0]
-        
-
+            
             for tf in tflist:
                 string1 = str(i) + str(tf) + ".png"
                 p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
@@ -244,19 +243,33 @@ class Plot:
                                     })
                             trades.append(add)
                         datelist.append(date)
-              
-                
+                    
+                    god = bar[1].iloc[i]['arrows']
+                    god = [list(x) for x in god]
+                    dfall= pd.DataFrame(god, columns=['Datetime', 'Price', 'Color', 'Marker'])
+                    dfall['Datetime'] = pd.to_datetime(dfall['Datetime'])
+                    dfall = dfall.sort_values('Datetime')
+                    colors = []
+                    dfsByColor = []
+                    for i in range(len(dfall)):
+                        if(dfall.iloc[i]['Color'] not in colors):
+                            colors.append(dfall.iloc[i]['Color'])
+        
+                    for i in range(len(colors)):
+                        colordf = dfall.loc[dfall['Color'] == colors[i]] 
+                        dfsByColor.append(colordf)
+                    for datafram in dfsByColor:
+                        print(datafram)
+
+
                     df1 = data.get(ticker,tf)
-                    startdate = df.iat[i,3][0][1]
-                    enddate = df.iat[i,3][-1][1]
+                    startdate = dfall.iloc[0]['Datetime']
+                    enddate = dfall.iloc[-1]['Datetime']
                     l1 = data.findex(df1,startdate) - 50
                     r1 = data.findex(df1,enddate) + 50
                     df1 = df1[l1:r1]
-
-                    
+               
                     tradeDf = pd.concat(trades).reset_index(drop = True)
-                    print("TRADEDF ====")
-                    print(tradeDf)
                     tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
                     times = df1.index.to_list()
                     tradelist = []
@@ -298,14 +311,6 @@ class Plot:
                     mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
-                    print(buyseries)
-                    #for rr in range(len(buyseries)):
-                        #print(buyseries.iloc[rr])
-                    
-                    print(sellseries)
-                    print(buyseries)
-                    print(mainindidf)
-
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
@@ -346,7 +351,7 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except:
+                except TimeoutError:
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

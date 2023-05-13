@@ -260,7 +260,7 @@ class Traits:
 
                     sprice = float(trades[i][3])
                     shares = float(trades[i][2])
-                    sdate = trades[i][0]
+                    sdate = trades[i][1]
                     if shares > 0:
                         color = 'g'
                         symbol = '^'
