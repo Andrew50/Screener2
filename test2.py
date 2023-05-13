@@ -141,4 +141,11 @@ for i in range(len(colors)):
     colordf = df.loc[df[2] == colors[i]] 
     dfsByColor.append(colordf)
 
+apds = []
+for i in range(len(dfsByColor)):
+    currentDf = dfsByColor[i].sort_values(by=0)
+
+    
+
+
     
