@@ -92,7 +92,7 @@ class Plot:
         for index in i:
             arglist.append([index,self.df_traits])
         pool = self.pool
-        pool.map(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         image1 = None
         image2 = None
@@ -245,12 +245,12 @@ class Plot:
                     dfall = dfall.sort_values('Datetime')
                     colors = []
                     dfsByColor = []
-                    for i in range(len(dfall)):
-                        if(dfall.iloc[i]['Color'] not in colors):
-                            colors.append(dfall.iloc[i]['Color'])
+                    for zz in range(len(dfall)):
+                        if(dfall.iloc[zz]['Color'] not in colors):
+                            colors.append(dfall.iloc[zz]['Color'])
         
-                    for i in range(len(colors)):
-                        colordf = dfall.loc[dfall['Color'] == colors[i]] 
+                    for yy in range(len(colors)):
+                        colordf = dfall.loc[dfall['Color'] == colors[yy]] 
                         dfsByColor.append(colordf)
 
 
@@ -260,10 +260,6 @@ class Plot:
                     l1 = data.findex(df1,startdate) - 50
                     r1 = data.findex(df1,enddate) + 50
                     df1 = df1[l1:r1]
-                    if tf == 'h':
-                        print(df1)
-                    if tf == 'd':
-                        print(df1)
                     times = df1.index.to_list()
                     timesdf = []
                     for _ in range(len(df1)):
@@ -280,7 +276,7 @@ class Plot:
                             tradeTime = datafram.iloc[t]['Datetime']
                             for q in range(len(times)):
                                 if(q+1 != len(times)):
-                                    if(times[q+1] > tradeTime):
+                                    if(times[q+1] >= tradeTime):
                                         test = pd.DataFrame({
                                             'Datetime':[times[q]],
                                             'Marker':[datafram.iloc[t]['Marker']],

@@ -8,9 +8,10 @@ from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
 
+print("TESTSET")
 df = pd.read_feather("C:/Screener/sync/traits.feather")
 bar = []
-bar = [199, df]
+bar = [0, df]
 plot.create(bar)
 
 
@@ -128,7 +129,7 @@ df.to_csv(r"C:/Screener/tmp/log.csv")
 
 
 '''
-
+'''
 df = # Lists inside of a list. [Setup][]
 
 colors = []
@@ -156,5 +157,5 @@ for i in range(len(dfsByColor)):
 
     
 
-
+    '''
     
