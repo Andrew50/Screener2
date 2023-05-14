@@ -18,23 +18,22 @@ import statistics
 from tqdm import tqdm
 
 class Account:
-    
-
 
     def calcaccount(df_pnl,df_log,startdate = None,tf = None,bars = None):
 
+        conact = True
+        if startdate == None:
+            concat = False
 
-
-
-
+        #if realtime than pull conacted file + tvscraper
         account = False
         if startdate == 'now':
             account = True
 
         df_aapl = data.get('AAPL','1min',account = account)
         
-        #print(f"{startdate} , {df_aapl.index[-1]}")
-        if startdate != 'now' and startdate > df_aapl.index[-1]:
+        
+        if startdate != 'now' and startdate != None and startdate > df_aapl.index[-1]:
             return df_pnl
         
         if startdate != None:
@@ -45,10 +44,7 @@ class Account:
                 del_index = data.findex(df_pnl,startdate) 
                 df_pnl = df_pnl[:del_index]
                 index = data.findex(df_pnl,startdate)
-      
-        
-        
-
+   
         #initial conditions
        
             
@@ -71,33 +67,38 @@ class Account:
                 if ticker != '':
                     share = float(shares[i])
                     df = data.get(ticker,'1min',account = account)
-                    print(df)
+                    #print(df)
                     pos.append([ticker,share,df])
 
             try:
                 log_index = data.findex(df_log.set_index('Datetime'),startdate) 
                 nex = df_log.iloc[log_index]['Datetime']
             except:
-                nex = datetime.datetime.now()
+                nex = datetime.datetime.now() + datetime.timedelta(days = 100)
           
             
 
         else:
-            date = df_log.iat[0,1]
+            startdate = df_log.iat[0,1] - datetime.timedelta(days = 1)
             
             pnl = 0
             deposits = 0
             pos = []
             index = 0
             log_index = 0
-            nex = date
+            nex = df_log.iat[0,1]
  
+
+        #get list of all dates
         start_index = data.findex(df_aapl,startdate)
         date_list = df_aapl[start_index:].index.to_list()
   
         df_list = []
         pbar = tqdm(total=len(date_list))
         
+
+        #iterate over date list
+        print(len(date_list))
         for date in date_list:
 
             pnlvol = 0
@@ -105,7 +106,7 @@ class Account:
             
             while date > nex:
                 remove = False
-                skip = False
+               
                 ticker = df_log.iat[log_index,0]
                 shares = df_log.iat[log_index,2]
                 price = df_log.iat[log_index,3]
@@ -115,44 +116,85 @@ class Account:
 
                 else:
                     pos_index = None
+
+
+                    #if ticker is already a position
                     for i in range(len(pos)):
 
                         if pos[i][0] == ticker:
                             
-                        
+                            
+                            #if ticker didnt have data when it first became a potiions
+                            #the 'df' index will instead represent the average and will therefore be a float
+                            #if the trade is a buy then calculate new avg
+                            #if trade is a sell calculate the change to pnl
+                            if not isinstance(pos[i][2], pd.DataFrame):
+                            
+                                prev_shares = pos[i][1]
+                             
+                                avg = pos[i][2]
+                                if shares / prev_shares > 0:
+                                    pos[i][2] = ((avg*prev_shares) + (price*shares))/(prev_shares + shares)
+
+
+                                #if trade is a sell
+                                else:
+                                    gain = (price - avg) * shares
+                                 
+                                    pnl += gain
+                                    
+
+
                             pos_index = i
                             pos[i][1] += shares
                        
+                            #if the new shares is 0 the ticker will be removed later
                             if pos[i][1] == 0:
                                 remove = True
 
+                            
+
+
+
+                    #if ticker isnt already a position
                     if pos_index == None:
+                        pos_index = len(pos)
                         try:
                             df = data.get(ticker,'1min',account = account)
-                            pos_index = len(pos)
+                            
                             data.findex(df,date) + 1
-                            pos.append([ticker,shares,df])
+                            
                             
                         except:
-                            skip = True
-                            pass
-                    if not skip:
-                        df = pos[pos_index][2]
+                       
+                            df = price
+
+
+                        pos.append([ticker,shares,df])
+                   
+
+
+                    #subtract the amount missed out on from prev close on these new shares
+                    df = pos[pos_index][2]
+                    if isinstance(df, pd.DataFrame):
                         ind = data.findex(df,date) - 1
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
+                    
                         pnl += gosh
                      
-                        pnlvol += abs(shares*price)
-
-                        if remove:
-                            del pos[pos_index]
+                    pnlvol += abs(shares*price)
+                    
+                    #if the pos was closed then remove ticker from positions
+                    if remove:
+                        del pos[pos_index]
 
                 log_index += 1
-                try:
-                    nex = df_log.iat[log_index,1]
-                except: 
+                if log_index >= len(df_log):
                     nex = datetime.datetime.now() + datetime.timedelta(days=100)
+                    
+                else:
+                    nex = df_log.iat[log_index,1]
 
 
             pnlh = pnl
@@ -160,21 +202,26 @@ class Account:
             
             positions = ""
             god_shares = ""
+           
+            
+            #iterate open positions to find change in candle price since last candle multiplied by shares to calc how much
+            #each position changed the pnl
             for i in range(len(pos)):
                 ticker = pos[i][0]
                 shares = pos[i][1]
                 df = pos[i][2]
-                index = data.findex(df,date)
-                prevc = df.iat[index - 1,3]
-                c = df.iat[index,3] 
-                o = df.iat[index,0]
-                h = df.iat[index,1]
-                l = df.iat[index,2]
-              
-                pnl += (c - prevc) * shares
-                pnlh += (h - prevc) * shares
-                pnll += (l - prevc) * shares
-                pnlo += (o - prevc) * shares
+                if isinstance(df, pd.DataFrame):
+                    index = data.findex(df,date)
+                    prevc = df.iat[index - 1,3]
+                    c = df.iat[index,3] 
+                    o = df.iat[index,0]
+                    h = df.iat[index,1]
+                    l = df.iat[index,2]
+                    #print(f'{(c - prevc) * shares}::: 3')
+                    pnl += (c - prevc) * shares
+                    pnlh += (h - prevc) * shares
+                    pnll += (l - prevc) * shares
+                    pnlo += (o - prevc) * shares
                 if i >= 1:
                     positions += "," + (str(ticker))
                     god_shares += "," + (str(shares))
@@ -206,9 +253,9 @@ class Account:
         df = pd.concat(df_list)
      
         #df_pnl.set_index('Datetime',drop = True)
-        if date != None:
-            df = pd.concat([df_pnl.reset_index(),df]).sort_values(by='datetime')
-        
+        if concat:
+            df = pd.concat([df_pnl.reset_index(),df])
+        df = df.sort_values(by='datetime')
         df = df.reset_index(drop = True).set_index('datetime',drop = True)
         
         if tf == None:
@@ -219,8 +266,7 @@ class Account:
 
     def account(self,date = None):
 
-        
-
+      
         if self.event == "Load" or self.event == "Recalc":
             tf = self.values['input-timeframe']
             bars = self.values['input-bars']
@@ -234,8 +280,9 @@ class Account:
 
         if self.df_pnl.empty or self.event == "Recalc":
             df = Account.calcaccount(self.df_pnl,self.df_log,date)
-            df.to_feather(r"C:\Screener\sync\pnl.feather")
-            self.df_pnl = df.set_index('datetime',drop = True)
+            df.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
+            self.df_pnl = df
+            #self.df_pnl = df.set_index('datetime',drop = True)
 
         
         df = self.df_pnl
@@ -264,6 +311,7 @@ class Account:
                 logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
                 df = df.resample(tf).apply(logic).dropna()
             df = df[-bars:]
+            print(df)
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
