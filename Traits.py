@@ -168,6 +168,7 @@ class Traits:
             ##size
             size = 0
             maxsize = 0
+
             shg = 0
             maxshares = 0
             for i in range(len(trades)):
