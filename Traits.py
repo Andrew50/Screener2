@@ -428,9 +428,10 @@ class Traits:
                     i = 0
                     while True:
                         close = daily.iat[start+i,3]
-                   
-                        cdate = daily.index[start + i + 1]
-                        if (d10 != maxloss and d5 != maxloss) or cdate > stopdate or i > 100 or i + start >= len(daily):
+                        if i + start >= len(daily):
+                            break
+                        cdate = daily.index[start + i ] + datetime.timedelta(days = 1)
+                        if (d10 != maxloss and d5 != maxloss) or cdate > stopdate or i > 100 :
                             break
                         if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
                             
