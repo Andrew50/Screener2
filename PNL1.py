@@ -96,7 +96,7 @@ class PNL():
             [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
             #[(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
             [(sg.Text("Bars  ")),sg.InputText(key = 'input-bars')],
-            [sg.Button('Recalc'),sg.Button('Load')],
+            [sg.Button('Trade'),sg.Button('Real'),sg.Button('Recalc'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleaccount,finalize = True)
             account.account(self)
@@ -153,6 +153,7 @@ class PNL():
             self.event = [None]
             self.index = None
             self.update(self)
+            self.account_type = 'Real'
             lap = datetime.datetime.now()
             while True:
                 
@@ -176,8 +177,8 @@ class PNL():
 
                 else:
                   
-                    if self.menu == "Account" and data.isMarketOpen():
-                    
+                    if self.menu == "Account" and (data.isMarketOpen()):
+                        print('refresh')
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
@@ -187,7 +188,7 @@ class PNL():
                             tf = 'd'
                         if bars == '':
                             bars = '300'
-                        pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars), callback = account.account_plot)
+                        pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars,self.account_type, self.df_traits), callback = account.account_plot)
                        
                         
 if __name__ == "__main__":

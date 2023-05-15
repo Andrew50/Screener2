@@ -21,65 +21,72 @@ from Data7 import Data as data
 
 class Traits:
 
+    def update(bar,df_log,df_traits,df_pnl):
+        df_log = df_log.sort_values(by='datetime', ascending = True)
+        if bar == 'open':
+            open_pos = df_traits[df_traits['closed'] == False]
+            tickers = open_pos['ticker'].to_list()
+            dates = open_pos['datetime'].to_list()
+        else:
+            dates = [bar[1]]
+            tickers = [bar[0]]
 
-    def update(self,bar):
-        self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
-        date = bar[1]
-        ticker = bar[0]
-        if ticker != 'Deposit':
+        for i in range(len(tickers)):
+            ticker = tickers[i]
+            date = dates[i]
 
-            #find all trades with same ticker and greater than or equal to date
-            
-            df = self.df_traits
-            df['index'] = df.index
+            if ticker != 'Deposit':
+
+                #find all trades with same ticker and greater than or equal to date
+                df = df_traits
+                df['index'] = df.index
            
-            df =df.set_index('datetime',drop = True)
-            df = df[df['ticker'] == ticker]
+                df =df.set_index('datetime',drop = True)
+                df = df[df['ticker'] == ticker]
 
 
-            if not df.empty:
-                cutoff = 0
+                if not df.empty:
+                    cutoff = 0
         
-                drop_list = []
-                for i in range(len(df)):
-                    if df.index[i] <= date:
-                        cutoff = i
-                        break
+                    drop_list = []
+                    for i in range(len(df)):
+                        if df.index[i] <= date:
+                            cutoff = i
+                            break
                
-                drop_list = df.reset_index()[:cutoff+1]['index'].to_list()
-                i = df.iloc[cutoff]['index']
-                gosh = self.df_traits.iloc[i].to_list()
-                self.df_traits = self.df_traits.drop(index = drop_list)
-                ticker = gosh[0]
-                log_date = gosh[1]
-                if log_date > date:
-                    log_date = date
-                logs = self.df_log
+                    drop_list = df.reset_index()[:cutoff+1]['index'].to_list()
+                    i = df.iloc[cutoff]['index']
+                    gosh = df_traits.iloc[i].to_list()
+                    df_traits = df_traits.drop(index = drop_list)
+                    ticker = gosh[0]
+                    log_date = gosh[1]
+                    if log_date > date:
+                        log_date = date
+                    logs = df_log
                 
 
-                short_logs = logs[logs['ticker'] == ticker]
-                short_logs = short_logs[short_logs['datetime'] >= log_date]
-                short_logs = short_logs.reset_index(drop = True)
+                    short_logs = logs[logs['ticker'] == ticker]
+                    short_logs = short_logs[short_logs['datetime'] >= log_date]
+                    short_logs = short_logs.reset_index(drop = True)
  
-                df = Traits.calc(self,short_logs)
-                self.df_traits = pd.concat([self.df_traits,df])
-                self.df_traits = self.df_traits.sort_values(by='datetime',ascending = False).reset_index(drop = True)
-                self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
-   
+                    df = Traits.calc(short_logs,df_pnl)
+                    df_traits = pd.concat([df_traits,df])
+                    df_traits = df_traits.sort_values(by='datetime',ascending = False).reset_index(drop = True)
+        df_traits.to_feather(r"C:\Screener\sync\traits.feather")
+        return df_traits
  
-    def calc(self,df):
+    def calc(df_log,df_pnl):
 
-
+#trades///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         pos = []
         df_traits = pd.DataFrame()
-        for k in range(len(df)):
-            row = df.iloc[k].to_list()
+        for k in range(len(df_log)):
+            row = df_log.iloc[k].to_list()
             ticker = row[0]
             if ticker != 'Deposit':
                 shares = row[2]
                 date = row[1]
-            
                 index = None
                 for i in range(len(pos)):
                     if pos[i][0] == ticker:
@@ -92,7 +99,6 @@ class Traits:
                     pos.append([ticker,date,shares,[]])
                     index = len(pos) - 1
                 pos[index][3].append([str(x) for x in row])
-              
                 shares = prev_share + shares
                 if shares == 0:
                     for i in range(len(pos)):
@@ -100,366 +106,48 @@ class Traits:
                             index = i
                             bar = pos[i]
                             add = pd.DataFrame({
-            
                             'ticker': [bar[0]],
                             'datetime':[bar[1]],
                             'trades': [bar[3]]
-                            
                             })
-
                             df_traits = pd.concat([df_traits,add])
-                            #df_traits.reset_index(inplace = True,drop = True)
-
-                            #self.df_traits
                             del pos[i]
                             break
                 else:
-                
                     pos[index][2] = shares
-
-
-
-
         for i in range(len(pos)-1,-1,-1):
-           
             index = i
             bar = pos[i]
             add = pd.DataFrame({
-            
             'ticker': [bar[0]],
             'datetime':[bar[1]],
             'trades': [bar[3]]
             })
-
             df_traits = pd.concat([df_traits,add])
-            #df_traits.reset_index(inplace = True,drop = True)
-
-           
             del pos[i]
             break
-
         df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
-            
 
-        #traits///////////////////////////////////////////////////////////////////////////////////////
 
-        df_list = []
-        pbar = tqdm(total=len(df_traits))
+
+
+#traits///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      
+        #pbar = tqdm(total=len(df_traits))
         df_vix = data.get('^VIX','d')
         df_qqq = data.get('QQQ','d')
+        arg_list = []
+        for i in range(len(df_traits)):
+            bar = df_traits.iloc[i]
+            arg_list.append([bar,df_pnl,df_vix,df_qqq])
 
-        for k in range(len(df_traits)):
-            
-            bar = df_traits.iloc[k]
-            ticker = bar[0]
-            date = bar[1]
-            trades = bar[2]
-            openprice = float(trades[0][3])
-
-            try:
-                df_1min = data.get(ticker,'1min',account = True)
-                hourly = data.get(ticker,'h')
-                daily = data.get(ticker,'d')
-                startd = data.findex(daily,date)
-                start = data.findex(hourly,date)
-                    
-                if startd != None and start != None and df_1min != None:
-                    run = True
-            except FileNotFoundError:
-                pass
-
-            #
-            
-         
-  
-            ##size
-            
-            for i in range(len(trades)):
-                
-            
-
-
-            #ohlc calc
-            
-            try:
-                
-            except:
-                df_1min = None
-
-            for i in range(len(trades)):
-                if df_1min != None:
-
-           
-            if closed:
-            
-                size = maxsize
-
-                ###direction
-                if float(trades[0][2]) > 0:
-                    direction = 1
-                else:
-                    direction = -1
-
-                #main trades iterator
-                trade_pnl = 0
-                fb = float(trades[0][3])  *   maxshares
-                pnl = -fb 
-                df = None
-                buys = 0
-                fs = None
-                arrow_list = []
-                trade_setup = 'None'
-                size = 0
-                maxsize = 0
-                shg = 0
-                maxshares = 0
-
-                for i in range(len(trades)):
-                    sdate = trades[i][1]
-                    sh = float(trades[i][2])
-                    price = float(trades[i][3])
-                    setup = trades[i][4]
-                    dollars = price * sh
-
-                    #maxsize
-                    size += dollars
-                    shg += sh
-                    if abs(size) > abs(maxsize):
-                        maxsize = (size)
-                    maxshares += abs(sh)
-
-                    #setup
-                    if  setup != 'None' and "":
-                        trade_setup = setup
-
-                    #arrow list
-                    if shares > 0:
-                        color = 'g'
-                        symbol = '^'
-                    else:
-                        color = 'r'
-                        symbol = 'v'
-                    arrow_list.append([str(sdate),str(price),str(color),str(symbol)])
-                    
-                    #first buy first sell calc
-                    if sh*direction > 0:
-                        last_open_date = datetime.datetime.strptime(trades[i][1],'%Y-%m-%d %H:%M:%S')
-                    if dollars*direction < 0:
-                        if fs == None:
-                            fs = price
-                        pnl -= dollars
-                    else:
-                        buys -= dollars
-
-                    #trade pnl calc
-                    trade_pnl -= dollars
-                    
-                fbuy = (pnl/fb) * 100 * direction
-                fsell = (fs*maxshares + buys)/size * 100 * direction
-                try:
-                    account_val = self.df_pnl.iloc[data.findex(self.df_pnl,date)]['account']
-                except:
-                    account_val = self.df_pnl.iloc[-1]['account']
-                pnl_pcnt = ((pnl / abs(size)) ) *100
-                pnl_account = (pnl/ account_val ) * 100
-                maxshares = maxshares/2
-                if shg != 0:
-                    closed = False
-                else:
-                    closed = True
-                if pnl_pcnt < -2:
-                    maxloss = pnl_pcnt
-                else:
-                    maxloss = -2
-                h10 = maxloss
-                h20 = maxloss
-                h50 = maxloss
-                d5 = maxloss
-                d10 = maxloss
-                h10time = 0
-                h20time = 0
-                h50time = 0
-                d5time = 0
-                d10time = 0
-                run = False
-
-                
-
-                #if there is data
-                if run:
-
-                    #theoretical or1 entry and max amount down after trade
-                    open_date = daily.index[data.findex(daily,date)]
-                    open_index = data.findex(df_1min,open_date)
-                    low = 1000000000*direction
-                    entered = False
-                    i = open_index
-                    stopped = False
-                    stop = ((maxloss/100)*direction + 1) * openprice
-                    stopdate = datetime.datetime.now() + datetime.timedelta(days = 100)
-                    max_days = 10
-                    while True:
-
-                        if i >= len(df_1min):
-                            break
-                        if direction > 0:
-                            clow = df_1min.iat[i,2] #low
-                        else:
-                            clow = df_1min.iat[i,1] #high
-                        cdate = df_1min.index[i]
-                        if  (cdate - date).days > 10 or i - open_index > 360*max_days :
-                            break
-                        if clow*direction < low*direction:
-                            low = clow
-                        if cdate >= date and not entered:
-                            entered = True
-                            risk = (direction*(low - openprice))/openprice * 100
-                            low = 1000000000000*direction
-                        if cdate > last_open_date and  direction*clow < stop*direction and not stopped:
-                            stopped = True
-                            copen = df_1min.iat[i,0]
-                            if direction*copen < direction*stop:
-                                stop = copen
-                            stopdate = df_1min.index[i+1]
-                            arrow_list.append([str(stopdate),str(stop),'k',symbol])
-                            
-                        i += 1
-                    low = (direction*(low - openprice)/openprice) * 100
-
-                    if direction > 0:
-                        symbol = 'v'
-                    else:
-                        symbol = '^'
-                    prices = []
-                    for i in range(50):
-                        prices.append(hourly.iat[i + start - 50,3])
-                    i = 0
-                    
-                    while True:
-                        close = hourly.iat[start+i,3]
-                        cdate = hourly.index[start + i] + datetime.timedelta(hours = 1)
-
-                        if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or cdate > stopdate or i > 1000 or i + start >= len(hourly):
-                            break
-                     
-                        if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
-                            h10 = direction*(close/openprice - 1)*100
-                            h10time = ( cdate- date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'m',str(symbol)])
-                        if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
-                            h20 = direction*(close/openprice - 1)*100
-                            h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'b',str(symbol)])
-                        if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
-                            h50 = direction*(close/openprice - 1)*100
-                            h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'c',str(symbol)])
-                            
-                        i += 1
-                        prices.append(hourly.iat[start + i,3])
-   
-                    start = startd 
-                    prices = []
-                    for i in range(10):
-                        prices.append(daily.iat[i + start - 10,3])
-                    i = 0
-
-                    while True:
-                        close = daily.iat[start+i,3]
-
-                        if i + start >= len(daily):
-                            break
-                        cdate = daily.index[start + i ] + datetime.timedelta(days = 1)
-                        if (d10 != maxloss and d5 != maxloss) or cdate > stopdate or i > 100 :
-                            break
-
-                        if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
-                            d5 = direction*(close/openprice - 1)*100
-                            d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'y',str(symbol)])
-                        if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss:
-                            
-                            d10 = direction*(close/openprice - 1)*100
-                            d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
-                            arrow_list.append([str(cdate),str(close),'w',str(symbol)])
-                        i += 1
-                        prices.append(daily.iat[start+i,3])
-
-                    if h10 < maxloss:
-                        h10 = maxloss
-                    if h20 < maxloss:
-                        h20 = maxloss
-                    if h50 < maxloss:
-                        h50 = maxloss
-                    if d5 < maxloss:
-                        d5 = maxloss
-                    if d10 < maxloss:
-                        d10 = maxloss
-
-                    #relative performance
-                    r10 = h10 - pnl_pcnt
-                    r20 = h20 - pnl_pcnt
-                    r50 = h50 - pnl_pcnt
-                    r5d = d5 - pnl_pcnt
-                    r10d = d10 - pnl_pcnt
-                    rfsell = fsell - pnl_pcnt
-                    rfbuy = fbuy - pnl_pcnt
-
-                    #vix
-                    try:
-                        ivix = data.findex(df_vix,date)
-                        vix = df_vix.iat[ivix,0]
-                    except:
-                        vix = 0
-
-                    #qqq traits
-                    iqqq = data.findex(df_qqq,date)
-                    ma = []
-                    for i in range(51):
-                        ma.append(df_qqq.iat[iqqq+i-50,3])
-                        if i == 49:
-                            ma50 = statistics.mean(ma)
-                    m50 = (statistics.mean(ma[-50:])/ma50 - 1) * 100
-
-                    #final df row
-                    add = pd.DataFrame({
-                    'ticker': [ticker],
-                    'datetime':[date],
-                    'setup':[trade_setup],
-                    'trades': [trades],
-                    'pnl':[pnl],
-                    'account':[pnl_account],
-                    'percent':[pnl_pcnt],
-                    'fsell':[fsell],
-                    'fbuy':[fbuy],
-                    'p10':[h10],
-                    'p20':[h20],
-                    'p50':[h50],
-                    'p5d':[d5],
-                    'p10d':[d10],
-                    'rpercent':[0],
-                    'rfsell':[rfsell],
-                    'rfbuy':[rfbuy],
-                    'r10':[r10],
-                    'r20':[r20],
-                    'r50':[r50],
-                    'r5d':[r5d],
-                    'r10d':[r10d],
-                    't10d':[d10time],
-                    't20':[h20time],
-                    't10':[h10time],
-                    't50':[h50time],
-                    't5d':[d5time],
-                    'arrows':[arrow_list],
-                    'vix':[vix],
-                    'low':[low],
-                    'risk':[risk],
-                    'm50':[m50]
-                    })
-               
-                    df_list.append(add)
-            pbar.update(1)
-
+        if len(arg_list) > 30:
+            df_list = data.pool(Traits.trait_calc,arg_list)
+        else:
+            df_list = []
+            for i in range(len(arg_list)):
+                df_list.append(Traits.trait_calc(arg_list[i]))
 
 
         try:
@@ -467,37 +155,416 @@ class Traits:
             df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
         except:
             df = pd.DataFrame()
-        #df.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
-        
+    
         return df
 
 
 
+    def trait_calc(pack):
+        bar = pack[0]
+        df_pnl = pack[1]
+        df_vix = pack[2]
+        df_qqq = pack[3]
+        #for k in range(len(df_traits)):
+            
+        #unpack row
+        #bar = df_traits.iloc[k]
+        ticker = bar[0]
+        date = bar[1]
+        trades = bar[2]
+        openprice = float(trades[0][3])
+        lastdate = datetime.datetime.strptime(trades[-1][1],'%Y-%m-%d %H:%M:%S')
+
+        #try to pull dfs
+
+        if (datetime.datetime.now() - lastdate).days > 10:
+            acnt = False
+        else:
+            acnt = True
+
+        run = False
+        try:
+            df_1min = data.get(ticker,'1min',account = acnt)
+            hourly = data.get(ticker,'h',account = acnt)
+            daily = data.get(ticker,'d',account = acnt)
+            startd = data.findex(daily,date)
+            start = data.findex(hourly,date)
+            open_date = daily.index[data.findex(daily,date)]
+            recent_price = df_1min.iat[-1,3]
+            if startd != None and start != None:
+                run = True
+        except:
+            recent_price = float(trades[-1][3])
+
+        ###direction
+        if float(trades[0][2]) > 0:
+            direction = 1
+        else: 
+            direction = -1
+
+        #main trades iterator
+        trade_pnl = 0
+        maxshares = sum([abs(float(s)) for d,d,s,d,d in trades])/2
+         
+        fb = float(trades[0][3])  *   maxshares
+        pnl = -fb 
+     
+        buys = 0
+        fs = None
+        arrow_list = []
+        trade_setup = 'None'
+        size = 0
+        maxsize = 0
+        shg = 0
+        total_size = 0
+        pnl_high = -10000000000
+        pnl_low = 1000000000000
+            
+            
+
+        for i in range(len(trades)):
+            sdate = trades[i][1]
+            sh = float(trades[i][2])
+            price = float(trades[i][3])
+            setup = trades[i][4]
+            dollars = price * sh
+
+            #total size
+            total_size += abs(dollars)
+
+            #maxsize
+            size += dollars
+            shg += sh
+            if abs(size) > abs(maxsize):
+                maxsize = (size)
+                
+
+            #setup
+            if  setup != 'None' and "":
+                trade_setup = setup
+
+            #arrow list
+            if sh > 0:
+                color = 'g'
+                symbol = '^'
+            else:
+                color = 'r'
+                symbol = 'v'
+            arrow_list.append([str(sdate),str(price),str(color),str(symbol)])
+                    
+            #first buy first sell calc
+            if sh*direction > 0:
+                last_open_date = datetime.datetime.strptime(trades[i][1],'%Y-%m-%d %H:%M:%S')
+            if dollars*direction < 0:
+                if fs == None:
+                    fs = price
+                pnl -= dollars
+            else:
+                buys -= dollars
+
+            #pnl
+            trade_pnl -= dollars
 
 
+            #ohlc if no data
+            if not run:
+                pnlc = trade_pnl + price * shg
+                if pnlc < pnl_low:
+                    pnl_low = pnlc
+                if pnlc > pnl_high:
+                    pnl_high = pnlc
 
+                
+                    
+        fbuy = (pnl/fb) * 100 * direction
+        fsell = (fs*maxshares + buys)/maxsize * 100 * direction
+        try:
+            account_val = df_pnl.iloc[data.findex(df_pnl,date)]['account']
+        except:
+            account_val = df_pnl.iloc[-1]['account']
 
+        maxloss = -2
+        if shg != 0:
+            closed = False
+            if not run:
+                  
+                trade_pnl += recent_price * shg
+                pnl_pcnt = ((trade_pnl / abs(maxsize)) ) *100
+                pnl_account = (trade_pnl/ account_val ) * 100
+        else:
+            closed = True
+            pnl_pcnt = ((trade_pnl / abs(maxsize)) ) *100
+            pnl_account = (trade_pnl/ account_val ) * 100
+            if pnl_pcnt < maxloss:
+                maxloss = pnl_pcnt
+            
+            
+        size = maxsize
+        h10 = maxloss
+        h20 = maxloss
+        h50 = maxloss
+        d5 = maxloss
+        d10 = maxloss
+        h10time = 0
+        h20time = 0
+        h50time = 0
+        d5time = 0
+        d10time = 0
 
+        #vix
+        try:
+            ivix = data.findex(df_vix,date)
+            vix = df_vix.iat[ivix,0]
+        except:
+            vix = 0
 
             
-            #df.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
-        
-
-            #self.df_traits.plot(x=self.event, y="perf", kind="scatter")
-        '''
-        ten = [i for i in self.df_traits['p10'].to_list() if i > 0]
-        twenty = [i for i in self.df_traits['p20'].to_list() if i > 0]
-        fifty = [i for i in self.df_traits['p50'].to_list() if i > 0]
-
-        bins = 20#numpy.linspace(-10, 10, 100)
             
-        plt.hist(ten, bins,alpha=0.35,ec='black', label='10')
-        plt.hist(twenty, bins,alpha=0.35, ec='black',label='20')
-        plt.hist(fifty, bins, alpha=0.35, ec='black',label='50') 
-        '''
 
+#if there is data////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if run:
+
+            #qqq traits
+            iqqq = data.findex(df_qqq,date)
+            ma = []
+            for i in range(51):
+                ma.append(df_qqq.iat[iqqq+i-50,3])
+                if i == 49:
+                    ma50 = statistics.mean(ma)
+            m50 = (statistics.mean(ma[-50:])/ma50 - 1) * 100
+
+
+            #theoretical or1 entry and max amount down after trade
+                
+            open_index = data.findex(df_1min,open_date)
+            low = 1000000000*direction
+            entered = False
+            i = open_index
+            stopped = False
+            stop = ((maxloss/100)*direction + 1) * openprice
+            stopdate = datetime.datetime.now() + datetime.timedelta(days = 100)
+            max_days = 3
+            before_max = True
+                
+            shares = 0
+
+            nex = date
+            trade_index = 0
+            pnl = 0
+            pnl_low = 10000000
+            pnl_high = -1000000
+            exit = False
+            while True:
+                    
+                #stop and risk
+                if i >= len(df_1min) or (exit and not before_max):
+                    break
+                if direction > 0:
+                    clow = df_1min.iat[i,2] 
+                else:
+                    clow = df_1min.iat[i,1] 
+                cdate = df_1min.index[i]
+                if  (cdate - date).days > max_days or i - open_index > 390*max_days :
+                    before_max = False
+                if clow*direction < low*direction and before_max:
+                    low = clow
+                if cdate >= date and not entered:
+                    entered = True
+                    risk = (direction*(low - openprice))/openprice * 100
+                    low = 1000000000*direction
+                if cdate > last_open_date and  direction*clow < stop*direction and not stopped:
+                    stopped = True
+                    copen = df_1min.iat[i,0]
+                    if direction*copen < direction*stop:
+                        stop = copen
+                    stopdate = df_1min.index[i+1]
+                    arrow_list.append([str(stopdate),str(stop),'k',symbol]) 
+
+                #pnl
+                while cdate > nex:
+                    sh = float(trades[trade_index][2])
+                    price = float(trades[trade_index][3])
+                    pnl -= (df_1min.iat[i-1,3] - price)*sh
+                    shares += sh
+                    trade_index += 1
+                    if trade_index >= len(trades):
+                        nex = datetime.datetime.now() + datetime.timedelta(days=100)
+                        exit = True
+                    else:
+                        nex = datetime.datetime.strptime(trades[trade_index][1],'%Y-%m-%d %H:%M:%S')
+
+                index = data.findex(df_1min,cdate)
+                prevc = df_1min.iat[index - 1,3]
+                c = df_1min.iat[index,3] 
+                h = df_1min.iat[index,1]
+                l = df_1min.iat[index,2]
+                pnlh =  pnl + (h - prevc) * shares
+                pnll = pnl + (l - prevc) * shares
+                pnl = pnl + (c - prevc) * shares
+                if pnll < pnl_low:
+                    pnl_low = pnll
+                if pnlh > pnl_high:
+                    pnl_high = pnlh
+
+                i += 1
+                
+            if not closed:
+                trade_pnl = pnl
+                pnl_pcnt = ((trade_pnl / abs(maxsize)) ) *100
+                pnl_account = (trade_pnl/ account_val ) * 100
+            low = (direction*(low - openprice)/openprice) * 100
+
+            #hourly exit calculator
+            if direction > 0:
+                symbol = 'v'
+            else:
+                symbol = '^'
+            prices = []
+            for i in range(50):
+                prices.append(hourly.iat[i + start - 50,3])
+            i = 0
+            while True:
+                close = hourly.iat[start+i,3]
+                cdate = hourly.index[start + i] + datetime.timedelta(hours = 1)
+                if (h20 != maxloss and h10 != maxloss and h50 != maxloss) or cdate > stopdate or i > 1000 or i + start >= len(hourly):
+                    break
+                if direction * close < direction * statistics.mean(prices[-10:]) and h10 == maxloss:
+                    h10 = direction*(close/openprice - 1)*100
+                    h10time = ( cdate- date).total_seconds() / 3600
+                    arrow_list.append([str(cdate),str(close),'m',str(symbol)])
+                if direction * close < direction * statistics.mean(prices[-20:]) and h20 == maxloss:
+                    h20 = direction*(close/openprice - 1)*100
+                    h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                    arrow_list.append([str(cdate),str(close),'b',str(symbol)])
+                if direction * close < direction * statistics.mean(prices[-50:]) and h50 == maxloss:
+                    h50 = direction*(close/openprice - 1)*100
+                    h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                    arrow_list.append([str(cdate),str(close),'c',str(symbol)]) 
+                i += 1
+                prices.append(hourly.iat[start + i,3])
+   
+            #daily exit calculator
+            start = startd 
+            prices = []
+            for i in range(10):
+                prices.append(daily.iat[i + start - 10,3])
+            i = 0
+            while True:
+                close = daily.iat[start+i,3]
+                if i + start >= len(daily):
+                    break
+                cdate = daily.index[start + i ] + datetime.timedelta(days = 1)
+                if (d10 != maxloss and d5 != maxloss) or cdate > stopdate or i > 100 :
+                    break
+                if direction * close < direction * statistics.mean(prices[-5:]) and d5 == maxloss:
+                    d5 = direction*(close/openprice - 1)*100
+                    d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                    arrow_list.append([str(cdate),str(close),'y',str(symbol)])
+                if direction * close < direction * statistics.mean(prices[-10:]) and d10 == maxloss: 
+                    d10 = direction*(close/openprice - 1)*100
+                    d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                    arrow_list.append([str(cdate),str(close),'w',str(symbol)])
+                i += 1
+                prices.append(daily.iat[start+i,3])
+
+            #set theoretical exits to stop loss if they are lower than max stop
+            if h10 < maxloss:
+                h10 = maxloss
+            if h20 < maxloss:
+                h20 = maxloss
+            if h50 < maxloss:
+                h50 = maxloss
+            if d5 < maxloss:
+                d5 = maxloss
+            if d10 < maxloss:
+                d10 = maxloss
+
+            #relative performance
+            r10 = h10 - pnl_pcnt
+            r20 = h20 - pnl_pcnt
+            r50 = h50 - pnl_pcnt
+            r5d = d5 - pnl_pcnt
+            r10d = d10 - pnl_pcnt
+            rfsell = fsell - pnl_pcnt
+            rfbuy = fbuy - pnl_pcnt
+                
+
+                
+
+        #if ticker doesnt have data then fill uncalcable traits
+        else:
+            h10  = pd.NA
+            h20 = pd.NA
+            h50 = pd.NA
+            d5 = pd.NA
+            d10 = pd.NA
+            r10 = pd.NA
+            r20 = pd.NA
+            r50 = pd.NA
+            r5d = pd.NA
+            r10d = pd.NA
+            d10time = pd.NA
+            h10time  = pd.NA
+            h20time = pd.NA
+            h50time = pd.NA
+            d5time = pd.NA
+            low  = pd.NA
+            risk  = pd.NA
+
+                
+            rfsell = fsell - pnl_pcnt
+            rfbuy = fbuy - pnl_pcnt
+            m50 = pd.NA
+                
+                
+
+      
+
+        #final df row
+        add = pd.DataFrame({
+        'ticker': [ticker],
+        'datetime':[date],
+        'setup':[trade_setup],
+        'trades': [trades],
+        'pnl':[trade_pnl],
+        'account':[pnl_account],
+        'percent':[pnl_pcnt],
+        'fsell':[fsell],
+        'fbuy':[fbuy],
+        'p10':[h10],
+        'p20':[h20],
+        'p50':[h50],
+        'p5d':[d5],
+        'p10d':[d10],
+        'rpercent':[0],
+        'rfsell':[rfsell],
+        'rfbuy':[rfbuy],
+        'r10':[r10],
+        'r20':[r20],
+        'r50':[r50],
+        'r5d':[r5d],
+        'r10d':[r10d],
+        'vix':[vix], 
+        'm50':[m50],
+        'arrows':[arrow_list],
+        'closed':[closed],
+        't10d':[d10time],
+        't20':[h20time],
+        't10':[h10time],
+        't50':[h50time],
+        't5d':[d5time],
+        'min':[low],
+        'risk':[risk],
+        'open':[0],
+        'high':[pnl_high],
+        'low':[pnl_low],
+        'close':[trade_pnl],
+        'volume':[total_size],
+        })
+        return add
 
     def traits(self):
+        '''
         pp = 0
         for i in range(len(self.df_log)):
             price = self.df_log.iat[i,3]
@@ -505,13 +572,14 @@ class Traits:
             dollars = price*shares
             pp -= dollars
         print(pp)
+        '''
         if self.df_traits.empty or self.event == 'Recalc':
 
             self.df_traits = pd.DataFrame()
             
             #df = self.df_log.sort_values(by='Datetime')
             self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
-            self.df_traits = Traits.calc(self,self.df_log)
+            self.df_traits = Traits.calc(self.df_log,self.df_pnl)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
 
         bins = 50

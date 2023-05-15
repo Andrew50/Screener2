@@ -88,9 +88,12 @@ class Log:
                     df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
                     self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
                     self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
-                    traits.update(self,add.values.tolist()[0])
+                    self.df_traits = traits.update(add.values.tolist()[0], self.df_log,self.df_traits,self.df_pnl)
 
                     self.df_log = df_log
+                    if os.path.exists("C:/Screener/tmp/pnl/charts"):
+                        shutil.rmtree("C:/Screener/tmp/pnl/charts")
+                    os.mkdir("C:/Screener/tmp/pnl/charts")
                     #self.df_log.
                     #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
                 except Exception as e:
@@ -103,9 +106,12 @@ class Log:
                 df_log = df_log.sort_values(by='datetime', ascending = True)
                 self.df_pnl = account.calcaccount(self.df_pnl,df_log,bar[1])
                 self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
-                traits.update(self,bar)
+                self.df_traits = traits.update(bar, self.df_log,self.df_traits,self.df_pnl)
                 self.df_log = df_log
                 self.index = None
+                if os.path.exists("C:/Screener/tmp/pnl/charts"):
+                    shutil.rmtree("C:/Screener/tmp/pnl/charts")
+                os.mkdir("C:/Screener/tmp/pnl/charts")
                 
 
            

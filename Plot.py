@@ -148,9 +148,17 @@ class Plot:
         table2 = [[],[]]
        
         for i in range(6,14):
-            table2[0].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
+            try:
+                string = f'{round(self.df_traits.iat[self.i,i],2)} %'
+            except:
+                string = str(self.df_traits.iat[self.i,i])
+            table2[0].append(string)
         for i in range(14,22):
-            table2[1].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
+            try:
+                string = f'{round(self.df_traits.iat[self.i,i],2)} %'
+            except:
+                string = str(self.df_traits.iat[self.i,i])
+            table2[1].append(string)
         '''
         pnl = 0
         for i in range(len(bar)):
@@ -249,7 +257,7 @@ class Plot:
                         dfsByColor.append(colordf)
 
 
-                    df1 = data.get(ticker,tf)
+                    df1 = data.get(ticker,tf,account = True)
                     startdate = dfall.iloc[0]['Datetime']
                     enddate = dfall.iloc[-1]['Datetime']
                     l1 = data.findex(df1,startdate) - 50
@@ -283,6 +291,18 @@ class Plot:
                                             })
                                         tradelist.append(test)
                                         break
+########################################################################
+                                else:
+                                    time = times[q].to_pydatetime() + (times[q].to_pydatetime() - times[q-1])
+                                    if time >= tradeTime:
+                                        test = pd.DataFrame({
+                                                'Datetime':[times[q]],
+                                                'Marker':[datafram.iloc[t]['Marker']],
+                                                'Price':[float(datafram.iloc[t]['Price'])]
+                                                })
+                                        tradelist.append(test)
+                                        break
+#########################################################
                         df2 = pd.concat(tradelist).reset_index(drop = True)
                         df2['Datetime'] = pd.to_datetime(df2['Datetime'])
                         df2 = df2.sort_values(by=['Datetime'])
@@ -364,8 +384,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except Exception as e:
-                   
+                except TimeoutError as e:
+                    print(e)
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

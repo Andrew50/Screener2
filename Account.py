@@ -17,11 +17,16 @@ import numpy
 import statistics
 from tqdm import tqdm
 
+from Traits import Traits as traits
+
 class Account:
 
-    def calcaccount(df_pnl,df_log,startdate = None,tf = None,bars = None):
+    def calcaccount(df_pnl,df_log,startdate = None,tf = None,bars = None,account_type = None, df_traits = None):
 
+        if account_type == 'Trade':
 
+            df = traits.update('open',df_log,df_traits,df_pnl)
+            return [df,tf,bars,account_type]
 
 
 
@@ -252,7 +257,7 @@ class Account:
                 df = pos[i][2]
                 if isinstance(df, pd.DataFrame):
                     index = data.findex(df,date)
-                    print(f'{date} , {df.index[index]} , {df}' )
+               
                     prevc = df.iat[index - 1,3]
                     c = df.iat[index,3] 
                     o = df.iat[index,0]
@@ -308,10 +313,13 @@ class Account:
         if tf == None:
             return df 
         else:
-            return [df,tf,bars]
+            return [df,tf,bars,account_type]
         
 
     def account(self,date = None):
+
+        if self.event == 'Trade' or 'Real':
+            self.account_type = self.event
 
       
         if self.event == "Load" or self.event == "Recalc":
@@ -331,9 +339,12 @@ class Account:
             self.df_pnl = df
             #self.df_pnl = df.set_index('datetime',drop = True)
 
+        if self.account_type == 'Trade':
+            df = self.df_traits
+        else:
+            df = self.df_pnl
         
-        df = self.df_pnl
-        bar = [df,tf,bars]
+        bar = [df,tf,bars,self.account_type]
         Account.account_plot(bar)
         Account.plot_update(self)
         
@@ -342,22 +353,43 @@ class Account:
 
 
     def account_plot(bar):
-
-
-        
         try:
             df = bar[0]
             tf = bar[1]
             bars = int(bar[2])
+            account_type = bar[3]
 
-       
+            if account_type == 'Trade':
+                
+                df = df.sort_values(by='datetime',ascending = True)
+                df = df.set_index('datetime')
+                
+                df = df[['open','high','low','close','volume']]
 
-            if tf == '':
-                tf = 'd'
-            if tf != "1min":
-                logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
-                df = df.resample(tf).apply(logic).dropna()
-            df = df[-bars:]
+                #df['high'] = pd.to_numeric(df['high'])
+                pc = 0
+                #print(type(df['high']))
+                
+                for i in range(len(df)):
+                    v = df.iat[i,4]
+                    c = df.iat[i,3] + pc
+                    o = pc
+                    h = df.iat[i,1] + pc
+                    l = df.iat[i,2] + pc
+                    df.iloc[i] = [o,h,l,c,v]
+                    pc = c
+                
+              
+                    
+            else:
+               
+            
+                if tf == '':
+                    tf = 'd'
+                if tf != "1min":
+                    logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
+                    df = df.resample(tf).apply(logic).dropna()
+                df = df[-bars:]
          
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
@@ -371,13 +403,13 @@ class Account:
                 fs = 2.1
             string1 = "pnl.png"
             p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
-
+            
             fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
-
             plt.savefig(p1, bbox_inches='tight')
             
-        except: #Exception as e:
+        except TimeoutError:# Exception as e:
             pass
+           
         #plt.show()
         
         
