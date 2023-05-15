@@ -8,6 +8,17 @@ from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
 
+
+
+
+
+
+
+string = '23:45'
+
+sting = string.split(':')
+print(sting)
+'''
 print("TESTSET")
 df = pd.read_feather("C:/Screener/sync/traits.feather")
 bar = []
@@ -20,7 +31,7 @@ plot.create(bar)
 #scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
 
 #print(scan)
-
+'''
 
 '''
 df = data.get('AAPL','1min',datetime.datetime.now(),account = True)\
