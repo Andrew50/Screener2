@@ -175,7 +175,7 @@ class PNL():
                 else:
                   
                     if self.menu == "Account" and False:
-                     
+                    
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
