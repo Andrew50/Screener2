@@ -162,11 +162,6 @@ class Plot:
 
 
 
-
-
-
-
-
         bio1 = io.BytesIO()
         image1.save(bio1, format="PNG")
         bio2 = io.BytesIO()
