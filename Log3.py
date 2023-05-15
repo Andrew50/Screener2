@@ -63,7 +63,7 @@ class Log:
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
         ourpath = pathlib.Path("C:/Screener/tmp")/ 'test.png'
-        print('4')
+       
         z = round(z, 3)
         df = df[-100:]
         #df.set_index('datetime', inplace = True)
@@ -79,7 +79,7 @@ class Log:
             
         if path == 1:
 
-            print('god')
+           
             file_path = "C:/Screener/tmp/subsetups/today" + str(os.getpid()) + ".feather"
             '''
             if df.index[currentday] == datetime.date.today(): 
@@ -159,7 +159,7 @@ class Log:
                     delta = (date - recent_date).days
                     if abs(delta) <= cooldown:
                         exclude = True
-                        #print(f'excluded {ticker} , {date} , {st}')
+                    
                     else:
                         exclude = False
                 else:
@@ -192,7 +192,7 @@ class Log:
                 
                 
                 df = df.reset_index(drop = True)
-                #print(df)
+              
                 df.to_feather(file_path)
 
 
@@ -330,7 +330,7 @@ class Log:
                 
                 
                 df = df.reset_index(drop = True)
-                #print(df)
+            
                 df.to_feather(file_path)
             
             

@@ -100,7 +100,7 @@ class Scan:
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
 
-        screener_data = pd.read_csv(r"C:\Downloads\america_" + today + ".csv")
+        screener_data = pd.read_csv(downloaded_file)
 
         '''
         new_name = r"C:\Downloads\screener_data.csv"
