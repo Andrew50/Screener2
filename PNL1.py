@@ -36,7 +36,7 @@ class PNL():
         if self.menu == None:
             sg.theme('DarkGrey')
             try:
-                self.df_log = pd.read_feather(r"C:\Screener\sync\log.feather")
+                self.df_log = pd.read_feather(r"C:\Screener\sync\log.feather").sort_values(by='datetime',ascending = False)
             except:
                 self.df_log = pd.DataFrame()
             try:
@@ -51,7 +51,7 @@ class PNL():
             self.menu = "Account"
         else:
             self.window.close()
-        print(f'{self.menu} menu')
+       # print(f'{self.menu} menu')
 
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 
@@ -174,13 +174,13 @@ class PNL():
 
                 else:
                   
-                    if self.menu == "Account":
-                     
+                    if self.menu == "Account" and False:
+                    
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
                         bars = self.values['input-bars']
-                        print('refresh')
+                       # print('refresh')
                         if tf == '':
                             tf = 'd'
                         if bars == '':

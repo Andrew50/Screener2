@@ -21,9 +21,31 @@ class Account:
 
     def calcaccount(df_pnl,df_log,startdate = None,tf = None,bars = None):
 
-        conact = True
+
+
+
+
+        df_log = df_log.sort_values(by='datetime', ascending = True)
+
+
+
+        #if date is a datetime object then it is coming from the log updater
+        #floor the datetime to nearest minute so that trades that happen in the same minute are not ignored
+        if startdate != None and not isinstance(startdate, str):
+            startdate = str(startdate)[:-2] + '00'
+            startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d %H:%M:%S')
+            print(str(startdate))
+            
+            print('rounded')
+
+
+
+        #wether to concat at end
+        #true if you are pushing a certain date because before that date will be saved and 
+        #concatted to the new calculation
+        conct = True
         if startdate == None:
-            concat = False
+            conct = False
 
         #if realtime than pull conacted file + tvscraper
         account = False
@@ -32,10 +54,16 @@ class Account:
 
         df_aapl = data.get('AAPL','1min',account = account)
         
-        
+
+
+
+        #if farther than sooner than now 
         if startdate != 'now' and startdate != None and startdate > df_aapl.index[-1]:
             return df_pnl
         
+
+        #if realtime then only recalc one day
+        #otherwise trim to the date
         if startdate != None:
             if startdate == 'now':
                 startdate = df_pnl.index[-1]
@@ -50,7 +78,7 @@ class Account:
             
             
             #index = 0
-            #print(index)
+      
             if index == None or index >= len(df_pnl):
                 index = -1
             bar = df_pnl.iloc[index]
@@ -67,15 +95,18 @@ class Account:
                 if ticker != '':
                     share = float(shares[i])
                     df = data.get(ticker,'1min',account = account)
-                    #print(df)
+                  
                     pos.append([ticker,share,df])
 
-            try:
-                log_index = data.findex(df_log.set_index('Datetime'),startdate) 
-                nex = df_log.iloc[log_index]['Datetime']
-            except:
+            print(pos)
+            log_index = data.findex(df_log.set_index('datetime'),startdate) 
+            if log_index != None and log_index < len(df_log):
+                nex = df_log.iloc[log_index]['datetime']
+            
+            else:
                 nex = datetime.datetime.now() + datetime.timedelta(days = 100)
-          
+
+            print(df_log.iloc[log_index])
             
 
         else:
@@ -98,7 +129,7 @@ class Account:
         
 
         #iterate over date list
-        print(len(date_list))
+        
         for date in date_list:
 
             pnlvol = 0
@@ -212,7 +243,7 @@ class Account:
                     o = df.iat[index,0]
                     h = df.iat[index,1]
                     l = df.iat[index,2]
-                    #print(f'{(c - prevc) * shares}::: 3')
+                   
                     pnl += (c - prevc) * shares
                     pnlh += (h - prevc) * shares
                     pnll += (l - prevc) * shares
@@ -226,7 +257,7 @@ class Account:
             
 
             add = pd.DataFrame({
-                'datetime':[date],
+                'datetime':[pd.Timestamp(date)],
                 'open':[pnlo],
                 'high':[pnlh],
                 'low':[pnll],
@@ -248,11 +279,17 @@ class Account:
         df = pd.concat(df_list)
      
         #df_pnl.set_index('Datetime',drop = True)
-        if concat:
-            df = pd.concat([df_pnl.reset_index(),df])
-        df = df.sort_values(by='datetime')
-        df = df.reset_index(drop = True).set_index('datetime',drop = True)
         
+        if conct:
+            df = pd.concat([df_pnl.reset_index(),df])
+           
+       
+        
+        df = df.reset_index(drop = True)
+        df = df.sort_values(by='datetime')
+        
+        df = df.set_index('datetime',drop = True)
+      
         if tf == None:
             return df 
         else:
@@ -298,7 +335,7 @@ class Account:
             tf = bar[1]
             bars = int(bar[2])
 
-            print(df)
+      
 
             if tf == '':
                 tf = 'd'
@@ -306,7 +343,7 @@ class Account:
                 logic = {'open'  : 'first','high'  : 'max','low'   : 'min','close' : 'last','volume': 'sum' }
                 df = df.resample(tf).apply(logic).dropna()
             df = df[-bars:]
-            print(df)
+         
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
@@ -324,7 +361,8 @@ class Account:
 
             plt.savefig(p1, bbox_inches='tight')
             
-        except Exception as e: print(e)
+        except: #Exception as e: print(e)
+            pass
         #plt.show()
         
         
