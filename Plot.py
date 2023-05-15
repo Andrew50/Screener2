@@ -186,7 +186,7 @@ class Plot:
         i = bar[0]
 
         if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
-            #print(i)
+            
         
 
             tflist = ['1min','h','d']
@@ -303,8 +303,7 @@ class Plot:
                         else: 
                             apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .6,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
 
-                    #print(f'{ticker} , {dfall}')
-
+               
                     '''
                     df2 = pd.concat(tradelist).reset_index(drop = True)
                     buy = df2[df2['Action'] == 'Buy']
@@ -335,7 +334,7 @@ class Plot:
                         pass
                     else:  
                         apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=300,alpha = .6,marker='^',edgecolors='black', color='g'))
-                        #print("W")
+                
                     if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
@@ -371,8 +370,7 @@ class Plot:
                     
                     plt.savefig(p1, bbox_inches='tight')
                 except Exception as e:
-                    if ticker == 'HIBS':
-                        print(e)
+                   
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

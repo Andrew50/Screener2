@@ -51,7 +51,7 @@ class PNL():
             self.menu = "Account"
         else:
             self.window.close()
-       # print(f'{self.menu} menu')
+     
 
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 
@@ -176,13 +176,13 @@ class PNL():
 
                 else:
                   
-                    if self.menu == "Account" and False:
+                    if self.menu == "Account" and data.isMarketOpen():
                     
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
                         bars = self.values['input-bars']
-                       # print('refresh')
+                    
                         if tf == '':
                             tf = 'd'
                         if bars == '':

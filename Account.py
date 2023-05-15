@@ -69,7 +69,7 @@ class Account:
             else:
                 del_index = data.findex(df_pnl,startdate) 
                 df_pnl = df_pnl[:del_index]
-                print(df_pnl)
+            
                 index = data.findex(df_pnl,startdate)
 
    
@@ -82,12 +82,12 @@ class Account:
             if index == None or index >= len(df_pnl):
                 index = -1
             bar = df_pnl.iloc[index]
-            print(bar)
+  
             pnl = bar['close']
             deposits = bar['deposits']
             positions = bar['positions'].split(',')
             shares = bar['shares'].split(',')
-            print(shares)
+       
             pos = []
          
             for i in range(len(shares)):
@@ -101,8 +101,7 @@ class Account:
 
           
             gud = df_log.set_index('datetime')
-            print(pos)
-            print(gud)
+       
             #add one because 
             log_index = data.findex(gud,startdate) 
 
@@ -118,9 +117,7 @@ class Account:
                 log_index += 1
                 nex = df_log.iloc[log_index]['datetime']
            
-            
-            print(nex)
-            print(startdate)
+    
 
         else:
             startdate = df_log.iat[0,1] - datetime.timedelta(days = 1)
@@ -213,7 +210,7 @@ class Account:
 
                         pos.append([ticker,shares,df])
                    
-                    print(f'{ticker} , {shares} , {pos[pos_index][1]}')
+       
 
                     #subtract the amount missed out on from prev close on these new shares
                     df = pos[pos_index][2]
@@ -350,7 +347,7 @@ class Account:
             tf = bar[1]
             bars = int(bar[2])
 
-            print(df.tail(30))
+       
 
             if tf == '':
                 tf = 'd'
@@ -376,9 +373,9 @@ class Account:
 
             plt.savefig(p1, bbox_inches='tight')
             
-        except: #Exception as e: print(e)
+        except: #Exception as e:
             pass
-        plt.show()
+        #plt.show()
         
         
         

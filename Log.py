@@ -56,42 +56,45 @@ class Log:
             ticker = str(self.values['input-ticker'])
 
             if ticker != "":
-                dt = self.values['input-datetime']
-                dt  = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
-                shares = float(self.values['input-shares'])
-                price = float(self.values['input-price'])
-                setup = str(self.values['input-setup'])
+                try:
+                    dt = self.values['input-datetime']
+                    dt  = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+                    shares = float(self.values['input-shares'])
+                    price = float(self.values['input-price'])
+                    setup = str(self.values['input-setup'])
 
-                add = pd.DataFrame({
+                    add = pd.DataFrame({
             
-                    'ticker': [ticker],
-                    'datetime':[dt],
-                    'shares': [shares],
-                    'price': [price],
-                    'setup': [setup]
-                    })
-                df_log = self.df_log
-                if self.index == None:
-                    df_log = pd.concat([df_log,add])
-                    df_log.reset_index(inplace = True, drop = True)
-                else:
+                        'ticker': [ticker],
+                        'datetime':[dt],
+                        'shares': [shares],
+                        'price': [price],
+                        'setup': [setup]
+                        })
+                    df_log = self.df_log
+                    if self.index == None:
+                        df_log = pd.concat([df_log,add])
+                        df_log.reset_index(inplace = True, drop = True)
+                    else:
                     
-                    df_log.iat[self.index,0] = ticker
-                    old_date = df_log.iat[self.index,1]
-                    df_log.iat[self.index,1] = dt
-                    df_log.iat[self.index,2] = shares
-                    df_log.iat[self.index,3] = price
-                    df_log.iat[self.index,4] = setup
-                    if old_date < dt:
-                        dt = old_date
-                df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
-                self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
-                self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
-                traits.update(self,add.values.tolist()[0])
+                        df_log.iat[self.index,0] = ticker
+                        old_date = df_log.iat[self.index,1]
+                        df_log.iat[self.index,1] = dt
+                        df_log.iat[self.index,2] = shares
+                        df_log.iat[self.index,3] = price
+                        df_log.iat[self.index,4] = setup
+                        if old_date < dt:
+                            dt = old_date
+                    df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
+                    self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
+                    self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
+                    traits.update(self,add.values.tolist()[0])
 
-                self.df_log = df_log
-                #self.df_log.
-                #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
+                    self.df_log = df_log
+                    #self.df_log.
+                    #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
+                except Exception as e:
+                    sg.Popup(str(e))
                 
         if self.event == "Delete":
             if self.index != None:
