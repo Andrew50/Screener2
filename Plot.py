@@ -350,7 +350,7 @@ class Plot:
                         mav = ()
 
 
-                    fig, axlist = mpf.plot(df1, type='candle', volume=True, 
+                    fig, axlist = mpf.plot(df1, type='candle', volume=True  , 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
                                            figscale=fs, panel_ratios = (5,1), mav=mav, 
