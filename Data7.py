@@ -73,8 +73,10 @@ class Data:
         try:
             #if dt == '0':
             #    return len(df) - 1
+
             if Data.isToday(dt):
-                return len(df) - 1
+           #     return len(df) - 1
+                print('findex might be fucked')
             dt = Data.convert_date(dt)
         
             i = int(len(df)/2)
@@ -106,7 +108,8 @@ class Data:
                     break
             return i
         except:
-            if i == len(df):
+            if i >= len(df):
+            #if i == len(df):
                 return i
             
             return None

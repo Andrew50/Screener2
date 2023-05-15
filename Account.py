@@ -139,7 +139,8 @@ class Account:
         
 
         #iterate over date list
-        
+
+      
         for date in date_list:
 
             pnlvol = 0
@@ -199,7 +200,8 @@ class Account:
                         pos_index = len(pos)
                         try:
                             df = data.get(ticker,'1min',account = account)
-                            
+
+                          
                             data.findex(df,date) + 1
                             
                             
@@ -250,6 +252,7 @@ class Account:
                 df = pos[i][2]
                 if isinstance(df, pd.DataFrame):
                     index = data.findex(df,date)
+                    print(f'{date} , {df.index[index]} , {df}' )
                     prevc = df.iat[index - 1,3]
                     c = df.iat[index,3] 
                     o = df.iat[index,0]
