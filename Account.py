@@ -142,9 +142,7 @@ class Account:
                                     gain = (price - avg) * shares
                                  
                                     pnl += gain
-                                    
-
-
+         
                             pos_index = i
                             pos[i][1] += shares
                        
@@ -152,10 +150,7 @@ class Account:
                             if pos[i][1] == 0:
                                 remove = True
 
-                            
-
-
-
+             
                     #if ticker isnt already a position
                     if pos_index == None:
                         pos_index = len(pos)
