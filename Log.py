@@ -25,7 +25,7 @@ from Account import Account as account
 class Log:
 
     def log(self):
-       
+        self.df_log = self.df_log.sort_values(by='datetime', ascending = False)
         if self.event == '-table-':
             try:
                 index = self.values['-table-'][0]
@@ -63,28 +63,35 @@ class Log:
                     'price': [price],
                     'setup': [setup]
                     })
+                df_log = self.df_log
                 if self.index == None:
-                    self.df_log = pd.concat([self.df_log,add])
-                    self.df_log.reset_index(inplace = True, drop = True)
+                    df_log = pd.concat([df_log,add])
+                    df_log.reset_index(inplace = True, drop = True)
                 else:
-                    self.df_log.iat[self.index,0] = ticker
-                    self.df_log.iat[self.index,1] = dt
-                    self.df_log.iat[self.index,2] = shares
-                    self.df_log.iat[self.index,3] = price
-                    self.df_log.iat[self.index,4] = setup
-                self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
-                self.df_pnl = account.calcaccount(self.df_pnl,self.df_log,dt)
+                    
+                    df_log.iat[self.index,0] = ticker
+                    df_log.iat[self.index,1] = dt
+                    df_log.iat[self.index,2] = shares
+                    df_log.iat[self.index,3] = price
+                    df_log.iat[self.index,4] = setup
+                df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
+                self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
+                self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
                 traits.update(self,add.values.tolist()[0])
-                
-                self.df_log.to_feather(r"C:\Screener\sync\log.feather")
+
+                self.df_log = df_log
+                #self.df_log.
+                #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
                 
         if self.event == "Delete":
             if self.index != None:
                 bar = self.df_log.iloc[self.index].to_list()
-                self.df_log = self.df_log.drop(self.index).reset_index(drop = True)
-                self.df_log = self.df_log.sort_values(by='Datetime', ascending = True)
-                self.df_pnl = account.calcaccount(self.df_pnl,self.df_log,bar[1])
+                df_log = self.df_log.drop(self.index).reset_index(drop = True)
+                df_log = df_log.sort_values(by='datetime', ascending = True)
+                self.df_pnl = account.calcaccount(self.df_pnl,df_log,bar[1])
+                self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
                 traits.update(self,bar)
+                self.df_log = df_log
                 
 
            
@@ -96,10 +103,10 @@ class Log:
             self.window["input-setup"].update("")
             self.window["input-datetime"].update("")
 
-        self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
-        self.df_log = self.df_log.reset_index(drop = True)
+        
+        self.df_log = self.df_log.reset_index(drop = True)  
         self.df_log.to_feather(r"C:\Screener\sync\log.feather")
-        table = self.df_log.values.tolist()
+        table = self.df_log.sort_values(by='datetime', ascending = False).values.tolist()
 
        
         self.window["-table-"].update(table)

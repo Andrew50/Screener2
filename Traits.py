@@ -23,7 +23,7 @@ class Traits:
 
 
     def update(self,bar):
-      
+        self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
         date = bar[1]
         ticker = bar[0]
         if ticker != 'Deposit':
@@ -55,6 +55,8 @@ class Traits:
                 if log_date > date:
                     log_date = date
                 logs = self.df_log
+                
+
                 short_logs = logs[logs['ticker'] == ticker]
                 short_logs = short_logs[short_logs['datetime'] >= log_date]
                 short_logs = short_logs.reset_index(drop = True)
@@ -66,6 +68,8 @@ class Traits:
    
  
     def calc(self,df):
+
+
 
         pos = []
         df_traits = pd.DataFrame()
@@ -88,6 +92,7 @@ class Traits:
                     pos.append([ticker,date,shares,[]])
                     index = len(pos) - 1
                 pos[index][3].append([str(x) for x in row])
+              
                 shares = prev_share + shares
                 if shares == 0:
                     for i in range(len(pos)):
@@ -349,7 +354,7 @@ class Traits:
                         
 
                         if clow*direction < low*direction:
-                            #print(clow*direction)
+                     
                             low = clow
 
                         if cdate >= date and not entered:
@@ -557,12 +562,14 @@ class Traits:
 
 
 
-
-        df = pd.concat(df_list)
-        df = df.reset_index(drop = True)
+        try:
+            df = pd.concat(df_list)
+            df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
+        except:
+            df = pd.DataFrame()
         #df.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
         
-        return df.sort_values(by='datetime',ascending = False)
+        return df
 
 
 
@@ -597,6 +604,7 @@ class Traits:
             self.df_traits = pd.DataFrame()
             
             #df = self.df_log.sort_values(by='Datetime')
+            self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
             self.df_traits = Traits.calc(self,self.df_log)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
 
