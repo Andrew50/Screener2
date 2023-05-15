@@ -556,7 +556,7 @@ class Traits:
                 
                     
                         })
-                    #print(arrow_list)
+               
                     df_list.append(add)
             pbar.update(1)
 
@@ -598,7 +598,13 @@ class Traits:
 
 
     def traits(self):
-
+        pp = 0
+        for i in range(len(self.df_log)):
+            price = self.df_log.iat[i,3]
+            shares = self.df_log.iat[i,2]
+            dollars = price*shares
+            pp -= dollars
+        print(pp)
         if self.df_traits.empty or self.event == 'Recalc':
 
             self.df_traits = pd.DataFrame()

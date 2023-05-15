@@ -24,7 +24,14 @@ from Account import Account as account
 
 class Log:
 
+
+    
+
+
+
     def log(self):
+        
+
         self.df_log = self.df_log.sort_values(by='datetime', ascending = False)
         if self.event == '-table-':
             try:
@@ -70,10 +77,13 @@ class Log:
                 else:
                     
                     df_log.iat[self.index,0] = ticker
+                    old_date = df_log.iat[self.index,1]
                     df_log.iat[self.index,1] = dt
                     df_log.iat[self.index,2] = shares
                     df_log.iat[self.index,3] = price
                     df_log.iat[self.index,4] = setup
+                    if old_date < dt:
+                        dt = old_date
                 df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
                 self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
                 self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
@@ -92,17 +102,25 @@ class Log:
                 self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
                 traits.update(self,bar)
                 self.df_log = df_log
+                self.index = None
                 
 
            
         elif self.event == "Clear":
-            self.index = None
-            self.window["input-ticker"].update("")
-            self.window["input-shares"].update("")
-            self.window["input-price"].update("")
-            self.window["input-setup"].update("")
-            self.window["input-datetime"].update("")
+            if self.index == None:
+            
+                self.window["input-ticker"].update("")
+                self.window["input-shares"].update("")
+                self.window["input-price"].update("")
+                self.window["input-setup"].update("")
+                self.window["input-datetime"].update("")
+            else:
+                self.index = None
 
+        try:
+            self.window['-index-'].update(f'Index {self.index}')
+        except:
+            pass
         
         self.df_log = self.df_log.reset_index(drop = True)  
         self.df_log.to_feather(r"C:\Screener\sync\log.feather")

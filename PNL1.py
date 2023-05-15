@@ -77,6 +77,7 @@ class PNL():
             [(sg.Text("Shares   ")),sg.InputText(key = 'input-shares')],
             [(sg.Text("Price     ")),sg.InputText(key = 'input-price')],
             [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
+            [sg.Text("",key = '-index-')],
             [sg.Button('Delete'),sg.Button('Clear'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
     
@@ -158,6 +159,7 @@ class PNL():
                 self.event, self.values = self.window.read(timeout=15000)
                
                 if self.event == "Traits" or self.event == "Plot" or self.event == "Account" or self.event == "Log":
+                    self.index = None
                     self.menu = self.event
                     self.update(self)
                 elif self.event != '__TIMEOUT__':
