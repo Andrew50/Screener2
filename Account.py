@@ -162,63 +162,39 @@ class Account:
 
                 if ticker == 'Deposit':
                     deposits += price
-
                 else:
                     pos_index = None
-
-
                     #if ticker is already a position
                     for i in range(len(pos)):
-
                         if pos[i][0] == ticker:
-                            
-                            
                             #if ticker didnt have data when it first became a potiions
                             #the 'df' index will instead represent the average and will therefore be a float
                             #if the trade is a buy then calculate new avg
                             #if trade is a sell calculate the change to pnl
                             if not isinstance(pos[i][2], pd.DataFrame):
-                            
                                 prev_shares = pos[i][1]
-                             
                                 avg = pos[i][2]
                                 if shares / prev_shares > 0:
                                     pos[i][2] = ((avg*prev_shares) + (price*shares))/(prev_shares + shares)
-
-
                                 #if trade is a sell
                                 else:
                                     gain = (price - avg) * shares
-                                 
                                     pnl += gain
-         
                             pos_index = i
                             pos[i][1] += shares
                        
                             #if the new shares is 0 the ticker will be removed later
                             if pos[i][1] == 0:
                                 remove = True
-
-             
                     #if ticker isnt already a position
                     if pos_index == None:
                         pos_index = len(pos)
                         try:
                             df = data.get(ticker,'1min',account = account)
-
-                          
                             data.findex(df,date) + 1
-                            
-                            
                         except:
-                       
                             df = price
-
-
                         pos.append([ticker,shares,df])
-                   
-       
-
                     #subtract the amount missed out on from prev close on these new shares
                     df = pos[pos_index][2]
                     if isinstance(df, pd.DataFrame):
@@ -327,10 +303,10 @@ class Account:
             if tf == "":
                 tf = 'd'
             if bars == "":
-                bars = 300
+                bars = 375
         else:
             tf = 'd'
-            bars = 300
+            bars = 375
 
         if self.df_pnl.empty or self.event == "Recalc":
             df = Account.calcaccount(self.df_pnl,self.df_log,date)

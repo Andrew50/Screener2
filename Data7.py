@@ -102,11 +102,9 @@ class Data:
                     i += k*order
                 if k == 0:
                     break
-                
-
-             
-                
+   
             while True:
+
                 if df.index[i].to_pydatetime() < dt:
        
                     i += 1*order
@@ -121,7 +119,8 @@ class Data:
         except IndexError:
             if i >= len(df):
             #if i == len(df):
-                return i
+                #return i
+                return len(df) - 1
             
             return None
 

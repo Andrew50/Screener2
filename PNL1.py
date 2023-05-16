@@ -187,7 +187,7 @@ class PNL():
                         if tf == '':
                             tf = 'd'
                         if bars == '':
-                            bars = '300'
+                            bars = '375'
                         pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars,self.account_type, self.df_traits), callback = account.account_plot)
                        
                         
