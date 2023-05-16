@@ -679,12 +679,16 @@ class UI:
 
 
 
-        df = data.get(ticker,'d')
+        df = data.get(ticker,'d',old = True)
         df_m = data.get(ticker,'1min')
 
 
         currentday = data.findex(df,date)
+        print(df)
+        print(date)
         currentmin = data.findex(df_m,date)
+
+        print(currentday)
 
         gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 

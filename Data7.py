@@ -19,10 +19,6 @@ import Scan
 class Data:
 
 
-
-
-
-
     path = ""
     if os.path.exists("F:/Screener/Ffile.txt"):
         path = "F:/Screener"
@@ -127,7 +123,7 @@ class Data:
 
 
 
-    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False):    
+    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False,old = False):    
         path = Data.path
         if account:
             date = 'now'
@@ -165,7 +161,7 @@ class Data:
                 
         else:
             if tf == 'd' or tf == 'w' or tf == 'm':
-                if ticker == "^VIX":
+                if ticker == "^VIX" or old:
                     df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 else:
                     df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
