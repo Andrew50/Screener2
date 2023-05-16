@@ -67,10 +67,10 @@ class Scan:
                 while True:
                     try:
                     
-                        browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
+                        df, browser = Scan.runIntradayScan(browser)
+                        return df.set_index('Ticker')
                         
-                    except:
+                    except TimeoutError:
                         
                         Scan.tryCloseLogout(browser)
 
@@ -154,21 +154,22 @@ class Scan:
 
 
         percent = .045
-
+        df = df.sort_values('Relative Volume at Time')
+        
         length = len(df) - 1
         left = 0
         right =  int(length* (percent))
-        df = df[left:right]
+        df = df[left:right].reset_index()
         numTickers = len(df)
         for i in range(numTickers):
             if str(df.iloc[i]['Exchange']) == "NYSE ARCA":
                 df.at[i, 'Exchange'] = "AMEX"
             if df.iloc[i]['Pre-market Change'] is None:
                     df.at[i, 'Pre-market Change'] = 0
-        df.to_feather(r"C:\Screener\sync\screener_data_intraday.feather")
+       
         time.sleep(0.1)
 
-        return browser
+        return df, browser
 
     def logInScrapper():
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")

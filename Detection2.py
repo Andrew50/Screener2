@@ -18,6 +18,7 @@ class Detection:
 	def check(bar):
 		
 		ticker = bar[0]
+		print(ticker)
 		tf = bar[1]
 		path = bar[2]
 		date_list = bar[3]
@@ -28,7 +29,7 @@ class Detection:
 		try:
 			dff = data.get(ticker,tf,date)
 			
-		except TimeoutError:
+		except KeyError:
 			pass
 		
 		except FileNotFoundError:
@@ -87,11 +88,20 @@ class Detection:
 									flag.flag(df,currentday, tf, ticker, path)
 									
 						if tf == '1min':
-							
+							print(f"{dolVol} {adr}")
 							if dolVol > 20000 and adr > .08:
 							
 								Detection.Pop(df,currentday, tf, ticker, path)
+
+
+
+
+
+
+
 							
+
+
 					
 						if tf == '5min':
 							if dolVol > 100000 and adr > .1:
@@ -102,7 +112,6 @@ class Detection:
 							pass
 				except TimeoutError:
 					pass
-			
 				except IndexError:
 					pass
 				except TypeError:
@@ -137,7 +146,7 @@ class Detection:
 		   
 	def Pop(df,currentday, tf, ticker, path):
 		i = 0
-		zfilter = 25
+		zfilter = 0
 		data = []
 		length = 500
 		x = df.iat[currentday - i,4] + df.iat[currentday - i-1,4]
@@ -152,6 +161,7 @@ class Detection:
 			data.append(value)
 	
 		z = (current_value - statistics.mean(data))/statistics.stdev(data)
+		print(z)
 		if ((z < -zfilter) or (z > zfilter)):
 			log.log(df,currentday, tf, ticker, z, path , 'Pop')  
    

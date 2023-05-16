@@ -23,7 +23,7 @@ class Screener:
 
 
     def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None, fpath = None):
-        
+        print("WEREW")
         path = 0
     
 
@@ -37,9 +37,7 @@ class Screener:
                     'tf':[]}
         pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
         if ticker == None:
-            
             ticker_list = scan.get(date,tf,True,browser).index.tolist()
-            
            
             if date == None:
                 i = 0
@@ -53,10 +51,10 @@ class Screener:
                         try:
                             ticker_list.remove(ticker)
                             i += 1
-                        except:
+                        except TimeoutError:
                             pass
                     
-                except FileNotFoundError:
+                except TimeoutError:
                     pass
                 print(f'{i} tickers already completed')
 
@@ -95,7 +93,6 @@ class Screener:
         if fpath != None:
             path = fpath
 
-        
         Screener.run(date_list, ticker_list, tf,path)
         consolidate.consolidate()
 
@@ -127,12 +124,12 @@ class Screener:
                     
         
         pbar.close()
+        print(container)
         data.pool(detection.check, container)
         
 
 if __name__ == '__main__':
-   
-    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
         Screener.queue('0')
 
@@ -145,12 +142,17 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
-        
+        print("ON")
+        browser = scan.startFirefoxSession()
+        while datetime.datetime.now().hour < 13:
+           
+            Screener.queue(tf = '1min', date = '0',browser = browser)
+        '''
         #Screener.queue(date = '2022-01-01',fpath = 0,days = 5)
         Screener.queue(date = '2023-04-25', tf = '5min')
         ui.loop(ui,True)
        
-       
+       '''
        
 
 
