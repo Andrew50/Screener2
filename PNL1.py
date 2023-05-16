@@ -143,7 +143,7 @@ class PNL():
 
     def loop(self):
 
-        with Pool(6) as self.pool:
+        with Pool(12) as self.pool:
             if os.path.exists("C:/Screener/tmp/pnl/charts"):
                 shutil.rmtree("C:/Screener/tmp/pnl/charts")
             os.mkdir("C:/Screener/tmp/pnl/charts")

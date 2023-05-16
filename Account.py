@@ -146,20 +146,18 @@ class Account:
         #iterate over date list
 
       
-        for date in date_list:
-
+        ##for date in date_list:
+        for i in range(len(date_list)):
+            date = date_list[i]
+            if i > 0:
+                prev_date = date_list[i-1]
             pnlvol = 0
             pnlo = pnl
-            
             while date > nex:
                 remove = False
-                
                 ticker = df_log.iat[log_index,0]
                 shares = df_log.iat[log_index,2]
                 price = df_log.iat[log_index,3]
-
-                
-
                 if ticker == 'Deposit':
                     deposits += price
                 else:
@@ -178,11 +176,10 @@ class Account:
                                     pos[i][2] = ((avg*prev_shares) + (price*shares))/(prev_shares + shares)
                                 #if trade is a sell
                                 else:
-                                    gain = (price - avg) * shares
+                                    gain = (price - avg) * (-shares)
                                     pnl += gain
                             pos_index = i
                             pos[i][1] += shares
-                       
                             #if the new shares is 0 the ticker will be removed later
                             if pos[i][1] == 0:
                                 remove = True
@@ -198,33 +195,25 @@ class Account:
                     #subtract the amount missed out on from prev close on these new shares
                     df = pos[pos_index][2]
                     if isinstance(df, pd.DataFrame):
-                        ind = data.findex(df,date) - 1
+                        ind = data.findex(df,prev_date)
+                        #print(date
+                        #print(df.index[ind])
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
-                    
                         pnl += gosh
-                     
                     pnlvol += abs(shares*price)
-                    
                     #if the pos was closed then remove ticker from positions
                     if remove:
                         del pos[pos_index]
-
                 log_index += 1
                 if log_index >= len(df_log):
                     nex = datetime.datetime.now() + datetime.timedelta(days=100)
-                    
                 else:
                     nex = df_log.iat[log_index,1]
-
-
             pnlh = pnl
             pnll = pnl
-            
             positions = ""
             god_shares = ""
-           
-            
             #iterate open positions to find change in candle price since last candle multiplied by shares to calc how much
             #each position changed the pnl
             for i in range(len(pos)):
@@ -233,13 +222,13 @@ class Account:
                 df = pos[i][2]
                 if isinstance(df, pd.DataFrame):
                     index = data.findex(df,date)
-               
-                    prevc = df.iat[index - 1,3]
+                    prev_index = data.findex(df,prev_date)
+                    prevc = df.iat[prev_index,3]
+                    #prevc = df.iat[index - 1,3]
                     c = df.iat[index,3] 
                     o = df.iat[index,0]
                     h = df.iat[index,1]
                     l = df.iat[index,2]
-                   
                     pnl += (c - prevc) * shares
                     pnlh += (h - prevc) * shares
                     pnll += (l - prevc) * shares
@@ -250,8 +239,6 @@ class Account:
                 else:
                     positions += str(ticker)
                     god_shares += str(shares)
-            
-
             add = pd.DataFrame({
                 'datetime':[pd.Timestamp(date)],
                 'open':[pnlo],
@@ -264,14 +251,8 @@ class Account:
                 'positions':[positions],
                 'shares':[god_shares]
                 })
-
-
-       
             df_list.append(add)
             pbar.update(1)
-
-
-        
         df = pd.concat(df_list)
      
         
