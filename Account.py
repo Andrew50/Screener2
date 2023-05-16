@@ -51,9 +51,9 @@ class Account:
             conct = False
 
         #if realtime than pull conacted file + tvscraper
-        account = False
-        if startdate == 'now':
-            account = True
+        #account = False
+        #if startdate == 'now':
+        account = True
 
         df_aapl = data.get('AAPL','1min',account = account)
         
@@ -155,17 +155,25 @@ class Account:
         
       
         ##for date in date_list:
+        print(date_list)
+        print(df_log)
+        print(nex)
+        
         for i in range(len(date_list)):
             date = date_list[i]
             if i > 0:
                 prev_date = date_list[i-1]
             pnlvol = 0
             pnlo = pnl
+            pnll = pnlo
+            pnlh = pnlo
+   
             while date > nex:
                 remove = False
                 ticker = df_log.iat[log_index,0]
                 shares = df_log.iat[log_index,2]
                 price = df_log.iat[log_index,3]
+                print(ticker)
                 if ticker == 'Deposit':
                     deposits += price
                 else:
@@ -184,8 +192,13 @@ class Account:
                                     pos[i][2] = ((avg*prev_shares) + (price*shares))/(prev_shares + shares)
                                 #if trade is a sell
                                 else:
-                                    gain = (price - avg) * (-shares)
-                                    pnl += gain
+                                    gosh = (price - avg) * (-shares)
+                                    pnl += gosh
+                                    if gosh > 0:
+                                        pnlh += gosh
+                                    else:
+                                        pnll += gosh
+                                    
                             pos_index = i
                             pos[i][1] += shares
                             #if the new shares is 0 the ticker will be removed later
@@ -209,17 +222,22 @@ class Account:
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
                         pnl += gosh
+                        if gosh > 0:
+                            pnlh += gosh
+                        else:
+                            pnll += gosh
                     pnlvol += abs(shares*price)
                     #if the pos was closed then remove ticker from positions
                     if remove:
                         del pos[pos_index]
                 log_index += 1
                 if log_index >= len(df_log):
+                    
                     nex = datetime.datetime.now() + datetime.timedelta(days=100)
                 else:
                     nex = df_log.iat[log_index,1]
-            pnlh = pnl
-            pnll = pnl
+                    print(nex)
+            
             positions = ""
             god_shares = ""
             #iterate open positions to find change in candle price since last candle multiplied by shares to calc how much
@@ -238,8 +256,14 @@ class Account:
                     h = df.iat[index,1]
                     l = df.iat[index,2]
                     pnl += (c - prevc) * shares
-                    pnlh += (h - prevc) * shares
-                    pnll += (l - prevc) * shares
+                    ch = (h - prevc) * shares
+                    cl = (l - prevc) * shares
+                    if shares > 0:
+                        pnll += cl
+                        pnlh+= ch
+                    else:
+                        pnll += ch
+                        pnlh += cl
                     pnlo += (o - prevc) * shares
                 if i >= 1:
                     positions += "," + (str(ticker))

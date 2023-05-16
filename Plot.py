@@ -76,24 +76,27 @@ class Plot:
             #i = list(range(len(self.df_traits)))
             #i = list(range(self.preloadamoun))
             
-
-
-        
+            '''
+        if(len(self.df_traits) < self.preloadamount):
+            god = len(self.df_traits) - 1
+        else:
+            god = self.preloadamount
+        '''
         i = list(range(self.i,self.preloadamount+self.i))
         if self.i < 5:
             i += list(range(len(self.df_traits) - 1,len(self.df_traits) - self.preloadamount - 1,-1))
         else:
             i += list(range(self.i,self.i - self.preloadamount,-1))
                 
-
         
+        i = [x for x in i if x >= 0 and x < len(self.df_traits)]
   
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
       
         pool = self.pool
-        pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        pool.map(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         image1 = None
         image2 = None
@@ -187,38 +190,42 @@ class Plot:
 
         
     def create(bar):
-        i = bar[0]
 
-        if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+
+
+        try:
+            i = bar[0]
+
+            if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
             
         
 
-            tflist = ['1min','h','d']
+                tflist = ['1min','h','d']
 
             
             
-            mc = mpf.make_marketcolors(up='g',down='r')
-            s  = mpf.make_mpf_style(marketcolors=mc)
+                mc = mpf.make_marketcolors(up='g',down='r')
+                s  = mpf.make_mpf_style(marketcolors=mc)
 
-            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-                fw = 22
-                fh = 12
-                fs = 1.95
+                if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                    fw = 22
+                    fh = 12
+                    fs = 1.95
 
-            else:
-                fw = 26
-                fh = 13
-                fs = 1.16
-            df = bar[1]
+                else:
+                    fw = 26
+                    fh = 13
+                    fs = 1.16
+                df = bar[1]
         
-            ticker = df.iat[i,0]
+                ticker = df.iat[i,0]
             
-            for tf in tflist:
-                string1 = str(i) + str(tf) + ".png"
-                p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
+                for tf in tflist:
+                    string1 = str(i) + str(tf) + ".png"
+                    p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
 
         
-                try:
+               
                     datelist = []
                     colorlist = []
                     trades = []
@@ -266,7 +273,7 @@ class Plot:
                     if closed:
                         r1 = data.findex(df1,enddate) + 50
                     else:
-                        r1 = -1
+                        r1 = len(df1)
                     minmax = 300
                 #    if tf == '1min' and r1 - l1 > minmax:
                    #     r1 = l1 + minmax
@@ -298,15 +305,15 @@ class Plot:
                                         break
 ########################################################################
                                 else:
-                                    time = times[q].to_pydatetime() + (times[q].to_pydatetime() - times[q-1])
-                                    if time >= tradeTime:
-                                        test = pd.DataFrame({
-                                                'Datetime':[times[q]],
-                                                'Marker':[datafram.iloc[t]['Marker']],
-                                                'Price':[float(datafram.iloc[t]['Price'])]
-                                                })
-                                        tradelist.append(test)
-                                        break
+                                   # time = times[q].to_pydatetime() + (times[q].to_pydatetime() - times[q-1])
+                                  #  if time >= tradeTime:
+                                    test = pd.DataFrame({
+                                            'Datetime':[times[q]],
+                                            'Marker':[datafram.iloc[t]['Marker']],
+                                            'Price':[float(datafram.iloc[t]['Price'])]
+                                            })
+                                    tradelist.append(test)
+                                    break
 #########################################################
                         df2 = pd.concat(tradelist).reset_index(drop = True)
                         df2['Datetime'] = pd.to_datetime(df2['Datetime'])
@@ -389,8 +396,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except TimeoutError as e:
+        except TimeoutError:# E as e:
                 
-                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+            shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

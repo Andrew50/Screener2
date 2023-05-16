@@ -70,7 +70,7 @@ class Scan:
                         df, browser = Scan.runIntradayScan(browser)
                         return df.set_index('Ticker')
                         
-                    except TimeoutError:
+                    except: # Except Timeout here if having issues -------------------------------------
                         
                         Scan.tryCloseLogout(browser)
 
@@ -153,8 +153,8 @@ class Scan:
         os.remove(downloaded_file)
 
 
-        percent = .045
-        df = df.sort_values('Relative Volume at Time')
+        percent = .01
+        df = df.sort_values('Relative Volume at Time', ascending=False)
         
         length = len(df) - 1
         left = 0
@@ -178,7 +178,7 @@ class Scan:
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
         ##///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        options.headless = True
+        options.headless = False
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
@@ -280,7 +280,7 @@ class Scan:
         if browser != None:
             try:
                 
-                browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
+                browser.find_element(By.XPATH, '//button[@class="close-button-FuMQAaGA closeButton-zCsHEeYj defaultClose-zCsHEeYj"]').click()
             except AttributeError:
                 pass
             except selenium.common.exceptions.NoSuchElementException:

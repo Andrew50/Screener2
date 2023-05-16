@@ -452,15 +452,15 @@ class Traits:
 
                 if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(h10):
                     h10 = direction*(close/openprice - 1)*100
-                    h10time = ( cdate- date).total_seconds() / 3600
+                    h10time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
                     arrow_list.append([str(cdate),str(close),'m',str(symbol)])
                 if direction * close < direction * statistics.mean(prices[-20:]) and pd.isna(h20):
                     h20 = direction*(close/openprice - 1)*100
-                    h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                    h20time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
                     arrow_list.append([str(cdate),str(close),'b',str(symbol)])
                 if direction * close < direction * statistics.mean(prices[-50:]) and pd.isna(h50):
                     h50 = direction*(close/openprice - 1)*100
-                    h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                    h50time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
                     arrow_list.append([str(cdate),str(close),'c',str(symbol)]) 
 
                 i += 1
@@ -491,11 +491,11 @@ class Traits:
 
                 if direction * close < direction * statistics.mean(prices[-5:]) and pd.isna(d5):
                     d5 = direction*(close/openprice - 1)*100
-                    d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                    d5time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
                     arrow_list.append([str(cdate),str(close),'y',str(symbol)])
-                if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(d10): 
+                if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(d10):
                     d10 = direction*(close/openprice - 1)*100
-                    d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                    d10time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
                     arrow_list.append([str(cdate),str(close),'w',str(symbol)])
 
                 i += 1
@@ -614,7 +614,7 @@ class Traits:
             self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
             self.df_traits = Traits.calc(self.df_log,self.df_pnl)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
-
+        print(self.df_traits)
         bins = 50
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
             size = (49,25)
@@ -655,7 +655,7 @@ class Traits:
             image1.save(bio1, format="PNG")
             self.window["-CHART-"].update(data=bio1.getvalue())
             #plt.show()
-        except KeyError:
+        except:
             sg.popup('Not a Key')
             pass
         
