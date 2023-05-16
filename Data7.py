@@ -82,12 +82,12 @@ class Data:
     def findex(df,dt,order = 1):
      
         try:
-            #if dt == '0':
-            #    return len(df) - 1
+            if dt == '0' or dt == 0:
+                return len(df) - 1
 
-            if Data.isToday(dt):
+            #if Data.isToday(dt):
            #     return len(df) - 1
-                print('findex might be fucked')
+               # print('findex might be fucked')
             dt = Data.convert_date(dt)
         
             i = int(len(df)/2)

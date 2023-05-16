@@ -251,6 +251,7 @@ class UI:
             s  = mpf.make_mpf_style(marketcolors=mc)
             try:
 
+                #print(setups_data)
                 date = (setups_data.iloc[i][0])
             
             #print(date)
@@ -323,9 +324,9 @@ class UI:
                 dpi = 100
 
                 if data.isToday(date):
-                    cm = sm - 1
-                    cd = sd - 1
-                    ch = sh - 1
+                    cm = sm - 2
+                    cd = sd - 2
+                    ch = sh - 2
                     fs = 1.08
                     fw = 15
                     fh = 7

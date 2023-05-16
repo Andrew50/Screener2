@@ -45,6 +45,7 @@ class Detection:
 			for date in date_list:
 				try:
 				
+					#print(f'{dff} , {date}')
 					currentday = data.findex(dff,date)
 					
 					if currentday != None and currentday > 15:
