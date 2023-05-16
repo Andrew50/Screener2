@@ -179,6 +179,7 @@ class PNL():
                   
                     if self.menu == "Account" and (data.isMarketOpen()):
                         print('refresh')
+                        self.df_pnl = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime',drop = True)
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
@@ -189,7 +190,7 @@ class PNL():
                         if bars == '':
                             bars = '375'
                         pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars,self.account_type, self.df_traits), callback = account.account_plot)
-                       
+                        
                         
 if __name__ == "__main__":
     PNL.loop(PNL)

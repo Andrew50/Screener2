@@ -91,7 +91,7 @@ class Plot:
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
-        print(arglist)
+      
         pool = self.pool
         pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -201,7 +201,7 @@ class Plot:
             s  = mpf.make_mpf_style(marketcolors=mc)
 
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-                fw = 24
+                fw = 22
                 fh = 12
                 fs = 1.95
 
@@ -262,7 +262,11 @@ class Plot:
                     startdate = dfall.iloc[0]['Datetime']
                     enddate = dfall.iloc[-1]['Datetime']
                     l1 = data.findex(df1,startdate) - 50
-                    r1 = data.findex(df1,enddate) + 50
+                    closed = df.iloc[i]['closed']
+                    if closed:
+                        r1 = data.findex(df1,enddate) + 50
+                    else:
+                        r1 = -1
                     minmax = 300
                 #    if tf == '1min' and r1 - l1 > minmax:
                    #     r1 = l1 + minmax
@@ -386,7 +390,7 @@ class Plot:
                     
                     plt.savefig(p1, bbox_inches='tight')
                 except TimeoutError as e:
-                    #print(e)
+                
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

@@ -64,7 +64,7 @@ class Traits:
                         log_date = date
                     logs = df_log
                 
-
+                 
                     short_logs = logs[logs['ticker'] == ticker]
                     short_logs = short_logs[short_logs['datetime'] >= log_date]
                     short_logs = short_logs.reset_index(drop = True)
@@ -78,10 +78,10 @@ class Traits:
     def calc(df_log,df_pnl):
 
 #trades///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+       
         pos = []
         df_traits = pd.DataFrame()
-        print(df_log.to_string())
+       
         for k in range(len(df_log)):
             row = df_log.iloc[k].to_list()
             ticker = row[0]
@@ -116,7 +116,7 @@ class Traits:
                             break
                 else:
                     pos[index][2] = shares
-        print(pos)
+     
         for i in range(len(pos)-1,-1,-1):
             index = i
             bar = pos[i]
@@ -131,7 +131,7 @@ class Traits:
         df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
 
 
-        print(df_traits)
+     
 
 #traits///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -604,7 +604,7 @@ class Traits:
             shares = self.df_log.iat[i,2]
             dollars = price*shares
             pp -= dollars
-        print(pp)
+        pint(pp)
         '''
         if self.df_traits.empty or self.event == 'Recalc':
 

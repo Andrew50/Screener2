@@ -69,6 +69,7 @@ class Account:
         #otherwise trim to the date
         if startdate != None:
             if startdate == 'now':
+                df_pnl = df_pnl[:-1]
                 startdate = df_pnl.index[-1]
                 index = -1
             else:
@@ -118,9 +119,14 @@ class Account:
             else:
                 nex = datetime.datetime.now() + datetime.timedelta(days = 100)
             
+            
             if nex < startdate:
-                log_index += 1
-                nex = df_log.iloc[log_index]['datetime']
+                try:
+                    log_index += 1
+                    nex = df_log.iloc[log_index]['datetime']
+                except:
+                    nex = datetime.datetime.now() + datetime.timedelta(days = 100)
+
            
     
 
@@ -137,6 +143,7 @@ class Account:
 
         #get list of all dates
         start_index = data.findex(df_aapl,startdate)
+        prev_date = df_aapl.index[start_index - 1]
         date_list = df_aapl[start_index:].index.to_list()
   
         df_list = []
@@ -144,7 +151,8 @@ class Account:
         
 
         #iterate over date list
-
+     
+        
       
         ##for date in date_list:
         for i in range(len(date_list)):
@@ -197,8 +205,7 @@ class Account:
                     df = pos[pos_index][2]
                     if isinstance(df, pd.DataFrame):
                         ind = data.findex(df,prev_date)
-                        #print(date
-                        #print(df.index[ind])
+                     
                         c1 = df.iat[ind,3]
                         gosh = (c1 - price)*shares
                         pnl += gosh
@@ -266,7 +273,7 @@ class Account:
         df = df.sort_values(by='datetime')
         
         df = df.set_index('datetime',drop = True)
-      
+        df.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
         if tf == None:
             return df 
         else:
@@ -292,7 +299,7 @@ class Account:
 
         if self.df_pnl.empty or self.event == "Recalc":
             df = Account.calcaccount(self.df_pnl,self.df_log,date)
-            df.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
+            
             self.df_pnl = df
           
 

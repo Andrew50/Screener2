@@ -146,7 +146,7 @@ class Data:
             dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
             dff = dff.between_time('09:30' , '15:59')
 
-            tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+            tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
             screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
             screener_data.set_index('Ticker', inplace = True)
             

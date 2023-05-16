@@ -29,3 +29,6 @@ __pycache__/
 /daily_data
 /intraday_data
 /minute_data
+sync/pnl.feather
+sync/traits.feather
+sync/log.feather
