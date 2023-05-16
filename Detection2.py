@@ -146,7 +146,7 @@ class Detection:
 		   
 	def Pop(df,currentday, tf, ticker, path):
 		i = 0
-		zfilter = 0
+		zfilter = 10
 		data = []
 		length = 500
 		x = df.iat[currentday - i,4] + df.iat[currentday - i-1,4]

@@ -48,7 +48,7 @@ class PNL():
             except:
                 self.df_pnl = pd.DataFrame()
           
-            self.menu = "Account"
+            self.menu = "Log"
         else:
             self.window.close()
      
@@ -143,7 +143,7 @@ class PNL():
 
     def loop(self):
 
-        with Pool(7) as self.pool:
+        with Pool(6) as self.pool:
             if os.path.exists("C:/Screener/tmp/pnl/charts"):
                 shutil.rmtree("C:/Screener/tmp/pnl/charts")
             os.mkdir("C:/Screener/tmp/pnl/charts")

@@ -31,8 +31,9 @@ class Log:
 
     def log(self):
         
-
-        self.df_log = self.df_log.sort_values(by='datetime', ascending = False)
+        if not self.df_log.empty:
+            self.df_log = self.df_log.sort_values(by='datetime', ascending = False)
+        
         if self.event == '-table-':
             try:
                 index = self.values['-table-'][0]
@@ -96,7 +97,7 @@ class Log:
                     os.mkdir("C:/Screener/tmp/pnl/charts")
                     #self.df_log.
                     #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
-                except Exception as e:
+                except TimeoutError as e:
                     sg.Popup(str(e))
                 
         if self.event == "Delete":
@@ -131,9 +132,10 @@ class Log:
         except:
             pass
         
-        self.df_log = self.df_log.reset_index(drop = True)  
-        self.df_log.to_feather(r"C:\Screener\sync\log.feather")
-        table = self.df_log.sort_values(by='datetime', ascending = False).values.tolist()
+        self.df_log = self.df_log.reset_index(drop = True)
+        if not self.df_log.empty:
+            self.df_log.to_feather(r"C:\Screener\sync\log.feather")
+            table = self.df_log.sort_values(by='datetime', ascending = False).values.tolist()
 
        
-        self.window["-table-"].update(table)
+            self.window["-table-"].update(table)
