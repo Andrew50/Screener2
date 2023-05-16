@@ -81,6 +81,7 @@ class Traits:
 
         pos = []
         df_traits = pd.DataFrame()
+        print(df_log.to_string())
         for k in range(len(df_log)):
             row = df_log.iloc[k].to_list()
             ticker = row[0]
@@ -115,6 +116,7 @@ class Traits:
                             break
                 else:
                     pos[index][2] = shares
+        print(pos)
         for i in range(len(pos)-1,-1,-1):
             index = i
             bar = pos[i]
@@ -125,11 +127,11 @@ class Traits:
             })
             df_traits = pd.concat([df_traits,add])
             del pos[i]
-            break
+            
         df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
 
 
-
+        print(df_traits)
 
 #traits///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -188,6 +188,7 @@ class Account:
                         pos_index = len(pos)
                         try:
                             df = data.get(ticker,'1min',account = account)
+                            #check if findex doesnt give None
                             data.findex(df,date) + 1
                         except:
                             df = price
@@ -362,7 +363,7 @@ class Account:
         except TimeoutError:# Exception as e:
             pass
            
-        plt.show()
+        #plt.show()
         
         
         

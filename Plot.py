@@ -91,6 +91,7 @@ class Plot:
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
+        print(arglist)
         pool = self.pool
         pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -194,7 +195,7 @@ class Plot:
 
             tflist = ['1min','h','d']
 
-            i = bar[0]
+            
             
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
@@ -385,7 +386,7 @@ class Plot:
                     
                     plt.savefig(p1, bbox_inches='tight')
                 except TimeoutError as e:
-                    print(e)
+                    #print(e)
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     
