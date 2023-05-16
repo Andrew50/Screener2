@@ -290,7 +290,7 @@ class Account:
                 })
 
 
-            #df_pnl = pd.concat([df_pnl,add])
+       
             df_list.append(add)
             pbar.update(1)
 
@@ -298,7 +298,6 @@ class Account:
         
         df = pd.concat(df_list)
      
-        #df_pnl.set_index('Datetime',drop = True)
         
         if conct:
             df = pd.concat([df_pnl.reset_index(),df])
@@ -337,7 +336,7 @@ class Account:
             df = Account.calcaccount(self.df_pnl,self.df_log,date)
             df.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_pnl = df
-            #self.df_pnl = df.set_index('datetime',drop = True)
+          
 
         if self.account_type == 'Trade':
             df = self.df_traits
@@ -347,11 +346,7 @@ class Account:
         bar = [df,tf,bars,self.account_type]
         Account.account_plot(bar)
         Account.plot_update(self)
-        
-
-
-
-
+    
     def account_plot(bar):
         try:
             df = bar[0]
@@ -366,9 +361,9 @@ class Account:
                 
                 df = df[['open','high','low','close','volume']]
 
-                #df['high'] = pd.to_numeric(df['high'])
+             
                 pc = 0
-                #print(type(df['high']))
+              
                 
                 for i in range(len(df)):
                     v = df.iat[i,4]
@@ -406,11 +401,11 @@ class Account:
             
             fig, axlist = mpf.plot(df, type='candle', volume=True, style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)
             plt.savefig(p1, bbox_inches='tight')
-            
+            #plt.plot()
         except TimeoutError:# Exception as e:
             pass
            
-        #plt.show()
+        plt.show()
         
         
         

@@ -275,9 +275,7 @@ class Traits:
                     pnl_high = pnlc
 
                 
-                    
-        fbuy = (pnl/fb) * 100 * direction
-        fsell = (fs*maxshares + buys)/maxsize * 100 * direction
+        
         try:
             account_val = df_pnl.iloc[data.findex(df_pnl,date)]['account']
         except:
@@ -297,7 +295,16 @@ class Traits:
             pnl_account = (trade_pnl/ account_val ) * 100
             if pnl_pcnt < maxloss:
                 maxloss = pnl_pcnt
-            
+        if closed:
+            fbuy = (pnl/fb) * 100 * direction
+            fsell = (fs*maxshares + buys)/maxsize * 100 * direction
+            rfsell = fsell - pnl_pcnt
+            rfbuy = fbuy - pnl_pcnt
+        else:
+            fbuy = pd.NA
+            fsell = pd.NA
+            rfsell = pd.NA
+            rfbuy = pd.NA
             
         size = maxsize
         h10 = maxloss
@@ -357,7 +364,7 @@ class Traits:
             while True:
                     
                 #stop and risk
-                if i >= len(df_1min) or (exit and not before_max):
+                if i >= len(df_1min) or (exit and not before_max and closed):
                     break
                 if direction > 0:
                     clow = df_1min.iat[i,2] 
@@ -510,10 +517,6 @@ class Traits:
             d5time = pd.NA
             low  = pd.NA
             risk  = pd.NA
-
-                
-            rfsell = fsell - pnl_pcnt
-            rfbuy = fbuy - pnl_pcnt
             m50 = pd.NA
                 
                 
