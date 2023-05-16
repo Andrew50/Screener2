@@ -414,7 +414,7 @@ class Traits:
                     pnl_high = pnlh
 
                 i += 1
-                
+            
             if not closed:
                 trade_pnl = pnl
                 pnl_pcnt = ((trade_pnl / abs(maxsize)) ) *100
