@@ -281,7 +281,10 @@ class Traits:
         try:
             account_val = df_pnl.iloc[data.findex(df_pnl,date)]['account']
         except:
-            account_val = df_pnl.iloc[-1]['account']
+            try:
+                account_val = df_pnl.iloc[-1]['account']
+            except:
+                account_val = 10000
 
         maxloss = -2
         if shg != 0:

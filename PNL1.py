@@ -48,7 +48,7 @@ class PNL():
             except:
                 self.df_pnl = pd.DataFrame()
           
-            self.menu = "Account"
+            self.menu = "Log"
         else:
             self.window.close()
      
