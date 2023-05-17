@@ -36,7 +36,7 @@ class PNL():
         if self.menu == None:
             sg.theme('DarkGrey')
             try:
-                self.df_log = pd.read_feather(r"C:\Screener\sync\log.feather")
+                self.df_log = pd.read_feather(r"C:\Screener\sync\log.feather").sort_values(by='datetime',ascending = False)
             except:
                 self.df_log = pd.DataFrame()
             try:
@@ -51,7 +51,7 @@ class PNL():
             self.menu = "Log"
         else:
             self.window.close()
-        print(f'{self.menu} menu')
+     
 
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 
@@ -61,8 +61,8 @@ class PNL():
             scaletraits = 4
             
         else:
-            scalelog = 3
-            scaleplot = 3
+            scalelog = 3.7
+            scaleplot = 2.98
             scaleaccount = 3
             scaletraits = 3
        
@@ -77,6 +77,7 @@ class PNL():
             [(sg.Text("Shares   ")),sg.InputText(key = 'input-shares')],
             [(sg.Text("Price     ")),sg.InputText(key = 'input-price')],
             [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
+            [sg.Text("",key = '-index-')],
             [sg.Button('Delete'),sg.Button('Clear'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
     
@@ -95,7 +96,7 @@ class PNL():
             [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
             #[(sg.Text("Datetime  ")),sg.InputText(key = 'input-datetime')],
             [(sg.Text("Bars  ")),sg.InputText(key = 'input-bars')],
-            [sg.Button('Recalc'),sg.Button('Load')],
+            [sg.Button('Trade'),sg.Button('Real'),sg.Button('Recalc'),sg.Button('Load')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleaccount,finalize = True)
             account.account(self)
@@ -118,7 +119,7 @@ class PNL():
              [(sg.Text((str(f"{self.i + 1} of {len(self.df_traits)}")), key = '-number-'))], 
              [sg.Table([],headings=toprow2,num_rows = 2, key = '-table2-',auto_size_columns=True,justification='left', 
                        expand_y = False)],
-              [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left', 
+              [sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,justification='left',num_rows = 5, 
                        expand_y = False)],
             [(sg.Text("Ticker  ")),sg.InputText(key = 'input-ticker')],
             [(sg.Text("Date   ")),sg.InputText(key = 'input-datetime')],
@@ -152,12 +153,14 @@ class PNL():
             self.event = [None]
             self.index = None
             self.update(self)
+            self.account_type = 'Real'
             lap = datetime.datetime.now()
             while True:
                 
                 self.event, self.values = self.window.read(timeout=15000)
                
                 if self.event == "Traits" or self.event == "Plot" or self.event == "Account" or self.event == "Log":
+                    self.index = None
                     self.menu = self.event
                     self.update(self)
                 elif self.event != '__TIMEOUT__':
@@ -174,19 +177,20 @@ class PNL():
 
                 else:
                   
-                    if self.menu == "Account":
-                     
+                    if self.menu == "Account" and (data.isMarketOpen()):
+                        print('refresh')
+                        self.df_pnl = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime',drop = True)
                         account.plot_update(self)
                         pool = self.pool
                         tf = self.values['input-timeframe']
                         bars = self.values['input-bars']
-                        print('refresh')
+                    
                         if tf == '':
                             tf = 'd'
                         if bars == '':
-                            bars = '300'
-                        pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars), callback = account.account_plot)
-                       
+                            bars = '375'
+                        pool.apply_async(account.calcaccount,args = (self.df_pnl,self.df_log,'now',tf,bars,self.account_type, self.df_traits), callback = account.account_plot)
+                        
                         
 if __name__ == "__main__":
     PNL.loop(PNL)

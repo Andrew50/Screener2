@@ -67,10 +67,10 @@ class Scan:
                 while True:
                     try:
                     
-                        browser = Scan.runIntradayScan(browser)
-                        return pd.read_feather(r"C:\Screener\sync\screener_data_intraday.feather").set_index('Ticker')
+                        df, browser = Scan.runIntradayScan(browser)
+                        return df.set_index('Ticker')
                         
-                    except:
+                    except: # Except Timeout here if having issues -------------------------------------
                         
                         Scan.tryCloseLogout(browser)
 
@@ -100,7 +100,7 @@ class Scan:
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
 
-        screener_data = pd.read_csv(r"C:\Downloads\america_" + today + ".csv")
+        screener_data = pd.read_csv(downloaded_file)
 
         '''
         new_name = r"C:\Downloads\screener_data.csv"
@@ -153,22 +153,23 @@ class Scan:
         os.remove(downloaded_file)
 
 
-        percent = .045
-
+        percent = .01
+        df = df.sort_values('Relative Volume at Time', ascending=False)
+        
         length = len(df) - 1
         left = 0
         right =  int(length* (percent))
-        df = df[left:right]
+        df = df[left:right].reset_index()
         numTickers = len(df)
         for i in range(numTickers):
             if str(df.iloc[i]['Exchange']) == "NYSE ARCA":
                 df.at[i, 'Exchange'] = "AMEX"
             if df.iloc[i]['Pre-market Change'] is None:
                     df.at[i, 'Pre-market Change'] = 0
-        df.to_feather(r"C:\Screener\sync\screener_data_intraday.feather")
+       
         time.sleep(0.1)
 
-        return browser
+        return df, browser
 
     def logInScrapper():
         tv = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
@@ -177,7 +178,7 @@ class Scan:
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
         ##///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        options.headless = True
+        options.headless = False
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
@@ -279,7 +280,7 @@ class Scan:
         if browser != None:
             try:
                 
-                browser.find_element(By.XPATH, '//button[@class="close-button-aR0iEGbS closeButton-GLTtix84 defaultClose-GLTtix84"]').click()
+                browser.find_element(By.XPATH, '//button[@class="close-button-FuMQAaGA closeButton-zCsHEeYj defaultClose-zCsHEeYj"]').click()
             except AttributeError:
                 pass
             except selenium.common.exceptions.NoSuchElementException:

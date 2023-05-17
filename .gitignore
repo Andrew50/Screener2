@@ -19,6 +19,9 @@ laptop.txt
 minute/
 daily/  
 UI.bat
+UI.lnk
+Screener.bat/
+Screener.lnk/
 data_test/
 /hwtest.py
 minute - Copy/
@@ -26,3 +29,6 @@ __pycache__/
 /daily_data
 /intraday_data
 /minute_data
+sync/pnl.feather
+sync/traits.feather
+sync/log.feather

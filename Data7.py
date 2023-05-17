@@ -17,18 +17,25 @@ import Scan
 
 
 class Data:
+
+
     path = ""
     if os.path.exists("F:/Screener/Ffile.txt"):
         path = "F:/Screener"
     else: 
         path = "C:/Screener"
-    def pool(deff,arg,nodes = 7):
+
+
+
+
+
+    def pool(deff,arg,nodes = 6):
             pool = Pool(processes = nodes)
             data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
             return(data)
 
 
-
+ 
 
 
 
@@ -71,10 +78,12 @@ class Data:
     def findex(df,dt,order = 1):
      
         try:
-            #if dt == '0':
-            #    return len(df) - 1
-            if Data.isToday(dt):
+            if dt == '0' or dt == 0:
                 return len(df) - 1
+
+            #if Data.isToday(dt):
+           #     return len(df) - 1
+               # print('findex might be fucked')
             dt = Data.convert_date(dt)
         
             i = int(len(df)/2)
@@ -89,11 +98,9 @@ class Data:
                     i += k*order
                 if k == 0:
                     break
-                
-
-             
-                
+   
             while True:
+
                 if df.index[i].to_pydatetime() < dt:
        
                     i += 1*order
@@ -105,44 +112,68 @@ class Data:
                 else:
                     break
             return i
-        except:
-            if i == len(df):
-                return i
+        except IndexError:
+            if i >= len(df):
+            #if i == len(df):
+                #return i
+                return len(df) - 1
             
             return None
 
 
 
 
-    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False):    
+    def get(ticker = 'AAPL',tf = 'd',date = None,premarket = False,account = False,old = False):    
         path = Data.path
         if account:
             date = 'now'
 
         current = Data.isToday(date)
 
+
         if tf == 'daily':
             tf = 'd'
         if tf == 'minute':
             tf = '1min'
 
-        if tf == 'd' or tf == 'w' or tf == 'm':
-            df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
-        else:
-            if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
 
-                tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
-                
-                screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
-                screener_data.set_index('Ticker', inplace = True)
+        if account:
+            #fetch file
+            dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+            dff = dff.between_time('09:30' , '15:59')
+
+            tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
+            screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
+            screener_data.set_index('Ticker', inplace = True)
             
-                exchange = str(screener_data.loc[ticker]['Exchange'])
-                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
-                df.drop('symbol', axis = 1, inplace = True)
-                df.index = df.index + pd.Timedelta(hours=4)
-
-                if not account:
-
+            exchange = str(screener_data.loc[ticker]['Exchange'])
+            df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
+            df.drop('symbol', axis = 1, inplace = True)
+            df.index = df.index + pd.Timedelta(hours=4)
+            lastday = dff.index[-1]   
+            scrapped_data_index = Data.findex(df,lastday) 
+            if scrapped_data_index == None:     
+                pass     
+            else:    
+                
+                df = df[scrapped_data_index + 1:]
+                df = pd.concat([dff,df])
+                
+        else:
+            if tf == 'd' or tf == 'w' or tf == 'm':
+                if ticker == "^VIX" or old:
+                    df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+                else:
+                    df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+            else:
+                if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+                    tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
+                    screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
+                    screener_data.set_index('Ticker', inplace = True)
+                    exchange = str(screener_data.loc[ticker]['Exchange'])
+                    df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
+                    df.drop('symbol', axis = 1, inplace = True)
+                    df.index = df.index + pd.Timedelta(hours=4)
                     seconds = datetime.datetime.now().second
                     bar = df.iloc[-1]
                     df.drop(df.tail(1).index,inplace = True)
@@ -162,7 +193,6 @@ class Data:
                             new_high = new_close
                         if new_close < low:
                             new_low = new_close
-
                         now = datetime.datetime.now()
                         new = pd.DataFrame({'datetime':[now],
                                             'open':[new_open],
@@ -171,50 +201,26 @@ class Data:
                                             'close':[new_close],
                                             'volume':[new_vol]}).set_index("datetime")
                         df = pd.concat([df,new])
-
                 else:
-                    #fetch file
-                    dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
-                    dff = dff.between_time('09:30' , '15:59')
-                    lastday = dff.index[-1]
-                   
-                    scrapped_data_index = Data.findex(df,lastday) 
-                    if scrapped_data_index == None:
-                        
-                        pass
-                        
-                    else:
-                       
-                        df = df[scrapped_data_index + 1:]
-                      
-                        df = pd.concat([dff,df])
-
-            else:
-                df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
-                if not premarket:
-                    df = df.between_time('09:30' , '15:59')
-
-
-
-        if tf != 'd' and tf != '1min':
+                    df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                    if not premarket:
+                        df = df.between_time('09:30' , '15:59')
+        if 'h' in tf:
+            df.index = df.index + pd.Timedelta(minutes = -30)
+        if tf != '1min':# and tf != 'd':
             logic = {'open'  : 'first',
                         'high'  : 'max',
                         'low'   : 'min',
                         'close' : 'last',
                         'volume': 'sum' }
             df = df.resample(tf).apply(logic)
+        if 'h' in tf:
+            df.index = df.index + pd.Timedelta(minutes = 30)
         if current and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
-
             screenbar = Scan.Scan.get('0','d').loc[ticker]
             pmchange =  screenbar['Pre-market Change']
-
-
             if numpy.isnan(pmchange):
                 pmchange = 0
-            #if type(pmchange) != int():
-           #     pmchange = 0
-                
-          
             try:
                 pm = df.iat[-1,3] + pmchange
                 date = pd.Timestamp(datetime.datetime.today())
@@ -225,7 +231,6 @@ class Data:
                        'close': [pm],
                        'volume': [0]}).set_index("datetime")
                 df = pd.concat([df, row])
-          
             except IndexError:
                 pass
         df.dropna(inplace = True)

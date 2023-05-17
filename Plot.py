@@ -30,12 +30,12 @@ class Plot:
         
 
             if ticker  != "":
-                scan = scan[scan['Ticker'] == ticker]
+                scan = scan[scan['ticker'] == ticker]
             
             
 
             if setup  != "":
-                scan = scan[scan['Setup'] == setup]
+                scan = scan[scan['setup'] == setup]
      
             if len(scan) < 1:
                 sg.Popup('No Setups Found')
@@ -76,23 +76,27 @@ class Plot:
             #i = list(range(len(self.df_traits)))
             #i = list(range(self.preloadamoun))
             
-
-
-        
+            '''
+        if(len(self.df_traits) < self.preloadamount):
+            god = len(self.df_traits) - 1
+        else:
+            god = self.preloadamount
+        '''
         i = list(range(self.i,self.preloadamount+self.i))
         if self.i < 5:
             i += list(range(len(self.df_traits) - 1,len(self.df_traits) - self.preloadamount - 1,-1))
         else:
             i += list(range(self.i,self.i - self.preloadamount,-1))
                 
-
         
+        i = [x for x in i if x >= 0 and x < len(self.df_traits)]
   
         arglist = []
         for index in i:
             arglist.append([index,self.df_traits])
+      
         pool = self.pool
-        pool.map(Plot.create,arglist)
+        pool.map(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         image1 = None
         image2 = None
@@ -148,9 +152,17 @@ class Plot:
         table2 = [[],[]]
        
         for i in range(6,14):
-            table2[0].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
+            try:
+                string = f'{round(self.df_traits.iat[self.i,i],2)} %'
+            except:
+                string = str(self.df_traits.iat[self.i,i])
+            table2[0].append(string)
         for i in range(14,22):
-            table2[1].append(f'{round(self.df_traits.iat[self.i,i],2)} %')
+            try:
+                string = f'{round(self.df_traits.iat[self.i,i],2)} %'
+            except:
+                string = str(self.df_traits.iat[self.i,i])
+            table2[1].append(string)
         '''
         pnl = 0
         for i in range(len(bar)):
@@ -159,11 +171,6 @@ class Plot:
             dollars = price*shares
             pnl -= dollars
         '''
-
-
-
-
-
 
 
 
@@ -183,40 +190,42 @@ class Plot:
 
         
     def create(bar):
-        i = bar[0]
 
-        if True: #(os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
 
-        
 
-            tflist = ['1min','h','d']
-
+        try:
             i = bar[0]
-          
-            mc = mpf.make_marketcolors(up='g',down='r')
-            s  = mpf.make_mpf_style(marketcolors=mc)
 
-            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-                fw = 24
-                fh = 13
-                fs = 1.95
-
-            else:
-                fw = 15
-                fh = 6
-                fs = .85
-            df = bar[1]
-        
-            ticker = df.iat[i,0]
+            if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+            
         
 
+                tflist = ['1min','h','d']
 
-            for tf in tflist:
-                string1 = str(i) + str(tf) + ".png"
-                p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
+            
+            
+                mc = mpf.make_marketcolors(up='g',down='r')
+                s  = mpf.make_mpf_style(marketcolors=mc)
+
+                if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                    fw = 22
+                    fh = 12
+                    fs = 1.95
+
+                else:
+                    fw = 26
+                    fh = 13
+                    fs = 1.16
+                df = bar[1]
+        
+                ticker = df.iat[i,0]
+            
+                for tf in tflist:
+                    string1 = str(i) + str(tf) + ".png"
+                    p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
 
         
-                try:
+               
                     datelist = []
                     colorlist = []
                     trades = []
@@ -237,42 +246,92 @@ class Plot:
                             trades.append(add)
                         else:
                             colorlist.append('r')
-                            add = pd.DataFrame({
-                                    'Datetime':[df.iat[i,3][k][1]], 
-                                    'Symbol':[df.iat[i,3][k][0]],
-                                    'Action':"Sell",
-                                    'Price':[float(df.iat[i,3][k][3])]
-                                    })
-                            trades.append(add)
+
                         datelist.append(date)
-              
-                
-                    df1 = data.get(ticker,tf)
-                    startdate = df.iat[i,3][0][1]
-                    enddate = df.iat[i,3][-1][1]
+                    
+                    god = bar[1].iloc[i]['arrows']
+                    god = [list(x) for x in god]
+                    dfall= pd.DataFrame(god, columns=['Datetime', 'Price', 'Color', 'Marker'])
+                    dfall['Datetime'] = pd.to_datetime(dfall['Datetime'])
+                    dfall = dfall.sort_values('Datetime')
+                    colors = []
+                    dfsByColor = []
+                    for zz in range(len(dfall)):
+                        if(dfall.iloc[zz]['Color'] not in colors):
+                            colors.append(dfall.iloc[zz]['Color'])
+        
+                    for yy in range(len(colors)):
+                        colordf = dfall.loc[dfall['Color'] == colors[yy]] 
+                        dfsByColor.append(colordf)
+
+
+                    df1 = data.get(ticker,tf,account = True)
+                    startdate = dfall.iloc[0]['Datetime']
+                    enddate = dfall.iloc[-1]['Datetime']
                     l1 = data.findex(df1,startdate) - 50
-                    r1 = data.findex(df1,enddate) + 50
+                    closed = df.iloc[i]['closed']
+                    if closed:
+                        r1 = data.findex(df1,enddate) + 50
+                    else:
+                        r1 = len(df1)
+                    minmax = 300
+                #    if tf == '1min' and r1 - l1 > minmax:
+                   #     r1 = l1 + minmax
                     df1 = df1[l1:r1]
 
-                    
-                    tradeDf = pd.concat(trades).reset_index(drop = True)
-                    tradeDf['Datetime'] = pd.to_datetime(tradeDf['Datetime'])
                     times = df1.index.to_list()
-                    tradelist = []
-                    for t in range(len(tradeDf)):
-                        tradeTime = tradeDf.iloc[t]['Datetime']
-                        for q in range(len(times)):
-                        
-                            if(q+1 != len(times)):
-                                if(times[q+1] > tradeTime):
-                                    add = pd.DataFrame({
-                                        'Datetime':[times[q]],
-                                        'Symbol':[tradeDf.iloc[t]['Symbol']],
-                                        'Action':[tradeDf.iloc[t]['Action']],
-                                        'Price':[tradeDf.iloc[t]['Price']]
-                                        })
-                                    tradelist.append(add)
+                    timesdf = []
+                    for _ in range(len(df1)):
+                        nextTime = pd.DataFrame({ 
+                            'Datetime':[df1.index[_]]
+                            })
+                        timesdf.append(nextTime)
+                    mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
+                    apds = [mpf.make_addplot(mainindidf)]
+                    for datafram in dfsByColor:
+                        datafram['Datetime'] = pd.to_datetime(datafram['Datetime'])
+                        tradelist = []
+                        for t in range(len(datafram)): 
+                            tradeTime = datafram.iloc[t]['Datetime']
+                            for q in range(len(times)):
+                                if(q+1 != len(times)):
+                                    if(times[q+1] >= tradeTime):
+                                        test = pd.DataFrame({
+                                            'Datetime':[times[q]],
+                                            'Marker':[datafram.iloc[t]['Marker']],
+                                            'Price':[float(datafram.iloc[t]['Price'])]
+                                            })
+                                        tradelist.append(test)
+                                        break
+########################################################################
+                                else:
+                                   # time = times[q].to_pydatetime() + (times[q].to_pydatetime() - times[q-1])
+                                  #  if time >= tradeTime:
+                                    test = pd.DataFrame({
+                                            'Datetime':[times[q]],
+                                            'Marker':[datafram.iloc[t]['Marker']],
+                                            'Price':[float(datafram.iloc[t]['Price'])]
+                                            })
+                                    tradelist.append(test)
                                     break
+#########################################################
+                        df2 = pd.concat(tradelist).reset_index(drop = True)
+                        df2['Datetime'] = pd.to_datetime(df2['Datetime'])
+                        df2 = df2.sort_values(by=['Datetime'])
+                        df2['TradeDate_count'] = df2.groupby("Datetime").cumcount() + 1
+                        newdf = (df2.pivot(index='Datetime', columns='TradeDate_count', values="Price")
+                            .rename(columns="price{}".format)
+                            .rename_axis(columns=None))
+                        
+                        series = mainindidf.merge(newdf, how='left', left_index=True, right_index=True)[newdf.columns]
+                        
+                        if series.isnull().values.all(axis=0)[0]:
+                            pass
+                        else: 
+                            apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .6,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
+
+               
+                    '''
                     df2 = pd.concat(tradelist).reset_index(drop = True)
                     buy = df2[df2['Action'] == 'Buy']
                     buy['Datetime'] = pd.to_datetime(buy['Datetime'])
@@ -289,36 +348,43 @@ class Plot:
                             .rename(columns="price{}".format)
                             .rename_axis(columns=None))
                     timesdf = []
-                    test = df1.index.to_list()
                     for _ in range(len(df1)):
                          ad = pd.DataFrame({
-                                'Datetime':[test[_]]
+                                'Datetime':[df1.index[_]]
                                 })
                          timesdf.append(ad)
-                    mainindidf = pd.concat(timesdf).reset_index(drop = True)
-                    mainindidf = mainindidf.set_index('Datetime', drop=True)
+                    mainindidf = pd.concat(timesdf).set_index('Datetime', drop=True)
                     buyseries = mainindidf.merge(newbuys, how='left', left_index=True, right_index=True)[newbuys.columns]
                     sellseries =  mainindidf.merge(newsells, how='left', left_index=True, right_index=True)[newsells.columns]
-                    for rr in range(len(buyseries)):
-                        print(buyseries.iloc[rr])
-                    
                     apds = [mpf.make_addplot(mainindidf)]
                     if buyseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=20,marker='^', color='g'))
-                        print("W")
+                        apds.append(mpf.make_addplot(buyseries,type='scatter',markersize=300,alpha = .6,marker='^',edgecolors='black', color='g'))
+                
                     if sellseries.isnull().values.all(axis=0)[0]:  ## test if all cols have null only
                         pass
                     else:  
-                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=20,marker='v', color='r'))
-                    
-                    fig, axlist = mpf.plot(df1, type='candle', volume=True, 
+                        apds.append(mpf.make_addplot(sellseries,type='scatter',markersize=300,alpha = .6,marker='v',edgecolors='black', color='r'))
+                    '''
+
+
+                    if tf == 'h':
+                        mav = (10,20,50)
+                    elif tf == 'd':
+                        mav = (5,10)
+                    else:
+                        mav = ()
+
+
+                    fig, axlist = mpf.plot(df1, type='candle', volume=True  , 
                                            title=str(f'{ticker} , {tf}'), 
                                            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
-                                           figscale=fs, panel_ratios = (5,1), mav=(10,20), 
-                                           tight_layout = True,vlines=dict(vlines=datelist, 
-                                          colors = colorlist, alpha = .2,linewidths=1))#, addplot=apds)
+                                           figscale=fs, panel_ratios = (5,1), mav=mav, 
+                                           tight_layout = True,
+                                        #   vlines=dict(vlines=datelist, 
+                                          #colors = colorlist, alpha = .2,linewidths=1),
+                                          addplot=apds)
                     ax = axlist[0]
                     #for k in range(len(df.iat[i,2])):
                      #   ax.text()
@@ -330,7 +396,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except TimeoutError:
-                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
-                    print("lolol")
+        except TimeoutError:# E as e:
+                
+            shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                   
                     

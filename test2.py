@@ -8,9 +8,21 @@ from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
 
+
+
+
+
+
+
+string = '23:45'
+
+sting = string.split(':')
+print(sting)
+'''
+print("TESTSET")
 df = pd.read_feather("C:/Screener/sync/traits.feather")
 bar = []
-bar = [199, df]
+bar = [0, df]
 plot.create(bar)
 
 
@@ -19,7 +31,7 @@ plot.create(bar)
 #scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
 
 #print(scan)
-
+'''
 
 '''
 df = data.get('AAPL','1min',datetime.datetime.now(),account = True)\
@@ -128,3 +140,33 @@ df.to_csv(r"C:/Screener/tmp/log.csv")
 
 
 '''
+'''
+df = # Lists inside of a list. [Setup][]
+
+colors = []
+dfsByColor = []
+for i in range(len(dfd)):
+    if(df.iloc[i][2] not in colors):
+        colors.append(df.iloc[i][2])
+        
+for i in range(len(colors)):
+    colordf = df.loc[df[2] == colors[i]] 
+    dfsByColor.append(colordf)
+
+apds = []
+
+for i in range(len(dfsByColor)):
+    currentDf = dfsByColor[i].sort_values(by=0)
+
+    df1 = data.get(ticker, tf)
+    startdate = currentDf[0][0]
+    enddate = currentDf[-1][0]
+    l1 = data.findex(df1, startdate) - 50
+    r1 = data.findex(df1,enddate) + 50
+    df1 = df1[l1:r1]
+
+
+    
+
+    '''
+    

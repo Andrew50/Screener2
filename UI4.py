@@ -145,7 +145,7 @@ class UI:
         arglist = []
         for index in i:
             arglist.append([self.setups_data,index])
-        pool.map(self.plot,arglist)
+        pool.map_async(self.plot,arglist)
 
     def redate(self,previ,new):
         df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
@@ -249,95 +249,105 @@ class UI:
                
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
-            date = (setups_data.iloc[i][0])
+            try:
+
+                #print(setups_data)
+                date = (setups_data.iloc[i][0])
+            
             #print(date)
            
-            ticker = setups_data.iloc[i][1]
-            setup = setups_data.iloc[i][2]
-            z= setups_data.iloc[i][3]
-            tf= setups_data.iloc[i][4] 
-            zs = z
+                ticker = setups_data.iloc[i][1]
+                setup = setups_data.iloc[i][2]
+                z= setups_data.iloc[i][3]
+                tf= setups_data.iloc[i][4] 
+                zs = z
+            
 
-            if data.isToday(date):
-                if tf == 'd':
-                    tf1 = 'd'
-                    tf2 = 'w'
-                    tf3 = 'h'
-                    tf4 = '15min'
-                if tf == 'h':
-                    tf1 = 'h'
-                    df2 = 'd'
-                    df3 = '15min'
-                    df4 = '1min'
-                if tf == '5min':
-                    tf1 = '5min'
-                    tf2 = 'd'
-                    tf3 = 'h'
-                    tf4 = '1min'
-                if tf == '1min':
-                    tf1 = '1min'
-                    tf2 = 'd'
-                    tf3 = 'h'
-                    tf4 = '5min'
-            else:
-                if tf == 'd':
-                    tf1 = 'd'
-                    tf2 = 'w'
-                    tf3 = 'h'
-                    tf4 = '1min'
-                if tf == 'h':
-                    tf1 = 'h'
-                    df2 = 'd'
-                    df3 = '15min'
-                    df4 = '1min'
-                if tf == '5min':
-                    tf1 = '5min'
-                    tf2 = 'd'
-                    tf3 = 'h'
-                    tf4 = '1min'
-                if tf == '1min':
-                    tf1 = '1min'
-                    tf2 = 'd'
-                    tf3 = 'h'
-                    tf4 = '5min'
+                if data.isToday(date):
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '15min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
+                else:
+                    if tf == 'd':
+                        tf1 = 'd'
+                        tf2 = 'w'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == 'h':
+                        tf1 = 'h'
+                        df2 = 'd'
+                        df3 = '15min'
+                        df4 = '1min'
+                    if tf == '5min':
+                        tf1 = '5min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '1min'
+                    if tf == '1min':
+                        tf1 = '1min'
+                        tf2 = 'd'
+                        tf3 = 'h'
+                        tf4 = '5min'
 
-            datedaily = f"{date}"
-            datehourly = f"{date} 09:00"
-            dateminute = f"{date} 09:30"
+                datedaily = f"{date}"
+                datehourly = f"{date} 09:00"
+                dateminute = f"{date} 09:30"
             
            
-            ch = 100
-            cd = 200
+                ch = 100
+                cd = 200
             
-            cm = 0
+                cm = 0
 
-            sh = 250
-            sd = sh
-            sm = 390
-
-
-            dpi = 100
-
-            if data.isToday(date):
-                cm = sm - 1
-                cd = sd - 1
-                ch = sh - 1
-                fs = 1.08
-                fw = 15
-                fh = 7
-            else:
-                fw = 20
-                fh = 7
-                fs = .8
-
-            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-                fs = .49
-                fw = 41
-                fh = 18
-                dpi = 330
+                sh = 250
+                sd = sh
+                sm = 390
 
 
+                dpi = 100
 
+                if data.isToday(date):
+                    cm = sm - 2
+                    cd = sd - 2
+                    ch = sh - 2
+                    fs = 1.08
+                    fw = 15
+                    fh = 7
+                else:
+                    fw = 20
+                    fh = 7
+                    fs = .8
+
+                if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                    fs = .49
+                    fw = 41
+                    fh = 18
+                    dpi = 330
+
+            except:
+                pass
+
+
+
+            string1 = "1" + iss + ".png"
+            p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
             try:
          
                 if 'h' in tf1:
@@ -359,8 +369,7 @@ class UI:
                 if l1 < 0:
                     l1 = 0
                 df1 = df1[l1:r1]
-                string1 = "1" + iss + ".png"
-                p1 = pathlib.Path("C:/Screener/tmp/charts") / string1
+                
                 if data.isToday(date):
                     fig, axlist  =  mpf.plot(df1, type='candle', volume=True, axisoff=True,title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     
@@ -372,12 +381,13 @@ class UI:
                 ax.set_yscale('log')
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                 plt.savefig(p1, bbox_inches='tight',dpi = dpi)
-            except TimeoutError:
-                pass
+            except:
+                shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                 #print(ticker)
                
                 
-
+            string2 = "2" + iss + ".png"
+            p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
 
             try:
                 if 'h' in tf2:
@@ -399,8 +409,7 @@ class UI:
                 if l2 < 0:
                     l2 = 0
                 df2 = df2[l2:r2]
-                string2 = "2" + iss + ".png"
-                p2 = pathlib.Path("C:/Screener/tmp/charts") / string2
+                
                 if data.isToday(date):
                     fig, axlist = mpf.plot(df2, type='candle', volume=True,axisoff=True, title = str(tf2), style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     
@@ -413,7 +422,7 @@ class UI:
                    
                 plt.savefig(p2, bbox_inches='tight',dpi=dpi)
             except:
-                pass
+                shutil.copy(r"C:\Screener\tmp\blank.png",p2)
              
 
             string3 = "3" + iss + ".png"
@@ -670,12 +679,16 @@ class UI:
 
 
 
-        df = data.get(ticker,'d')
+        df = data.get(ticker,'d',old = True)
         df_m = data.get(ticker,'1min')
 
 
         currentday = data.findex(df,date)
+        print(df)
+        print(date)
         currentmin = data.findex(df_m,date)
+
+        print(currentday)
 
         gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
@@ -792,6 +805,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 
 
