@@ -56,9 +56,11 @@ class Scan:
             if tf == 'd' or tf == 'w' or tf == 'm':
                 
                 if refresh:
-                    
+                    #try:
                     Scan.runDailyScan(None)
-                
+                    #except:
+                        #print('scan failed, gave full ticker list')
+                        #return pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather").set_index('Ticker')
                 return pd.read_feather(r"C:\Screener\sync\screener_data.feather").set_index('Ticker')
 
             else:
@@ -71,7 +73,7 @@ class Scan:
                         return df.set_index('Ticker')
                         
                     except: # Except Timeout here if having issues -------------------------------------
-                        
+                        print('tried closing popup')
                         Scan.tryCloseLogout(browser)
 
         else:
@@ -81,22 +83,25 @@ class Scan:
 
     
     def runDailyScan(brows):
-        browser = brows
-        if(browser == None):
-            browser = Scan.startFirefoxSession()
+        try:
+            browser = brows
+            if(browser == None):
+                browser = Scan.startFirefoxSession()
+        
+            time.sleep(0.5) 
+            browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
+            time.sleep(0.25)
+            browser.find_element(By.XPATH, '//span[@class="js-filter-set-name"]').click()
+            time.sleep(0.25)
+            sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
+            sortRVol.click()
 
-        time.sleep(0.5) 
-        browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
-        time.sleep(0.25)
-        browser.find_element(By.XPATH, '//span[@class="js-filter-set-name"]').click()
-        time.sleep(0.25)
-        sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
-        sortRVol.click()
-
-        #creating the csv file
-        download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
-        download_screener_data.click()
-        time.sleep(1.5)
+            #creating the csv file
+            download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
+            download_screener_data.click()
+            time.sleep(1.5)
+        except:
+            print('screener fucked MANAUL SCREENER CSV REQUIRED')
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
 
