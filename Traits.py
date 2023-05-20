@@ -1,5 +1,5 @@
 
-from lib2to3.pgen2.token import PERCENT
+
 from Data7 import Data as data
 import pandas as pd
 import matplotlib as mpl
@@ -127,36 +127,37 @@ class Traits:
             })
             df_traits = pd.concat([df_traits,add])
             del pos[i]
-            
-        df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
+        df = df_traits
+        if not df_traits.empty:
+            df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
 
 
      
 
-#traits///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    #traits///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       
-        #pbar = tqdm(total=len(df_traits))
-        df_vix = data.get('^VIX','d')
-        df_qqq = data.get('QQQ','d')
-        arg_list = []
-        for i in range(len(df_traits)):
-            bar = df_traits.iloc[i]
-            arg_list.append([bar,df_pnl,df_vix,df_qqq])
+            #pbar = tqdm(total=len(df_traits))
+            df_vix = data.get('^VIX','d')
+            df_qqq = data.get('QQQ','d')
+            arg_list = []
+            for i in range(len(df_traits)):
+                bar = df_traits.iloc[i]
+                arg_list.append([bar,df_pnl,df_vix,df_qqq])
 
-        if len(arg_list) > 30:
-            df_list = data.pool(Traits.trait_calc,arg_list)
-        else:
-            df_list = []
-            for i in range(len(arg_list)):
-                df_list.append(Traits.trait_calc(arg_list[i]))
+            if len(arg_list) > 30:
+                df_list = data.pool(Traits.trait_calc,arg_list)
+            else:
+                df_list = []
+                for i in range(len(arg_list)):
+                    df_list.append(Traits.trait_calc(arg_list[i]))
 
 
-        try:
-            df = pd.concat(df_list)
-            df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
-        except:
-            df = pd.DataFrame()
+            try:
+                df = pd.concat(df_list)
+                df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
+            except:
+                df = pd.DataFrame()
     
         return df
 
@@ -207,6 +208,7 @@ class Traits:
         #main trades iterator
         trade_pnl = 0
         maxshares = sum([abs(float(s)) for d,d,s,d,d in trades])/2
+        maxshares = maxshares * direction
          
         fb = float(trades[0][3])  *   maxshares
         pnl = -fb 
