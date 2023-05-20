@@ -28,7 +28,6 @@ class Log:
     
 
 
-
     def log(self):
         
         if not self.df_log.empty:
@@ -97,7 +96,7 @@ class Log:
                     os.mkdir("C:/Screener/tmp/pnl/charts")
                     #self.df_log.
                     #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
-                except TimeoutError as e:
+                except Exception as e:
                     sg.Popup(str(e))
                 
         if self.event == "Delete":

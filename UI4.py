@@ -324,9 +324,9 @@ class UI:
                 dpi = 100
 
                 if data.isToday(date):
-                    cm = sm - 2
-                    cd = sd - 2
-                    ch = sh - 2
+                    cm = sm - 5
+                    cd = sd - 5
+                    ch = sh - 5
                     fs = 1.08
                     fw = 15
                     fh = 7
