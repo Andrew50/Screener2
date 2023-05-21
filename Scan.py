@@ -207,20 +207,20 @@ class Scan:
         login_page = browser.find_element(By.XPATH, '//button[@data-name="header-user-menu-sign-in"]')
         login_page.click()
         time.sleep(1)
-        login_page = browser.find_element(By.XPATH, '//span[@class="tv-signin-dialog__social tv-signin-dialog__toggle-email js-show-email"]')
+        login_page = browser.find_element(By.XPATH, '//button[@class="emailButton-nKAw8Hvt light-button-bYDQcOkp with-start-icon-bYDQcOkp variant-secondary-bYDQcOkp color-gray-bYDQcOkp size-medium-bYDQcOkp typography-medium16px-bYDQcOkp"]')
         login_page.click()
-        username = browser.find_element(By.XPATH, '//input[@name="username"]')
+        username = browser.find_element(By.XPATH, '//input[@name="id_username"]')
         username.send_keys("cs.benliu@gmail.com")
         time.sleep(0.5)
-        password = browser.find_element(By.XPATH, '//input[@name="password"]')
+        password = browser.find_element(By.XPATH, '//input[@name="id_password"]')
         password.send_keys("tltShort!1")
         time.sleep(0.5)
-        login_button = browser.find_element(By.XPATH, '//button[@class="tv-button tv-button--size_large tv-button--primary tv-button--loader"]')
+        login_button = browser.find_element(By.XPATH, '//button[@class="button-D4RPB3ZC size-large-D4RPB3ZC color-brand-D4RPB3ZC variant-primary-D4RPB3ZC stretch-D4RPB3ZC"]')
         login_button.click()
         time.sleep(3)
         browser.refresh();
       
-        time.sleep(4)
+        time.sleep(5)
         Scan.clickFilters(browser)
         return browser
     def clickFilters(browser):
@@ -340,7 +340,7 @@ class Scan:
 
 if __name__ == '__main__':
 
-    Scan.get(datetime.datetime.now(),'d',True)
+    Scan.startFirefoxSession()
 
     
 
