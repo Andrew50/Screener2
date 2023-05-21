@@ -28,7 +28,6 @@ class Log:
     
 
 
-
     def log(self):
         
         if not self.df_log.empty:
