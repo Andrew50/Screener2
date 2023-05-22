@@ -18,7 +18,7 @@ class Detection:
 	def check(bar):
 		
 		ticker = bar[0]
-		print(ticker)
+	
 		tf = bar[1]
 		path = bar[2]
 		date_list = bar[3]
@@ -46,7 +46,7 @@ class Detection:
 			for date in date_list:
 				try:
 				
-					#print(f'{dff} , {date}')
+				
 					currentday = data.findex(dff,date)
 					
 					if currentday != None and currentday > 15:
@@ -88,7 +88,7 @@ class Detection:
 									flag.flag(df,currentday, tf, ticker, path)
 									
 						if tf == '1min':
-							print(f"{dolVol} {adr}")
+						
 							if dolVol > 20000 and adr > .08:
 							
 								Detection.Pop(df,currentday, tf, ticker, path)
@@ -161,7 +161,7 @@ class Detection:
 			data.append(value)
 	
 		z = (current_value - statistics.mean(data))/statistics.stdev(data)
-		print(z)
+	
 		if ((z < -zfilter) or (z > zfilter)):
 			log.log(df,currentday, tf, ticker, z, path , 'Pop')  
    
