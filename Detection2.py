@@ -10,6 +10,7 @@ import datetime
 from Data7 import Data as data
 from sklearn.linear_model import LinearRegression
 import numpy as np
+from Scan import Scan
 
 class Detection:
 
@@ -58,7 +59,7 @@ class Detection:
 						df = dff[start:currentday + 50]
 						currentday = data.findex(df,date)
 					
-						dolVol, adr = Detection.requirements(df,currentday)
+						dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 						if tf == 'd':
 							
@@ -76,14 +77,14 @@ class Detection:
 									sFlag = False
 								dolVolFilter = 10000000
 								
-								if(dolVol > .2* dolVolFilter  and adr > 3.5 and sEP):
+								if((dolVol > .2* dolVolFilter or pmDolVol  > 1 * 1000000)  and adr > 3.5 and sEP):
 									Detection.EP(df,currentday, tf, ticker, path)
-								if(dolVol > .7 * dolVolFilter    and adr > 5 and sMR):
+								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 )   and adr > 5 and sMR):
 									Detection.MR(df,currentday, tf, ticker, path)
-								if(dolVol > .8* dolVolFilter   and adr > 3.5 and sPivot):
+								if((dolVol > .8* dolVolFilter or pmDolVol  > 1 * 1000000)   and adr > 3.5 and sPivot):
 									
 									pivot.pivot(df,currentday, tf, ticker, path)
-								if(dolVol > .7 * dolVolFilter   and adr > 4 and sFlag):
+								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 ) and adr > 4 and sFlag):
 									
 									flag.flag(df,currentday, tf, ticker, path)
 									
@@ -93,13 +94,6 @@ class Detection:
 							
 								Detection.Pop(df,currentday, tf, ticker, path)
 
-
-
-
-
-
-
-							
 
 
 					
@@ -121,7 +115,7 @@ class Detection:
 				
 		#except Exception as e: print(e)
   
-	def requirements(df,currentday):
+	def requirements(df,currentday,path,ticker):
 
 		dol_vol_l = 5
 		adr_l = 15
@@ -140,9 +134,22 @@ class Detection:
 				val = (high/low - 1) * 100
 				adr.append(val)
 			adr = statistics.mean(adr)  
-			return dolVol, adr
+			try:
+				if path == 1:
+					screenbar = Scan.Scan.get('0','d').loc[ticker]
+					pmvol =  screenbar['Pre-market Volume']
+
+					pmprice = df.iat[currentday,0]
+					pmDolVol = pmvol * pmprice
+				else:
+					pmDolVol = 0
+			except:
+				print('pm vol failed')
+				pmDolVol = 0
+
+			return dolVol, adr, pmDolVol
 		except:
-			return 0 ,0
+			return 0 ,0 , 0
 		   
 	def Pop(df,currentday, tf, ticker, path):
 		i = 0
