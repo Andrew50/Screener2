@@ -136,14 +136,16 @@ class Detection:
 			adr = statistics.mean(adr)  
 			try:
 				if path == 1:
-					screenbar = Scan.Scan.get('0','d').loc[ticker]
+					screenbar = Scan.get('0','d').loc[ticker]
+					print(screenbar)
 					pmvol =  screenbar['Pre-market Volume']
 
 					pmprice = df.iat[currentday,0]
 					pmDolVol = pmvol * pmprice
 				else:
 					pmDolVol = 0
-			except:
+			except Exception as e:
+				print(e)
 				print('pm vol failed')
 				pmDolVol = 0
 

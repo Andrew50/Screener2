@@ -104,7 +104,8 @@ class Scan:
             print('screener fucked MANAUL SCREENER CSV REQUIRED')
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-
+        
+        time.sleep(3)
         screener_data = pd.read_csv(downloaded_file)
 
         '''

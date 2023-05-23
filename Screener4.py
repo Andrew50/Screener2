@@ -23,7 +23,7 @@ class Screener:
 
 
     def queue(date = None,days = 1, ticker = None, tf = 'd',browser = None, fpath = None):
-        print("WEREW")
+       
         path = 0
     
 
@@ -124,7 +124,7 @@ class Screener:
                     
         
         pbar.close()
-        print(container)
+      
         data.pool(detection.check, container)
         
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
-        print("ON")
+   
         browser = scan.startFirefoxSession()
         while datetime.datetime.now().hour < 13:
            
