@@ -323,6 +323,10 @@ class Scan:
                     removelist.append(ticker)
                         
 
+
+            if '/' in ticker:
+                removelist.append(ticker)
+
         df3 = df3.set_index('Ticker')
         for ticker in removelist:
             ticker = str(ticker)
