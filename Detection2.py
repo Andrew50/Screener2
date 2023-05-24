@@ -138,6 +138,7 @@ class Detection:
 				if path == 1:
 					screenbar = Scan.get('0','d').loc[ticker]
 					print(screenbar)
+				
 					pmvol =  screenbar['Pre-market Volume']
 
 					pmprice = df.iat[currentday,0]
