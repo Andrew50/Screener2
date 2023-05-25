@@ -148,10 +148,15 @@ class Trainer:
         df = bar[1]
 
         p = pathlib.Path("C:/Screener/setups/charts") / str(i)
+        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 
-        fw = 22
-        fh = 12
-        fs = 3
+            fw = 22
+            fh = 12
+            fs = 3
+        else:
+            fw = 25
+            fh = 12
+            fs = 2
 
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
