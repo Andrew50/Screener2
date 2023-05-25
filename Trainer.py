@@ -33,7 +33,7 @@ class Trainer:
 
             ticker = self.dict[self.i][0]
             date = self.dict[self.i][1]
-
+            
             add = pd.DataFrame({
                 'ticker':[ticker],
                 'date':[date],
@@ -41,6 +41,7 @@ class Trainer:
                 })
             df = pd.concat([df,add]).reset_index(drop = True)
             df.to_feather(path)
+            print(add)
             print(s)
             print(df)
 
@@ -97,7 +98,7 @@ class Trainer:
                     self.update(self)
                     
                     self.preload(self)
-
+                    self.setup = []
                 else:
                     self.setup.append(self.event)
                 
@@ -156,7 +157,7 @@ class Trainer:
         else:
             fw = 25
             fh = 12
-            fs = 2
+            fs = 1.3
 
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
