@@ -12,6 +12,7 @@ import numpy
 from multiprocessing  import Pool
 import warnings
 import yfinance as yf
+import shutil
 warnings.filterwarnings("ignore")
 import Scan
 
@@ -321,7 +322,26 @@ class Data:
         
         
         Data.pool(Data.update, batches)
+
+
+
+
+        if datetime.datetime.now().weekday() == 4:
+            Data.backup()
         
+
+
+    def backup():
+        print('backing up data')
+        date = datetime.date.today()
+        src = r'C:/Screener'
+        dst = r'D:/Screener Backups/' + str(date)
+
+
+        shutil.copytree(src, dst)
+
+
+
 
     def isMarketOpen():
         dayOfWeek = datetime.datetime.now().weekday()
@@ -343,7 +363,7 @@ class Data:
 
 
 if __name__ == '__main__':
-    
+    #Data.backup()
     Data.runUpdate()
     
 

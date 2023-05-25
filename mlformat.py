@@ -98,6 +98,12 @@ def get_nn_data():
     the outputs as four numpy arrays (x_train, y_train, x_test, y_test)
     '''
     
+    setup 
+
+
+
+
+
     dfs = []
     for ticker in TICKERS:
 
