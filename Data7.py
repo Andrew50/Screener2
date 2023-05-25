@@ -250,10 +250,11 @@ class Data:
             try:
                 cs = Data.get(ticker,tf)
                 lastDay = cs.index[-1]
+         
                 if (lastDay == lastDStock):
                     return
             
-            except:
+            except TimeoutError:
                 exists = False
             if tf == 'daily':
                 ytf = '1d'
@@ -310,12 +311,14 @@ class Data:
         
         #screener_data = pd.DataFrame({'Ticker': ['^VIX']
                                #       }).set_index('Ticker')
-        
+        print(daily_last)
+        print(minute_last)
         batches = []
         for i in range(len(screener_data)):
            ticker = screener_data.index[i]
            batches.append([ticker, daily_last, 'daily'])
            batches.append([ticker, minute_last, 'minute'])
+        
         
         Data.pool(Data.update, batches)
         

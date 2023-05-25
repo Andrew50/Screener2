@@ -100,13 +100,16 @@ class Scan:
             download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
             download_screener_data.click()
             time.sleep(1.5)
-        except:
+        except TimeoutError:
             print('screener fucked MANAUL SCREENER CSV REQUIRED')
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
         
         time.sleep(3)
+
         screener_data = pd.read_csv(downloaded_file)
+
+        print(screener_data)
 
         '''
         new_name = r"C:\Downloads\screener_data.csv"
@@ -184,7 +187,10 @@ class Scan:
         options = Options()
         options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
         ##///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        options.headless = True
+
+
+
+        options.headless = False
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
@@ -197,9 +203,9 @@ class Scan:
         url = "https://www.tradingview.com/screener/"
         browser.get(url)
         time.sleep(1.5)
-        browser.find_element(By.XPATH, '//div[@data-set="performance"]').click()
-        time.sleep(.5)
-        element_tab = browser.find_element(By.XPATH, '//div[@data-set="overview"]').click()
+        #browser.find_element(By.XPATH, '//div[@data-set="performance"]').click()
+        #time.sleep(.5)
+        
 
         #Logging into trading view
         login_page = browser.find_element(By.XPATH, '//button[@aria-label="Open user menu"]')
@@ -228,7 +234,10 @@ class Scan:
         #setting default scanner settings
         browser.find_element(By.XPATH, '//div[@data-name="screener-field-sets"]').click()
         time.sleep(0.1)
-        browser.find_element(By.XPATH, '//div[@data-set="overview"]').click()
+        browser.find_element(By.XPATH, '//div[@title="Python Screener"]').click()
+        
+        
+        #browser.find_element(By.XPATH, '//div[@data-set="overview"]').click()
 
         #seting filters
         filter_tab = browser.find_element(By.XPATH, '//div[@class="tv-screener-sticky-header-wrapper__fields-button-wrap"]')
@@ -238,6 +247,8 @@ class Scan:
             pass
         time.sleep(0.5)
         #Setting up the TV screener parameters
+
+        '''
         tab1 = browser.find_element(By.XPATH, '//label[@data-field="earnings_per_share_basic_ttm"]')
         tab2 = browser.find_element(By.XPATH, '//label[@data-field="number_of_employees"]')
         tab3 = browser.find_element(By.XPATH, '//label[@data-field="sector"]')
@@ -252,6 +263,8 @@ class Scan:
         tab13 = browser.find_element(By.XPATH, '//label[@data-field="open"]')
         tab14 = browser.find_element(By.XPATH, '//label[@data-field="change_from_open_abs"]')
         tab15 = browser.find_element(By.XPATH, '//label[@data-field="change_from_open"]')
+
+        
         tab1.click()
         tab2.click()
         tab3.click()
@@ -266,6 +279,8 @@ class Scan:
         tab13.click()
         tab14.click()
         tab15.click()
+        '''
+        
 
         '''
         //*[@id="close"]
@@ -325,8 +340,8 @@ class Scan:
                         
 
 
-            if '/' in ticker:
-                removelist.append(ticker)
+            #if '/' in ticker:
+           #     removelist.append(ticker)
 
         df3 = df3.set_index('Ticker')
         for ticker in removelist:

@@ -1,7 +1,7 @@
 import time
 from multiprocessing import Pool, current_process
 import pandas as pd
-import Scan 
+from Scan import Scan as scan
 
 import yfinance as yf
 from Data7 import Data as data
@@ -14,10 +14,21 @@ from Plot import Plot as plot
 
 
 
-string = '23:45'
+#string = '23:45'
 
-sting = string.split(':')
-print(sting)
+#sting = string.split(':')
+#print(sting)
+
+
+date = '0'
+browser = None
+tf = 'd'
+df = scan.get(date,tf,True,browser)
+
+
+print(df.columns)
+
+
 '''
 print("TESTSET")
 df = pd.read_feather("C:/Screener/sync/traits.feather")
