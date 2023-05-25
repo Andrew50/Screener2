@@ -574,7 +574,7 @@ class UI:
 
             '''
            
-            
+            '''
             traits = UI.traits(ticker,date)
 
 
@@ -589,7 +589,7 @@ class UI:
             time = traits[8]
             vol1 = traits[9]
             
-
+            '''
 
 
  
@@ -601,16 +601,18 @@ class UI:
                 layout = [  
                 [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
-                [ (sg.Text("gap")),(sg.Text(gap, key = '-gap-')),
-                (sg.Text("|   adr")),(sg.Text(adr, key = '-adr-')),
-                (sg.Text("|   vol")),(sg.Text(vol, key = '-vol-')),
-                (sg.Text("|   vol1")),(sg.Text(vol1, key = '-vol1-')),
-                (sg.Text("|   q")),(sg.Text(q, key = '-q-')),
-                (sg.Text("|   1")),(sg.Text(one, key = '-one-')),
-                (sg.Text("|   2")),(sg.Text(two, key = '-two-')),
-                (sg.Text("|   3")),(sg.Text(three, key = '-three-')),
-                (sg.Text("|   10")),(sg.Text(ten, key = '-ten-')),
-                (sg.Text("|   time")),(sg.Text(time, key = '-time-'))],
+                
+                #[ (sg.Text("gap")),(sg.Text(gap, key = '-gap-')),
+                #(sg.Text("|   adr")),(sg.Text(adr, key = '-adr-')),
+                #(sg.Text("|   vol")),(sg.Text(vol, key = '-vol-')),
+                #(sg.Text("|   vol1")),(sg.Text(vol1, key = '-vol1-')),
+                #(sg.Text("|   q")),(sg.Text(q, key = '-q-')),
+                #(sg.Text("|   1")),(sg.Text(one, key = '-one-')),
+                #(sg.Text("|   2")),(sg.Text(two, key = '-two-')),
+                #(sg.Text("|   3")),(sg.Text(three, key = '-three-')),
+                #(sg.Text("|   10")),(sg.Text(ten, key = '-ten-')),
+                #(sg.Text("|   time")),(sg.Text(time, key = '-time-'))],
+                
                 [sg.Multiline(annotation,size=(150, 5), key='annotation')],
                 [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
                 [(sg.Text("Ticker       ")),sg.InputText(key = 'input-ticker')],
@@ -631,16 +633,17 @@ class UI:
                 
                 annotation = self.setups_data.iat[self.i,5]
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
-                self.window["-gap-"].update(gap)
-                self.window["-adr-"].update(adr)
-                self.window["-vol-"].update(vol)
-                self.window["-vol1-"].update(vol1)
-                self.window["-q-"].update(q)
-                self.window["-one-"].update(one)
-                self.window["-two-"].update(two)
-                self.window["-three-"].update(three)
-                self.window["-ten-"].update(ten)
-                self.window["-time-"].update(time)
+
+                #self.window["-gap-"].update(gap)
+                #self.window["-adr-"].update(adr)
+                #self.window["-vol-"].update(vol)
+                #self.window["-vol1-"].update(vol1)
+                #self.window["-q-"].update(q)
+                #self.window["-one-"].update(one)
+                #self.window["-two-"].update(two)
+                #self.window["-three-"].update(three)
+                #self.window["-ten-"].update(ten)
+                #self.window["-time-"].update(time)
                 self.window["annotation"].update(annotation)
                 self.window["input-redate"].update("")
                 self.window["-IMAGE-"].update(data=bio1.getvalue())

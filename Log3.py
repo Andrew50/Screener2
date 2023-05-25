@@ -71,7 +71,7 @@ class Log:
         Log.sendDiscordIntradayPost('tmp/test.png')
 
     def log(df,currentday, tf, ticker, z, path, st):
-        print("LLLLLLL")
+  
         if path == 2:
             
             

@@ -104,15 +104,20 @@ class Detection:
 						if tf == 'h':
 						
 							pass
+
+
+
 				except TimeoutError:
 					pass
+
+				
 				except IndexError:
 					pass
+			
 				except TypeError:
 					pass
 				except ValueError:
 					pass
-				
 		#except Exception as e: print(e)
   
 	def requirements(df,currentday,path,ticker):
@@ -134,10 +139,11 @@ class Detection:
 				val = (high/low - 1) * 100
 				adr.append(val)
 			adr = statistics.mean(adr)  
+			
 			try:
-				if path == 1:
+				if path == 1 and dolVol < 8000000 and abs(df.iat[currentday,0] / df.iat[currentday-1,3] - 1) > .05:
 					screenbar = Scan.get('0','d').loc[ticker]
-					print(screenbar)
+					#print(screenbar)
 				
 					pmvol =  screenbar['Pre-market Volume']
 
@@ -151,7 +157,7 @@ class Detection:
 				pmDolVol = 0
 
 			return dolVol, adr, pmDolVol
-		except:
+		except TimeoutError:
 			return 0 ,0 , 0
 		   
 	def Pop(df,currentday, tf, ticker, path):
