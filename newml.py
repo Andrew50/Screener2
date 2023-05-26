@@ -14,16 +14,6 @@ def getTickers():
     for iii in range(len(setupsss)):
         Data.get(setupsss.iloc[iii]['ticker'], tf='d', date=setupsss.iloc[iii]['datetime'])
 
-def time_series(df: pd.DataFrame,
-                col: str,
-                name: str) -> pd.DataFrame:
-    '''
-    Form the lagged columns for this feature
-    '''
-    return df.assign(**{
-        f'{name}_t-{lag}': col.shift(lag)
-        for lag in range(0, FEAT_LENGTH)
-    })
 
 
 def get_lagged_returns(df: pd.DataFrame) -> pd.DataFrame:
@@ -31,20 +21,14 @@ def get_lagged_returns(df: pd.DataFrame) -> pd.DataFrame:
     For each of the feature cols, find the returns and then form the lagged
     time-series as new columns
     '''
-    new_df = pd.DataFrame()
     add = []
     for row in range(len(df)):
-        pass
-    for col in FEAT_COLS:
-        #print(df[col])
-        #print(df[col].shift(1))
-        return_col = df[col]/df[col].shift(1)-1
-       # print(return_col)
-     #   print("------------------------------")
-        
-        df = time_series(df, return_col, f'feat_{col}_ret')
-    #df.to_csv('C:/Screener/godddd.csv')
-    return df
+        if(row != 0):
+            add.append((df.iloc[row]['open']/df.iloc[row-1]['close'])-1)
+            add.append((df.iloc[row]['high']/df.iloc[row-1]['close'])-1)
+            add.append((df.iloc[row]['low']/df.iloc[row-1]['close'])-1)
+            add.append((df.iloc[row]['close']/df.iloc[row-1]['close'])-1)
+    return add
 
 
 
@@ -91,50 +75,53 @@ def get_nn_data():
 
     dfs = []
     #for ticker in TICKERS:
+    print(setups)
     for i in range(len(setups)):
+
         ticker = setups.iat[i,0]
         date = setups.iat[i,1]
         value = setups.iat[i,2]
+        try:
 
-        df = data.get(ticker)
-
+            df = data.get(str(ticker))
+        except:
+            print(f'{ticker} fucked')
        
         index = data.findex(df,date)
-        df2 = df[index-50:index]
+        if(index != None): 
+            df2 = df[index-51:index]
 
-        o = df.iat[index,0]
-        add = pd.DataFrame({
-            'datetime':[date],
-            'open':[o],
-            'high':[o],
-            'low':[o],
-            'close':[o],
-            'volume':[0]}).set_index('datetime')
-        df2 = pd.concat([df2,add])
-        df = df2
-
-       # print(df)
-        #df = pd.read_csv(f'data/{ticker}.csv')
-        df = get_lagged_returns(df)
-        #print(df)
+            o = df.iat[index,0]
+            add = pd.DataFrame({
+                'datetime':[date],
+                'open':[o],
+                'high':[o],
+                'low':[o],
+                'close':[o],
+                'volume':[0]}).set_index('datetime')
+            df2 = pd.concat([df2,add])
+            df = df2
+           # print(df)
+            #df = pd.read_csv(f'data/{ticker}.csv')
+            added = get_lagged_returns(df)
+            added.append(value)
+            #print(df)
+            #print(added)
+            # We may end up with some divisions by 0 when calculating the returns
+            # so to prevent any rows with this slipping in, we replace any infs
+            # with nan values and remove all rows with nan values in them
+            addeddf = pd.DataFrame([added])
+            #print(addeddf)
+            dfs.append(addeddf)
         
-        # We may end up with some divisions by 0 when calculating the returns
-        # so to prevent any rows with this slipping in, we replace any infs
-        # with nan values and remove all rows with nan values in them
-        dfs.append(
-            df
-            .replace([np.inf, -np.inf], np.nan)
-            .dropna()
-            [[col for col in df.columns if 'feat_' in col]]
-        )
-        
-    nn_values = pd.concat(dfs)
+    nn_values = pd.concat(dfs).reset_index(drop = True)
+    nn_values = nn_values.dropna()
+    nn_values = nn_values.reset_index(drop = True)
+    nn_values = nn_values.rename({204: "classification"}, axis=1)
+    print(nn_values)
     nn_values.to_csv('C:/Screener/godddd.csv')
    
     nn_values = nn_values.values
-    for n in nn_values:
-        print(n)
-    
     #print(dfs)
     # Shuffle the values to ensure the NN does not learn an order
     np.random.shuffle(nn_values)

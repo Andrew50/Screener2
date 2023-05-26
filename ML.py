@@ -34,16 +34,34 @@ if __name__ == '__main__':
 
 
     #get setups df
-    df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+    df = pd.read_feather(r"C:\Screener\sync\setups.feather")
 
     #filter out all setups wihtout an annotation
     #df = df[df['annotation'] != ""]
     df = df[df['Setup'] == setup]
-    df = df.sample(size)
+    df = df.sample(size).reset_index(drop = True)
     #format shit
-    df = df.reset_index(drop = True)
+    newdf = df[['Ticker', 'Date']]
+    for i in range(len(newdf)):
+        newdf.at[i, 'setup'] = 1
+    newdf = newdf.rename({'Ticker':'ticker', 'Date':'date'}, axis=1)
+
+
+    sets = pd.read_feather(r"C:\Screener\sync\setups.feather")
+    test = sets[sets['Setup'] != "EP"]
+    test = test.sample(size).reset_index(drop = True)
+    nnn = test[['Ticker', 'Date']]
+    for j in range(len(nnn)):
+        nnn.at[j, 'setup'] = 0
+
+    nnn = nnn.rename({'Ticker':'ticker', 'Date':'date'}, axis=1)
+    print(nnn)
+    newdd = pd.concat([newdf, nnn]).reset_index(drop = True)
+    newdd['date'] = pd.to_datetime(newdd['date'])
+    print(newdd.to_string())
+
    
-    
+    '''
     #create list of series so that it can be multiprocessed
     container = []
     for index, row in df.iterrows():
@@ -76,12 +94,11 @@ if __name__ == '__main__':
     #replace qqq boolean with int
     df['q'].replace({False:0, True:1}, inplace = True)
 
+    '''
+    
 
 
-    print(df)
-
-
-    df.to_feather(r"C:\Screener\tmp\ml"+setup+".feather")
+    newdd.to_feather(r"C:\Screener\setups\EP.feather")
 
 
 
