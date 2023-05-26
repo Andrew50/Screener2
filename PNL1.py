@@ -79,6 +79,7 @@ class PNL():
             [(sg.Text("Setup    ")),sg.InputText(key = 'input-setup')],
             [sg.Text("",key = '-index-')],
             [sg.Button('Delete'),sg.Button('Clear'),sg.Button('Enter')],
+            [sg.Button('Pull')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
     
             c2 = [[sg.Table([],headings=toprow,key = '-table-',auto_size_columns=True,num_rows = 30,justification='left',enable_events=True,selected_row_colors='red on yellow')]]

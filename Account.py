@@ -55,7 +55,7 @@ class Account:
         #if startdate == 'now':
         account = True
 
-        df_aapl = data.get('AAPL','1min',account = account)
+        df_aapl = data.get('NFLX','1min',account = account)
         
 
 
@@ -155,10 +155,7 @@ class Account:
         
       
         ##for date in date_list:
-        print(date_list)
-        print(df_log)
-        print(nex)
-        
+       
         for i in range(len(date_list)):
             date = date_list[i]
             if i > 0:
@@ -173,7 +170,7 @@ class Account:
                 ticker = df_log.iat[log_index,0]
                 shares = df_log.iat[log_index,2]
                 price = df_log.iat[log_index,3]
-                print(ticker)
+               
                 if ticker == 'Deposit':
                     deposits += price
                 else:
@@ -236,7 +233,7 @@ class Account:
                     nex = datetime.datetime.now() + datetime.timedelta(days=100)
                 else:
                     nex = df_log.iat[log_index,1]
-                    print(nex)
+                   
             
             positions = ""
             god_shares = ""
