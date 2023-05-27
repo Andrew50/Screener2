@@ -38,21 +38,23 @@ class Log:
             os.makedirs(download_folder, exist_ok=True)
         mail = Imbox(host, username=username, password=password, ssl=True, ssl_context=None, starttls=False)
         #messages = mail.messages() # defaults to inbox
-        messages = mail.messages(sent_from='noreply@email.webull.com')
+        dt = datetime.date.today() - datetime.timedelta(days = 1)
+        messages = mail.messages(sent_from='noreply@email.webull.com',date__gt=dt)
         
         for (uid, message) in messages:
             mail.mark_seen(uid) # optional, mark message as read
             for idx, attachment in enumerate(message.attachments):
-                try:
-                    att_fn = attachment.get('filename')
-                    if not 'IPO' and 'Options' in att_fn:
-                        download_path = f"{download_folder}/{att_fn}"
-                       
-                        with open(download_path, "wb") as fp:
-                            fp.write(attachment.get('content').read())
-                except:
-                    pass
+               
+                att_fn = attachment.get('filename')
+                print(att_fn)
+                if not 'IPO' in att_fn and not  'Options' in att_fn:
+                    download_path = f"{download_folder}/{att_fn}"
+                        
+                    with open(download_path, "wb") as fp:
+                        fp.write(attachment.get('content').read())
+               
                     
+
         mail.logout()
         log = pd.read_csv('C:/Screener/tmp/pnl/Webull_Orders_Records.csv')
         log2 = pd.DataFrame()
@@ -78,10 +80,11 @@ class Log:
 
             new_log = Log.pull_mail()
 
+            print(new_log)
             #self.df_log = new_log
             
             new = pd.concat([self.df_log, new_log]).drop_duplicates(keep=False)
-
+            print(new)
             new = new.sort_values(by='datetime', ascending = False)
             dt = new.iloc[-1]['datetime']
 
@@ -90,7 +93,7 @@ class Log:
             df_log = pd.concat([self.df_log,new])
 
             df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
-            #self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
+            self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
             #self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_traits = traits.update(new.values.tolist(), df_log,self.df_traits,self.df_pnl)
 
