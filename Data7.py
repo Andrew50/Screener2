@@ -364,6 +364,7 @@ class Data:
 
 if __name__ == '__main__':
     #Data.backup()
+    #print(datetime.datetime.now().weekday())
     Data.runUpdate()
     
 
