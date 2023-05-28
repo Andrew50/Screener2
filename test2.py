@@ -13,6 +13,7 @@ from Plot import Plot as plot
 ################dont delte!!!!!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setups = pd.read_feather('C:/Screener/sync/setups.feather')
 
+print(setups)
 
 ep = setups[setups['Setup'] == 'EP'].reset_index(drop = True)
 

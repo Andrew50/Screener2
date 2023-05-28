@@ -42,7 +42,7 @@ class Screener:
             if date == None:
                 i = 0
                 try:
-                    df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+                    df = pd.read_feather(r"C:\Screener\sync\setups.feather")
 
                     
                     god = df['Ticker'].tolist()
@@ -54,7 +54,7 @@ class Screener:
                         except TimeoutError:
                             pass
                     
-                except TimeoutError:
+                except:
                     pass
                 print(f'{i} tickers already completed')
 
@@ -72,7 +72,7 @@ class Screener:
                 path = 2
             date_list = [date]
         else:
-            sample = data.get('AAPL',tf)
+            sample = data.get('NFLX',tf)
             if date == None:
               
                 date_list =sample.index.tolist()
@@ -102,7 +102,7 @@ class Screener:
         pbar = tqdm(total=length)
         container = []
        
-
+      
 
 
 
@@ -129,7 +129,7 @@ class Screener:
         
 
 if __name__ == '__main__':
-    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
         Screener.queue('0')
 
@@ -142,12 +142,19 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
-   
+
+
+        Screener.queue()
+
+
+
+
+        '''
         browser = scan.startFirefoxSession()
         while datetime.datetime.now().hour < 13:
            
             Screener.queue(tf = '1min', date = '0',browser = browser)
-        '''
+       
         #Screener.queue(date = '2022-01-01',fpath = 0,days = 5)
         Screener.queue(date = '2023-04-25', tf = '5min')
         ui.loop(ui,True)

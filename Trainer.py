@@ -13,6 +13,7 @@ import io
 import matplotlib.ticker as mticker
 import shutil
 import os
+from Detection2 import Detection as detection
 
 
 
@@ -41,9 +42,11 @@ class Trainer:
                 })
             df = pd.concat([df,add]).reset_index(drop = True)
             df.to_feather(path)
-            print(add)
-            print(s)
-            print(df)
+       
+     
+
+        self.setup = []
+        self.window['-text-'].update('')
 
     def update(self):
         if self.init:
@@ -51,7 +54,7 @@ class Trainer:
             layout = [
             [sg.Image(key = '-IMAGE-')],
             [sg.Button(s) for s in self.setup_list],
-            [sg.Button('Next')]]
+            [sg.Button('Next'), sg.Text(key = '-text-')]]
 
             self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
             self.init = False
@@ -63,6 +66,9 @@ class Trainer:
                 break
             except:
                 pass
+
+
+
 
         bio1 = io.BytesIO()
         image1.save(bio1, format="PNG")
@@ -101,6 +107,11 @@ class Trainer:
                     self.setup = []
                 else:
                     self.setup.append(self.event)
+                    gud = ''
+                    for i in self.setup:
+                        gud += (str(i) + " ")
+                        
+                    self.window['-text-'].update(gud)
                 
 
     def preload(self):
@@ -114,30 +125,44 @@ class Trainer:
 
         for i in l:
 
+            while True:
+                try:
+                    ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
 
-            ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
+                    df = data.get(ticker)
 
-            df = data.get(ticker)
-
-            date_list = df.index.to_list()
+                    date_list = df.index.to_list()
             
-            date = date_list[random.randint(0,len(date_list) - 1)]
+                    date = date_list[random.randint(0,len(date_list) - 1)]
             
+            
+
+            
+                    index = data.findex(df,date)
+                    df2 = df[index-200:index]
+
+                    o = df.iat[index,0]
+                    add = pd.DataFrame({
+                        'datetime':[date],
+                        'open':[o],
+                        'high':[o],
+                        'low':[o],
+                        'close':[o],
+                        'volume':[0]}).set_index('datetime')
+                    df2 = pd.concat([df2,add])
+
+                    #filters
+                    if len(df2) > 20:
+                        dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
+                        if dolVol > 2000000 and adr > 2:
+                            break
+
+
+                except:
+                    pass
+   
+
             self.dict.append([ticker,date])
-
-            
-            index = data.findex(df,date)
-            df2 = df[index-50:index]
-
-            o = df.iat[index,0]
-            add = pd.DataFrame({
-                'datetime':[date],
-                'open':[o],
-                'high':[o],
-                'low':[o],
-                'close':[o],
-                'volume':[0]}).set_index('datetime')
-            df2 = pd.concat([df2,add])
             arglist.append([i,df2])
 
 
@@ -154,10 +179,14 @@ class Trainer:
             fw = 22
             fh = 12
             fs = 3
-        else:
+        elif os.path.exists("C:/Screener/ben.txt"):
             fw = 25
             fh = 12
             fs = 1.3
+        else:
+            fw = 25
+            fh = 12
+            fs = 2.2
 
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)

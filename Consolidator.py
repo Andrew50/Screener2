@@ -38,11 +38,13 @@ class consolidate:
 
         
             setups.reset_index(inplace = True,drop = True)
-            print(setups)
+        
             setups.to_feather(r"C:\Screener\sync\setups.feather")
 
-            todays_setups.reset_index(inplace = True,drop = True)
-            todays_setups.to_feather(r"C:\Screener\sync\todays_setups.feather")
+          
+            if not todays_setups.empty:
+                todays_setups.reset_index(inplace = True,drop = True)
+                todays_setups.to_feather(r"C:\Screener\sync\todays_setups.feather")
 
 
         if os.path.exists("C:/Screener/tmp/subsetups"):
