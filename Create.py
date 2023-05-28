@@ -102,11 +102,9 @@ class Create:
                 'volume':[0]}).set_index('datetime')
             df2 = pd.concat([df2,add])
             df = df2
-            print(df)
 
             #df = pd.read_csv(f'data/{ticker}.csv')
             df = Create.get_lagged_returns(df)
-            print(df)
             df = Create.get_classification(df,value)
             #   print(df)
         

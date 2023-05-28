@@ -54,7 +54,7 @@ while True:
 
 
         total += 1
-        print(val)
+        print(f"{val} Actual: {typee}")
         if val == 1:
             df1 = data.get(ticker)
 
@@ -78,7 +78,7 @@ while True:
 
 
         #time.sleep(.1)
-    except TimeoutError:
+    except:
         pass
 
 
