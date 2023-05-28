@@ -143,7 +143,7 @@ class Create:
         
     
         nn_values = pd.concat(dfs)
-        nn_values.to_csv('C:/Screener/godddd.csv')
+       
         nn_values = nn_values.values
 
     
@@ -226,7 +226,7 @@ class Create:
         #df = pd.read_csv(f'data/{ticker}.csv')
         df = Create.get_lagged_returns(df)
         #  print(df)
-        df = Create.get_classification(df,0)
+        df = Create.get_classification(df,1)
 
         df = (
         df
