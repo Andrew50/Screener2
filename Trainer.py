@@ -157,7 +157,7 @@ class Trainer:
         else:
             fw = 25
             fh = 12
-            fs = 1.3
+            fs = 1.33
 
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)

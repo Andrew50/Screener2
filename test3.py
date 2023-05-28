@@ -9,8 +9,8 @@ from tensorflow.keras.models import load_model
 model = load_model('model')
 
 
-setups = pd.read_feather('C:/Screener/sync/setups.feather')
-
+setups = pd.read_feather('C:/Screener/setups/Testdata.feather')
+print(setups[setups['setup'] == 1])
 right = 0
 total = 0
 while True:
@@ -20,9 +20,9 @@ while True:
         setup = setups.iloc[(random.randint(0,len(setups)-1))]
  
 
-        ticker = setup['Ticker'] 
-        date =  setup['Date']
-        type = setup["Setup"]
+        ticker = setup['ticker'] 
+        date =  setup['date']
+        typee = setup["setup"]
     
         df = create.test_data(ticker,date)
 
@@ -35,9 +35,9 @@ while True:
             val = 1
 
         sys.stdout = sys.__stdout__
-        print(f'{val} , {type}')
+        print(f'{val} , {typee}')
 
-        if type == 'EP':
+        if typee == 'EP':
             actual = 1
         else:
             actual = 0
@@ -52,7 +52,7 @@ while True:
 
         print((right/total) * 100)
         #time.sleep(.1)
-    except:
+    except TimeoutError:
         pass
 
 
