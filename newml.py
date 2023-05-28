@@ -81,38 +81,39 @@ def get_nn_data():
         ticker = setups.iat[i,0]
         date = setups.iat[i,1]
         value = setups.iat[i,2]
-        try:
-
-            df = data.get(str(ticker))
-        except:
-            print(f'{ticker} fucked')
+        if(ticker != "RCII"):
+            try:
+                print(ticker)
+                df = data.get(str(ticker))
+            except:
+                print(f'{ticker} fucked')
        
-        index = data.findex(df,date)
-        if(index != None): 
-            df2 = df[index-51:index]
+            index = data.findex(df,date)
+            if(index != None): 
+                df2 = df[index-51:index]
 
-            o = df.iat[index,0]
-            add = pd.DataFrame({
-                'datetime':[date],
-                'open':[o],
-                'high':[o],
-                'low':[o],
-                'close':[o],
-                'volume':[0]}).set_index('datetime')
-            df2 = pd.concat([df2,add])
-            df = df2
-           # print(df)
-            #df = pd.read_csv(f'data/{ticker}.csv')
-            added = get_lagged_returns(df)
-            added.append(value)
-            #print(df)
-            #print(added)
-            # We may end up with some divisions by 0 when calculating the returns
-            # so to prevent any rows with this slipping in, we replace any infs
-            # with nan values and remove all rows with nan values in them
-            addeddf = pd.DataFrame([added])
-            #print(addeddf)
-            dfs.append(addeddf)
+                o = df.iat[index,0]
+                add = pd.DataFrame({
+                    'datetime':[date],
+                    'open':[o],
+                    'high':[o],
+                    'low':[o],
+                    'close':[o],
+                    'volume':[0]}).set_index('datetime')
+                df2 = pd.concat([df2,add])
+                df = df2
+               # print(df)
+                #df = pd.read_csv(f'data/{ticker}.csv')
+                added = get_lagged_returns(df)
+                added.append(value)
+                #print(df)
+                #print(added)
+                # We may end up with some divisions by 0 when calculating the returns
+                # so to prevent any rows with this slipping in, we replace any infs
+                # with nan values and remove all rows with nan values in them
+                addeddf = pd.DataFrame([added])
+                #print(addeddf)
+                dfs.append(addeddf)
         
     nn_values = pd.concat(dfs).reset_index(drop = True)
     nn_values = nn_values.dropna()

@@ -10,8 +10,8 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # Global variables
-EPOCHS = 5
-BATCH_SIZE = 8
+EPOCHS = 25
+BATCH_SIZE = 64
 VALIDATION = 0.1
 LEARN_RATE = 1e-3
 MODEL_SAVE_NAME = 'model'
