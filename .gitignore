@@ -35,3 +35,4 @@ __pycache__/
 #sync/pnl.feather
 #sync/traits.feather
 #sync/log.feather
+/ben.txt
