@@ -11,8 +11,8 @@ from Data7 import Data as data
 model = load_model('model')
 
 
-setups = pd.read_feather('C:/Screener/sync/setups.feather')
-
+setups = pd.read_feather('C:/Screener/setups/Testdata.feather')
+print(setups[setups['setup'] == 1])
 right = 0
 total = 0
 from matplotlib import pyplot as plt
@@ -23,9 +23,9 @@ while True:
         setup = setups.iloc[(random.randint(0,len(setups)-1))]
  
 
-        ticker = setup['Ticker'] 
-        date =  setup['Date']
-        type = setup["Setup"]
+        ticker = setup['ticker'] 
+        date =  setup['date']
+        typee = setup["setup"]
     
         df = create.test_data(ticker,date)
 
@@ -40,7 +40,7 @@ while True:
         sys.stdout = sys.__stdout__
         #print(f'{val} , {type}')
 
-        if type == 'EP':
+        if typee == 'EP':
             actual = 1
         else:
             actual = 0
@@ -54,7 +54,7 @@ while True:
 
 
         total += 1
-        print(val)
+        print(f"{val} Actual: {typee}")
         if val == 1:
             df1 = data.get(ticker)
 

@@ -103,17 +103,15 @@ class Create:
             df2 = pd.concat([df2,add])
             df = df2
 
-
             #df = pd.read_csv(f'data/{ticker}.csv')
             df = Create.get_lagged_returns(df)
-            #  print(df)
             df = Create.get_classification(df,value)
             #   print(df)
         
             # We may end up with some divisions by 0 when calculating the returns
             # so to prevent any rows with this slipping in, we replace any infs
             # with nan values and remove all rows with nan values in them
-          
+            #print(df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']])
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
             
         except:
@@ -125,11 +123,14 @@ class Create:
     def get_nn_data():
  
         setup = 'EP'
-        setups = pd.read_feather('C:/Screener/setups/' + setup + '.feather')
-
-   
-
+        allsetups = pd.read_feather('C:/Screener/setups/EP.feather')
+        eighty = int(len(allsetups) * 0.8)
+        setups = allsetups.loc[0:eighty].reset_index(drop = True)
         print(setups)
+        rest = allsetups.loc[eighty:].reset_index(drop = True)
+        rest.to_feather('C:/Screener/setups/Testdata.feather')
+        
+
         arglist = []
         for i in range(len(setups)):
             arglist.append(setups.iloc[i])
