@@ -12,11 +12,17 @@ from Plot import Plot as plot
 
 ################dont delte!!!!!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setups = pd.read_feather('C:/Screener/sync/setups.feather')
+setups2 = pd.read_feather('C:/Screener/sync/allsetups.feather')
 
 print(setups)
 
-ep = setups[setups['Setup'] == 'EP'].reset_index(drop = True)
+#ep = setups[setups['Setup'] == 'EP'].reset_index(drop = True)
 
+
+ep = setups2[setups2['Setup'] == 'EP'].reset_index(drop = True)
+
+
+#ep = pd.concat([ep,ep2]).reset_index(drop = True)
 
 other = setups[setups['Setup'] != 'EP'].reset_index(drop = True)
 
@@ -40,6 +46,9 @@ setups ['setup'] = df['setup']
 
 print(setups)
 
+
+gud = setups[setups['setup'] == 1].reset_index(drop = True)
+print(len(gud))
 
 setups.to_feather('C:/Screener/setups/EP.feather')
 

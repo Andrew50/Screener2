@@ -32,7 +32,7 @@ class Detection:
 		
 		except TimeoutError:
 			pass
-		'''
+		
 
 		except KeyError:
 			return
@@ -51,7 +51,7 @@ class Detection:
 		except:
 			pass
 
-		'''
+		
 		if len(dff) > 20:
 		
 			for date in date_list:
@@ -90,7 +90,7 @@ class Detection:
 								if((dolVol > .2* dolVolFilter or pmDolVol  > 1 * 1000000)  and adr > 3.5 and sEP):
 									Detection.EP(df,currentday, tf, ticker, path)
 
-								'''
+								
 
 								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 )   and adr > 5 and sMR):
 									Detection.MR(df,currentday, tf, ticker, path)
@@ -100,7 +100,7 @@ class Detection:
 								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 ) and adr > 4 and sFlag):
 									
 									flag.flag(df,currentday, tf, ticker, path)
-								'''
+								
 						if tf == '1min':
 						
 							if dolVol > 20000 and adr > .08:
@@ -215,15 +215,15 @@ class Detection:
 		if(z > zfilter) and pmPrice > max(highs):
 			log.log(df,currentday, tf, ticker, z, path, 'EP')  
 			
-
-		else:
-			log.log(df,currentday, tf, ticker, z, path, 'None')  
-			'''
+		
+		#else:
+		#	log.log(df,currentday, tf, ticker, z, path, 'None')  
+		
 
 		elif (z < -zfilter) and pmPrice < min(lows):
 			log.log(df,currentday, tf, ticker, z, path , 'NEP')  
 
-			'''
+			
 
  
 	def MR(df,currentday, tf, ticker, path):
