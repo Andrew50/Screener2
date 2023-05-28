@@ -116,7 +116,7 @@ class Plot:
 
 
         table = []
-        bar = self.df_traits.iat[self.i,3]
+        bar = self.df_traits.iat[self.i,2]
 
         maxsize = 0
         size = 0
@@ -229,19 +229,19 @@ class Plot:
                     datelist = []
                     colorlist = []
                     trades = []
-                    for k in range(len(df.iat[i,3])):
-                        date = datetime.datetime.strptime(df.iat[i,3][k][1], '%Y-%m-%d %H:%M:%S')
+                    for k in range(len(df.iat[i,2])):
+                        date = datetime.datetime.strptime(df.iat[i,2][k][1], '%Y-%m-%d %H:%M:%S')
                         if tf == 'd':
                             date = date.date()
                     
-                        val = float(df.iat[i,3][k][2])
+                        val = float(df.iat[i,2][k][2])
                         if val > 0:
                             colorlist.append('g')
                             add = pd.DataFrame({
-                                    'Datetime':[df.iat[i,3][k][1]], 
-                                    'Symbol':[df.iat[i,3][k][0]],
+                                    'Datetime':[df.iat[i,2][k][1]], 
+                                    'Symbol':[df.iat[i,2][k][0]],
                                     'Action':"Buy",
-                                    'Price':[float(df.iat[i,3][k][3])]
+                                    'Price':[float(df.iat[i,2][k][3])]
                                     })
                             trades.append(add)
                         else:

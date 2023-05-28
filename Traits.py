@@ -21,47 +21,127 @@ from Data7 import Data as data
 
 class Traits:
 
-    def update(bar,df_log,df_traits,df_pnl):
-        df_log = df_log.sort_values(by='datetime', ascending = True)
-        if bar == 'open':
-            open_pos = df_traits[df_traits['closed'] == False]
-            tickers = open_pos['ticker'].to_list()
-            dates = open_pos['datetime'].to_list()
-        else:
-            dates = [bar[1]]
-            tickers = [bar[0]]
+    def update(bars,df_log,df_traits,df_pnl):
+        if not df_traits.empty:
+            for bar in bars:
+                ticker = bar[0]
+                date = bar[1]
+                df_traits = df_traits[df_traits['ticker'] != ticker]
+                #df_traits = df_traits[df_traits['ticker'] != ticker || df_traits['datetime'] >= date]
 
-        for i in range(len(tickers)):
-            ticker = tickers[i]
-            date = dates[i]
 
-            if ticker != 'Deposit':
 
-                #find all trades with same ticker and greater than or equal to date
+                '''
+            
                 df = df_traits
                 df['index'] = df.index
            
                 df =df.set_index('datetime',drop = True)
                 df = df[df['ticker'] == ticker]
-
-
+                   
+                   
                 if not df.empty:
-                    cutoff = 0
-        
-                    drop_list = []
+                    cutoff = 0  
                     for i in range(len(df)):
                         if df.index[i] <= date:
                             cutoff = i
                             break
-               
+                
                     drop_list = df.reset_index()[:cutoff+1]['index'].to_list()
                     i = df.iloc[cutoff]['index']
                     gosh = df_traits.iloc[i].to_list()
                     df_traits = df_traits.drop(index = drop_list)
-                    ticker = gosh[0]
-                    log_date = gosh[1]
-                    if log_date > date:
+
+                    '''
+
+       
+
+
+        new_traits = Traits.get_list(df_log)
+
+        old_traits = df_traits
+
+    
+
+        new = pd.concat([old_traits,new_traits]).drop_duplicates('datetime',keep=False)
+
+        new = new.sort_values(by='datetime', ascending = False)
+
+
+     
+
+
+        df = Traits.calc(new,df_pnl)
+        
+        
+        df_traits = pd.concat([df_traits,df])
+        df_traits = df_traits.sort_values(by='datetime',ascending = False).reset_index(drop = True)
+        df_traits.to_feather(r"C:\Screener\sync\traits.feather")
+     
+        return df_traits
+
+
+
+
+
+
+        if bars == 'open':
+            bars = ['open']
+
+
+
+        pbar = tqdm(total=len(bars))
+        for bar in bars:
+
+          
+
+
+
+            df_log = df_log.sort_values(by='datetime', ascending = True)
+            if bar == 'open':
+                open_pos = df_traits[df_traits['closed'] == False]
+                tickers = open_pos['ticker'].to_list()
+                dates = open_pos['datetime'].to_list()
+            else:
+                dates = [bar[1]]
+                tickers = [bar[0]]
+         
+            for i in range(len(tickers)):
+                ticker = tickers[i]
+                date = dates[i]
+               
+                if ticker != 'Deposit':
+
+                    #find all trades with same ticker and greater than or equal to date
+                    df = df_traits
+                    df['index'] = df.index
+           
+                    df =df.set_index('datetime',drop = True)
+                    df = df[df['ticker'] == ticker]
+                   
+                   
+                    if not df.empty:
+                        cutoff = 0
+        
+                      
+                     
+                        for i in range(len(df)):
+                            if df.index[i] <= date:
+                                cutoff = i
+                                break
+                
+                        drop_list = df.reset_index()[:cutoff+1]['index'].to_list()
+                        i = df.iloc[cutoff]['index']
+                        gosh = df_traits.iloc[i].to_list()
+                        df_traits = df_traits.drop(index = drop_list)
+                        ticker = gosh[0]
+                        log_date = gosh[1]
+                        if log_date > date:
+                            log_date = date
+
+                    else:
                         log_date = date
+
                     logs = df_log
                 
                  
@@ -70,15 +150,20 @@ class Traits:
                     short_logs = short_logs.reset_index(drop = True)
  
                     df = Traits.calc(short_logs,df_pnl)
+               
                     df_traits = pd.concat([df_traits,df])
                     df_traits = df_traits.sort_values(by='datetime',ascending = False).reset_index(drop = True)
+            pbar.update(1)
         df_traits.to_feather(r"C:\Screener\sync\traits.feather")
         return df_traits
  
-    def calc(df_log,df_pnl):
 
-#trades///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-       
+
+    def get_list(df_log):
+
+
+
+
         pos = []
         df_traits = pd.DataFrame()
        
@@ -128,6 +213,16 @@ class Traits:
             df_traits = pd.concat([df_traits,add])
             del pos[i]
         df = df_traits
+
+        return df
+
+
+
+    def calc(df_traits,df_pnl):
+
+#trades///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        
         if not df_traits.empty:
             df_traits = df_traits.sort_values(by='datetime', ascending = False).reset_index(drop = True)
 
@@ -175,6 +270,7 @@ class Traits:
         ticker = bar[0]
         date = bar[1]
         trades = bar[2]
+   
         openprice = float(trades[0][3])
         lastdate = datetime.datetime.strptime(trades[-1][1],'%Y-%m-%d %H:%M:%S')
 
@@ -479,34 +575,38 @@ class Traits:
             for i in range(10):
                 prices.append(daily.iat[i + start - 10,3])
             i = 0
-            while True:
-                close = daily.iat[start+i,3]
-                cdate = daily.index[start + i ] + datetime.timedelta(days = 1)
+            try:
+                while True:
+                    close = daily.iat[start+i,3]
+                    cdate = daily.index[start + i ] + datetime.timedelta(days = 1)
 
-                if cdate > stopdate:
-                    if pd.isna(d5):
-                        d5 = maxloss
-                        d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
-                    if pd.isna(d10):
-                        d10 = maxloss
-                        d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                    if cdate > stopdate:
+                        if pd.isna(d5):
+                            d5 = maxloss
+                            d5time = (daily.index[start+i+1] - date).total_seconds() / 3600
+                        if pd.isna(d10):
+                            d10 = maxloss
+                            d10time = (daily.index[start+i+1] - date).total_seconds() / 3600
 
-                if (not pd.isna(d10) and not pd.isna(d5)):
-                    break
+                    if (not pd.isna(d10) and not pd.isna(d5)):
+                        break
 
-                if direction * close < direction * statistics.mean(prices[-5:]) and pd.isna(d5):
-                    d5 = direction*(close/openprice - 1)*100
-                    d5time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
-                    arrow_list.append([str(cdate),str(close),'y',str(symbol)])
-                if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(d10):
-                    d10 = direction*(close/openprice - 1)*100
-                    d10time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
-                    arrow_list.append([str(cdate),str(close),'w',str(symbol)])
+                    if direction * close < direction * statistics.mean(prices[-5:]) and pd.isna(d5):
+                        d5 = direction*(close/openprice - 1)*100
+                        d5time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
+                        arrow_list.append([str(cdate),str(close),'y',str(symbol)])
+                    if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(d10):
+                        d10 = direction*(close/openprice - 1)*100
+                        d10time = ((daily.index[start+i] - date)+datetime.timedelta(days=1)).total_seconds() / 3600
+                        arrow_list.append([str(cdate),str(close),'w',str(symbol)])
 
-                i += 1
-                if i + start >= len(daily):
-                    break
-                prices.append(daily.iat[start+i,3])
+                    i += 1
+                    if i + start + 1 >= len(daily):
+                        break
+                    prices.append(daily.iat[start+i,3])
+
+            except:
+                pass
 
             #set theoretical exits to stop loss if they are lower than max stop
             '''
@@ -562,8 +662,9 @@ class Traits:
         add = pd.DataFrame({
         'ticker': [ticker],
         'datetime':[date],
-        'setup':[trade_setup],
+        
         'trades': [trades],
+        'setup':[trade_setup],
         'pnl':[trade_pnl],
         'account':[pnl_account],
         'percent':[pnl_pcnt],
@@ -619,7 +720,7 @@ class Traits:
             self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
             self.df_traits = Traits.calc(self.df_log,self.df_pnl)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
-        print(self.df_traits)
+       
         bins = 50
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
             size = (49,25)

@@ -38,6 +38,7 @@ class consolidate:
 
         
             setups.reset_index(inplace = True,drop = True)
+            print(setups)
             setups.to_feather(r"C:\Screener\sync\setups.feather")
 
             todays_setups.reset_index(inplace = True,drop = True)
