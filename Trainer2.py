@@ -1,5 +1,6 @@
 
 
+
 from Data7 import Data as data
 import matplotlib.pyplot as plt
 import random
@@ -58,7 +59,14 @@ class Trainer:
         if self.init:
             sg.theme('DarkGrey')
             layout = [
-            [sg.Image(key = '-IMAGE-')],
+            [sg.Graph(
+            canvas_size=(self.width, self.height),
+            graph_bottom_left=(0, 0),
+            graph_top_right=(self.width, self.height),
+            key="-GRAPH-",
+            change_submits=True,  # mouse click events
+            background_color='grey',
+            drag_submits=False), ],
             [sg.Button(s) for s in self.setup_list],
             [sg.Button('Next'), sg.Text(key = '-text-')]]
 
@@ -75,12 +83,33 @@ class Trainer:
 
 
 
+        self.x_size = image1.size[0]
+        
+
+
 
         bio1 = io.BytesIO()
         image1.save(bio1, format="PNG")
-        self.window["-IMAGE-"].update(data=bio1.getvalue())
+
+
+        self.window['-GRAPH-'].erase()
+        self.window["-GRAPH-"].draw_image(data=bio1.getvalue(), location=(0, self.height))
+
+
+
+
+       # graph.draw_image(data=data, location=(0, height))
+        #self.window["-IMAGE-"].update(data=bio1.getvalue())
 
     def loop(self):
+
+
+        self.height = 1200
+
+        self.width = 2500
+
+
+
 
         with Pool(6) as self.pool:
             if os.path.exists("C:/Screener/setups/charts"):
@@ -98,9 +127,6 @@ class Trainer:
 
             self.preload(self)
             self.update(self)
-
- 
-
             while True:
                 self.event, self.values = self.window.read()
 
@@ -110,7 +136,13 @@ class Trainer:
                     self.update(self)
                     
                     self.preload(self)
+
                     self.setup = []
+
+
+                elif self.event == '-GRAPH-':
+                    print(self.values)
+                    print(self.x_size)
                 else:
                     self.setup.append(self.event)
                     gud = ''
@@ -121,68 +153,35 @@ class Trainer:
                 
 
     def preload(self):
-
         arglist = []
-
         if self.i == 0:
             l = list(range(10))
         else:
             l = [9 + self.i]
-
         for i in l:
-
             while True:
                 try:
                     ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
-
                     df = data.get(ticker)
-
                     date_list = df.index.to_list()
-            
                     date = date_list[random.randint(0,len(date_list) - 1)]
-            
-            
-
-            
                     index = data.findex(df,date)
-                    #df2 = df[index-200:index]
                     df2 = df[index-200:index + 1]
-
-                    #o = df.iat[index,0]
-                    #add = pd.DataFrame({
-                    #    'datetime':[date],
-                    #    'open':[o],
-                    #    'high':[o],
-                    #    'low':[o],
-                    #    'close':[o],
-                    #    'volume':[0]}).set_index('datetime')
-                    #df2 = pd.concat([df2,add])
-
-                    #filters
                     if len(df2) > 30:
                         dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
                         if dolVol > 2000000 and adr > 2:
                             break
-
-
                 except:
                     pass
-   
-
             self.dict.append([ticker,date])
             arglist.append([i,df2])
-
-
         self.pool.map_async(self.plot,arglist)
-
     def plot(bar):
 
         i = bar[0]
         df = bar[1]
-
         p = pathlib.Path("C:/Screener/setups/charts") / str(i)
         if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-
             fw = 22
             fh = 12
             fs = 3
@@ -194,20 +193,19 @@ class Trainer:
             fw = 25
             fh = 12
             fs = 2.2
-
         mc = mpf.make_marketcolors(up='g',down='r')
         s  = mpf.make_mpf_style(marketcolors=mc)
-
         fig, axlist = mpf.plot(df, type='candle', volume=True  ,                          
         style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
         figscale=fs, panel_ratios = (5,1), 
-        tight_layout = True)
+        tight_layout = True).axes.get_yaxis().set_ticks([])
+
+
+
 
         ax = axlist[0]
-
         ax.set_yscale('log')
         ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-                    
         plt.savefig(p, bbox_inches='tight')
 
 
