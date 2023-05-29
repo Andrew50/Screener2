@@ -203,9 +203,9 @@ class Trainer:
 
     def loop(self):
 
-        elif os.path.exists("C:/Screener/ben.txt"):
-            self.height = 1200
-            self.width = 2500
+        if os.path.exists("C:/Screener/ben.txt"):
+            self.height = 800
+            self.width = 1700
           
         else:
             self.height = 1200
