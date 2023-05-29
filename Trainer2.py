@@ -83,9 +83,10 @@ class Trainer:
 
             add = df[['ticker','date','setup']]
 
-
-            df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
-
+            try:
+                df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
+            except:
+                df = pd.DataFrame()
 
             df = pd.concat([df,add]).reset_index(drop = True)
 
@@ -203,7 +204,7 @@ class Trainer:
 
     def loop(self):
 
-        elif os.path.exists("C:/Screener/ben.txt"):
+        if os.path.exists("C:/Screener/ben.txt"):
             self.height = 1200
             self.width = 2500
           
