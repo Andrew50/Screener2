@@ -120,15 +120,15 @@ class Create:
 
 
 
-    def get_nn_data():
+    def get_nn_data(setuptype):
  
-        setup = 'EP'
-        allsetups = pd.read_feather('C:/Screener/setups/EP.feather')
+        setup = setuptype
+        allsetups = pd.read_feather('C:/Screener/setups/' + setup + '.feather')
         eighty = int(len(allsetups) * 0.8)
         setups = allsetups.loc[0:eighty].reset_index(drop = True)
         print(setups)
         rest = allsetups.loc[eighty:].reset_index(drop = True)
-        rest.to_feather('C:/Screener/setups/Testdata.feather')
+        rest.to_feather('C:/Screener/setups/Testdata_' + setup + '.feather')
         
 
         arglist = []
@@ -288,8 +288,8 @@ class Create:
 
 if __name__ == '__main__':
 
-
-    Create.get_nn_data()
+    setuptype = 'MR'
+    Create.get_nn_data(setuptype)
     x_train, y_train, x_test, y_test = Create.load_data()
     
     model = Create.get_model(x_train)
@@ -310,6 +310,6 @@ if __name__ == '__main__':
     
     Create.evaluate_training(model, x_test, y_test)
     
-    model.save(MODEL_SAVE_NAME)
+    model.save('model_' + setuptype)
 
     print('done')

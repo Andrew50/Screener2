@@ -11,8 +11,8 @@ from Data7 import Data as data
 from matplotlib import pyplot as plt
 
 class Test3:
-    def runRandomTicker():
-        model = load_model('model')
+    def runRandomTicker(setuptype):
+        model = load_model('model_' + setuptype)
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:
@@ -26,9 +26,10 @@ class Test3:
                 god = model.predict(df)
 
                 val = 0
-                if god[0][1] > god[0][0]:
+                if god[0][1] > 0.2:
                     val = 1
                 sys.stdout = sys.__stdout__
+                print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
                 print(f"{val}")
                 if val == 1:
                         df1 = data.get(ticker)
@@ -55,12 +56,13 @@ class Test3:
 
 
 
-    def runTestData():
+    def runTestData(setuptype):
 
-        model = load_model('model')
+        model = load_model('model_' + setuptype)
 
-        setups = pd.read_feather('C:/Screener/setups/Testdata.feather')
-        print(setups[setups['setup'] == 1])
+        setups = pd.read_feather('C:/Screener/setups/Testdata_' + setuptype + '.feather')
+        print(setups)
+        #print(setups[setups['setup'] == 1])
         right = 0
         total = 0
 
@@ -82,13 +84,14 @@ class Test3:
                 god = model.predict(df)
 
                 val = 0
+                
                 if god[0][1] > god[0][0]:
                     val = 1
 
                 sys.stdout = sys.__stdout__
                 #print(f'{val} , {type}')
 
-                if typee == 'EP':
+                if typee == setuptype:
                     actual = 1
                 else:
                     actual = 0
@@ -102,8 +105,9 @@ class Test3:
 
 
                 total += 1
+                print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
                 print(f"{val} Actual: {typee}")
-                if val == 1:
+                if val == 1 or typee == 1:
                     df1 = data.get(ticker)
 
 
@@ -120,6 +124,7 @@ class Test3:
                 #   vlines=dict(vlines=datelist, 
                     #colors = colorlist, alpha = .2,linewidths=1),
                 )
+                
         
                     plt.show()
 
@@ -131,7 +136,9 @@ class Test3:
 
 
 if __name__ == "__main__":
-    Test3.runRandomTicker()
+    setuptype = 'MR'
+    Test3.runRandomTicker(setuptype)
+    #Test3.runTestData(setuptype)
 
 
 
