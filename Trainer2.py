@@ -364,6 +364,7 @@ class Trainer:
                 date = bar[1]
                 df = data.get(ticker)
                 index = data.findex(df,date)
+                
                 df2 = df[index-self.size:index + 1]
                 if df2.empty:
                     print(df.to_string())
