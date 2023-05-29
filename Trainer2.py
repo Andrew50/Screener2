@@ -208,6 +208,8 @@ class Trainer:
         self.width = 2500
         self.cutoff = 75
 
+        self.size = 300
+
         with Pool(6) as self.pool:
             if os.path.exists("C:/Screener/setups/charts"):
                 shutil.rmtree("C:/Screener/setups/charts")
@@ -258,7 +260,7 @@ class Trainer:
                     date_list = df.index.to_list()
                     date = date_list[random.randint(0,len(date_list) - 1)]
                     index = data.findex(df,date)
-                    df2 = df[index-200:index + 1]
+                    df2 = df[index-self.size:index + 1]
                     if len(df2) > 30:
                         dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
                         if dolVol > 2000000 and adr > 2:
