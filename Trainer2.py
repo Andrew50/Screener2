@@ -206,11 +206,13 @@ class Trainer:
         elif os.path.exists("C:/Screener/ben.txt"):
             self.height = 1200
             self.width = 2500
-            self.cutoff = 75
+          
         else:
             self.height = 1200
             self.width = 2500
-            self.cutoff = 75
+
+
+        self.cutoff = 75
 
         self.size = 300
 
