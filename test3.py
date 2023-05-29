@@ -29,8 +29,9 @@ class Test3:
                 if god[0][1] > 0.2:
                     val = 1
                 sys.stdout = sys.__stdout__
-                print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
-                print(f"{val}")
+                #print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+                print(god[0][1])
+                #print(f"{val}")
                 if val == 1:
                         df1 = data.get(ticker)
 
@@ -136,7 +137,9 @@ class Test3:
 
 
 if __name__ == "__main__":
-    setuptype = 'MR'
+    setuptype = 'EP'
+    keep = .08
+    create.run(setuptype,keep,True)
     Test3.runRandomTicker(setuptype)
     #Test3.runTestData(setuptype)
 

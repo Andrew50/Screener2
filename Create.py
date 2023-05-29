@@ -7,6 +7,8 @@ from Data7 import Data as data
 import numpy as np
 from typing import Tuple
 from tqdm import tqdm
+from matplotlib import pyplot as plt
+
 # NN imports
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Sequential
@@ -47,13 +49,19 @@ class Create:
 
     def get_lagged_returns(df: pd.DataFrame) -> pd.DataFrame:
 
+        close = df.iat[-2,3]
         for col in FEAT_COLS:
 
             return_col = df[col]/df[col].shift(1)-1
+            
+            
+            #df = Create.time_series(df, return_col, f'feat_{col}_ret')
 
-        
+
+            #return_col = df[col].div(close) - 1
+
             df = Create.time_series(df, return_col, f'feat_{col}_ret')
-
+            
         return df
 
 
@@ -114,32 +122,50 @@ class Create:
             #print(df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']])
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
             
-        except:
+        except TimeoutError:
             pass
 
 
 
 
-    def get_nn_data(setuptype):
+    def get_nn_data(setuptype,use,split):
  
         setup = setuptype
         allsetups = pd.read_feather('C:/Screener/setups/' + setup + '.feather')
-        eighty = int(len(allsetups) * 0.8)
-        setups = allsetups.loc[0:eighty].reset_index(drop = True)
+        
+        
+        
+        yes = allsetups[allsetups['setup'] == 1]
+        no = allsetups[allsetups['setup'] == 0]
+        
+
+        no = no.sample(frac = use)
+
+
+        allsetups = pd.concat([yes,no]).sample(frac = 1).reset_index(drop = True)
+
+
+        if split:
+            eighty = int(len(allsetups) * 0.8)
+            setups = allsetups.loc[0:eighty].reset_index(drop = True)
+            rest = allsetups.loc[eighty:].reset_index(drop = True)
+            rest.to_feather('C:/Screener/setups/Testdata_' + setup + '.feather')
+            TRAIN_SPLIT = 0.8
+        else:
+            setups = allsetups
+            TRAIN_SPLIT = 1
+        
+            
         print(setups)
-        rest = allsetups.loc[eighty:].reset_index(drop = True)
-        rest.to_feather('C:/Screener/setups/Testdata_' + setup + '.feather')
+        
         
 
         arglist = []
         for i in range(len(setups)):
             arglist.append(setups.iloc[i])
 
-
         dfs = data.pool(Create.nn_multi,arglist)
 
-        
-    
         nn_values = pd.concat(dfs)
        
         nn_values = nn_values.values
@@ -152,19 +178,23 @@ class Create:
 
     
         # Split into training and test data
-        split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
+        if TRAIN_SPLIT == 1:
+            split_idx = -1
+        else:
+            split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
+            # Save the x testing data
+            np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
+            # Save the y testing data
+            np.save('y_test', nn_values[split_idx:, -1])
     
         # Save the x training data
         np.save('x_train', Create.reshape_x(nn_values[0:split_idx, :-1]))
     
         # Save the y training data
         np.save('y_train', nn_values[0:split_idx:, -1])
-    
-        # Save the x testing data
-        np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
-    
-        # Save the y testing data
-        np.save('y_test', nn_values[split_idx:, -1])
+
+
+            
     
         return
    
@@ -279,37 +309,57 @@ class Create:
         unscaled.plot()
         unscaled.ax_.set_title('Unscaled confusion matrix')
     
+
+
+
         scaled = ConfusionMatrixDisplay(confusion_matrix = cm_scaled)
         scaled.plot()
         scaled.ax_.set_title('Scaled confusion matrix')
-    
+        
+        plt.show()
+
         return
 
 
+
+
+
+    def run(setuptype,keep,split):
+        
+        Create.get_nn_data(setuptype,keep,split)
+        x_train, y_train, x_test, y_test = Create.load_data()
+    
+        model = Create.get_model(x_train)
+    
+        model.compile(
+            loss = 'sparse_categorical_crossentropy',
+            optimizer = Adam(learning_rate = LEARN_RATE),
+            metrics = ['accuracy']
+        )
+    
+        model.fit(
+            x_train,
+            y_train,
+            epochs = EPOCHS,
+            batch_size = BATCH_SIZE,
+            validation_split = VALIDATION,
+        )
+    
+
+        if split:
+            Create.evaluate_training(model, x_test, y_test)
+    
+        model.save('model_' + setuptype)
+
+        print('done with model')
+
 if __name__ == '__main__':
+    setuptype = 'NF'
+    keep = .14
+    Create.run(setuptype,keep,False)
+    
 
-    setuptype = 'MR'
-    Create.get_nn_data(setuptype)
-    x_train, y_train, x_test, y_test = Create.load_data()
-    
-    model = Create.get_model(x_train)
-    
-    model.compile(
-        loss = 'sparse_categorical_crossentropy',
-        optimizer = Adam(learning_rate = LEARN_RATE),
-        metrics = ['accuracy']
-    )
-    
-    model.fit(
-        x_train,
-        y_train,
-        epochs = EPOCHS,
-        batch_size = BATCH_SIZE,
-        validation_split = VALIDATION,
-    )
-    
-    Create.evaluate_training(model, x_test, y_test)
-    
-    model.save('model_' + setuptype)
 
-    print('done')
+
+    
+    

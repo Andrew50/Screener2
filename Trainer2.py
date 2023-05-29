@@ -48,7 +48,7 @@ class Trainer:
 
             text = self.window["-GRAPH-"].draw_text( setup, (x,y) , color='black', font=None, angle=0, text_location='center')
 
-            line = self.window["-GRAPH-"].draw_line((self.select_line_x,0), (self.select_line_x,self.height), color='black', width=2)
+            line = self.window["-GRAPH-"].draw_line((self.select_line_x,0), (self.select_line_x,self.height), color='black', width=1)
         
 
         
@@ -101,9 +101,6 @@ class Trainer:
 
         self.y = self.values['-GRAPH-'][1]
 
-        
-            
-
 
         chart_click = x - 10
         chart_size = self.x_size - 20
@@ -138,24 +135,41 @@ class Trainer:
 
     def update(self):
         if self.init:
-            sg.theme('DarkGrey')
+
+            
+            
+
+            if self.menu == 0:
+
+                graph = sg.Graph(
+                canvas_size=(self.width, self.height),
+                graph_bottom_left=(0, 0),
+                graph_top_right=(self.width, self.height),
+                key="-GRAPH-",
+                change_submits=True,  # mouse click events
+                background_color='grey',
+                drag_submits=False)
 
 
-            graph = sg.Graph(
-            canvas_size=(self.width, self.height),
-            graph_bottom_left=(0, 0),
-            graph_top_right=(self.width, self.height),
-            key="-GRAPH-",
-            change_submits=True,  # mouse click events
-            background_color='grey',
-            drag_submits=False)
-            layout = [
-            [graph],
-            [sg.Button(s) for s in self.setup_list],
 
-            [sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip')]]
+                layout = [
+                [graph],
+                [sg.Button(s) for s in self.setup_list],
 
-            self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
+                [sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip')],
+                [sg.Button('Toggle')]]
+                self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
+
+            else:
+                layout = [
+                [sg.Image(key = '-CHART-')],
+                [sg.Button(s) for s in self.setup_list],
+                [sg.Button('Prev'),sg.Button('Next'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
+                [sg.Button('Toggle')]
+                ]
+
+
+                self.window = sg.Window('Validator', layout,margins = (10,10),scaling=self.scale,finalize = True)
             
             self.init = False
             self.window.maximize()
@@ -167,37 +181,42 @@ class Trainer:
             except:
                 pass
 
-
-
-        self.x_size = image1.size[0]
-        
-        
-
-
         bio1 = io.BytesIO()
         image1.save(bio1, format="PNG")
 
 
-        self.window['-GRAPH-'].erase()
-        self.window["-GRAPH-"].draw_image(data=bio1.getvalue(), location=(0, self.height))
+        if self.menu == 0:
+            self.x_size = image1.size[0]
+
+  
+            self.window['-GRAPH-'].erase()
+            self.window["-GRAPH-"].draw_image(data=bio1.getvalue(), location=(0, self.height))
 
 
-        self.select_line_x = -100
-        self.select_line = self.window["-GRAPH-"].draw_line((self.select_line_x,0), (self.select_line_x,self.height), color='green', width=2)
+            self.select_line_x = -100
+            self.select_line = self.window["-GRAPH-"].draw_line((self.select_line_x,0), (self.select_line_x,self.height), color='green', width=1)
 
 
-        df = self.dict[self.i][2]
+            df = self.dict[self.i][2]
         
 
-        chart_size = self.x_size - 20
-        round_x = int((self.cutoff)/(len(df)) * (chart_size)) + 10 - int((chart_size/len(df))/2)
+            chart_size = self.x_size - 20
+            round_x = int((self.cutoff)/(len(df)) * (chart_size)) + 10 - int((chart_size/len(df))/2)
 
         
 
 
-        self.window["-GRAPH-"].draw_line((round_x,0), (round_x,self.height), color='red', width=2)
+            self.window["-GRAPH-"].draw_line((round_x,0), (round_x,self.height), color='red', width=2)
 
-        self.current_setups = []
+            self.current_setups = []
+
+        else:
+
+            string = f'{self.i + 1} of {len(self.setups_df)}'
+            self.window['-counter-'].update(string)
+
+
+            self.window["-CHART-"].update(data=bio1.getvalue())
 
        # graph.draw_image(data=data, location=(0, height))
         #self.window["-IMAGE-"].update(data=bio1.getvalue())
@@ -209,7 +228,7 @@ class Trainer:
             self.width = 2500
           
         else:
-            self.height = 1200
+            self.height = 1150
             self.width = 2500
 
 
@@ -221,11 +240,12 @@ class Trainer:
             if os.path.exists("C:/Screener/setups/charts"):
                 shutil.rmtree("C:/Screener/setups/charts")
             os.mkdir("C:/Screener/setups/charts")
-
+            sg.theme('DarkGrey')
             self.setup_list = ['EP', 'NEP' , 'P' , 'NP' , 'MR' , 'F' , 'NF' , 'FB' , 'NFB']
             self.scale = 4
             self.setup = []
             self.i = 0
+            self.menu = 0
             self.init = True
             self.dict = []
             self.tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
@@ -237,12 +257,32 @@ class Trainer:
                 self.event, self.values = self.window.read()
 
                 if self.event == 'Next':
+                    
+                    if self.menu == 0:
+                        self.save(self)
+                        self.current_setups = []
 
-                    self.save(self)
-                    self.i += 1
-                    self.update(self)
-                    self.preload(self)
-                    self.current_setups = []
+
+                        self.i += 1
+                        self.update(self)
+                        self.preload(self)
+
+                    else:
+
+                        if self.i + 1 < len(self.setups_df):
+                            self.i += 1
+                            print(self.i)
+                            self.update(self)
+                            self.preload(self)
+
+                elif self.event == 'Prev':
+                    #self.menu has to be 1
+                    if self.i > 0:
+                        self.i -= 1
+                        self.update(self)
+                        self.preload(self)
+
+                   
                 elif self.event == 'Skip':
                     self.i += 1
                     self.update(self)
@@ -250,60 +290,130 @@ class Trainer:
                     self.current_setups = []
                 elif self.event == '-GRAPH-':
                     self.click(self)
-                else:
-                    self.log(self)
 
+                elif self.event == 'Toggle':
+                    self.window.close()
+                    self.i = 0
+
+                    if os.path.exists("C:/Screener/setups/charts"):
+                        shutil.rmtree("C:/Screener/setups/charts")
+                    os.mkdir("C:/Screener/setups/charts")
+                    if self.menu == 0:
+                        self.menu = 1
+                        
+                    else:
+                        self.menu = 0
+
+                    self.init = True
+                    self.setups_df = pd.read_feather('C:/Screener/setups/EP.feather').sample(frac = 1).reset_index(drop = True)
+                    self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                    self.preload(self)
+                    self.update(self)
+
+
+                    
+                else:
+                    if self.menu == 0:
+                        self.log(self)
+                    else:
+                        self.setups_df = pd.read_feather('C:/Screener/setups/' + self.event + '.feather').sample(frac = 1).reset_index(drop = True)
+                        self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                        if os.path.exists("C:/Screener/setups/charts"):
+                            shutil.rmtree("C:/Screener/setups/charts")
+                        os.mkdir("C:/Screener/setups/charts")
+                        self.preload(self)
+                        self.update(self)
+                        self.window['-text-'].update(self.event)
     def preload(self):
         arglist = []
         if self.i == 0:
             l = list(range(10))
         else:
             l = [9 + self.i]
-        for i in l:
-            while True:
-                try:
-                    ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
-                    df = data.get(ticker)
-                    date_list = df.index.to_list()
-                    date = date_list[random.randint(0,len(date_list) - 1)]
-                    index = data.findex(df,date)
-                    df2 = df[index-self.size:index + 1]
-                    if len(df2) > 30:
-                        dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
-                        if dolVol > 2000000 and adr > 2:
-                            break
-                except:
-                    pass
-            self.dict.append([ticker,date,df2])
-            arglist.append([i,df2])
-        self.pool.map_async(self.plot,arglist)
-    def plot(bar):
 
+
+        if self.menu == 0:
+
+            for i in l:
+                while True:
+                    try:
+                        ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
+                        df = data.get(ticker)
+                        date_list = df.index.to_list()
+                        date = date_list[random.randint(0,len(date_list) - 1)]
+                        index = data.findex(df,date)
+                        df2 = df[index-self.size:index + 1]
+                        if len(df2) > 30:
+                            dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
+                            if dolVol > 2000000 and adr > 2:
+                                break
+                    except:
+                        pass
+                self.dict.append([ticker,date,df2])
+                arglist.append([i,df2])
+
+        else:
+
+            for i in l:
+                
+
+
+                bar = self.setups_df.iloc[i]
+
+                ticker = bar[0]
+                date = bar[1]
+                df = data.get(ticker)
+                index = data.findex(df,date)
+                df2 = df[index-self.size:index + 1]
+                if df2.empty:
+                    print(df.to_string())
+                    print(date)
+                arglist.append([i,df2])
+                
+
+        self.pool.map_async(self.plot,arglist)
+
+
+            
+
+
+    def plot(bar):
         i = bar[0]
         df = bar[1]
-        p = pathlib.Path("C:/Screener/setups/charts") / str(i)
-        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-            fw = 22
-            fh = 12
-            fs = 3
-        elif os.path.exists("C:/Screener/ben.txt"):
-            fw = 25
-            fh = 12
-            fs = 1.3
-        else:
-            fw = 25
-            fh = 12
-            fs = 2.2
-        mc = mpf.make_marketcolors(up='g',down='r')
-        s  = mpf.make_mpf_style(marketcolors=mc)
-        fig, axlist = mpf.plot(df, type='candle', volume=True  ,                          
-        style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
-        figscale=fs, panel_ratios = (5,1), 
-        tight_layout = True,axisoff=True)
-        ax = axlist[0]
-        ax.set_yscale('log')
-        ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
-        plt.savefig(p, bbox_inches='tight')
+        strubg = str(i) + ".png"
+        p = pathlib.Path("C:/Screener/setups/charts") / strubg
+        try:
+            
+            
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                fw = 22
+                fh = 12
+                fs = 3
+            elif os.path.exists("C:/Screener/ben.txt"):
+                fw = 25
+                fh = 12
+                fs = 1.3
+            else:
+                fw = 50
+                fh = 23
+                fs = 2.28
+
+            mc = mpf.make_marketcolors(up='g',down='r')
+            s  = mpf.make_mpf_style(marketcolors=mc)
+
+            fig, axlist = mpf.plot(df, type='candle', volume=True  ,                          
+            style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
+            figscale=fs, panel_ratios = (5,1), 
+            tight_layout = True,axisoff=True)
+            ax = axlist[0]
+            ax.set_yscale('log')
+            ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+            plt.savefig(p, bbox_inches='tight')
+
+        except:
+            #print(df)
+            #print(e)
+            shutil.copy(r"C:\Screener\tmp\blank.png",p)
 
 if __name__ == '__main__':
     Trainer.loop(Trainer)
