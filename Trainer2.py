@@ -83,9 +83,10 @@ class Trainer:
 
             add = df[['ticker','date','setup']]
 
-
-            df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
-
+            try:
+                df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
+            except:
+                df = pd.DataFrame()
 
             df = pd.concat([df,add]).reset_index(drop = True)
 
