@@ -24,7 +24,7 @@ class Trainer:
 
     def log(self):
 
-        if self.event == 'Clear' or self.evetn == 'cl':
+        if self.event == 'Clear' or self.event == 'cl':
             for i in range(len(self.current_setups)-1,-1,-1):
                
                 if self.current_setups[i][0] == self.index:
@@ -32,7 +32,7 @@ class Trainer:
                         self.window["-GRAPH-"].MoveFigure(self.current_setups[i][2][k],5000,0)
 
                     del self.current_setups[i]
-
+            self.window.refresh()
 
         else:
 
@@ -173,7 +173,7 @@ class Trainer:
                 self.window.bind("<z>", "7")
                 self.window.bind("<x>", "8")
                 self.window.bind("<c>", "9")
-                self.window.bind("<Alt_L>", "cl")
+                self.window.bind("<Button-3>", "cl")
 
             else:
                 layout = [
