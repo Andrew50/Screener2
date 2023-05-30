@@ -157,7 +157,7 @@ class Create:
         
             
         print(setups)
-        
+        print(f"Setup Ratio: {len(setups[setups['setup'] == 1]) / len(setups)}")
         
 
         arglist = []

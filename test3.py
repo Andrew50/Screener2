@@ -138,7 +138,7 @@ class Test3:
 
 if __name__ == "__main__":
     setuptype = 'EP'
-    keep = .08
+    keep = .01
     create.run(setuptype,keep,True)
     Test3.runRandomTicker(setuptype)
     #Test3.runTestData(setuptype)
