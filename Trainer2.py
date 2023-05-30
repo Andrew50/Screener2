@@ -24,18 +24,19 @@ class Trainer:
 
     def log(self):
 
-        if self.event == 'Clear':
+        if self.event == 'Clear' or self.evetn == 'cl':
             for i in range(len(self.current_setups)-1,-1,-1):
-                #print(f'{self.current_setups[i][0]} == {self.index}')
+               
                 if self.current_setups[i][0] == self.index:
                     for k in range(2):
                         self.window["-GRAPH-"].MoveFigure(self.current_setups[i][2][k],5000,0)
 
                     del self.current_setups[i]
 
+
         else:
 
-            print(self.event)
+           
 
             try:
                 i = int(self.event)
@@ -99,7 +100,7 @@ class Trainer:
 
             df.to_feather('C:/Screener/setups/' + s + '.feather')
 
-            #print(df.to_string())
+          
     
     def click(self):
         df = self.dict[self.i][2]
@@ -126,8 +127,7 @@ class Trainer:
 
             self.date = df.index[self.index]
 
-            #print(ticker)
-            #print(self.date)
+       
         except:
             return
 
@@ -173,7 +173,7 @@ class Trainer:
                 self.window.bind("<z>", "7")
                 self.window.bind("<x>", "8")
                 self.window.bind("<c>", "9")
-                self.window.bind("<Alt_L>", "Clear")
+                self.window.bind("<Alt_L>", "cl")
 
             else:
                 layout = [
@@ -270,7 +270,7 @@ class Trainer:
             self.update(self)
             while True:
                 self.event, self.values = self.window.read()
-                print(self.event)
+            
                 if self.event == 'Next':
                     
                     if self.menu == 0:
@@ -286,12 +286,12 @@ class Trainer:
 
                         if self.i + 1 < len(self.setups_df):
                             self.i += 1
-                            #print(self.i)
+                     
                             self.update(self)
                             self.preload(self)
 
                 elif self.event == 'Prev':
-                    #self.menu has to be 1
+                    #self.menu therfore has to be 1
                     if self.i > 0:
                         self.i -= 1
                         self.update(self)
@@ -387,13 +387,9 @@ class Trainer:
                     if left < 0:
                         left = 0
                     df2 = df[left:index + 1]
-                    if df2.empty:
+                 
                     
-                        print(df.to_string())
-                        print(index - self.size)
-                        print(index + 1)
-                        print(index)
-                        print(date)
+                     
                     arglist.append([i,df2])
                 
 
@@ -437,8 +433,7 @@ class Trainer:
             plt.savefig(p, bbox_inches='tight')
 
         except:
-            #print(df)
-            #print(e)
+         
             shutil.copy(r"C:\Screener\tmp\blank.png",p)
 
 if __name__ == '__main__':
