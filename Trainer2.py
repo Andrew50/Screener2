@@ -26,7 +26,7 @@ class Trainer:
 
         if self.event == 'Clear':
             for i in range(len(self.current_setups)-1,-1,-1):
-                print(f'{self.current_setups[i][0]} == {self.index}')
+                #print(f'{self.current_setups[i][0]} == {self.index}')
                 if self.current_setups[i][0] == self.index:
                     for k in range(2):
                         self.window["-GRAPH-"].MoveFigure(self.current_setups[i][2][k],5000,0)
@@ -34,7 +34,14 @@ class Trainer:
                     del self.current_setups[i]
 
         else:
-            setup = self.event
+
+            print(self.event)
+
+            try:
+                i = int(self.event)
+                setup = self.setup_list[i-1]
+            except:
+                setup = self.event
 
         
             x = self.select_line_x
@@ -92,7 +99,7 @@ class Trainer:
 
             df.to_feather('C:/Screener/setups/' + s + '.feather')
 
-            print(df.to_string())
+            #print(df.to_string())
     
     def click(self):
         df = self.dict[self.i][2]
@@ -119,8 +126,8 @@ class Trainer:
 
             self.date = df.index[self.index]
 
-            print(ticker)
-            print(self.date)
+            #print(ticker)
+            #print(self.date)
         except:
             return
 
@@ -130,14 +137,9 @@ class Trainer:
 
         self.select_line_x = round_x
 
-        
-        
-
     def update(self):
         if self.init:
 
-            
-            
 
             if self.menu == 0:
 
@@ -159,6 +161,19 @@ class Trainer:
                 [sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip')],
                 [sg.Button('Toggle')]]
                 self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
+
+             #   for s in self.setup_list:
+                   # self.window[s].bind(str(i))
+                self.window.bind("<q>", "1")
+                self.window.bind("<w>", "2")
+                self.window.bind("<e>", "3")
+                self.window.bind("<a>", "4")
+                self.window.bind("<s>", "5")
+                self.window.bind("<d>", "6")
+                self.window.bind("<z>", "7")
+                self.window.bind("<x>", "8")
+                self.window.bind("<c>", "9")
+                self.window.bind("<Alt_L>", "Clear")
 
             else:
                 layout = [
@@ -255,7 +270,7 @@ class Trainer:
             self.update(self)
             while True:
                 self.event, self.values = self.window.read()
-
+                print(self.event)
                 if self.event == 'Next':
                     
                     if self.menu == 0:
@@ -271,7 +286,7 @@ class Trainer:
 
                         if self.i + 1 < len(self.setups_df):
                             self.i += 1
-                            print(self.i)
+                            #print(self.i)
                             self.update(self)
                             self.preload(self)
 
@@ -321,6 +336,7 @@ class Trainer:
                         if os.path.exists("C:/Screener/setups/charts"):
                             shutil.rmtree("C:/Screener/setups/charts")
                         os.mkdir("C:/Screener/setups/charts")
+                        self.i = 0
                         self.preload(self)
                         self.update(self)
                         self.window['-text-'].update(self.event)
@@ -342,7 +358,10 @@ class Trainer:
                         date_list = df.index.to_list()
                         date = date_list[random.randint(0,len(date_list) - 1)]
                         index = data.findex(df,date)
-                        df2 = df[index-self.size:index + 1]
+                        left = index - self.size 
+                        if left < 0:
+                            left = 0
+                        df2 = df[left:index + 1]
                         if len(df2) > 30:
                             dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
                             if dolVol > 2000000 and adr > 2:
@@ -355,21 +374,27 @@ class Trainer:
         else:
 
             for i in l:
-                
+                if i < len(self.setups_df):
 
 
-                bar = self.setups_df.iloc[i]
+                    bar = self.setups_df.iloc[i]
 
-                ticker = bar[0]
-                date = bar[1]
-                df = data.get(ticker)
-                index = data.findex(df,date)
-                
-                df2 = df[index-self.size:index + 1]
-                if df2.empty:
-                    print(df.to_string())
-                    print(date)
-                arglist.append([i,df2])
+                    ticker = bar[0]
+                    date = bar[1]
+                    df = data.get(ticker)
+                    index = data.findex(df,date)
+                    left = index-self.size
+                    if left < 0:
+                        left = 0
+                    df2 = df[left:index + 1]
+                    if df2.empty:
+                    
+                        print(df.to_string())
+                        print(index - self.size)
+                        print(index + 1)
+                        print(index)
+                        print(date)
+                    arglist.append([i,df2])
                 
 
         self.pool.map_async(self.plot,arglist)

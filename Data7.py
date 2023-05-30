@@ -113,7 +113,7 @@ class Data:
                 else:
                     break
             return i
-        except IndexError:
+        except TimeoutError:
             if i >= len(df):
             #if i == len(df):
                 #return i
