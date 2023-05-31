@@ -19,6 +19,8 @@ import statistics
 from tqdm import tqdm
 from Data7 import Data as data
 
+from Plot import Plot as plot
+
 class Traits:
 
     def update(bars,df_log,df_traits,df_pnl):
@@ -63,12 +65,14 @@ class Traits:
 
     
 
+        
+
         new = pd.concat([old_traits,new_traits]).drop_duplicates('datetime',keep=False)
 
         new = new.sort_values(by='datetime', ascending = False)
 
 
-     
+   
 
 
         df = Traits.calc(new,df_pnl)
@@ -163,7 +167,6 @@ class Traits:
 
 
 
-
         pos = []
         df_traits = pd.DataFrame()
        
@@ -236,8 +239,10 @@ class Traits:
             df_vix = data.get('^VIX','d')
             df_qqq = data.get('QQQ','d')
             arg_list = []
+        
             for i in range(len(df_traits)):
                 bar = df_traits.iloc[i]
+                
                 arg_list.append([bar,df_pnl,df_vix,df_qqq])
 
             if len(arg_list) > 30:
@@ -270,7 +275,7 @@ class Traits:
         ticker = bar[0]
         date = bar[1]
         trades = bar[2]
-   
+       
         openprice = float(trades[0][3])
         lastdate = datetime.datetime.strptime(trades[-1][1],'%Y-%m-%d %H:%M:%S')
 
@@ -702,6 +707,75 @@ class Traits:
         })
         return add
 
+
+    def build_monthly(self):
+
+        df = self.df_traits
+        g = df.groupby(pd.Grouper(key='datetime', freq='M'))
+        # groups to a list of dataframes with list comprehension
+        dfs = [group for _,group in g]
+
+
+        god = []
+        for df in dfs:
+           
+            date = str(df.iat[0,1])
+      
+            date = date[:-12]
+         
+            
+
+            loss = df[df['account'] <= 0]
+            avg_loss = loss['account'].mean()
+
+            gain = df[df['account'] > 0]
+            avg_gain = gain['account'].mean()
+
+            wins = []
+            for i in range(len(df)):
+                if df.iloc[i]['pnl'] > 0:
+                    wins.append(1)
+                else:
+                    wins.append(0)
+
+
+            win = statistics.mean(wins) * 100
+
+            trades = len(df)
+
+            pnl = df['pnl'].sum()
+
+            god.append([date,round(avg_gain,2), round(avg_loss,2), round(win,2), round(trades,2), round(pnl,2)])
+
+        
+
+        
+        return god
+
+
+    def build_traits(self):
+
+
+        traits = self.df_traits
+        god = []
+
+
+        traits_list = [6,7,8,9,10,11,12,13]
+
+        for i in traits_list:
+
+            t = traits.columns[i]
+            tn = traits.columns[i+8]
+            n = round(traits[t].mean(),2)
+            r = round(traits[tn].mean(),2)
+            god.append([t,n,r])
+
+
+        self.traits_table = god
+
+        return god
+
+
     def traits(self):
         '''
         pp = 0
@@ -712,64 +786,128 @@ class Traits:
             pp -= dollars
         pint(pp)
         '''
+        inp = False
+
+
         if self.df_traits.empty or self.event == 'Recalc':
 
             self.df_traits = pd.DataFrame()
             
             #df = self.df_log.sort_values(by='Datetime')
             self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
-            self.df_traits = Traits.calc(self.df_log,self.df_pnl)
+            self.df_traits = Traits.update([],self.df_log,pd.DataFrame(),self.df_pnl)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
-       
-        bins = 50
-        if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-            size = (49,25)
-        else:
-            size = (32,15)
-        try:
-            inp = self.values['input-trait']
-        except:
-            inp = 'account'
-        if inp == "":
-            inp = 'account'
-        try:
+
+        if 'table' in self.event:
+          
 
 
-            plt.clf()
-            if ':'  in inp:
-                inp = inp.split(':')
-                inp1 = inp[0]
-                inp2 = inp[1]
-                x = self.df_traits[inp1].to_list()
-                y = self.df_traits[inp2].to_list()
-                plt.scatter(x,y)
-                z = np.polyfit(x, y, 1)
-                p = np.poly1d(z)
-                plt.plot(x,p(x),"r--")
+            if self.event == '-table_traits-':
+                
+                i = self.values['-table_traits-'][0]
+                inp = self.traits_table[i][0]
+
+
             else:
-                fifty = self.df_traits[inp].to_list()
-                plt.hist(fifty, bins, alpha=1, ec='black',label='Percent') 
-            plt.gcf().set_size_inches(size)
-            #plt.legend(loc='upper right')
-            string1 = "traits.png"
-            p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
+
+                if self.event == '-table_gainers-':
+                    df = self.gainers
+                    i = self.values['-table_gainers-'][0]
+                else:
+                    df = self.losers
+                    i = self.values['-table_losers-'][0]
                 
-            plt.savefig(p1,bbox_inches='tight')
+               
+
+
+                bar = [i,df,1]
+                if os.path.exists("C:/Screener/tmp/pnl/charts"):
+                    shutil.rmtree("C:/Screener/tmp/pnl/charts")
+                os.mkdir("C:/Screener/tmp/pnl/charts")
+                plot.create(bar)
                 
-            bio1 = io.BytesIO()
-            image1 = Image.open(r"C:\Screener\tmp\pnl\traits.png")
-            image1.save(bio1, format="PNG")
-            self.window["-CHART-"].update(data=bio1.getvalue())
-            #plt.show()
-        except:
-            sg.popup('Not a Key')
-            pass
+                bio1 = io.BytesIO()
+                image1 = Image.open(f'C:/Screener/tmp/pnl/charts/{i}d.png')
+                image1.save(bio1, format="PNG")
+                self.window["-CHART-"].update(data=bio1.getvalue())
+
+
+        else:
+
+            inp = 'account'
+
+            gainers2 = self.df_traits.sort_values(by = ['pnl'])[:10].reset_index(drop = True)
+
+            gainers = pd.DataFrame()
+           
+            gainers['#'] = gainers2.index + 1
+            gainers['Ticker'] = gainers2['ticker']
+            gainers['$'] = gainers2['pnl'].round(2)
+
+            losers2 = self.df_traits.sort_values(by = ['pnl'] , ascending = False)[:10].reset_index(drop = True)
+            losers = pd.DataFrame()
+            losers['#'] = losers2.index + 1
+            losers['Ticker'] = losers2['ticker']
+            losers['$'] = losers2['pnl'].round(2)
+
+
+            self.losers = losers2
+            self.gainers = gainers2
+
+
+            monthly = Traits.build_monthly(self)
+
+            traits = Traits.build_traits(self)
+
+
+          
+
+            self.window["-table_gainers-"].update(gainers.values.tolist())
+            self.window["-table_losers-"].update(losers.values.tolist())
+            self.window["-table_traits-"].update(traits)
+            self.window["-table_monthly-"].update(monthly)
+
+
         
+ 
+        if inp != False:
 
-            #for k in range(len(self.df_traits)):
+            bins = 50
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                size = (49,25)
+            else:
+                size = (25,10)
+        
+            if inp == "":
+                inp = 'p10'
+       
 
-
-
-        #self.df_traits.to_feather(r"C:\Screener\tmp\pnl\traits.feather")
-
-    
+            try:
+                plt.clf()
+                if ':'  in inp:
+                    inp = inp.split(':')
+                    inp1 = inp[0]
+                    inp2 = inp[1]
+                    x = self.df_traits[inp1].to_list()
+                    y = self.df_traits[inp2].to_list()
+                    plt.scatter(x,y)
+                    z = np.polyfit(x, y, 1)
+                    p = np.poly1d(z)
+                    plt.plot(x,p(x),"r--")
+                else:
+                    fifty = self.df_traits[inp].dropna().to_list()
+                    plt.hist(fifty, bins, alpha=1, ec='black',label='Percent') 
+                plt.gcf().set_size_inches(size)
+ 
+                string1 = "traits.png"
+                p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
+                
+                plt.savefig(p1,bbox_inches='tight')
+                
+                bio1 = io.BytesIO()
+                image1 = Image.open(r"C:\Screener\tmp\pnl\traits.png")
+                image1.save(bio1, format="PNG")
+                self.window["-CHART-"].update(data=bio1.getvalue())
+            except:
+                pass
+      

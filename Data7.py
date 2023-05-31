@@ -40,7 +40,6 @@ class Data:
 
 
 
-
     def convert_date(dt):
         if type(dt) == str:
             try:
@@ -113,7 +112,7 @@ class Data:
                 else:
                     break
             return i
-        except TimeoutError:
+        except IndexError:
             if i >= len(df):
             #if i == len(df):
                 #return i

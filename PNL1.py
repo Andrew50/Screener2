@@ -102,11 +102,49 @@ class PNL():
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaleaccount,finalize = True)
             account.account(self)
         if self.menu == "Traits":
+             
+            toprow = ['    ','Ticker  ','$      ']
+            c1 = [[sg.Table([],headings=toprow,key = '-table_gainers-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
+            c2 = [[sg.Table([],headings=toprow,key = '-table_losers-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
+
+            toprow = [' Trait ', 'Value ', 'Residual ']
+            c3 = [[sg.Table([],headings=toprow,key = '-table_traits-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
+            toprow = ['Month    ', 'Avg Gain    ', 'Avg Loss    ', 'Win %    ', 'Trades     ', 'PNL     ']
+            c4 = [[sg.Table([],headings=toprow,key = '-table_monthly-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=False,selected_row_colors='red on yellow')]]
+
+
+            c5 = [[sg.Button('Recalc')],
+                [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
+
+            c6 = [[sg.Image(key = '-CHART-')]]
+
+
+            layout = [
+            [sg.Column(c1),
+             sg.VSeperator(),
+             sg.Column(c2),
+             sg.VSeperator(),
+             sg.Column(c3),
+             sg.VSeperator(),
+             sg.Column(c4),
+             sg.VSeperator(),
+             ],
+             [sg.Column(c5),
+             sg.VSeperator(),
+             sg.Column(c6),
+             ]]
+             
+             
+            
+            '''
             layout = [
             [sg.Image(key = '-CHART-')],
             [(sg.Text("Trait  ")),sg.InputText(key = 'input-trait')],
             [sg.Button('Recalc'),sg.Button('Enter')],
             [sg.Button('Account'), sg.Button('Log'),sg.Button('Traits'),sg.Button('Plot')]]
+
+
+            '''
             self.window = sg.Window(self.menu, layout,margins = (10,10),scaling=scaletraits,finalize = True)
             traits.traits(self)
         if self.menu == "Plot":

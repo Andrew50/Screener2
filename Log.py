@@ -83,7 +83,10 @@ class Log:
             print(new_log)
             #self.df_log = new_log
             
-            new = pd.concat([self.df_log, new_log]).drop_duplicates(keep=False)
+            non_dep = self.df_log[self.df_log['ticker'] != 'Deposit']
+
+
+            new = pd.concat([non_dep, new_log]).drop_duplicates(keep=False)
             print(new)
             new = new.sort_values(by='datetime', ascending = False)
             dt = new.iloc[-1]['datetime']

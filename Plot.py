@@ -197,10 +197,16 @@ class Plot:
             i = bar[0]
 
             if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
-            
-        
+                df = bar[1]
 
-                tflist = ['1min','h','d']
+
+                
+                try:
+                    god = bar[2]
+                    tflist = ['d']
+                except:
+
+                    tflist = ['1min','h','d']
 
             
             
@@ -216,7 +222,7 @@ class Plot:
                     fw = 26
                     fh = 13
                     fs = 1.16
-                df = bar[1]
+                
         
                 ticker = df.iat[i,0]
             
@@ -328,7 +334,7 @@ class Plot:
                         if series.isnull().values.all(axis=0)[0]:
                             pass
                         else: 
-                            apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .6,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
+                            apds.append(mpf.make_addplot(series,type='scatter',markersize=300,alpha = .4,marker=datafram.iloc[0]['Marker'],edgecolors='black', color=datafram.iloc[0]['Color']))
 
                
                     '''
