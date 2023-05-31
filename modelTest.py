@@ -1,5 +1,4 @@
 
-
 import random
 import pandas as pd
 from Create import Create as create
@@ -10,9 +9,10 @@ import mplfinance as mpf
 from Data7 import Data as data
 from matplotlib import pyplot as plt
 
-class Test3:
+class modelTest:
     def runRandomTicker(setuptype,thresh):
-        model = load_model('models/model_' + setuptype)
+        model = load_model('C:/Screener/setups/models/model_' + setuptype)
+        setupList = pd.read_feather(r"C:/Screener/setups/database/" + setuptype + ".feather")
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:
@@ -33,24 +33,34 @@ class Test3:
                 print(god[0][1])
                 #print(f"{val}")
                 if val == 1:
-                        df1 = data.get(ticker)
+                    df1 = data.get(ticker)
 
 
-                        ind= data.findex(df1,date)
+                    ind= data.findex(df1,date)
 
-                        df1 = df1[ind-100:ind + 1]
-                        mc = mpf.make_marketcolors(up='g',down='r')
-                        s  = mpf.make_mpf_style(marketcolors=mc)
+                    df1 = df1[ind-100:ind + 1]
+                    mc = mpf.make_marketcolors(up='g',down='r')
+                    s  = mpf.make_mpf_style(marketcolors=mc)
             
-                        mpf.plot(df1, type='candle', volume=True  , 
+                    mpf.plot(df1, type='candle', volume=True  , 
  
-                        style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
-                        tight_layout = True
-                    #   vlines=dict(vlines=datelist, 
-                        #colors = colorlist, alpha = .2,linewidths=1),
-                    )
-        
-                        plt.show()
+                    style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
+                    tight_layout = True
+                #   vlines=dict(vlines=datelist, 
+                    #colors = colorlist, alpha = .2,linewidths=1),
+                )   
+                    plt.show()
+                    print("Was it a setup?")
+                    input1 = str(input())
+                    if(input1 == 'yes'):
+                        add = pd.DataFrame()
+                        add['ticker'] = [ticker]
+                        add['date'] = [date]
+                        add['setup'] = [1]
+                        new = pd.concat([setupList, add]).reset_index(drop = True)
+                        new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
+                        print(new.tail())
+                   
             except:
                 print('Error')
 
@@ -60,7 +70,7 @@ class Test3:
     def runTestData(setuptype):
 
         model = load_model('model_' + setuptype)
-
+        setupsList = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather')
         setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
         print(setups)
         #print(setups[setups['setup'] == 1])
@@ -128,21 +138,39 @@ class Test3:
                 
         
                     plt.show()
+                    print("Was it a setup?")
+                    input1 = str(input())
+                    if(input1 == "yes"):
+                        add = pd.DataFrame()
+                        add['ticker'] = [ticker]
+                        add['date'] = [date]
+                        add['setup'] = [1]
+                        new = pd.concat([setupsList, add]).reset_index(drop = True)
+                        new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
+                        print(new.tail())
 
 
 
-                #time.sleep(.1)
-            except:
-                pass
-
+            except TimeoutError:
+                print('ERROR')
+    def combine(): 
+        setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
+        for setup in setups:
+            df1 = pd.read_feather(f"C:/Screener/setups/database/ben_{setup}.feather")
+            df2 = pd.read_feather(f"C:/Screener/setups/database/aj_{setup}.feather")
+            df3 = pd.concat([df1, df2]).reset_index(drop = True)
+            print(df3)
+            df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
 
 if __name__ == "__main__":
     setuptype = 'EP'
     keep = .015
     thresh = .2
-    #create.run(setuptype,keep,False)
-    Test3.runRandomTicker(setuptype,thresh)
-    #Test3.runTestData(setuptype)
+    #modelTest.combine()
+    create.run(setuptype,keep,False)
+    modelTest.runRandomTicker(setuptype,thresh)
+    #modelTest.runTestData(setuptype)
+
 
 
 

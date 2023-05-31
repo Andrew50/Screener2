@@ -92,13 +92,18 @@ class Trainer:
             add = df[['ticker','date','setup']]
 
             try:
-                df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
+                if(data.isBen()):
+                    df = pd.read_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+                else:
+                    df = pd.read_feather('C:/Screener/setups/database/aj_' + s + '.feather')
             except:
                 df = pd.DataFrame()
 
             df = pd.concat([df,add]).reset_index(drop = True)
-
-            df.to_feather('C:/Screener/setups/' + s + '.feather')
+            if(data.isBen()):
+                df.to_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+            else:
+                df.to_feather('C:/Screener/setups/database/aj_' + s + '.feather')
 
           
     
@@ -412,9 +417,9 @@ class Trainer:
                 fh = 12
                 fs = 3
             elif os.path.exists("C:/Screener/ben.txt"):
-                fw = 25
+                fw = 27
                 fh = 12
-                fs = 1.3
+                fs = 1.6
             else:
                 fw = 50
                 fh = 23
