@@ -92,13 +92,18 @@ class Trainer:
             add = df[['ticker','date','setup']]
 
             try:
-                df = pd.read_feather('C:/Screener/setups/' + s + '.feather')
+                if(data.isBen()):
+                    df = pd.read_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+                else:
+                    df = pd.read_feather('C:/Screener/setups/database/aj_' + s + '.feather')
             except:
                 df = pd.DataFrame()
 
             df = pd.concat([df,add]).reset_index(drop = True)
-
-            df.to_feather('C:/Screener/setups/' + s + '.feather')
+            if(data.isBen()):
+                df.to_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+            else:
+                df.to_feather('C:/Screener/setups/database/aj_' + s + '.feather')
 
           
     

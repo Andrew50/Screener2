@@ -4,7 +4,7 @@ import pandas as pd
 
 
 class Test4:
-
+   '''
     def merge():
         setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
         for setup in setups:
@@ -13,7 +13,7 @@ class Test4:
             df3 = pd.concat([df1, df2]).reset_index(drop = True)
             print(df3)
             df3.to_feather(f"C:/Screener/setups/{setup}.feather")
-
+            '''
 '''
 df3 = pd.concat([df1,df2]).reset_index(drop= True)
 

@@ -131,7 +131,7 @@ class Create:
     def get_nn_data(setuptype,use,split):
  
         setup = setuptype
-        allsetups = pd.read_feather('C:/Screener/setups/' + setup + '.feather')
+        allsetups = pd.read_feather('C:/Screener/setups/database/' + setup + '.feather')
         
         
         
@@ -149,7 +149,7 @@ class Create:
             eighty = int(len(allsetups) * 0.8)
             setups = allsetups.loc[0:eighty].reset_index(drop = True)
             rest = allsetups.loc[eighty:].reset_index(drop = True)
-            rest.to_feather('C:/Screener/setups/Testdata_' + setup + '.feather')
+            rest.to_feather('C:/Screener/setups/database/Testdata_' + setup + '.feather')
             TRAIN_SPLIT = 0.8
         else:
             setups = allsetups
@@ -349,7 +349,7 @@ class Create:
         if split:
             Create.evaluate_training(model, x_test, y_test)
     
-        model.save('model_' + setuptype)
+        model.save('C:/Screener/setups/models/model_' + setuptype)
 
         print('done with model')
 

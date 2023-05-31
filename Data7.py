@@ -362,7 +362,10 @@ class Data:
         else: 
             return 0
 
-
+    def isBen():
+        if(os.path.exists("C:/Screener/ben.txt")):
+            return True
+        return False
 
 if __name__ == '__main__':
     #Data.backup()
