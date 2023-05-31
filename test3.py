@@ -11,7 +11,7 @@ from Data7 import Data as data
 from matplotlib import pyplot as plt
 
 class Test3:
-    def runRandomTicker(setuptype):
+    def runRandomTicker(setuptype,thresh):
         model = load_model('model_' + setuptype)
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
@@ -26,7 +26,7 @@ class Test3:
                 god = model.predict(df)
 
                 val = 0
-                if god[0][1] > 0.2:
+                if god[0][1] > thresh:
                     val = 1
                 sys.stdout = sys.__stdout__
                 #print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
@@ -137,10 +137,11 @@ class Test3:
 
 
 if __name__ == "__main__":
-    setuptype = 'EP'
-    keep = .01
-    create.run(setuptype,keep,True)
-    Test3.runRandomTicker(setuptype)
+    setuptype = 'MR'
+    keep = .07
+    thresh = .17
+    create.run(setuptype,keep,False)
+    Test3.runRandomTicker(setuptype,thresh)
     #Test3.runTestData(setuptype)
 
 
