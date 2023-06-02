@@ -402,7 +402,7 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-        except TimeoutError:# E as e:
+        except:# E as e:
                 
             shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
