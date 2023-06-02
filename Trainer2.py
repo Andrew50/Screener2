@@ -36,8 +36,6 @@ class Trainer:
 
         else:
 
-           
-
             try:
                 i = int(self.event)
                 setup = self.setup_list[i-1]

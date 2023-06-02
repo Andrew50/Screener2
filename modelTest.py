@@ -30,15 +30,17 @@ class modelTest:
                     val = 1
                 sys.stdout = sys.__stdout__
                 #print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
-                print(god[0][1])
+                
                 #print(f"{val}")
                 if val == 1:
+                    print(god[0][1])
                     df1 = data.get(ticker)
 
 
                     ind= data.findex(df1,date)
 
                     df1 = df1[ind-100:ind + 1]
+                   
                     mc = mpf.make_marketcolors(up='g',down='r')
                     s  = mpf.make_mpf_style(marketcolors=mc)
             
@@ -50,16 +52,17 @@ class modelTest:
                     #colors = colorlist, alpha = .2,linewidths=1),
                 )   
                     plt.show()
-                    print("Was it a setup?")
-                    input1 = str(input())
-                    if(input1 == 'yes'):
-                        add = pd.DataFrame()
-                        add['ticker'] = [ticker]
-                        add['date'] = [date]
-                        add['setup'] = [1]
-                        new = pd.concat([setupList, add]).reset_index(drop = True)
-                        new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
-                        print(new.tail())
+                    if False:
+                        print("Was it a setup?")
+                        input1 = str(input())
+                        if(input1 == 'yes'):
+                            add = pd.DataFrame()
+                            add['ticker'] = [ticker]
+                            add['date'] = [date]
+                            add['setup'] = [1]
+                            new = pd.concat([setupList, add]).reset_index(drop = True)
+                            new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
+                            print(new.tail())
                    
             except:
                 print('Error')
@@ -152,7 +155,8 @@ class modelTest:
 
 
             except TimeoutError:
-                print('ERROR')
+                pass
+                #print('ERROR')
     def combine(): 
         setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
         for setup in setups:
@@ -164,7 +168,7 @@ class modelTest:
 
 if __name__ == "__main__":
     setuptype = 'EP'
-    keep = .015
+    keep = .08
     thresh = .2
     #modelTest.combine()
     create.run(setuptype,keep,False)
