@@ -9,6 +9,15 @@ import datetime
 from Plot import Plot as plot
 
 
+
+
+
+df = data.get('yang')
+
+print(df)
+
+
+'''
 setuptype = 'MR'
 ################dont delte!!!!!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setups = pd.read_feather('C:/Screener/sync/setups.feather')
@@ -53,7 +62,7 @@ print(len(gud))
 setups.to_feather('C:/Screener/setups/' + setuptype + '.feather')
 
 
-
+'''
 
 
 

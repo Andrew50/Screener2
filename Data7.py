@@ -83,7 +83,7 @@ class Data:
 
             #if Data.isToday(dt):
            #     return len(df) - 1
-               # print('findex might be fucked')
+             
             dt = Data.convert_date(dt)
         
             i = int(len(df)/2)
@@ -251,13 +251,15 @@ class Data:
             exists = True
             try:
                 cs = Data.get(ticker,tf)
+                
                 lastDay = cs.index[-1]
-         
+             
                 if (lastDay == lastDStock):
                     return
             
-            except TimeoutError:
+            except AttributeError: #df is empty
                 exists = False
+
             if tf == 'daily':
                 ytf = '1d'
                 period = '25y'
@@ -280,10 +282,9 @@ class Data:
             if Data.isMarketOpen() == 1 :
                 ydf.drop(ydf.tail(1).index,inplace=True)
             ydf.dropna(inplace = True)
-  
             if not exists:
                 df = ydf
-                print(f'created {ticker} {tf}')
+          
             else:
  
                 scrapped_data_index = Data.findex(ydf, lastDay) 
@@ -298,23 +299,32 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except FileNotFoundError:
-            pass
+        except:
+            print('random error')
     
     def runUpdate():
         tv = TvDatafeed()
-        daily = tv.get_hist('AAPL', 'NASDAQ', n_bars=2)
+        daily = tv.get_hist('NFLX', 'NASDAQ', n_bars=2)
         daily_last = daily.index[Data.isMarketOpen()]
-        minute = tv.get_hist('AAPL', 'NASDAQ', n_bars=2, interval=Interval.in_1_minute, extended_session = False)
-        minute_last = minute.index[Data.isMarketOpen()]
+
+
+
+        minute = tv.get_hist('NFLX', 'NASDAQ', n_bars=2, interval=Interval.in_1_minute, extended_session = False)
+
+        
+        minute_last = minute.index
+        
+        minute_last = minute_last[Data.isMarketOpen()]
+       
+        
+
 
         screener_data = Scan.Scan.get()
         
         
         #screener_data = pd.DataFrame({'Ticker': ['^VIX']
                                #       }).set_index('Ticker')
-        print(daily_last)
-        print(minute_last)
+    
         batches = []
         for i in range(len(screener_data)):
            ticker = screener_data.index[i]
@@ -358,8 +368,8 @@ class Data:
         elif(hour == 12):
             if(minute <= 15): 
                 return 1
-        else: 
-            return 0
+        
+        return 0
 
     def isBen():
         if(os.path.exists("C:/Screener/ben.txt")):
@@ -368,7 +378,7 @@ class Data:
 
 if __name__ == '__main__':
     #Data.backup()
-    #print(datetime.datetime.now().weekday())
+  
     Data.runUpdate()
     
 
