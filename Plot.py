@@ -192,41 +192,42 @@ class Plot:
     def create(bar):
 
 
+        i = bar[0]
+        
+            
 
-        try:
-            i = bar[0]
-
-            if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
-                df = bar[1]
+        if (os.path.exists(r"C:\Screener\tmp\pnl\charts" + f"\{i}" + "1min.png") == False):
+            df = bar[1]
 
 
                 
-                try:
-                    god = bar[2]
-                    tflist = ['d']
-                except:
+            try:
+                god = bar[2]
+                tflist = ['d']
+            except:
 
-                    tflist = ['1min','h','d']
+                tflist = ['1min','h','d']
 
             
             
-                mc = mpf.make_marketcolors(up='g',down='r')
-                s  = mpf.make_mpf_style(marketcolors=mc)
+            mc = mpf.make_marketcolors(up='g',down='r')
+            s  = mpf.make_mpf_style(marketcolors=mc)
 
-                if os.path.exists("C:/Screener/laptop.txt"): #if laptop
-                    fw = 22
-                    fh = 12
-                    fs = 1.95
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                fw = 22
+                fh = 12
+                fs = 1.95
 
-                else:
-                    fw = 26
-                    fh = 13
-                    fs = 1.16
+            else:
+                fw = 26
+                fh = 13
+                fs = 1.16
                 
         
-                ticker = df.iat[i,0]
+            ticker = df.iat[i,0]
             
-                for tf in tflist:
+            for tf in tflist:
+                try:
                     string1 = str(i) + str(tf) + ".png"
                     p1 = pathlib.Path("C:/Screener/tmp/pnl/charts") / string1
 
@@ -402,8 +403,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-        except:# E as e:
+                except:# E as e:
                 
-            shutil.copy(r"C:\Screener\tmp\blank.png",p1)
+                    shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     
