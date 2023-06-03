@@ -163,15 +163,15 @@ class modelTest:
             df1 = pd.read_feather(f"C:/Screener/setups/database/ben_{setup}.feather")
             df2 = pd.read_feather(f"C:/Screener/setups/database/aj_{setup}.feather")
             df3 = pd.concat([df1, df2]).reset_index(drop = True)
-            print(df3)
+    
             df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
 
 if __name__ == "__main__":
     setuptype = 'EP'
-    keep = .08
+    keep = .01
     thresh = .2
     #modelTest.combine()
-    create.run(setuptype,keep,False)
+    create.run(setuptype,keep,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 

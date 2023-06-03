@@ -17,7 +17,7 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 20
+EPOCHS = 10
 BATCH_SIZE = 64
 VALIDATION = 0.1
 LEARN_RATE = 1e-3

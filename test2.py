@@ -10,11 +10,23 @@ from Plot import Plot as plot
 
 
 
+df1 = pd.read_feather('C:/Screener/setups/database/F2.feather')
+df2 = pd.read_feather('C:/Screener/setups/database/FB.feather')
+df3 = pd.read_feather('C:/Screener/setups/database/NF.feather')
+df4 = pd.read_feather('C:/Screener/setups/database/NFB.feather')
+
+df = pd.DataFrame()
+df['ticker'] = df1['ticker']
+df['date'] = df1['date']
+df['setup'] = df1['setup']  + df3['setup'] + df2['setup'] + df4['setup']
+
+    
+df.to_feather('C:/Screener/setups/database/F.feather')
 
 
-df = data.get('yang')
+#df = data.get('yang')
 
-print(df)
+#print(df)
 
 
 '''
