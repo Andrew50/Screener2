@@ -378,8 +378,8 @@ class Create:
         print('done with model')
 
 if __name__ == '__main__':
-    setuptype = 'EP'
-    keep = .14
+    setuptype = 'P'
+    keep = .45
     Create.run(setuptype,keep,False)
     
 
