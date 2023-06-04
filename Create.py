@@ -93,12 +93,25 @@ class Create:
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
+            setup_type = [3]
 
             df = data.get(ticker)
 
+
+            if 'EP' in setup_type:
+                sample_size = 5
+            elif setup_type == 'MR':
+                sample_size = 15
+            elif 'F' in setup_type:
+                sample_size = 40
+            else:
+                sample_size = 10
+
+
+
        
             index = data.findex(df,date)
-            df2 = df[index-50:index]
+            df2 = df[index-sample_size:index]
 
             o = df.iat[index,0]
             add = pd.DataFrame({
@@ -139,6 +152,11 @@ class Create:
         no = allsetups[allsetups['setup'] == 0]
         
 
+        length = (len(yes) / use) - len(yes)
+
+        use = length / len(no)
+
+
         no = no.sample(frac = use)
 
 
@@ -162,7 +180,9 @@ class Create:
 
         arglist = []
         for i in range(len(setups)):
-            arglist.append(setups.iloc[i])
+            bar = setups.iloc[i].tolist()#.append(setuptype)
+            print(bar)
+            arglist.append(bar)
 
         dfs = data.pool(Create.nn_multi,arglist)
 
