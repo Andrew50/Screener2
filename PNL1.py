@@ -216,7 +216,7 @@ class PNL():
 
                 else:
                   
-                    if self.menu == "Account" and (data.isMarketOpen()):
+                    if self.menu == "Account": #and (data.isMarketOpen()):
                         print('refresh')
                         self.df_pnl = pd.read_feather(r"C:\Screener\sync\pnl.feather").set_index('datetime',drop = True)
                         account.plot_update(self)

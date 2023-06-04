@@ -808,6 +808,15 @@ class Traits:
                 inp = self.traits_table[i][0]
 
 
+
+            elif self.event == '-table_monthly-':
+
+                i = self.values['-table_traits-'][0]
+
+                
+
+
+
             else:
 
                 if self.event == '-table_gainers-':
@@ -855,7 +864,7 @@ class Traits:
             self.gainers = gainers2
 
 
-            monthly = Traits.build_monthly(self)
+            self.monthly = Traits.build_monthly(self)
 
             traits = Traits.build_traits(self)
 
@@ -865,7 +874,7 @@ class Traits:
             self.window["-table_gainers-"].update(gainers.values.tolist())
             self.window["-table_losers-"].update(losers.values.tolist())
             self.window["-table_traits-"].update(traits)
-            self.window["-table_monthly-"].update(monthly)
+            self.window["-table_monthly-"].update(self.monthly)
 
 
         
