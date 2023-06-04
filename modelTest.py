@@ -171,7 +171,7 @@ if __name__ == "__main__":
     prcnt_setup = .2
     thresh = .2
     #modelTest.combine()
-    create.run(setuptype,prcnt_setup,True)
+    create.run(setuptype,prcnt_setup,False)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 
