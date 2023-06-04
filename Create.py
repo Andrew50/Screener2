@@ -68,6 +68,7 @@ class Create:
     def get_classification(df: pd.DataFrame,value) -> pd.DataFrame:
     
         df['classification'] = value
+      
         return df
     
 
@@ -89,7 +90,7 @@ class Create:
 
             setups = bar
             
-
+          
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
@@ -97,7 +98,7 @@ class Create:
 
             df = data.get(ticker)
 
-
+            
             if 'EP' in setup_type:
                 sample_size = 5
             elif setup_type == 'MR':
@@ -106,8 +107,7 @@ class Create:
                 sample_size = 40
             else:
                 sample_size = 10
-
-
+                
 
        
             index = data.findex(df,date)
@@ -127,12 +127,12 @@ class Create:
             #df = pd.read_csv(f'data/{ticker}.csv')
             df = Create.get_lagged_returns(df)
             df = Create.get_classification(df,value)
-            #   print(df)
+          
         
             # We may end up with some divisions by 0 when calculating the returns
             # so to prevent any rows with this slipping in, we replace any infs
             # with nan values and remove all rows with nan values in them
-            #print(df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']])
+  
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
             
         except TimeoutError:
@@ -174,7 +174,7 @@ class Create:
             TRAIN_SPLIT = 1
         
             
-        print(setups)
+       
         print(f"Setup Ratio: {len(setups[setups['setup'] == 1]) / len(setups)}")
         
 
@@ -182,7 +182,7 @@ class Create:
         for i in range(len(setups)):
             bar = setups.iloc[i].tolist()
             bar.append(setuptype)
-            print(bar)
+           
             arglist.append(bar)
 
         dfs = data.pool(Create.nn_multi,arglist)
@@ -192,7 +192,7 @@ class Create:
         nn_values = nn_values.values
 
     
-        #print(dfs)
+       
         # Shuffle the values to ensure the NN does not learn an order
         np.random.shuffle(nn_values)
 
@@ -274,7 +274,7 @@ class Create:
 
         #df = pd.read_csv(f'data/{ticker}.csv')
         df = Create.get_lagged_returns(df)
-        #  print(df)
+  
         df = Create.get_classification(df,1)
 
         df = (
@@ -289,11 +289,6 @@ class Create:
         )
 
         return x
-
-
-
-
-
 
 
     def evaluate_training(model: Sequential,
@@ -340,10 +335,7 @@ class Create:
         plt.show()
 
         return
-
-
-
-
+    
 
     def run(setuptype,keep,split):
         
@@ -357,7 +349,8 @@ class Create:
             optimizer = Adam(learning_rate = LEARN_RATE),
             metrics = ['accuracy']
         )
-    
+        print(x_train)
+        print(y_train)
         model.fit(
             x_train,
             y_train,
