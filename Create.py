@@ -17,7 +17,7 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 20
+EPOCHS = 10
 BATCH_SIZE = 64
 VALIDATION = 0.1
 LEARN_RATE = 1e-3
@@ -39,15 +39,15 @@ class Create:
 
     def time_series(df: pd.DataFrame,
                     col: str,
-                    name: str) -> pd.DataFrame:
+                    name: str, sample_size) -> pd.DataFrame:
 
         return df.assign(**{
             f'{name}_t-{lag}': col.shift(lag)
-            for lag in range(0, FEAT_LENGTH)
+            for lag in range(0, sample_size)
         })
 
 
-    def get_lagged_returns(df: pd.DataFrame) -> pd.DataFrame:
+    def get_lagged_returns(df: pd.DataFrame, sample_size) -> pd.DataFrame:
 
         close = df.iat[-2,3]
         for col in FEAT_COLS:
@@ -60,7 +60,7 @@ class Create:
 
             #return_col = df[col].div(close) - 1
 
-            df = Create.time_series(df, return_col, f'feat_{col}_ret')
+            df = Create.time_series(df, return_col, f'feat_{col}_ret', sample_size)
             
         return df
 
@@ -68,6 +68,7 @@ class Create:
     def get_classification(df: pd.DataFrame,value) -> pd.DataFrame:
     
         df['classification'] = value
+      
         return df
     
 
@@ -89,16 +90,28 @@ class Create:
 
             setups = bar
             
-
+          
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
+            setup_type = [3]
 
             df = data.get(ticker)
 
-       
+            
+            if 'EP' in setup_type:
+                sample_size = 2
+            elif setup_type == 'MR':
+                sample_size = 15
+            elif 'F' in setup_type:
+                sample_size = 40
+            else:
+                sample_size = 10
+                
+
+            sample_size = 13
             index = data.findex(df,date)
-            df2 = df[index-50:index]
+            df2 = df[index-sample_size:index]
 
             o = df.iat[index,0]
             add = pd.DataFrame({
@@ -112,9 +125,9 @@ class Create:
             df = df2
 
             #df = pd.read_csv(f'data/{ticker}.csv')
-            df = Create.get_lagged_returns(df)
+            df = Create.get_lagged_returns(df, sample_size)
             df = Create.get_classification(df,value)
-            #   print(df)
+          
         
             # We may end up with some divisions by 0 when calculating the returns
             # so to prevent any rows with this slipping in, we replace any infs
@@ -139,6 +152,14 @@ class Create:
         no = allsetups[allsetups['setup'] == 0]
         
 
+        length = (len(yes) / use) - len(yes)
+
+        use = length / len(no)
+
+
+        if use > 1:
+            use = 1
+
         no = no.sample(frac = use)
 
 
@@ -162,7 +183,10 @@ class Create:
 
         arglist = []
         for i in range(len(setups)):
-            arglist.append(setups.iloc[i])
+            bar = setups.iloc[i].tolist()
+            bar.append(setuptype)
+           
+            arglist.append(bar)
 
         dfs = data.pool(Create.nn_multi,arglist)
 
@@ -171,7 +195,7 @@ class Create:
         nn_values = nn_values.values
 
     
-        #print(dfs)
+       
         # Shuffle the values to ensure the NN does not learn an order
         np.random.shuffle(nn_values)
 
@@ -230,14 +254,22 @@ class Create:
 
 
 
-    def test_data(ticker,date):
+    def test_data(ticker,date,setup_type):
 
 
         df = data.get(ticker)
 
        
         index = data.findex(df,date)
-        df2 = df[index-50:index]
+        if 'EP' in setup_type:
+                sample_size = 5
+        elif setup_type == 'MR':
+            sample_size = 15
+        elif 'F' in setup_type:
+            sample_size = 40
+        else:
+            sample_size = 10
+        df2 = df[index-sample_size:index]
 
         o = df.iat[index,0]
         add = pd.DataFrame({
@@ -253,7 +285,7 @@ class Create:
 
         #df = pd.read_csv(f'data/{ticker}.csv')
         df = Create.get_lagged_returns(df)
-        #  print(df)
+  
         df = Create.get_classification(df,1)
 
         df = (
@@ -268,11 +300,6 @@ class Create:
         )
 
         return x
-
-
-
-
-
 
 
     def evaluate_training(model: Sequential,
@@ -319,10 +346,7 @@ class Create:
         plt.show()
 
         return
-
-
-
-
+    
 
     def run(setuptype,keep,split):
         
@@ -336,7 +360,7 @@ class Create:
             optimizer = Adam(learning_rate = LEARN_RATE),
             metrics = ['accuracy']
         )
-    
+     
         model.fit(
             x_train,
             y_train,
@@ -354,7 +378,7 @@ class Create:
         print('done with model')
 
 if __name__ == '__main__':
-    setuptype = 'NF'
+    setuptype = 'EP'
     keep = .14
     Create.run(setuptype,keep,False)
     
