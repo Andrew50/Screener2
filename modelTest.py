@@ -21,7 +21,7 @@ class modelTest:
                 tickerdf = data.get(ticker)
                 date_list = tickerdf.index.to_list()
                 date = date_list[random.randint(0,len(date_list) - 1)]
-                df = create.test_data(ticker, date)
+                df = create.test_data(ticker, date, setuptype)
                 sys.stdout = open(os.devnull, 'w')
                 god = model.predict(df)
 
@@ -29,9 +29,9 @@ class modelTest:
                 if god[0][1] > thresh:
                     val = 1
                 sys.stdout = sys.__stdout__
-                #print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+      
                 
-                #print(f"{val}")
+            
                 if val == 1:
                     print(god[0][1])
                     df1 = data.get(ticker)
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     prcnt_setup = .2
     thresh = .2
     #modelTest.combine()
-    create.run(setuptype,prcnt_setup,False)
+    create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 

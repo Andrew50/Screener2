@@ -100,7 +100,7 @@ class Create:
 
             
             if 'EP' in setup_type:
-                sample_size = 5
+                sample_size = 2
             elif setup_type == 'MR':
                 sample_size = 15
             elif 'F' in setup_type:
@@ -156,6 +156,9 @@ class Create:
 
         use = length / len(no)
 
+
+        if use > 1:
+            use = 1
 
         no = no.sample(frac = use)
 
@@ -251,14 +254,22 @@ class Create:
 
 
 
-    def test_data(ticker,date):
+    def test_data(ticker,date,setup_type):
 
 
         df = data.get(ticker)
 
        
         index = data.findex(df,date)
-        df2 = df[index-50:index]
+        if 'EP' in setup_type:
+                sample_size = 5
+        elif setup_type == 'MR':
+            sample_size = 15
+        elif 'F' in setup_type:
+            sample_size = 40
+        else:
+            sample_size = 10
+        df2 = df[index-sample_size:index]
 
         o = df.iat[index,0]
         add = pd.DataFrame({
@@ -349,8 +360,7 @@ class Create:
             optimizer = Adam(learning_rate = LEARN_RATE),
             metrics = ['accuracy']
         )
-        print(x_train)
-        print(y_train)
+     
         model.fit(
             x_train,
             y_train,
