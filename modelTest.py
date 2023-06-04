@@ -24,7 +24,6 @@ class modelTest:
                 date = date_list[random.randint(0,len(date_list) - 1)]
                 df = create.test_data(ticker, date, setuptype)
                 sys.stdout = open(os.devnull, 'w')
-                print(df)
                 god = model.predict(df)
 
                 val = 0
@@ -169,9 +168,9 @@ class modelTest:
             df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
 
 if __name__ == "__main__":
-    setuptype = 'P'
+    setuptype = 'EP'
     prcnt_setup = .2
-    thresh = .5
+    thresh = .7
     #modelTest.combine()
     #create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)

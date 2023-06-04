@@ -269,6 +269,7 @@ class Create:
             sample_size = 40
         else:
             sample_size = 10
+        sample_size = 50
         df2 = df[index-sample_size:index]
 
         o = df.iat[index,0]
@@ -282,7 +283,7 @@ class Create:
         df2 = pd.concat([df2,add])
         df = df2
 
-        print(f'{df} , {date}')
+        #print(f'{df} , {date}')
 
 
         #df = pd.read_csv(f'data/{ticker}.csv')
@@ -300,7 +301,7 @@ class Create:
             df[[col for col in df.columns if 'feat_' in col] + ['classification']]
             .values[:, :-1]
         )
-
+        print(x)
         return x
 
 
