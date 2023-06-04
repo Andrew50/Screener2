@@ -18,6 +18,8 @@ import numpy as np
 import statistics
 from tqdm import tqdm
 from Data7 import Data as data
+import scipy
+from sklearn.metrics import r2_score
 
 from Plot import Plot as plot
 
@@ -717,6 +719,40 @@ class Traits:
 
 
         god = []
+
+        date = 'Overall'
+
+        loss = df[df['account'] <= 0]
+        avg_loss = loss['account'].mean()
+
+        gain = df[df['account'] > 0]
+        avg_gain = gain['account'].mean()
+
+        wins = []
+        for i in range(len(df)):
+            if df.iloc[i]['account'] > 0:
+                wins.append(1)
+            else:
+                wins.append(0)
+
+
+        win = statistics.mean(wins) * 100
+
+        pnl = ((df['account'] / 100) + 1).tolist()
+
+        gud = 1
+        for i in pnl:
+            gud *= i
+
+        pnl = gud
+
+        trades = len(df)
+
+
+        god.append([date,round(avg_gain,2), round(avg_loss,2), round(win,2), round(trades,2), round(pnl,2)])
+
+
+        
         for df in dfs:
            
             date = str(df.iat[0,1])
@@ -733,7 +769,7 @@ class Traits:
 
             wins = []
             for i in range(len(df)):
-                if df.iloc[i]['pnl'] > 0:
+                if df.iloc[i]['account'] > 0:
                     wins.append(1)
                 else:
                     wins.append(0)
@@ -743,7 +779,13 @@ class Traits:
 
             trades = len(df)
 
-            pnl = df['pnl'].sum()
+            pnl = ((df['account'] / 100) + 1).tolist()
+
+            gud = 1
+            for i in pnl:
+                gud *= i
+
+            pnl = (gud - 1) *100
 
             god.append([date,round(avg_gain,2), round(avg_loss,2), round(win,2), round(trades,2), round(pnl,2)])
 
@@ -777,6 +819,7 @@ class Traits:
 
 
     def traits(self):
+        print(self.event)
         '''
         pp = 0
         for i in range(len(self.df_log)):
@@ -787,7 +830,7 @@ class Traits:
         pint(pp)
         '''
         inp = False
-
+       
 
         if self.df_traits.empty or self.event == 'Recalc':
 
@@ -797,51 +840,79 @@ class Traits:
             self.df_log = self.df_log.sort_values(by='datetime', ascending = True)
             self.df_traits = Traits.update([],self.df_log,pd.DataFrame(),self.df_pnl)
             self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
-
-        if 'table' in self.event:
-          
-
-
-            if self.event == '-table_traits-':
-                
-                i = self.values['-table_traits-'][0]
-                inp = self.traits_table[i][0]
+        
+      
 
 
-
-            elif self.event == '-table_monthly-':
-
-                i = self.values['-table_traits-'][0]
-
-                
-
-
-
+        if '+CLICKED+' in self.event:
+            if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+                size = (49,25)
             else:
+                size = (25,10)
+              
+            c = self.event[2][1]
 
-                if self.event == '-table_gainers-':
-                    df = self.gainers
-                    i = self.values['-table_gainers-'][0]
-                else:
-                    df = self.losers
-                    i = self.values['-table_losers-'][0]
+            if c == 0:
+                return
+
+
+            plt.clf()
+    
+            y = [p[5] for p in self.monthly[1:] if not np.isnan(p[c])]
+            x = [p[c] for p in self.monthly[1:] if not np.isnan(p[c])]
+
+            
+            
+            plt.scatter(x,y)
+            z = np.polyfit(x, y, 1)
+            p = np.poly1d(z)
+            plt.plot(x,p(x),"r--")
+
+            plt.gcf().set_size_inches(size)
+ 
+            string1 = "traits.png"
+            p1 = pathlib.Path("C:/Screener/tmp/pnl") / string1
+                
+            plt.savefig(p1,bbox_inches='tight')
+                
+            bio1 = io.BytesIO()
+            image1 = Image.open(r"C:\Screener\tmp\pnl\traits.png")
+            image1.save(bio1, format="PNG")
+            self.window["-CHART-"].update(data=bio1.getvalue())
+                
+
+        elif self.event == '-table_traits-':
+                
+            i = self.values['-table_traits-'][0]
+            inp = self.traits_table[i][0]
+
+
+
+        elif self.event == '-table_gainers-' or self.event == '-table_losers-':
+
+            if self.event == '-table_gainers-':
+                df = self.gainers
+                i = self.values['-table_gainers-'][0]
+            else:
+                df = self.losers
+                i = self.values['-table_losers-'][0]
                 
                
+            print('god')
 
-
-                bar = [i,df,1]
-                if os.path.exists("C:/Screener/tmp/pnl/charts"):
-                    shutil.rmtree("C:/Screener/tmp/pnl/charts")
-                os.mkdir("C:/Screener/tmp/pnl/charts")
-                plot.create(bar)
+            bar = [i,df,1]
+            if os.path.exists("C:/Screener/tmp/pnl/charts"):
+                shutil.rmtree("C:/Screener/tmp/pnl/charts")
+            os.mkdir("C:/Screener/tmp/pnl/charts")
+            plot.create(bar)
                 
-                bio1 = io.BytesIO()
-                image1 = Image.open(f'C:/Screener/tmp/pnl/charts/{i}d.png')
-                image1.save(bio1, format="PNG")
-                self.window["-CHART-"].update(data=bio1.getvalue())
+            bio1 = io.BytesIO()
+            image1 = Image.open(f'C:/Screener/tmp/pnl/charts/{i}d.png')
+            image1.save(bio1, format="PNG")
+            self.window["-CHART-"].update(data=bio1.getvalue())
 
 
-        else:
+        elif self.event == 'Traits':
 
             inp = 'account'
 
@@ -880,7 +951,7 @@ class Traits:
         
  
         if inp != False:
-
+           
             bins = 50
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
                 size = (49,25)

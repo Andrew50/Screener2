@@ -135,7 +135,7 @@ class Create:
             #print(df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']])
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
             
-        except TimeoutError:
+        except:
             pass
 
 
