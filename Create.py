@@ -17,7 +17,7 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 10
+EPOCHS = 20
 BATCH_SIZE = 64
 VALIDATION = 0.1
 LEARN_RATE = 1e-3
@@ -42,7 +42,7 @@ class Create:
 
     def get_lagged_returns(df: pd.DataFrame, sample_size) -> pd.DataFrame:
 
-        close = df.iat[-2,3]
+        #close = df.iat[-2,3]
         for col in FEAT_COLS:
 
             return_col = df[col]/df[col].shift(1)-1
@@ -92,8 +92,9 @@ class Create:
                 sample_size = 40
             else:
                 sample_size = 10
+            
 
-            sample_size = 13
+            sample_size = 50
             index = data.findex(df,date)
             df2 = df[index-sample_size:index]
 
@@ -145,6 +146,12 @@ class Create:
         else:
             setups = allsetups
             TRAIN_SPLIT = 1
+        
+            
+        print(len(setups))
+        print(f"Setup Ratio: {len(setups[setups['setup'] == 1]) / len(setups)}")
+        
+
         arglist = []
         for i in range(len(setups)):
             bar = setups.iloc[i].tolist()
@@ -196,7 +203,7 @@ class Create:
         df = data.get(ticker)
         index = data.findex(df,date)
         if 'EP' in setup_type:
-                sample_size = 5
+                sample_size = 2
         elif setup_type == 'MR':
             sample_size = 15
         elif 'F' in setup_type:
@@ -216,7 +223,12 @@ class Create:
         df2 = pd.concat([df2,add])
         df = df2
 
-        df = Create.get_lagged_returns(df)
+        print(f'{df} , {date}')
+
+
+        #df = pd.read_csv(f'data/{ticker}.csv')
+        df = Create.get_lagged_returns(df, sample_size)
+  
         df = Create.get_classification(df,1)
         df = (df.dropna().reset_index(drop = True))
         x = Create.reshape_x(df[[col for col in df.columns if 'feat_' in col] + ['classification']].values[:, :-1])
@@ -252,8 +264,8 @@ class Create:
         print('done with model')
 
 if __name__ == '__main__':
-    setuptype = 'P'
-    keep = .45
+    setuptype = 'EP'
+    keep = .40
     Create.run(setuptype,keep,False)
     
 
