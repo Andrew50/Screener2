@@ -296,12 +296,14 @@ class Create:
         .dropna()
         .reset_index(drop = True)
         )
-    
+        x = Create.reshape_x(
+            df.values[:, :-1]
+        )
+        return x 
         x = Create.reshape_x(
             df[[col for col in df.columns if 'feat_' in col] + ['classification']]
             .values[:, :-1]
         )
-        print(x)
         return x
 
 
