@@ -180,7 +180,8 @@ class Create:
 
         arglist = []
         for i in range(len(setups)):
-            bar = setups.iloc[i].tolist()#.append(setuptype)
+            bar = setups.iloc[i].tolist()
+            bar.append(setuptype)
             print(bar)
             arglist.append(bar)
 
