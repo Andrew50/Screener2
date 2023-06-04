@@ -171,8 +171,10 @@ if __name__ == "__main__":
     setuptype = 'EP'
     prcnt_setup = .2
     thresh = .7
-    #modelTest.combine()
-    #create.run(setuptype,prcnt_setup,True)
+    modelTest.combine()
+    create.run(setuptype,prcnt_setup,True)
+
+
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 

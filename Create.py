@@ -25,7 +25,6 @@ MODEL_SAVE_NAME = 'model'
 TRAIN_SPLIT = 0.8
 FEAT_LENGTH = 50
 FEAT_COLS = ['open', 'low', 'high', 'close']
-#FEAT_COLS = ['Open', 'Low', 'High', 'Close']
 TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
 
 class Create:
@@ -33,7 +32,6 @@ class Create:
     def time_series(df: pd.DataFrame,
                     col: str,
                     name: str, sample_size) -> pd.DataFrame:
-
         return df.assign(**{
             f'{name}_t-{lag}': col.shift(lag)
             for lag in range(0, sample_size)
@@ -44,32 +42,20 @@ class Create:
 
         #close = df.iat[-2,3]
         for col in FEAT_COLS:
-
             return_col = df[col]/df[col].shift(1)-1
-
             #return_col = df[col].div(close) - 1
-
             df = Create.time_series(df, return_col, f'feat_{col}_ret', sample_size)
-            
         return df
-
 
     def get_classification(df: pd.DataFrame,value) -> pd.DataFrame:
-    
         df['classification'] = value
-      
         return df
-    
 
     def reshape_x(x: np.array) -> np.array:
-    
         num_feats = x.shape[1]//FEAT_LENGTH
-
         x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
-
         for n in range(0, num_feats):
             x_reshaped[:, :, n] = x[:, n*FEAT_LENGTH:(n+1)*FEAT_LENGTH]
-    
         return x_reshaped
 
     def nn_multi(bar):
@@ -80,20 +66,7 @@ class Create:
             date = setups[1]
             value = setups[2]
             setup_type = [3]
-
             df = data.get(ticker)
-
-            
-            if 'EP' in setup_type:
-                sample_size = 2
-            elif setup_type == 'MR':
-                sample_size = 15
-            elif 'F' in setup_type:
-                sample_size = 40
-            else:
-                sample_size = 10
-            
-
             sample_size = 50
             index = data.findex(df,date)
             df2 = df[index-sample_size:index]
@@ -121,15 +94,11 @@ class Create:
  
         setup = setuptype
         allsetups = pd.read_feather('C:/Screener/setups/database/' + setup + '.feather')
-        
-        
-        
         yes = allsetups[allsetups['setup'] == 1]
         no = allsetups[allsetups['setup'] == 0]
         length = (len(yes) / use) - len(yes)
 
         use = length / len(no)
-
 
         if use > 1:
             use = 1
@@ -147,11 +116,6 @@ class Create:
             setups = allsetups
             TRAIN_SPLIT = 1
         
-            
-        print(len(setups))
-        print(f"Setup Ratio: {len(setups[setups['setup'] == 1]) / len(setups)}")
-        
-
         arglist = []
         for i in range(len(setups)):
             bar = setups.iloc[i].tolist()
@@ -178,9 +142,7 @@ class Create:
         return
    
     def load_data() -> Tuple[np.array, np.array, np.array, np.array]:
-
         return (np.load('x_train.npy'),np.load('y_train.npy'),np.load('x_test.npy'),np.load('y_test.npy'),)
-
 
     def get_model(x_train: np.array) -> Sequential:
  
@@ -223,17 +185,11 @@ class Create:
             'volume':[0]}).set_index('datetime')
         df2 = pd.concat([df2,add])
         df = df2
-
-        #print(f'{df} , {date}')
-
-
-        #df = pd.read_csv(f'data/{ticker}.csv')
         df = Create.get_lagged_returns(df, sample_size)
   
         df = Create.get_classification(df,1)
         df = (df.dropna().reset_index(drop = True))
         x = Create.reshape_x(df[[col for col in df.columns if 'feat_' in col] + ['classification']].values[:, :-1])
-
         return x
 
     def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
