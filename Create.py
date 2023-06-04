@@ -126,13 +126,14 @@ class Create:
 
             #df = pd.read_csv(f'data/{ticker}.csv')
             df = Create.get_lagged_returns(df)
+            print(df.tail())
             df = Create.get_classification(df,value)
-            #   print(df)
         
             # We may end up with some divisions by 0 when calculating the returns
             # so to prevent any rows with this slipping in, we replace any infs
             # with nan values and remove all rows with nan values in them
             #print(df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']])
+
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
             
         except TimeoutError:
@@ -174,14 +175,14 @@ class Create:
             TRAIN_SPLIT = 1
         
             
-        print(setups)
+       # print(setups)
         print(f"Setup Ratio: {len(setups[setups['setup'] == 1]) / len(setups)}")
         
 
         arglist = []
         for i in range(len(setups)):
             bar = setups.iloc[i].tolist()#.append(setuptype)
-            print(bar)
+           # print(bar)
             arglist.append(bar)
 
         dfs = data.pool(Create.nn_multi,arglist)
@@ -374,7 +375,7 @@ class Create:
         print('done with model')
 
 if __name__ == '__main__':
-    setuptype = 'NF'
+    setuptype = 'EP'
     keep = .14
     Create.run(setuptype,keep,False)
     
