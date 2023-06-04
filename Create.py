@@ -53,6 +53,7 @@ class Create:
 
     def reshape_x(x: np.array) -> np.array:
         num_feats = x.shape[1]//FEAT_LENGTH
+        print(f"Num feats: {num_feats}")
         x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
         for n in range(0, num_feats):
             x_reshaped[:, :, n] = x[:, n*FEAT_LENGTH:(n+1)*FEAT_LENGTH]
@@ -125,8 +126,9 @@ class Create:
 
         dfs = data.pool(Create.nn_multi,arglist)
         nn_values = pd.concat(dfs)
+        print(nn_values)
         nn_values = nn_values.values
-
+        print(nn_values)
         np.random.shuffle(nn_values)
         if TRAIN_SPLIT == 1:
             split_idx = -1
@@ -134,8 +136,10 @@ class Create:
             split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
             np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
             np.save('y_test', nn_values[split_idx:, -1])
-    
-
+        print('X Train')
+        print(Create.reshape_x(nn_values[0:split_idx, :-1]))
+        print("Y Train")
+        print(nn_values[0:split_idx:, -1])
         np.save('x_train', Create.reshape_x(nn_values[0:split_idx, :-1]))
         np.save('y_train', nn_values[0:split_idx:, -1])
 
@@ -172,7 +176,7 @@ class Create:
             sample_size = 40
         else:
             sample_size = 10
-        sample_size = 50
+        sample_size = 50 # HARD CODE IS HERE ---------------------------------------------------------------------------------------
         df2 = df[index-sample_size:index]
 
         o = df.iat[index,0]
@@ -187,13 +191,16 @@ class Create:
         df = df2
         df = Create.get_lagged_returns(df, sample_size)
   
-        df = Create.get_classification(df,1)
-
+        df = Create.get_classification(df,0)
+        print(f'DF of {ticker}')
         df = (
         df
         .dropna()
         .reset_index(drop = True)
         )
+        print(df)
+        print(df[[col for col in df.columns if 'feat_' in col] + ['classification']]
+            .values[:, :-1])
         x = Create.reshape_x(
             df[[col for col in df.columns if 'feat_' in col] + ['classification']]
             .values[:, :-1]

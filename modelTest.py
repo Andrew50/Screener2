@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 class modelTest:
     def runRandomTicker(setuptype,thresh):
-        print('test')
+        print('Initialized')
         model = load_model('C:/Screener/setups/models/model_' + setuptype)
         setupList = pd.read_feather(r"C:/Screener/setups/database/" + setuptype + ".feather")
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
@@ -30,11 +30,11 @@ class modelTest:
                 if god[0][1] > thresh:
                     val = 1
                 sys.stdout = sys.__stdout__
-      
+                
                 
             
                 if val == 1:
-                    print(god[0][1])
+                    print(f"{god}")
                     df1 = data.get(ticker)
 
 
@@ -65,7 +65,7 @@ class modelTest:
                             new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
                             print(new.tail()) 
                    
-            except:
+            except TimeoutError:
                 print('Error')
 
 
@@ -169,10 +169,10 @@ class modelTest:
 
 if __name__ == "__main__":
     setuptype = 'EP'
-    prcnt_setup = .2
+    prcnt_setup = .4
     thresh = .7
-    modelTest.combine()
-    create.run(setuptype,prcnt_setup,True)
+    #modelTest.combine()
+    #create.run(setuptype,prcnt_setup,True)
 
 
     modelTest.runRandomTicker(setuptype,thresh)
