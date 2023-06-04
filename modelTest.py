@@ -26,60 +26,50 @@ class modelTest:
         setuptype = bar[0]
         thresh = bar[1]
         model = load_model('C:/Screener/setups/models/model_' + setuptype)
-        setupList = pd.read_feather(r"C:/Screener/setups/database/" + setuptype + ".feather")
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:
                 ticker = tickers[random.randint(0,len(tickers)-1)]
 
                 tickerdf = data.get(ticker)
-                date_list = tickerdf.index.to_list()
-                date = date_list[random.randint(0,len(date_list) - 1)]
-                df = create.test_data(ticker, date, setuptype)
+                if(len(tickerdf) > 300):
+                    date_list = tickerdf.index.to_list()
+                    date = date_list[random.randint(0,len(date_list) - 1)]
+                    df = create.test_data(ticker, date, setuptype)
              
-                sys.stdout = open(os.devnull, 'w')
-                god = model.predict(df)
+                    sys.stdout = open(os.devnull, 'w')
+                    god = model.predict(df)
 
-                val = 0
-                if god[0][1] > thresh:
-                    val = 1
-                sys.stdout = sys.__stdout__
+                    val = 0
+                    if god[0][1] > thresh:
+                        val = 1
+                    sys.stdout = sys.__stdout__
                 
                 
                
-                if val == 1:
-                    print(f"{god}")
-                    df1 = data.get(ticker)
+                    if val == 1:
+                        print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+                        df1 = data.get(ticker)
 
 
-                    ind= data.findex(df1,date)
+                        ind= data.findex(df1,date)
 
-                    df1 = df1[ind-50:ind + 1]
+                        df1 = df1[ind-50:ind + 1]
                    
-                    mc = mpf.make_marketcolors(up='g',down='r')
-                    s  = mpf.make_mpf_style(marketcolors=mc)
+                        mc = mpf.make_marketcolors(up='g',down='r')
+                        s  = mpf.make_mpf_style(marketcolors=mc)
             
-                    mpf.plot(df1, type='candle', volume=True  , 
+                        mpf.plot(df1, type='candle', volume=True  , 
  
-                    style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
-                    tight_layout = True
-                #   vlines=dict(vlines=datelist, 
-                    #colors = colorlist, alpha = .2,linewidths=1),
-                        )      
-                    plt.show()
-                    if False:
-                        print("Was it a setup?")
-                        input1 = str(input())
-                        if(input1 == 'yes'):
-                            add = pd.DataFrame()
-                            add['ticker'] = [ticker]
-                            add['date'] = [date]
-                            add['setup'] = [1]
-                            new = pd.concat([setupList, add]).reset_index(drop = True)
-                            new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
-                            print(new.tail()) 
+                        style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
+                        tight_layout = True
+                    #   vlines=dict(vlines=datelist, 
+                        #colors = colorlist, alpha = .2,linewidths=1),
+                            )      
+                        plt.show()
+
                    
-            except TimeoutError:
+            except (ValueError, FileNotFoundError, TimeoutError):
                 print('Error')
 
 
@@ -87,8 +77,7 @@ class modelTest:
 
     def runTestData(setuptype):
 
-        model = load_model('model_' + setuptype)
-        setupsList = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather')
+        model = load_model('C:/Screener/setups/models/model_'+ setuptype)
         setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
         print(setups)
         #print(setups[setups['setup'] == 1])
@@ -106,7 +95,7 @@ class modelTest:
                 date =  setup['date']
                 typee = setup["setup"]
     
-                df = create.test_data(ticker,date)
+                df = create.test_data(ticker,date, setuptype)
 
 
                 sys.stdout = open(os.devnull, 'w')
@@ -150,28 +139,17 @@ class modelTest:
  
                     style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
                     tight_layout = True
-                #   vlines=dict(vlines=datelist, 
+                    #   vlines=dict(vlines=datelist, 
                     #colors = colorlist, alpha = .2,linewidths=1),
-                )
+                    )
                 
         
                     plt.show()
-                    print("Was it a setup?")
-                    input1 = str(input())
-                    if(input1 == "yes"):
-                        add = pd.DataFrame()
-                        add['ticker'] = [ticker]
-                        add['date'] = [date]
-                        add['setup'] = [1]
-                        new = pd.concat([setupsList, add]).reset_index(drop = True)
-                        new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
-                        print(new.tail())
 
 
 
-            except TimeoutError:
-                pass
-                #print('ERROR')
+            except (TypeError, ValueError):
+                print('Error')
     def combine(new,setuptype): 
         if new:
             setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
