@@ -110,7 +110,7 @@ class PNL():
             toprow = [' Trait ', 'Value ', 'Residual ']
             c3 = [[sg.Table([],headings=toprow,key = '-table_traits-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=True,selected_row_colors='red on yellow')]]
             toprow = ['Month    ', 'Avg Gain    ', 'Avg Loss    ', 'Win %    ', 'Trades     ', 'PNL     ']
-            c4 = [[sg.Table([],headings=toprow,key = '-table_monthly-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=False,selected_row_colors='red on yellow')]]
+            c4 = [[sg.Table([],headings=toprow,key = '-table_monthly-',auto_size_columns=True,num_rows = 10,justification='left',enable_events=True,enable_click_events=True)]]
 
 
             c5 = [[sg.Button('Recalc')],
