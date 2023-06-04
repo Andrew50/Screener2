@@ -42,7 +42,8 @@ class Create:
 
         #close = df.iat[-2,3]
         for col in FEAT_COLS:
-            return_col = df[col]/df[col].shift(1)-1
+            #return_col = df[col]/df[col].shift(1)-1
+            return_col = df[col]/df['close'].shift(1)-1
             #return_col = df[col].div(close) - 1
             df = Create.time_series(df, return_col, f'feat_{col}_ret', sample_size)
         return df
@@ -80,6 +81,7 @@ class Create:
                 'close':[o],
                 'volume':[0]}).set_index('datetime')
             df2 = pd.concat([df2,add])
+         
             df = df2
 
             df = Create.get_lagged_returns(df, sample_size)
@@ -184,6 +186,7 @@ class Create:
             'close':[o],
             'volume':[0]}).set_index('datetime')
         df2 = pd.concat([df2,add])
+      
         df = df2
         df = Create.get_lagged_returns(df, sample_size)
   
