@@ -188,8 +188,20 @@ class Create:
         df = Create.get_lagged_returns(df, sample_size)
   
         df = Create.get_classification(df,1)
-        df = (df.dropna().reset_index(drop = True))
-        x = Create.reshape_x(df[[col for col in df.columns if 'feat_' in col] + ['classification']].values[:, :-1])
+
+        df = (
+        df
+        .dropna()
+        .reset_index(drop = True)
+        )
+        x = Create.reshape_x(
+            df.values[:, :-1]
+        )
+        return x 
+        x = Create.reshape_x(
+            df[[col for col in df.columns if 'feat_' in col] + ['classification']]
+            .values[:, :-1]
+        )
         return x
 
     def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
