@@ -11,7 +11,20 @@ from matplotlib import pyplot as plt
 
 class modelTest:
     def runRandomTicker(setuptype,thresh):
-        print('Initialized')
+        print('testing with random')
+
+
+        
+        while True:
+            arglist = []
+            for _ in range(100):
+                arglist.append([setuptype,thresh])
+
+            data.pool(modelTest.testRandom,arglist)
+
+    def testRandom(bar):
+        setuptype = bar[0]
+        thresh = bar[1]
         model = load_model('C:/Screener/setups/models/model_' + setuptype)
         setupList = pd.read_feather(r"C:/Screener/setups/database/" + setuptype + ".feather")
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
@@ -23,6 +36,7 @@ class modelTest:
                 date_list = tickerdf.index.to_list()
                 date = date_list[random.randint(0,len(date_list) - 1)]
                 df = create.test_data(ticker, date, setuptype)
+             
                 sys.stdout = open(os.devnull, 'w')
                 god = model.predict(df)
 
@@ -32,7 +46,7 @@ class modelTest:
                 sys.stdout = sys.__stdout__
                 
                 
-            
+               
                 if val == 1:
                     print(f"{god}")
                     df1 = data.get(ticker)
@@ -40,7 +54,7 @@ class modelTest:
 
                     ind= data.findex(df1,date)
 
-                    df1 = df1[ind-100:ind + 1]
+                    df1 = df1[ind-50:ind + 1]
                    
                     mc = mpf.make_marketcolors(up='g',down='r')
                     s  = mpf.make_mpf_style(marketcolors=mc)
@@ -51,7 +65,7 @@ class modelTest:
                     tight_layout = True
                 #   vlines=dict(vlines=datelist, 
                     #colors = colorlist, alpha = .2,linewidths=1),
-                )   
+                        )      
                     plt.show()
                     if False:
                         print("Was it a setup?")
@@ -158,23 +172,44 @@ class modelTest:
             except TimeoutError:
                 pass
                 #print('ERROR')
-    def combine(): 
-        setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
-        for setup in setups:
-            df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
-            df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
-            df3 = pd.concat([df1, df2]).reset_index(drop = True)
+    def combine(new,setuptype): 
+        if new:
+            setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
+            for setup in setups:
+                df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
+                df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
+                df3 = pd.concat([df1, df2]).reset_index(drop = True)
     
-            df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
+                df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
+        else:
+            df = pd.read_feather(r"C:/Screener/sync/allsetups.feather").sample(frac = .2)
+
+            new_df = df.drop(axis=1, labels=["Z", "timeframe", "annotation"])
+            for i in range(len(df)):
+                new_df.at[i, 'ticker'] = df.iloc[i]['Ticker']
+                new_df.at[i, 'date'] = df.iloc[i]['Date']
+                if(df.iloc[i]['Setup'] == setuptype):
+                    new_df.at[i, 'setup'] = 1
+                else:
+                    new_df.at[i, 'setup'] = 0
+            new_df = new_df.drop(axis=1, labels=['Ticker', 'Date', 'Setup']).reset_index(drop = True)
+            
+        
+
+            new_df.to_feather('C:/Screener/setups/database/' + setuptype + '.feather')
+
+        
+
+
+
 
 if __name__ == "__main__":
     setuptype = 'EP'
-    prcnt_setup = .4
-    thresh = .7
-    #modelTest.combine()
+    prcnt_setup = .35
+    thresh = .85
+    new = False
+   # modelTest.combine(new,setuptype)
     #create.run(setuptype,prcnt_setup,True)
-
-
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 
