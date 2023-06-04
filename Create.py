@@ -28,6 +28,21 @@ FEAT_COLS = ['open', 'low', 'high', 'close']
 TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
 
 class Create:
+    def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
+        score = model.evaluate(x_test,y_test,verbose = 0,)
+        print("Test loss:", score[0])
+        print("Test accuracy:", score[1])
+        pred = np.argmax(model.predict(x_test), axis = 1,)
+        cm = confusion_matrix(y_true = y_test,y_pred = pred,)
+        cm_scaled = cm/cm.astype(np.float).sum(axis = 0)
+        unscaled = ConfusionMatrixDisplay(confusion_matrix = cm)
+        unscaled.plot()
+        unscaled.ax_.set_title('Unscaled confusion matrix')
+        scaled = ConfusionMatrixDisplay(confusion_matrix = cm_scaled)
+        scaled.plot()
+        scaled.ax_.set_title('Scaled confusion matrix')
+        plt.show()
+        return
 
     def time_series(df: pd.DataFrame,
                     col: str,
@@ -195,36 +210,18 @@ class Create:
         df = Create.get_lagged_returns(df, sample_size)
   
         df = Create.get_classification(df,0)
-        print(f'DF of {ticker}')
         df = (
         df
         .dropna()
         .reset_index(drop = True)
         )
-        print(df)
-        print(df[[col for col in df.columns if 'feat_' in col] + ['classification']]
-            .values[:, :-1])
         x = Create.reshape_x(
             df[[col for col in df.columns if 'feat_' in col] + ['classification']]
             .values[:, :-1]
         )
         return x
 
-    def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
-        score = model.evaluate(x_test,y_test,verbose = 0,)
-        print("Test loss:", score[0])
-        print("Test accuracy:", score[1])
-        pred = np.argmax(model.predict(x_test), axis = 1,)
-        cm = confusion_matrix(y_true = y_test,y_pred = pred,)
-        cm_scaled = cm/cm.astype(np.float).sum(axis = 0)
-        unscaled = ConfusionMatrixDisplay(confusion_matrix = cm)
-        unscaled.plot()
-        unscaled.ax_.set_title('Unscaled confusion matrix')
-        scaled = ConfusionMatrixDisplay(confusion_matrix = cm_scaled)
-        scaled.plot()
-        scaled.ax_.set_title('Scaled confusion matrix')
-        plt.show()
-        return
+  
     
     def run(setuptype,keep,split):
         Create.get_nn_data(setuptype,keep,split)
@@ -234,6 +231,8 @@ class Create:
         model.fit(x_train,y_train,epochs = EPOCHS,batch_size = BATCH_SIZE,validation_split = VALIDATION,)
 
         if split:
+
+            pass
             Create.evaluate_training(model, x_test, y_test)
         model.save('C:/Screener/setups/models/model_' + setuptype)
         print('done with model')
@@ -241,7 +240,7 @@ class Create:
 if __name__ == '__main__':
     setuptype = 'EP'
     keep = .40
-    Create.run(setuptype,keep,False)
+    Create.run(setuptype,keep,True)
     
 
 

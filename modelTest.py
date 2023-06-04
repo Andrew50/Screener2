@@ -87,8 +87,7 @@ class modelTest:
 
     def runTestData(setuptype):
 
-        model = load_model('model_' + setuptype)
-        setupsList = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather')
+        model = load_model('C:/Screener/setups/models/model_'+ setuptype)
         setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
         print(setups)
         #print(setups[setups['setup'] == 1])
@@ -106,7 +105,7 @@ class modelTest:
                 date =  setup['date']
                 typee = setup["setup"]
     
-                df = create.test_data(ticker,date)
+                df = create.test_data(ticker,date, setuptype)
 
 
                 sys.stdout = open(os.devnull, 'w')
@@ -150,28 +149,17 @@ class modelTest:
  
                     style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
                     tight_layout = True
-                #   vlines=dict(vlines=datelist, 
+                    #   vlines=dict(vlines=datelist, 
                     #colors = colorlist, alpha = .2,linewidths=1),
-                )
+                    )
                 
         
                     plt.show()
-                    print("Was it a setup?")
-                    input1 = str(input())
-                    if(input1 == "yes"):
-                        add = pd.DataFrame()
-                        add['ticker'] = [ticker]
-                        add['date'] = [date]
-                        add['setup'] = [1]
-                        new = pd.concat([setupsList, add]).reset_index(drop = True)
-                        new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
-                        print(new.tail())
 
 
 
-            except TimeoutError:
-                pass
-                #print('ERROR')
+            except TypeError:
+                print('Type Error')
     def combine(new,setuptype): 
         if new:
             setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
@@ -210,8 +198,8 @@ if __name__ == "__main__":
     new = False
    # modelTest.combine(new,setuptype)
     #create.run(setuptype,prcnt_setup,True)
-    modelTest.runRandomTicker(setuptype,thresh)
-    #modelTest.runTestData(setuptype)
+    #modelTest.runRandomTicker(setuptype,thresh)
+    modelTest.runTestData(setuptype)
 
 
 
