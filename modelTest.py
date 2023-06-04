@@ -161,8 +161,8 @@ class modelTest:
     def combine(): 
         setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
         for setup in setups:
-            df1 = pd.read_feather(f"C:/Screener/setups/database/ben_{setup}.feather")
-            df2 = pd.read_feather(f"C:/Screener/setups/database/aj_{setup}.feather")
+            df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
+            df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
             df3 = pd.concat([df1, df2]).reset_index(drop = True)
     
             df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
