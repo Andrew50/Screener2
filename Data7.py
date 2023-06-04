@@ -113,11 +113,12 @@ class Data:
                     break
             return i
         except IndexError:
+        #except TimeoutError:
             if i >= len(df):
             #if i == len(df):
                 #return i
                 return len(df) - 1
-            
+           
             return None
 
 
@@ -236,7 +237,7 @@ class Data:
                     pass
             df.dropna(inplace = True)
             return (df)
-        except:
+        except TimeoutError:
             pass
     def update(bar):
         path = Data.path

@@ -96,7 +96,8 @@ class Plot:
             arglist.append([index,self.df_traits])
       
         pool = self.pool
-        pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+       # pool.map_async(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        pool.map(Plot.create,arglist) #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         image1 = None
         image2 = None
@@ -403,8 +404,8 @@ class Plot:
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
                     plt.savefig(p1, bbox_inches='tight')
-                except:# E as e:
-                
+                except TimeoutError as e:
+                    print(e)
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     
