@@ -31,9 +31,8 @@ __pycache__/
 /daily_data
 /intraday_data
 /minute_data
-setups/models
-setups/charts
-setups/backup
+/setups
+
 model/
 model_old/
 /data
