@@ -69,7 +69,6 @@ class Create:
 
     def reshape_x(x: np.array) -> np.array:
         num_feats = x.shape[1]//FEAT_LENGTH
-        print(f"Num feats: {num_feats}")
         x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
         for n in range(0, num_feats):
             x_reshaped[:, :, n] = x[:, n*FEAT_LENGTH:(n+1)*FEAT_LENGTH]
