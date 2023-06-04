@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 
 class modelTest:
     def runRandomTicker(setuptype,thresh):
+        print('test')
         model = load_model('C:/Screener/setups/models/model_' + setuptype)
         setupList = pd.read_feather(r"C:/Screener/setups/database/" + setuptype + ".feather")
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
@@ -23,6 +24,7 @@ class modelTest:
                 date = date_list[random.randint(0,len(date_list) - 1)]
                 df = create.test_data(ticker, date, setuptype)
                 sys.stdout = open(os.devnull, 'w')
+                print(df)
                 god = model.predict(df)
 
                 val = 0
@@ -62,7 +64,7 @@ class modelTest:
                             add['setup'] = [1]
                             new = pd.concat([setupList, add]).reset_index(drop = True)
                             new.to_feather("C:/Screener/setups/database/" + setuptype + ".feather")
-                            print(new.tail())
+                            print(new.tail()) 
                    
             except:
                 print('Error')
@@ -167,11 +169,11 @@ class modelTest:
             df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
 
 if __name__ == "__main__":
-    setuptype = 'EP'
+    setuptype = 'P'
     prcnt_setup = .2
-    thresh = .2
+    thresh = .5
     #modelTest.combine()
-    create.run(setuptype,prcnt_setup,True)
+    #create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 

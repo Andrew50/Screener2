@@ -12,13 +12,13 @@ class Test4:
         for i in range(len(df)):
             new_df.at[i, 'ticker'] = df.iloc[i]['Ticker']
             new_df.at[i, 'date'] = df.iloc[i]['Date']
-            if(df.iloc[i]['Setup'] == 'P'):
+            if(df.iloc[i]['Setup'] == 'EP'):
                 new_df.at[i, 'setup'] = 1
             else:
                 new_df.at[i, 'setup'] = 0
         new_df = new_df.drop(axis=1, labels=['Ticker', 'Date', 'Setup'])
 
-        new_df.to_feather('C:/Screener/setups/database/P.feather')
+        new_df.to_feather('C:/Screener/setups/database/EP.feather')
 
         print(new_df)
     '''
