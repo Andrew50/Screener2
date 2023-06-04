@@ -39,15 +39,15 @@ class Create:
 
     def time_series(df: pd.DataFrame,
                     col: str,
-                    name: str) -> pd.DataFrame:
+                    name: str, sample_size) -> pd.DataFrame:
 
         return df.assign(**{
             f'{name}_t-{lag}': col.shift(lag)
-            for lag in range(0, FEAT_LENGTH)
+            for lag in range(0, sample_size)
         })
 
 
-    def get_lagged_returns(df: pd.DataFrame) -> pd.DataFrame:
+    def get_lagged_returns(df: pd.DataFrame, sample_size) -> pd.DataFrame:
 
         close = df.iat[-2,3]
         for col in FEAT_COLS:
@@ -60,7 +60,7 @@ class Create:
 
             #return_col = df[col].div(close) - 1
 
-            df = Create.time_series(df, return_col, f'feat_{col}_ret')
+            df = Create.time_series(df, return_col, f'feat_{col}_ret', sample_size)
             
         return df
 
@@ -109,7 +109,7 @@ class Create:
                 sample_size = 10
                 
 
-       
+            sample_size = 13
             index = data.findex(df,date)
             df2 = df[index-sample_size:index]
 
@@ -125,7 +125,7 @@ class Create:
             df = df2
 
             #df = pd.read_csv(f'data/{ticker}.csv')
-            df = Create.get_lagged_returns(df)
+            df = Create.get_lagged_returns(df, sample_size)
             df = Create.get_classification(df,value)
           
         
