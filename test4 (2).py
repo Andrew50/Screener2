@@ -5,20 +5,20 @@ import pandas as pd
 
 class Test4:
 
-    def run():
+    def run(setuptype):
         df = pd.read_feather(r"C:/Screener/sync/allsetups.feather")
 
         new_df = df.drop(axis=1, labels=["Z", "timeframe", "annotation"])
         for i in range(len(df)):
             new_df.at[i, 'ticker'] = df.iloc[i]['Ticker']
             new_df.at[i, 'date'] = df.iloc[i]['Date']
-            if(df.iloc[i]['Setup'] == 'EP'):
+            if(df.iloc[i]['Setup'] == setuptype):
                 new_df.at[i, 'setup'] = 1
             else:
                 new_df.at[i, 'setup'] = 0
         new_df = new_df.drop(axis=1, labels=['Ticker', 'Date', 'Setup'])
 
-        new_df.to_feather('C:/Screener/setups/database/EP.feather')
+        new_df.to_feather(f'C:/Screener/setups/database/{setuptype}.feather')
 
         print(new_df)
     '''
@@ -46,4 +46,4 @@ df3.to_feather('C:/Screener/setups/' + setup + '.feather')
 
 
 if __name__ == '__main__':
-    Test4.run()
+    Test4.run('MR')
