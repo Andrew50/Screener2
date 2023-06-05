@@ -32,44 +32,45 @@ class modelTest:
                 ticker = tickers[random.randint(0,len(tickers)-1)]
 
                 tickerdf = data.get(ticker)
-                if(len(tickerdf) > 300):
+                if(len(tickerdf) > 200):
                     date_list = tickerdf.index.to_list()
                     date = date_list[random.randint(0,len(date_list) - 1)]
-                    df = create.test_data(ticker, date, setuptype)
-             
-                    sys.stdout = open(os.devnull, 'w')
-                    god = model.predict(df)
+                    if(tickerdf.iloc[data.findex(tickerdf, date)]['volume'] > 250000):
+                        df = create.test_data(ticker, date, setuptype)
+                    
+                        sys.stdout = open(os.devnull, 'w')
+                        god = model.predict(df)
 
-                    val = 0
-                    if god[0][1] > thresh:
-                        val = 1
-                    sys.stdout = sys.__stdout__
+                        val = 0
+                        if god[0][1] > thresh:
+                            val = 1
+                        sys.stdout = sys.__stdout__
                 
                 
                
-                    if val == 1:
-                        print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
-                        df1 = data.get(ticker)
+                        if val == 1:
+                            print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+                            df1 = data.get(ticker)
 
 
-                        ind= data.findex(df1,date)
+                            ind= data.findex(df1,date)
 
-                        df1 = df1[ind-50:ind + 1]
+                            df1 = df1[ind-50:ind + 1]
                    
-                        mc = mpf.make_marketcolors(up='g',down='r')
-                        s  = mpf.make_mpf_style(marketcolors=mc)
+                            mc = mpf.make_marketcolors(up='g',down='r')
+                            s  = mpf.make_mpf_style(marketcolors=mc)
             
-                        mpf.plot(df1, type='candle', volume=True  , 
+                            mpf.plot(df1, type='candle', volume=True  , 
  
-                        style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
-                        tight_layout = True
-                    #   vlines=dict(vlines=datelist, 
-                        #colors = colorlist, alpha = .2,linewidths=1),
-                            )      
-                        plt.show()
+                            style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
+                            tight_layout = True
+                        #   vlines=dict(vlines=datelist, 
+                            #colors = colorlist, alpha = .2,linewidths=1),
+                                )      
+                            plt.show()
 
                    
-            except (ValueError, FileNotFoundError, TimeoutError):
+            except (ValueError, FileNotFoundError, TimeoutError, TypeError)
                 print('Error')
 
 
@@ -125,7 +126,8 @@ class modelTest:
                 total += 1
                 print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
                 print(f"{val} Actual: {typee}")
-                if val == 1 or typee == 1:
+                #if val == 1 or typee == 1:
+                if True:
                     df1 = data.get(ticker)
 
 
@@ -148,7 +150,7 @@ class modelTest:
 
 
 
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, IndexError):
                 print('Error')
     def combine(new,setuptype): 
         if new:
