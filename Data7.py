@@ -377,6 +377,12 @@ class Data:
             return True
         return False
 
+
+    def isLaptop():
+        if(os.path.exists("C:/Screener/laptop.txt")):
+            return True
+        return False
+
 if __name__ == '__main__':
     #Data.backup()
   

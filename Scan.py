@@ -83,25 +83,27 @@ class Scan:
 
     
     def runDailyScan(brows):
-       # try:
-        browser = brows
-        if(browser == None):
-            browser = Scan.startFirefoxSession()
+        try:
+            browser = brows
+            if(browser == None):
+                browser = Scan.startFirefoxSession()
         
-        time.sleep(0.5) 
-        browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
-        time.sleep(0.25)
-        browser.find_element(By.XPATH, '//span[@class="js-filter-set-name"]').click()
-        time.sleep(0.25)
-        sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
-        sortRVol.click()
+            time.sleep(0.5) 
+            browser.find_element(By.XPATH, '//div[@data-name="screener-filter-sets"]').click()
+            time.sleep(0.25)
+            browser.find_element(By.XPATH, '//span[@class="js-filter-set-name"]').click()
+            time.sleep(0.25)
+            sortRVol = browser.find_element(By.XPATH, '//div[@data-field="relative_volume_intraday.5"]')
+            sortRVol.click()
 
-        #creating the csv file
-        download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
-        download_screener_data.click()
-        time.sleep(1.5)
-        #except TimeoutError:
-            #print('screener fucked MANAUL SCREENER CSV REQUIRED')
+            #creating the csv file
+            download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
+            download_screener_data.click()
+            time.sleep(1.5)
+        except:
+            print('manual csv fetch required')
+            print('enter when done')
+            input()
         today = str(datetime.date.today())
         downloaded_file = r"C:\Downloads\america_" + today + ".csv"
         
