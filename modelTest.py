@@ -153,11 +153,12 @@ class modelTest:
                 print('Error')
     def combine(new,setuptype): 
         if new:
-            setups = ["EP", "F", "FB", "MR", "NEP", "NF", "NFB", "NP", "P"]
+            setups = ['EP', 'NEP' , 'RP' , 'PP','NP' , 'MR' , 'F' , 'NF']
             for setup in setups:
                 df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
                 df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
-                df3 = pd.concat([df1, df2]).reset_index(drop = True)
+                df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
+                df3 = pd.concat([df1, df2, df4]).reset_index(drop = True)
     
                 df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
         else:
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     setuptype = 'MR'
     prcnt_setup = .35
     thresh = .85
->>>>>>> 285c01603f2f28ffae8eb3c777e6b95077e538f6
+
     new = False
     #modelTest.combine(new,setuptype)
     #create.run(setuptype,prcnt_setup,True)
