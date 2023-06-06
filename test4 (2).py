@@ -46,4 +46,4 @@ df3.to_feather('C:/Screener/setups/' + setup + '.feather')
 
 
 if __name__ == '__main__':
-    Test4.run('MR')
+    Test4.run('P')

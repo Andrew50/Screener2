@@ -237,7 +237,7 @@ class Create:
         print('done with model')
 
 if __name__ == '__main__':
-    setuptype = 'MR'
+    setuptype = 'P'
     keep = .40
     Create.run(setuptype,keep,True)
     
