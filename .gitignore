@@ -31,8 +31,11 @@ __pycache__/
 /daily_data
 /intraday_data
 /minute_data
-/setups
-
+setups
+x_test.npy
+x_train.npy
+y_test.npy
+y_train.npy
 model/
 model_old/
 /data

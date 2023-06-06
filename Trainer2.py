@@ -92,6 +92,8 @@ class Trainer:
             try:
                 if(data.isBen()):
                     df = pd.read_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+                elif data.isLaptop():
+                    df = pd.read_feather('C:/Screener/setups/database/laptop_' + s + '.feather')
                 else:
                     df = pd.read_feather('C:/Screener/setups/database/aj_' + s + '.feather')
             except:
@@ -100,6 +102,8 @@ class Trainer:
             df = pd.concat([df,add]).reset_index(drop = True)
             if(data.isBen()):
                 df.to_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+            elif data.isLaptop():
+                df.to_feather('C:/Screener/setups/database/laptop_' + s + '.feather')
             else:
                 df.to_feather('C:/Screener/setups/database/aj_' + s + '.feather')
 
@@ -244,6 +248,9 @@ class Trainer:
         if os.path.exists("C:/Screener/ben.txt"):
             self.height = 850
             self.width = 2000
+        elif os.path.exists("C:/Screener/laptop.txt"):
+            self.height = 2050
+            self.width = 3900
           
         else:
             self.height = 1150
@@ -259,7 +266,7 @@ class Trainer:
                 shutil.rmtree("C:/Screener/setups/charts")
             os.mkdir("C:/Screener/setups/charts")
             sg.theme('DarkGrey')
-            self.setup_list = ['EP', 'NEP' , 'P' , 'NP' , 'MR' , 'F' , 'NF' , 'FB' , 'NFB']
+            self.setup_list = ['EP', 'NEP' , 'RP' , 'PP','NP' , 'MR' , 'F' , 'NF']
             self.scale = 4
             self.setup = []
             self.i = 0
@@ -413,7 +420,7 @@ class Trainer:
             if os.path.exists("C:/Screener/laptop.txt"): #if laptop
                 fw = 22
                 fh = 12
-                fs = 3
+                fs = 4.1
             elif os.path.exists("C:/Screener/ben.txt"):
                 fw = 27
                 fh = 12
