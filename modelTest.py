@@ -184,12 +184,12 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'MR'
+    setuptype = 'P'
     prcnt_setup = .35
     thresh = .85
     new = False
-    modelTest.combine(new,setuptype)
-    create.run(setuptype,prcnt_setup,True)
+    #modelTest.combine(new,setuptype)
+    #create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 
