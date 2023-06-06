@@ -49,7 +49,7 @@ class modelTest:
                 
                
                         if val == 1:
-                            print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+                           
                             df1 = data.get(ticker)
 
 
@@ -63,14 +63,14 @@ class modelTest:
                             mpf.plot(df1, type='candle', volume=True  , 
  
                             style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
-                            tight_layout = True
-                        #   vlines=dict(vlines=datelist, 
+                            tight_layout = True,
+                            vlines=dict(vlines = [date])
                             #colors = colorlist, alpha = .2,linewidths=1),
                                 )      
                             plt.show()
 
                    
-            except (ValueError, FileNotFoundError, TimeoutError, TypeError)
+            except (ValueError, FileNotFoundError, TimeoutError, TypeError):
                 print('Error')
 
 
@@ -80,8 +80,7 @@ class modelTest:
 
         model = load_model('C:/Screener/setups/models/model_'+ setuptype)
         setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
-        print(setups)
-        #print(setups[setups['setup'] == 1])
+       
         right = 0
         total = 0
 
@@ -108,7 +107,7 @@ class modelTest:
                     val = 1
 
                 sys.stdout = sys.__stdout__
-                #print(f'{val} , {type}')
+            
 
                 if typee == setuptype:
                     actual = 1
@@ -141,7 +140,7 @@ class modelTest:
  
                     style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
                     tight_layout = True
-                    #   vlines=dict(vlines=datelist, 
+                     #  vlines=dict(vlines=[date])
                     #colors = colorlist, alpha = .2,linewidths=1),
                     )
                 
@@ -184,12 +183,12 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'EP'
-    prcnt_setup = .35
-    thresh = .85
+    setuptype = 'P'
+    prcnt_setup = .3
+    thresh = .8
     new = False
-    modelTest.combine(new,setuptype)
-    create.run(setuptype,prcnt_setup,True)
+    #modelTest.combine(new,setuptype)
+    #create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 
