@@ -183,11 +183,6 @@ class modelTest:
 
 
 if __name__ == "__main__":
-
-    setuptype = 'P'
-    prcnt_setup = .3
-    thresh = .8
-
     setuptype = 'MR'
     prcnt_setup = .35
     thresh = .85
