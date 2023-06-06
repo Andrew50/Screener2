@@ -32,7 +32,10 @@ __pycache__/
 /intraday_data
 /minute_data
 setups/
-
+x_test.npy
+x_train.npy
+y_test.npy
+y_train.npy
 model/
 model_old/
 /data
