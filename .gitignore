@@ -40,7 +40,4 @@ model/
 model_old/
 /data
 /tvDatafeed
-#sync/pnl.feather
-#sync/traits.feather
-#sync/log.feather
 /ben.txt
