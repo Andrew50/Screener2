@@ -153,7 +153,7 @@ class modelTest:
                 print('Error')
     def combine(new,setuptype): 
         if new:
-            setups = ['EP', 'NEP' , 'RP' , 'PP','NP' , 'MR' , 'F' , 'NF']
+            setups = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
             for setup in setups:
                 df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
                 df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
@@ -184,7 +184,7 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'MR'
+    setuptype = 'P'
     prcnt_setup = .35
     thresh = .85
 
