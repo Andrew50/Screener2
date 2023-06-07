@@ -155,11 +155,21 @@ class modelTest:
         if new:
             setups = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
             for setup in setups:
-                df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
-                df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
-                df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
+                try:
+                    df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
+                except:
+                    df1 = pd.DataFrame()
+                try:
+                    df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
+                except:
+                    df2 = pd.DataFrame()
+                try:
+
+                    df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
+                except:
+                    df4 = pd.DataFrame()
                 df3 = pd.concat([df1, df2, df4]).reset_index(drop = True)
-    
+                
                 df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
         else:
             df = pd.read_feather(r"C:/Screener/sync/allsetups.feather").sample(frac = .2)
@@ -184,13 +194,13 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'P'
-    prcnt_setup = .35
-    thresh = .85
+    setuptype = 'MR'
+    prcnt_setup = .1
+    thresh = .4
 
-    new = False
-    #modelTest.combine(new,setuptype)
-    #create.run(setuptype,prcnt_setup,True)
+    new = True
+    modelTest.combine(new,setuptype)
+    create.run(setuptype,prcnt_setup,True)
     modelTest.runRandomTicker(setuptype,thresh)
     #modelTest.runTestData(setuptype)
 
