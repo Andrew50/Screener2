@@ -91,21 +91,21 @@ class Trainer:
 
             try:
                 if(data.isBen()):
-                    df = pd.read_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+                    df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
                 elif data.isLaptop():
-                    df = pd.read_feather('C:/Screener/setups/database/laptop_' + s + '.feather')
+                    df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
                 else:
-                    df = pd.read_feather('C:/Screener/setups/database/aj_' + s + '.feather')
+                    df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
             except:
                 df = pd.DataFrame()
 
             df = pd.concat([df,add]).reset_index(drop = True)
             if(data.isBen()):
-                df.to_feather('C:/Screener/setups/database/ben_' + s + '.feather')
+                df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
             elif data.isLaptop():
-                df.to_feather('C:/Screener/setups/database/laptop_' + s + '.feather')
+                df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
             else:
-                df.to_feather('C:/Screener/setups/database/aj_' + s + '.feather')
+                df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
 
           
     
