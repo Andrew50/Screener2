@@ -72,10 +72,10 @@ class Simulate:
             if((i != len(ticks)-1) and (df2.iloc[i]['time'] == df2.iloc[i+1]['time'])):
                 pass
             elif (i != len(ticks)-1): 
-                pass
+                delay = p
 
 
-            sleep(0.1)
+            sleep(delay/speed)
 
 
 if __name__ == '__main__':
