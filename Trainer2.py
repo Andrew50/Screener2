@@ -113,8 +113,8 @@ class Trainer:
             if(data.isBen()):
                 df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
             elif data.isLaptop():
-                #df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
-                pass
+                df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                
             else:
                 df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
 
