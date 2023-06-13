@@ -17,12 +17,12 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 20
+EPOCHS = 50
 BATCH_SIZE = 64
 VALIDATION = 0.1
 LEARN_RATE = 1e-3
 MODEL_SAVE_NAME = 'model'
-TRAIN_SPLIT = 0.8
+TRAIN_SPLIT = 1
 FEAT_LENGTH = 50
 FEAT_COLS = ['open', 'low', 'high', 'close']
 TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
@@ -30,8 +30,7 @@ TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
 class Create:
     def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
         score = model.evaluate(x_test,y_test,verbose = 0,)
-        print("Test loss:", score[0])
-        print("Test accuracy:", score[1])
+    
         pred = np.argmax(model.predict(x_test), axis = 1,)
         cm = confusion_matrix(y_true = y_test,y_pred = pred,)
         cm_scaled = cm/cm.astype(np.float).sum(axis = 0)
@@ -107,31 +106,101 @@ class Create:
         except:
             pass
 
-    def get_nn_data(setuptype,use,split):
- 
-        setup = setuptype
-        allsetups = pd.read_feather('C:/Screener/setups/database/' + setup + '.feather')
-        yes = allsetups[allsetups['setup'] == 1]
-        no = allsetups[allsetups['setup'] == 0]
-        length = (len(yes) / use) - len(yes)
+
+    def sample(setuptype,use,split):
+
+
+
+        buffer = 2
+
+        
+        allsetups = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
+        
+        yes = []
+        no = []
+        req_no = []
+
+        g = allsetups.groupby(pd.Grouper(key='ticker'))
+        # groups to a list of dataframes with list comprehension
+        dfs = [group for _,group in g]
+
+       
+      
+        for df in dfs:
+            df = df.reset_index(drop = True)
+        
+            rem = 0
+            for i in range(len(df)):
+                bar = df.iloc[i]
+                ticker = bar[0]
+                date = bar[1]
+                setup = bar[2]
+               
+                if setup == 1:
+
+                    
+                    if df.iat[i-1,2] == 0:
+                        for j in range(buffer):
+                            try:
+                                req_no.append(df.iloc[i - j - 1])
+                            except:
+                                pass
+
+                    yes.append(bar)
+                    rem = buffer
+                else:
+                    if rem > 0:
+                        req_no.append(bar)
+                        rem -= 1
+
+                    else:
+                        #needs to be fixes because if setup occurs it will ad to no and to no_req because it adds to no req on a 1
+                        no.append(bar)
+            
+     #   yes = allsetups[allsetups['setup'] == 1]
+      #  no = allsetups[allsetups['setup'] == 0]
+        
+        yes = pd.DataFrame(yes)
+        print(f'{len(yes)} setups')
+        no = pd.DataFrame(no)
+        req_no = pd.DataFrame(req_no)
+        length = ((len(yes) / use) - len(yes)) - len(req_no)
 
         use = length / len(no)
 
         if use > 1:
             use = 1
+        if use < 0:
+            use = 0
 
         no = no.sample(frac = use)
-        allsetups = pd.concat([yes,no]).sample(frac = 1).reset_index(drop = True)
+       
+        allsetups = pd.concat([yes,no,req_no]).sample(frac = 1).reset_index(drop = True)
+        
+      
+
+
+        '''
 
         if split:
             eighty = int(len(allsetups) * 0.8)
             setups = allsetups.loc[0:eighty].reset_index(drop = True)
             rest = allsetups.loc[eighty:].reset_index(drop = True)
-            rest.to_feather('C:/Screener/setups/database/Testdata_' + setup + '.feather')
+            rest.to_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
             TRAIN_SPLIT = 0.8
         else:
             setups = allsetups
             TRAIN_SPLIT = 1
+        TRAIN_SPLIT = 1
+        '''
+        setups = allsetups
+        return setups
+
+
+
+    def get_nn_data(setuptype,use,split):
+ 
+        setups = Create.sample(setuptype,use,split)
         
         arglist = []
         for i in range(len(setups)):
@@ -142,23 +211,30 @@ class Create:
 
         dfs = data.pool(Create.nn_multi,arglist)
         nn_values = pd.concat(dfs)
-        print(nn_values)
+      
         nn_values = nn_values.values
-        print(nn_values)
+      
         np.random.shuffle(nn_values)
-        if TRAIN_SPLIT == 1:
-            split_idx = -1
-        else:
-            split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
-            np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
-            np.save('y_test', nn_values[split_idx:, -1])
-        print('X Train')
-        print(Create.reshape_x(nn_values[0:split_idx, :-1]))
-        print("Y Train")
-        print(nn_values[0:split_idx:, -1])
+        #if TRAIN_SPLIT == 1:
+         #   split_idx = -1
+       # else:
+          #  split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
+
+        '''
+        np.save('x_test', Create.reshape_x(nn_values))
+        np.save('y_test', nn_values)
+     
+        np.save('x_train', Create.reshape_x(nn_values))
+        np.save('y_train', nn_values)
+        '''
+        
+        split_idx = 0
+        np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
+        np.save('y_test', nn_values[split_idx:, -1])
+        split_idx = -1
         np.save('x_train', Create.reshape_x(nn_values[0:split_idx, :-1]))
         np.save('y_train', nn_values[0:split_idx:, -1])
-
+        
         return
    
     def load_data() -> Tuple[np.array, np.array, np.array, np.array]:
@@ -222,7 +298,7 @@ class Create:
 
   
     
-    def run(setuptype,keep,split):
+    def run(setuptype,keep,split = True):
         Create.get_nn_data(setuptype,keep,split)
         x_train, y_train, x_test, y_test = Create.load_data()
         model = Create.get_model(x_train)
@@ -234,13 +310,13 @@ class Create:
             pass
             Create.evaluate_training(model, x_test, y_test)
         model.save('C:/Screener/setups/models/model_' + setuptype)
-        print('done with model')
-
+      
+'''
 if __name__ == '__main__':
     setuptype = 'P'
     keep = .40
     Create.run(setuptype,keep,True)
-    
+''' 
 
 
 

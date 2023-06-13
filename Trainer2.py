@@ -77,14 +77,24 @@ class Trainer:
             df['date'] = df1.index
             df['ticker'] = ticker
             df['setup'] = 0
+
+
            
             for bar in self.current_setups:
                 
                 if bar[1] == s:
                     index = bar[0]
                     df.iat[index,2] = 1
+                    if index <= self.cutoff:
+                        df2 = pd.DataFrame({
+                            'date':[df1.index[index]],
+                            'ticker':[ticker],
+                            'setup':[1]})
+
+                        df = pd.concat([df,df2]).reset_index(drop = True)
 
             df = df[self.cutoff:]
+            print(df)
             
 
             add = df[['ticker','date','setup']]
@@ -103,7 +113,8 @@ class Trainer:
             if(data.isBen()):
                 df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
             elif data.isLaptop():
-                df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                #df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                pass
             else:
                 df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
 

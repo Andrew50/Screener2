@@ -59,7 +59,7 @@ class modelTest:
                    
                             mc = mpf.make_marketcolors(up='g',down='r')
                             s  = mpf.make_mpf_style(marketcolors=mc)
-            
+                            print(god[0][1])
                             mpf.plot(df1, type='candle', volume=True  , 
  
                             style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
@@ -71,7 +71,7 @@ class modelTest:
 
                    
             except (ValueError, FileNotFoundError, TimeoutError, TypeError):
-                print('Error')
+                pass
 
 
 
@@ -150,7 +150,7 @@ class modelTest:
 
 
             except (TypeError, ValueError, IndexError):
-                print('Error')
+                pass
     def combine(new,setuptype): 
         if new:
             setups = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
@@ -194,15 +194,19 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'MR'
-    prcnt_setup = .1
-    thresh = .4
-
+    setuptype = 'F'
+    prcnt_setup = .25
+    thresh = .65
     new = True
+
+
+
     modelTest.combine(new,setuptype)
-    create.run(setuptype,prcnt_setup,True)
+
+    create.run(setuptype,prcnt_setup)
+
     modelTest.runRandomTicker(setuptype,thresh)
-    #modelTest.runTestData(setuptype)
+   
 
 
 
