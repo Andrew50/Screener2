@@ -113,8 +113,29 @@ class Create:
 
         buffer = 2
 
-        
-        allsetups = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
+        if setuptype == 'AF':
+            f = pd.read_feather('C:/Screener/setups/database/F.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
+            nf = pd.read_feather('C:/Screener/setups/database/NF.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
+
+            nf = nf[nf['setup'] == 1]
+
+
+
+
+            for i in range(len(nf)):
+              
+                dt = nf.iat[i,1]
+                index = data.findex(f.set_index('date'),dt)
+                try:
+                    f.iat[index,2] = 1
+                except:
+                    pass
+
+            allsetups = f
+            #allsetups = pd.concat([f,nf]).sort_values(by='date', ascending = False).reset_index(drop = True)
+        else:
+
+            allsetups = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
         
         yes = []
         no = []
@@ -132,8 +153,8 @@ class Create:
             rem = 0
             for i in range(len(df)):
                 bar = df.iloc[i]
-                ticker = bar[0]
-                date = bar[1]
+           #     ticker = bar[0]
+              #  date = bar[1]
                 setup = bar[2]
                
                 if setup == 1:

@@ -36,6 +36,12 @@ class Trainer:
 
         else:
 
+
+
+
+
+
+
             try:
                 i = int(self.event)
                 setup = self.setup_list[i-1]
@@ -120,40 +126,58 @@ class Trainer:
 
           
     
-    def click(self):
+    def click(self,clicked = True):
+
         df = self.dict[self.i][2]
         ticker = self.dict[self.i][0]
-        x = self.values['-GRAPH-'][0]
-
-        self.y = self.values['-GRAPH-'][1]
-
-
-        chart_click = x - 10
         chart_size = self.x_size - 20
-        percent = chart_click/chart_size
+        if clicked:
+
+            
+            x = self.values['-GRAPH-'][0]
+
+            self.y = self.values['-GRAPH-'][1]
 
 
-        self.index = math.floor(len(df) * percent)
+            chart_click = x - 10
+            
+            percent = chart_click/chart_size
 
 
-        if self.index <= -1:
-            self.index = 0
-        if self.index >= len(df):
-            self.index = len(df) - 1
+            self.index = math.floor(len(df) * percent)
+
+
+            if self.index <= -1:
+                self.index = 0
+            if self.index >= len(df):
+                self.index = len(df) - 1
         
-        try:
+            try:
 
-            self.date = df.index[self.index]
+                self.date = df.index[self.index]
 
        
-        except:
-            return
+            except:
+                return
+
+            
+
+
+        else:
+
+            if self.event == 'right' and self.index < len(df) - 1:
+                self.index += 1
+            elif self.event == 'left' and self.index > 0:
+                self.index -= 1
+
+            self.y = self.height - 80
 
         round_x = int((self.index + 1)/(len(df)) * (self.x_size - 20)) + 10 - int((chart_size/len(df))/2)
         
         self.window["-GRAPH-"].MoveFigure(self.select_line,round_x - self.select_line_x,0)
 
         self.select_line_x = round_x
+
 
     def update(self):
         if self.init:
@@ -191,6 +215,9 @@ class Trainer:
                 self.window.bind("<z>", "7")
                 self.window.bind("<x>", "8")
                 self.window.bind("<c>", "9")
+                self.window.bind("<p>", "right")
+                self.window.bind("<i>", "left")
+                self.window.bind("<o>", "cl")
                 self.window.bind("<Button-3>", "cl")
 
             else:
@@ -285,7 +312,7 @@ class Trainer:
             self.init = True
             self.dict = []
             self.tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
-
+            self.index = -1
 
             self.preload(self)
             self.update(self)
@@ -295,6 +322,7 @@ class Trainer:
                 if self.event == 'Next':
                     
                     if self.menu == 0:
+
                         self.save(self)
                         self.current_setups = []
 
@@ -302,6 +330,7 @@ class Trainer:
                         self.i += 1
                         self.update(self)
                         self.preload(self)
+                        self.index = 0
 
                     else:
 
@@ -324,6 +353,7 @@ class Trainer:
                     self.update(self)
                     self.preload(self)
                     self.current_setups = []
+                    self.index = 0
                 elif self.event == '-GRAPH-':
                     self.click(self)
 
@@ -346,10 +376,12 @@ class Trainer:
                     self.preload(self)
                     self.update(self)
 
-
+                elif self.event == 'right' or self.event == 'left':
+                    self.click(self,False)
                     
                 else:
                     if self.menu == 0:
+                        
                         self.log(self)
                     else:
                         self.setups_df = pd.read_feather('C:/Screener/setups/' + self.event + '.feather').sample(frac = 1).reset_index(drop = True)
