@@ -5,6 +5,7 @@ from time import sleep
 from lightweight_charts import Chart
 from tvDatafeed import TvDatafeed, Interval
 from Data7 import Data as data
+
 class Simulate:
 
     def run(setuptype):
