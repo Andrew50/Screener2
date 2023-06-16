@@ -5,7 +5,6 @@ from time import sleep
 from lightweight_charts import Chart
 from tvDatafeed import TvDatafeed, Interval
 from Data7 import Data as data
-
 class Simulate:
 
     def run(setuptype):
@@ -79,7 +78,9 @@ class Simulate:
 
 
 if __name__ == '__main__':
+
+    aiTest.test()
     #Simulate.run('P')
     #Simulate.read('test', "csv")
     #Simulate.formatTicks('NVCR_test')
-    Simulate.lightweight('NVCR_test')
+    #Simulate.lightweight('NVCR_test')
