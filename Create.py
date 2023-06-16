@@ -17,9 +17,9 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 50
+EPOCHS = 200
 BATCH_SIZE = 64
-VALIDATION = 0.1
+VALIDATION = 0.05
 LEARN_RATE = 1e-3
 MODEL_SAVE_NAME = 'model'
 TRAIN_SPLIT = 1
@@ -281,15 +281,26 @@ class Create:
 
         df = data.get(ticker)
         index = data.findex(df,date)
+
+        
         if 'EP' in setup_type:
-                sample_size = 2
+                sample_size = 15
+
         elif setup_type == 'MR':
-            sample_size = 15
+            sample_size = 10
+
         elif 'F' in setup_type:
             sample_size = 40
-        else:
-            sample_size = 10
-        sample_size = 50 # HARD CODE IS HERE ---------------------------------------------------------------------------------------
+
+        else: #pivot
+            sample_size = 15
+        
+        sample_size = 20 # HARD CODE IS HERE ---------------------------------------------------------------------------------------
+
+      #  if 'MR' in setup_type:
+            
+
+
         df2 = df[index-sample_size:index]
 
         o = df.iat[index,0]
