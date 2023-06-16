@@ -30,7 +30,6 @@ TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
 class Create:
     def evaluate_training(model: Sequential,x_test: np.array,y_test: np.array):
         score = model.evaluate(x_test,y_test,verbose = 0,)
-    
         pred = np.argmax(model.predict(x_test), axis = 1,)
         cm = confusion_matrix(y_true = y_test,y_pred = pred,)
         cm_scaled = cm/cm.astype(np.float).sum(axis = 0)
@@ -76,13 +75,24 @@ class Create:
     def nn_multi(bar):
         try:
             setups = bar
-
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
             setup_type = [3]
+            if 'EP' in setup_type:
+                sample_size = 10
+            elif setup_type == 'MR':
+                sample_size = 15
+            elif 'F' in setup_type:
+                sample_size = 75
+            else: #pivot
+                sample_size = 15
+
+
+            #sample_size = 50
+
             df = data.get(ticker)
-            sample_size = 50
+
             index = data.findex(df,date)
             df2 = df[index-sample_size:index]
 
@@ -109,64 +119,39 @@ class Create:
 
     def sample(setuptype,use,split):
 
-
-
         buffer = 2
-
         if setuptype == 'AF':
             f = pd.read_feather('C:/Screener/setups/database/F.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
             nf = pd.read_feather('C:/Screener/setups/database/NF.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
-
             nf = nf[nf['setup'] == 1]
-
-
-
-
             for i in range(len(nf)):
-              
                 dt = nf.iat[i,1]
                 index = data.findex(f.set_index('date'),dt)
                 try:
                     f.iat[index,2] = 1
                 except:
                     pass
-
             allsetups = f
-            #allsetups = pd.concat([f,nf]).sort_values(by='date', ascending = False).reset_index(drop = True)
         else:
-
             allsetups = pd.read_feather('C:/Screener/setups/database/' + setuptype + '.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
-        
         yes = []
         no = []
         req_no = []
-
         g = allsetups.groupby(pd.Grouper(key='ticker'))
-        # groups to a list of dataframes with list comprehension
         dfs = [group for _,group in g]
-
-       
-      
         for df in dfs:
             df = df.reset_index(drop = True)
-        
             rem = 0
             for i in range(len(df)):
                 bar = df.iloc[i]
-           #     ticker = bar[0]
-              #  date = bar[1]
                 setup = bar[2]
-               
                 if setup == 1:
-
-                    
                     if df.iat[i-1,2] == 0:
                         for j in range(buffer):
                             try:
                                 req_no.append(df.iloc[i - j - 1])
                             except:
                                 pass
-
                     yes.append(bar)
                     rem = buffer
                 else:
@@ -177,10 +162,6 @@ class Create:
                     else:
                         #needs to be fixes because if setup occurs it will ad to no and to no_req because it adds to no req on a 1
                         no.append(bar)
-            
-     #   yes = allsetups[allsetups['setup'] == 1]
-      #  no = allsetups[allsetups['setup'] == 0]
-        
         yes = pd.DataFrame(yes)
         print(f'{len(yes)} setups')
         no = pd.DataFrame(no)
@@ -188,67 +169,29 @@ class Create:
         length = ((len(yes) / use) - len(yes)) - len(req_no)
 
         use = length / len(no)
-
         if use > 1:
             use = 1
         if use < 0:
             use = 0
 
         no = no.sample(frac = use)
-       
         allsetups = pd.concat([yes,no,req_no]).sample(frac = 1).reset_index(drop = True)
-        
-      
-
-
-        '''
-
-        if split:
-            eighty = int(len(allsetups) * 0.8)
-            setups = allsetups.loc[0:eighty].reset_index(drop = True)
-            rest = allsetups.loc[eighty:].reset_index(drop = True)
-            rest.to_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
-            TRAIN_SPLIT = 0.8
-        else:
-            setups = allsetups
-            TRAIN_SPLIT = 1
-        TRAIN_SPLIT = 1
-        '''
         setups = allsetups
         return setups
 
-
-
     def get_nn_data(setuptype,use,split):
- 
         setups = Create.sample(setuptype,use,split)
-        
         arglist = []
         for i in range(len(setups)):
             bar = setups.iloc[i].tolist()
             bar.append(setuptype)
-           
             arglist.append(bar)
-
         dfs = data.pool(Create.nn_multi,arglist)
         nn_values = pd.concat(dfs)
-      
-        nn_values = nn_values.values
-      
-        np.random.shuffle(nn_values)
-        #if TRAIN_SPLIT == 1:
-         #   split_idx = -1
-       # else:
-          #  split_idx = int(TRAIN_SPLIT*nn_values.shape[0])
 
-        '''
-        np.save('x_test', Create.reshape_x(nn_values))
-        np.save('y_test', nn_values)
-     
-        np.save('x_train', Create.reshape_x(nn_values))
-        np.save('y_train', nn_values)
-        '''
-        
+        nn_values = nn_values.values
+        np.random.shuffle(nn_values)
+
         split_idx = 0
         np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
         np.save('y_test', nn_values[split_idx:, -1])
@@ -279,57 +222,12 @@ class Create:
 
     def test_data(ticker,date,setup_type):
 
-        df = data.get(ticker)
-        index = data.findex(df,date)
+        bar = [ticker,date,1,setup_type]
+        x = Create.nn_multi(bar).values
+        x = Create.reshape_x(x[0:, :-1])
 
-        
-        if 'EP' in setup_type:
-                sample_size = 15
-
-        elif setup_type == 'MR':
-            sample_size = 10
-
-        elif 'F' in setup_type:
-            sample_size = 40
-
-        else: #pivot
-            sample_size = 15
-        
-        sample_size = 20 # HARD CODE IS HERE ---------------------------------------------------------------------------------------
-
-      #  if 'MR' in setup_type:
-            
-
-
-        df2 = df[index-sample_size:index]
-
-        o = df.iat[index,0]
-        add = pd.DataFrame({
-            'datetime':[date],
-            'open':[o],
-            'high':[o],
-            'low':[o],
-            'close':[o],
-            'volume':[0]}).set_index('datetime')
-        df2 = pd.concat([df2,add])
-      
-        df = df2
-        df = Create.get_lagged_returns(df, sample_size)
-  
-        df = Create.get_classification(df,0)
-        df = (
-        df
-        .dropna()
-        .reset_index(drop = True)
-        )
-        x = Create.reshape_x(
-            df[[col for col in df.columns if 'feat_' in col] + ['classification']]
-            .values[:, :-1]
-        )
         return x
-
-  
-    
+   
     def run(setuptype,keep,split = True):
         Create.get_nn_data(setuptype,keep,split)
         x_train, y_train, x_test, y_test = Create.load_data()
@@ -342,13 +240,6 @@ class Create:
             pass
             Create.evaluate_training(model, x_test, y_test)
         model.save('C:/Screener/setups/models/model_' + setuptype)
-      
-'''
-if __name__ == '__main__':
-    setuptype = 'P'
-    keep = .40
-    Create.run(setuptype,keep,True)
-''' 
 
 
 
