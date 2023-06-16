@@ -654,12 +654,37 @@ class UI:
         else:
             if init:
                 sg.theme('DarkGrey')
+
+                # get star req
+
+                req = [4.5,4,3.5,3.5,3.5]
+
+                df_traits = pd.read_feather('C:/Screener/sync/traits.feather')
+
+
+                win_rate_ma = 5
+
+
+                last = df_traits[:win_rate_ma]
+                print(last['ticker'])
+
+                wins = 0
+
+                for i in range(len(last)):
+                    if last.iloc[i]['pnl'] > 0:
+                        wins += 1
+                   
+                req = req[wins]
+
+       
                 
                 layout = [  
                 [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
-                [sg.Button('Prev'), sg.Button('Next')] ]
+                [sg.Button('Prev'), sg.Button('Next')] ,
+                [sg.Text(str(req) + ' star requirement')]
+                ]
                 self.window = sg.Window('Screener', layout,margins = (10,10),finalize = True)
             else:
                 try:

@@ -70,7 +70,8 @@ class modelTest:
                             plt.show()
 
                    
-            except (ValueError, FileNotFoundError, TimeoutError, TypeError):
+            except:
+            #(ValueError, FileNotFoundError, TimeoutError, TypeError):
                 pass
 
 
@@ -194,9 +195,9 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'EP'
-    prcnt_setup = .15
-    thresh = .65
+    setuptype = 'AF'
+    prcnt_setup = .16
+    thresh = .7
     new = True
 
 
