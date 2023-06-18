@@ -79,7 +79,9 @@ class Simulate:
 
 
 if __name__ == '__main__':
+
+    aiTest.test()
     #Simulate.run('P')
     #Simulate.read('test', "csv")
     #Simulate.formatTicks('NVCR_test')
-    Simulate.lightweight('NVCR_test')
+    #Simulate.lightweight('NVCR_test')
