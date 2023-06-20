@@ -25,7 +25,7 @@ class modelTest:
     def testRandom(bar):
         setuptype = bar[0]
         thresh = bar[1]
-        model = load_model('C:/Screener/setups/models/model_' + setuptype)
+        model = load_model('C:/Screener/sync/models/model_' + setuptype)
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:

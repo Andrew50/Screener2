@@ -239,7 +239,7 @@ class Create:
 
             pass
             Create.evaluate_training(model, x_test, y_test)
-        model.save('C:/Screener/setups/models/model_' + setuptype)
+        model.save('C:/Screener/sync/models/model_' + setuptype)
 
 
 
