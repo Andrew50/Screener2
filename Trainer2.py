@@ -18,6 +18,9 @@ from Detection2 import Detection as detection
 import math
 
 
+from modelTest import modelTest
+
+
 
 class Trainer:
 
@@ -77,7 +80,18 @@ class Trainer:
 
 
 
+
+
+
+
+        ii = 0
         for s in self.setup_list:
+
+            
+
+
+
+
             df = pd.DataFrame()
             
             df['date'] = df1.index
@@ -89,6 +103,10 @@ class Trainer:
             for bar in self.current_setups:
                 
                 if bar[1] == s:
+
+                    self.stats_list[ii] += 1
+
+
                     index = bar[0]
                     df.iat[index,2] = 1
                     if index <= self.cutoff:
@@ -124,6 +142,8 @@ class Trainer:
             else:
                 df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
 
+
+            ii += 1
           
     
     def click(self,clicked = True):
@@ -185,6 +205,22 @@ class Trainer:
 
             if self.menu == 0:
 
+
+
+                self.stats_list = []
+
+
+                for setup in self.setup_list:
+
+
+                    modelTest.combine(True,setup)
+
+                    df = pd.read_feather("C:/Screener/setups/database/" + setup + ".feather")
+
+                    df = df[df['setup'] == 1]
+
+                    self.stats_list.append(len(df))
+
                 graph = sg.Graph(
                 canvas_size=(self.width, self.height),
                 graph_bottom_left=(0, 0),
@@ -198,8 +234,8 @@ class Trainer:
 
                 layout = [
                 [graph],
-                [sg.Button(s) for s in self.setup_list],
-
+                #[sg.Button(s) for s in self.setup_list],
+                [sg.Text(key = '-stats-')],
                 [sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip')],
                 [sg.Button('Toggle')]]
                 self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
@@ -269,6 +305,24 @@ class Trainer:
             self.window["-GRAPH-"].draw_line((round_x,0), (round_x,self.height), color='red', width=2)
 
             self.current_setups = []
+
+
+
+
+            stat_string = ''
+
+            for i  in range(len(self.setup_list)):
+
+                setup = self.setup_list[i]
+                num = self.stats_list[i]
+
+                stat_string += f'  {num} {setup}  |'
+
+
+            stat_string = stat_string[:-1]
+            self.window['-stats-'].update(stat_string)
+
+
 
         else:
 

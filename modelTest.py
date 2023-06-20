@@ -195,9 +195,9 @@ class modelTest:
 
 
 if __name__ == "__main__":
-    setuptype = 'AF'
+    setuptype = 'P'
     prcnt_setup = .16
-    thresh = .7
+    thresh = .6
     new = True
 
 
