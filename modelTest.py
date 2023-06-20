@@ -195,16 +195,31 @@ class modelTest:
 
 
 if __name__ == "__main__":
+
+
+
+    # EP 
+
+
+
     setuptype = 'P'
-    prcnt_setup = .16
+    prcnt_setup = .1
+    epochs = 10
+
+
+
+
+
     thresh = .6
     new = True
 
 
+    
+
 
     modelTest.combine(new,setuptype)
 
-    create.run(setuptype,prcnt_setup)
+    create.run(setuptype,prcnt_setup,epochs)
 
     modelTest.runRandomTicker(setuptype,thresh)
    

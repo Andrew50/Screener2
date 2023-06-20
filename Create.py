@@ -17,7 +17,7 @@ from tensorflow.keras.layers import Dense, LSTM, Bidirectional, Dropout
 # Imports for evaluating the network
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-EPOCHS = 200
+
 BATCH_SIZE = 64
 VALIDATION = 0.05
 LEARN_RATE = 1e-3
@@ -228,12 +228,12 @@ class Create:
 
         return x
    
-    def run(setuptype,keep,split = True):
+    def run(setuptype,keep,epochs,split = True):
         Create.get_nn_data(setuptype,keep,split)
         x_train, y_train, x_test, y_test = Create.load_data()
         model = Create.get_model(x_train)
         model.compile(loss = 'sparse_categorical_crossentropy',optimizer = Adam(learning_rate = LEARN_RATE),metrics = ['accuracy'])
-        model.fit(x_train,y_train,epochs = EPOCHS,batch_size = BATCH_SIZE,validation_split = VALIDATION,)
+        model.fit(x_train,y_train,epochs = epochs,batch_size = BATCH_SIZE,validation_split = VALIDATION,)
 
         if split:
 
