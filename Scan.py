@@ -194,7 +194,7 @@ class Scan:
 
 
 
-        options.headless = True
+        options.headless = False
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')
@@ -226,7 +226,7 @@ class Scan:
         password = browser.find_element(By.XPATH, '//input[@name="id_password"]')
         password.send_keys("tltShort!1")
         time.sleep(0.5)
-        login_button = browser.find_element(By.XPATH, '//button[@class="button-D4RPB3ZC size-large-D4RPB3ZC color-brand-D4RPB3ZC variant-primary-D4RPB3ZC stretch-D4RPB3ZC"]')
+        login_button = browser.find_element(By.XPATH, '//button[@class="submitButton-LQwxK8Bm button-D4RPB3ZC size-large-D4RPB3ZC color-brand-D4RPB3ZC variant-primary-D4RPB3ZC stretch-D4RPB3ZC"]')
         login_button.click()
         time.sleep(3)
         browser.refresh();
