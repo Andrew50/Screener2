@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
 
 
-    setuptype = 'MR'
+    setuptype = 'NP'
     prcnt_setup = .1
     epochs = 250
 
