@@ -16,6 +16,8 @@ from UI4 import UI as ui
 
 from Consolidator import consolidate
 
+from tensorflow.keras.models import load_model
+
 
 
 
@@ -105,12 +107,29 @@ class Screener:
       
 
 
+        
+        setuplist = ['EP','NEP','P', 'NP', 'F', 'NF', 'MR']
+
+
+        model_list = []
+
+
+        for setup in setuplist:
+
+            model = load_model('C:/Screener/sync/models/model_' + str(setup))
+
+            model_list.append([model, str(setup)])
+
 
         for i in  range(len( ticker_list)):
+
+
+            
+
             
             ticker = ticker_list[i]
             
-            container.append([ticker, tf , path, []])
+            container.append([ticker, tf , path, [], model_list])
 
             for date in date_list:
                     

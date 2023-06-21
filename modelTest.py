@@ -8,6 +8,7 @@ from tensorflow.keras.models import load_model
 import mplfinance as mpf
 from Data7 import Data as data
 from matplotlib import pyplot as plt
+import datetime
 
 class modelTest:
     def runRandomTicker(setuptype,thresh):
@@ -25,7 +26,11 @@ class modelTest:
     def testRandom(bar):
         setuptype = bar[0]
         thresh = bar[1]
+        time = datetime.datetime.now()
+
+        
         model = load_model('C:/Screener/sync/models/model_' + setuptype)
+        print(datetime.datetime.now() - time)
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:
@@ -196,17 +201,11 @@ class modelTest:
 
 if __name__ == "__main__":
 
-
-
     # EP 
 
-
-
-    setuptype = 'MR'
+    setuptype = 'NF'
     prcnt_setup = .1
     epochs = 250
-
-
 
 
 
@@ -217,9 +216,9 @@ if __name__ == "__main__":
     
 
 
-    modelTest.combine(new,setuptype)
+   # modelTest.combine(new,setuptype)
 
-    create.run(setuptype,prcnt_setup,epochs)
+   # create.run(setuptype,prcnt_setup,epochs)
 
     modelTest.runRandomTicker(setuptype,thresh)
    

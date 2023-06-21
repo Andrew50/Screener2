@@ -23,6 +23,9 @@ class Detection:
 		tf = bar[1]
 		path = bar[2]
 		date_list = bar[3]
+		model_list = bar[4]
+
+
 		
 		date = date_list[0]
 		
@@ -72,9 +75,28 @@ class Detection:
 						dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 						if tf == 'd':
+
+
+							
+
+
+
 							
 							
 							if dolVol > 1000000 and adr > 3:
+
+
+								for god in model_list:
+
+									model = god[0]
+									typ = god[1]
+
+									typ = 'ML ' + typ
+
+
+
+
+
 								if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 									sEP = True
 									sMR = True
