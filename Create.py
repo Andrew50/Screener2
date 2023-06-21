@@ -19,7 +19,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 
 BATCH_SIZE = 64
-VALIDATION = 0.05
+VALIDATION = 0.2
 LEARN_RATE = 1e-3
 MODEL_SAVE_NAME = 'model'
 TRAIN_SPLIT = 1
@@ -234,12 +234,13 @@ class Create:
         model = Create.get_model(x_train)
         model.compile(loss = 'sparse_categorical_crossentropy',optimizer = Adam(learning_rate = LEARN_RATE),metrics = ['accuracy'])
         model.fit(x_train,y_train,epochs = epochs,batch_size = BATCH_SIZE,validation_split = VALIDATION,)
+        model.save('C:/Screener/sync/models/model_' + setuptype)
 
         if split:
 
             pass
             Create.evaluate_training(model, x_test, y_test)
-        model.save('C:/Screener/sync/models/model_' + setuptype)
+        
 
 
 
