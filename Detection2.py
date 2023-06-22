@@ -11,13 +11,14 @@ from Data7 import Data as data
 from sklearn.linear_model import LinearRegression
 import numpy as np
 from Scan import Scan
+from Create import Create as create
 
 class Detection:
 
    
 
 	def check(bar):
-		
+		print('0000000000000000000000000000000')
 		ticker = bar[0]
 	
 		tf = bar[1]
@@ -87,13 +88,25 @@ class Detection:
 
 
 								for god in model_list:
-
+								
 									model = god[0]
 									typ = god[1]
 
 									typ = 'ML ' + typ
 
+									df2 = create.reform(df)
+                    
+								
+									z = model.predict(df2)[0][1]
+								
 
+
+									thresh = .7
+
+
+									if z > thresh:
+
+										log.log(df,currentday, tf, ticker, z, path , typ)  
 
 
 
@@ -153,6 +166,8 @@ class Detection:
 					pass
 				except ValueError:
 					pass
+				except:
+					print('failed')
 		#except Exception as e: print(e)
   
 	def requirements(df,currentday,path,ticker):

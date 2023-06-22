@@ -108,18 +108,22 @@ class Screener:
 
 
         
-        setuplist = ['EP','NEP','P', 'NP', 'F', 'NF', 'MR']
+        #setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+        setuplist = ['EP']#,'NEP','P', 'NP', 'NF', 'MR']
+      #  setuplist = ['EP','NEP','P', 'NP', 'F', 'NF', 'MR']
 
 
         model_list = []
 
-
+        print('loading models')
         for setup in setuplist:
-
+        
             model = load_model('C:/Screener/sync/models/model_' + str(setup))
-
+            model = 'god'
             model_list.append([model, str(setup)])
 
+
+        print('queuing')
 
         for i in  range(len( ticker_list)):
 
@@ -142,6 +146,8 @@ class Screener:
                 pbar.update(1)
                     
         
+
+        print('screening')
         pbar.close()
       
         data.pool(detection.check, container)
@@ -163,8 +169,8 @@ if __name__ == '__main__':
     else:
 
 
-        Screener.queue()
-
+        Screener.queue(date = '2023-04-25')
+        ui.loop(ui,True)
 
 
 

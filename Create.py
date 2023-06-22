@@ -112,10 +112,21 @@ class Create:
             df = Create.get_classification(df,value)
 
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
-            
+            #return Create.reform(df)
         except:
             pass
 
+    def reform(df):
+
+        df = Create.get_lagged_returns(df, sample_size)
+        df = Create.get_classification(df,value)
+
+        df =  df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
+
+        df = df.values
+        df = Create.reshape_x(df[0:, :-1])
+
+        return df
 
     def sample(setuptype,use,split):
 
