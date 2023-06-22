@@ -204,16 +204,16 @@ class Create:
         np.random.shuffle(nn_values)
 
         split_idx = 0
-        np.save('x_test', Create.reshape_x(nn_values[split_idx:, :-1]))
-        np.save('y_test', nn_values[split_idx:, -1])
+        np.save('C:/Screener/tmp/training data/x_test.npy', Create.reshape_x(nn_values[split_idx:, :-1]))
+        np.save('C:/Screener/tmp/training data/y_test.npy', nn_values[split_idx:, -1])
         split_idx = -1
-        np.save('x_train', Create.reshape_x(nn_values[0:split_idx, :-1]))
-        np.save('y_train', nn_values[0:split_idx:, -1])
+        np.save('C:/Screener/tmp/training data/x_train.npy', Create.reshape_x(nn_values[0:split_idx, :-1]))
+        np.save('C:/Screener/tmp/training data/y_train.npy', nn_values[0:split_idx:, -1])
         
         return
    
     def load_data() -> Tuple[np.array, np.array, np.array, np.array]:
-        return (np.load('x_train.npy'),np.load('y_train.npy'),np.load('x_test.npy'),np.load('y_test.npy'),)
+        return (np.load('C:/Screener/tmp/training data/x_train.npy'),np.load('C:/Screener/tmp/training data/y_train.npy'),np.load('C:/Screener/tmp/training data/x_test.npy'),np.load('C:/Screener/tmp/training data/y_test.npy'),)
 
     def get_model(x_train: np.array) -> Sequential:
  
