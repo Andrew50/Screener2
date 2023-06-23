@@ -116,7 +116,7 @@ class Detection:
 											model = god[0]
 											typ = god[1]
 
-											typ += '  ml'
+											#typ += '  ml'
 											df2 = create.reform(df,typ,currentday)
 											#sys.stdout = open(os.devnull, 'w')
 											z = model.predict(df2)[0][1]
