@@ -125,7 +125,7 @@ class Detection:
 											continue
 											#print(typ)
 										#prin
-										thresh = .3
+										thresh = .75
 
 										
 										if z > thresh:
@@ -133,7 +133,7 @@ class Detection:
 											print('logged')
 											log.log(df,currentday, tf, ticker, z, path , typ)  
 									sys.stdout = sys.__stdout__
-									if True:
+									if False:
 
 										if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 											sEP = True
