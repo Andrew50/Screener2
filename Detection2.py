@@ -25,15 +25,15 @@ class Detection:
 
 	def check(container):
 	#	setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
-	    setuplist = []
+		setuplist = []
 		model_list = []
 
 		print('loading models')
 		start = datetime.datetime.now()
 		for setup in setuplist:
-        
+		
 			model = load_model('C:/Screener/sync/models/model_' + str(setup))
-           
+		   
 			model_list.append([model, str(setup)])
 
 
@@ -173,8 +173,8 @@ class Detection:
 					except TimeoutError:
 						pass
 
-					#except:
-				#		pass
+					except:
+						pass
 					#except IndexError:
 					#	pass
 			
