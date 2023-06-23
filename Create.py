@@ -8,6 +8,7 @@ import numpy as np
 from typing import Tuple
 from tqdm import tqdm
 from matplotlib import pyplot as plt
+import datetime
 
 # NN imports
 from tensorflow.keras.optimizers import Adam
@@ -23,7 +24,7 @@ VALIDATION = 0.2
 LEARN_RATE = 1e-3
 MODEL_SAVE_NAME = 'model'
 TRAIN_SPLIT = 1
-FEAT_LENGTH = 50
+#FEAT_LENGTH = 50
 FEAT_COLS = ['open', 'low', 'high', 'close']
 TICKERS = ['TSLA', 'AAPL', 'MSFT', 'NVDA', 'GOOG', 'AMD']
 
@@ -65,8 +66,12 @@ class Create:
         df['classification'] = value
         return df
 
-    def reshape_x(x: np.array) -> np.array:
+    def reshape_x(x: np.array,FEAT_LENGTH) -> np.array:
+
+        
+      #  num_feats = x.shape[1]//FEAT_LENGTH
         num_feats = x.shape[1]//FEAT_LENGTH
+        
         x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
         for n in range(0, num_feats):
             x_reshaped[:, :, n] = x[:, n*FEAT_LENGTH:(n+1)*FEAT_LENGTH]
@@ -78,24 +83,20 @@ class Create:
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
-            setup_type = [3]
-            if 'EP' in setup_type:
-                sample_size = 10
-            elif setup_type == 'MR':
-                sample_size = 15
-            elif 'F' in setup_type:
-                sample_size = 75
-            else: #pivot
-                sample_size = 15
-
+            setup_type = setups[3]
+            #setup_type = [3] god reallllly 
+            sample_size = Create.setup_size(setup_type)
+            
 
             #sample_size = 50
 
             df = data.get(ticker)
 
+
+
             index = data.findex(df,date)
             df2 = df[index-sample_size:index]
-
+        
             o = df.iat[index,0]
             add = pd.DataFrame({
                 'datetime':[date],
@@ -105,6 +106,8 @@ class Create:
                 'close':[o],
                 'volume':[0]}).set_index('datetime')
             df2 = pd.concat([df2,add])
+
+          
          
             df = df2
 
@@ -116,15 +119,51 @@ class Create:
         except:
             pass
 
-    def reform(df):
+
+
+
+    
+
+    def reform(df,setup_type,currentday):
+        sample_size = Create.setup_size(setup_type)
+
+        o = df.iat[currentday,0]
+        df = df[currentday-sample_size:currentday]
+
+
+     
+        
+        #bandage
+        date = datetime.datetime.now()
+        
+        add = pd.DataFrame({
+            'datetime':[date],
+            'open':[o],
+            'high':[o],
+            'low':[o],
+            'close':[o],
+            'volume':[0]}).set_index('datetime')
+        df = pd.concat([df,add])
+
+
+      
+       
+
 
         df = Create.get_lagged_returns(df, sample_size)
-        df = Create.get_classification(df,value)
+        df = Create.get_classification(df,1)
+
+      
 
         df =  df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
 
         df = df.values
-        df = Create.reshape_x(df[0:, :-1])
+      
+        
+    
+        df = Create.reshape_x(df[0:, :-1],sample_size)
+
+        
 
         return df
 
@@ -190,6 +229,20 @@ class Create:
         setups = allsetups
         return setups
 
+    def setup_size(setup_type):
+        if 'EP' in setup_type:
+            sample_size = 10
+        elif setup_type == 'MR':
+            sample_size = 15
+        elif 'F' in setup_type:
+            sample_size = 75
+        else: #pivot
+            sample_size = 15
+
+        return sample_size
+
+
+
     def get_nn_data(setuptype,use,split):
         setups = Create.sample(setuptype,use,split)
         arglist = []
@@ -203,12 +256,14 @@ class Create:
         nn_values = nn_values.values
         np.random.shuffle(nn_values)
 
+        sample_size = Create.setup_size(setuptype)
+
         split_idx = 0
-        np.save('C:/Screener/tmp/training data/x_test.npy', Create.reshape_x(nn_values[split_idx:, :-1]))
-        np.save('C:/Screener/tmp/training data/y_test.npy', nn_values[split_idx:, -1])
+        np.save('C:/Screener/tmp/training data/x_test.npy', Create.reshape_x(nn_values[split_idx:, :-1],sample_size))
+        np.save('C:/Screener/tmp/training data/y_test.npy', nn_values[split_idx:, -1],sample_size)
         split_idx = -1
-        np.save('C:/Screener/tmp/training data/x_train.npy', Create.reshape_x(nn_values[0:split_idx, :-1]))
-        np.save('C:/Screener/tmp/training data/y_train.npy', nn_values[0:split_idx:, -1])
+        np.save('C:/Screener/tmp/training data/x_train.npy', Create.reshape_x(nn_values[0:split_idx, :-1],sample_size))
+        np.save('C:/Screener/tmp/training data/y_train.npy', nn_values[0:split_idx:, -1],sample_size)
         
         return
    
@@ -235,7 +290,10 @@ class Create:
 
         bar = [ticker,date,1,setup_type]
         x = Create.nn_multi(bar).values
-        x = Create.reshape_x(x[0:, :-1])
+
+        sample_size = Create.setup_size(setup_type)
+     
+        x = Create.reshape_x(x[0:, :-1],sample_size)
 
         return x
    

@@ -16,7 +16,10 @@ from UI4 import UI as ui
 
 from Consolidator import consolidate
 
-from tensorflow.keras.models import load_model
+
+
+
+
 
 
 
@@ -37,7 +40,7 @@ class Screener:
                     'Setup': [],
                     'Z': [],
                     'tf':[]}
-        pd.DataFrame(df).to_feather("C:/Screener/tmp/todays_setups.feather")
+        pd.DataFrame(df).to_feather("C:/Screener/sync/todays_setups.feather")
         if ticker == None:
             ticker_list = scan.get(date,tf,True,browser).index.tolist()
            
@@ -101,6 +104,7 @@ class Screener:
     
     def run(date_list,ticker_list,tf,path):
         length = len(ticker_list)*len(date_list)
+        print('packaging')
         pbar = tqdm(total=length)
         container = []
        
@@ -108,22 +112,22 @@ class Screener:
 
 
         
-        #setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
-        setuplist = ['EP']#,'NEP','P', 'NP', 'NF', 'MR']
-      #  setuplist = ['EP','NEP','P', 'NP', 'F', 'NF', 'MR']
+      #  #setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+      #  setuplist = ['EP']#,'NEP','P', 'NP', 'NF', 'MR']
+      ##  setuplist = ['EP','NEP','P', 'NP', 'F', 'NF', 'MR']
 
 
-        model_list = []
+      #  model_list = []
 
-        print('loading models')
-        for setup in setuplist:
+      #  print('loading models')
+      #  for setup in setuplist:
         
-            model = load_model('C:/Screener/sync/models/model_' + str(setup))
-            model = 'god'
-            model_list.append([model, str(setup)])
+      #      model = load_model('C:/Screener/sync/models/model_' + str(setup))
+      #      model = 'god'
+      #      model_list.append([model, str(setup)])
 
 
-        print('queuing')
+        
 
         for i in  range(len( ticker_list)):
 
@@ -133,7 +137,8 @@ class Screener:
             
             ticker = ticker_list[i]
             
-            container.append([ticker, tf , path, [], model_list])
+           # container.append([ticker, tf , path, [], model_list])
+            container.append([ticker, tf , path, []])
 
             for date in date_list:
                     
@@ -147,10 +152,37 @@ class Screener:
                     
         
 
-        print('screening')
+#repackage as a list of 5 lists
+
+        
         pbar.close()
+        print('spliting')
+        pbar = tqdm(total=len(container))
+        ii = 0
+        package = [[],[],[],[],[]]
+        for bar in container:
+            package[ii].append(bar)
+            ii += 1
+            if ii == 5:
+                ii = 0
+
+            pbar.update(1)
+
+        pbar.close()
+     
+        
       
-        data.pool(detection.check, container)
+        data.pool(detection.check, package)
+
+       # pbar = tqdm(total=len(container))
+     ##   for bar in container:
+
+     #       detection.check(bar)
+     #       pbar.update(1)
+
+
+
+
         
 
 if __name__ == '__main__':

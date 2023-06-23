@@ -8,166 +8,183 @@ from pivot import Pivot as pivot
 import datetime
 
 from Data7 import Data as data
+from tqdm import tqdm
 from sklearn.linear_model import LinearRegression
 import numpy as np
 from Scan import Scan
+import os, sys
 from Create import Create as create
+
+
+from tensorflow.keras.models import load_model
+
 
 class Detection:
 
    
 
-	def check(bar):
-		print('0000000000000000000000000000000')
-		ticker = bar[0]
+	def check(container):
+	#	setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+	    setuplist = []
+		model_list = []
+
+		print('loading models')
+		start = datetime.datetime.now()
+		for setup in setuplist:
+        
+			model = load_model('C:/Screener/sync/models/model_' + str(setup))
+           
+			model_list.append([model, str(setup)])
+
+
+		tim = datetime.datetime.now() - start
+		print(f'models loaded in {tim}')
+
+		print('screening')
+		pbar = tqdm(total=len(container))
+
+
+		
+
+
+		for bar in container:
+			pbar.update(1)
+			ticker = bar[0]
 	
-		tf = bar[1]
-		path = bar[2]
-		date_list = bar[3]
-		model_list = bar[4]
-
-
-		
-		date = date_list[0]
-		
-		
-		try:
-			dff = data.get(ticker,tf,date)
-		
-		except TimeoutError:
-			pass
-		
-
-		except KeyError:
-			return
-		
-		except FileNotFoundError:
+			tf = bar[1]
+			path = bar[2]
+			date_list = bar[3]
 			
-			return
+
+
+		
+			date = date_list[0]
+		
+		
+			try:
+				dff = data.get(ticker,tf,date)
+		
+			except TimeoutError:
+				pass
 		
 
-		except TypeError:
+			except KeyError:
+				continue
+		
+			except FileNotFoundError:
 			
-			return
-		try:
-			if dff == None:
-				return
-		except:
-			pass
+				continue
+		
+
+			except TypeError:
+			
+				continue
+			try:
+				if dff == None:
+					continue
+			except:
+				pass
 
 		
-		if len(dff) > 20:
+			if len(dff) > 10:
 		
-			for date in date_list:
-				try:
+				for date in date_list:
+					try:
 				
 				
-					currentday = data.findex(dff,date)
+						currentday = data.findex(dff,date)
 					
-					if currentday != None and currentday > 15:
+						if currentday != None and currentday > 10:
 						
-						length = 500
-						start = currentday - length
-						if start < 0:
-							start = 0
-						df = dff[start:currentday + 50]
-						currentday = data.findex(df,date)
+							length = 500
+							start = currentday - length
+							if start < 0:
+								start = 0
+							df = dff[start:currentday + 200]
+							currentday = data.findex(df,date)
 					
-						dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
+							dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
-						if tf == 'd':
+							if tf == 'd':
+								if dolVol > 1000000 and adr > 3:
 
 
-							
-
-
-
-							
-							
-							if dolVol > 1000000 and adr > 3:
-
-
-								for god in model_list:
+									for god in model_list:
 								
-									model = god[0]
-									typ = god[1]
+										model = god[0]
+										typ = god[1]
 
-									typ = 'ML ' + typ
+										typ += 'ML'
+										df2 = create.reform(df,typ,currentday)
+										sys.stdout = open(os.devnull, 'w')
+										z = model.predict(df2)[0][1]
+										sys.stdout = sys.__stdout__
 
-									df2 = create.reform(df)
-                    
+										#prin
+										thresh = .3
+
+										
+										if z > thresh:
+											z = round(z*100)
+											print('logged')
+											log.log(df,currentday, tf, ticker, z, path , typ)  
+
+									if True:
+
+										if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
+											sEP = True
+											sMR = True
+											sPivot = True
+											sFlag = True
+										else:
+											sEP = False
+											sMR = False
+											sPivot = True
+											sFlag = False
+										dolVolFilter = 10000000
 								
-									z = model.predict(df2)[0][1]
-								
-
-
-									thresh = .7
-
-
-									if z > thresh:
-
-										log.log(df,currentday, tf, ticker, z, path , typ)  
-
-
-
-								if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
-									sEP = True
-									sMR = True
-									sPivot = True
-									sFlag = True
-								else:
-									sEP = False
-									sMR = False
-									sPivot = True
-									sFlag = False
-								dolVolFilter = 10000000
-								
-								if((dolVol > .2* dolVolFilter or pmDolVol  > 1 * 1000000)  and adr > 3.5 and sEP):
-									Detection.EP(df,currentday, tf, ticker, path)
+										if((dolVol > .2* dolVolFilter or pmDolVol  > 1 * 1000000)  and adr > 3.5 and sEP):
+											Detection.EP(df,currentday, tf, ticker, path)
 
 								
 
-								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 )   and adr > 5 and sMR):
-									Detection.MR(df,currentday, tf, ticker, path)
-								if((dolVol > .8* dolVolFilter or pmDolVol  > 1 * 1000000)   and adr > 3.5 and sPivot):
+										if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 )   and adr > 5 and sMR):
+											Detection.MR(df,currentday, tf, ticker, path)
+										if((dolVol > .8* dolVolFilter or pmDolVol  > 1 * 1000000)   and adr > 3.5 and sPivot):
 									
-									pivot.pivot(df,currentday, tf, ticker, path)
-								if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 ) and adr > 4 and sFlag):
+											pivot.pivot(df,currentday, tf, ticker, path)
+										if((dolVol > .7 * dolVolFilter or pmDolVol  > 1 * 1000000 ) and adr > 4 and sFlag):
 									
-									flag.flag(df,currentday, tf, ticker, path)
+											flag.flag(df,currentday, tf, ticker, path)
 								
-						if tf == '1min':
-						
-							if dolVol > 20000 and adr > .08:
-							
-								Detection.Pop(df,currentday, tf, ticker, path)
-
-
-
+							if tf == '1min':
+								if dolVol > 20000 and adr > .08:
+									Detection.Pop(df,currentday, tf, ticker, path)
+							if tf == '5min':
+								if dolVol > 100000 and adr > .1:
+									Detection.Pop(df,currentday, tf, ticker, path)
 					
-						if tf == '5min':
-							if dolVol > 100000 and adr > .1:
-								Detection.Pop(df,currentday, tf, ticker, path)
-					
-						if tf == 'h':
+							if tf == 'h':
 						
-							pass
+								pass
 
 
 
-				except TimeoutError:
-					pass
+					except TimeoutError:
+						pass
 
-				
-				except IndexError:
-					pass
+					#except:
+				#		pass
+					#except IndexError:
+					#	pass
 			
-				except TypeError:
-					pass
-				except ValueError:
-					pass
-				except:
-					print('failed')
+					##except TypeError:
+					##	pass
+					#except ValueError:
+					#	pass
+					##except:
+					#	pass
+				#		print('failed')
 		#except Exception as e: print(e)
   
 	def requirements(df,currentday,path,ticker):
@@ -202,8 +219,8 @@ class Detection:
 				else:
 					pmDolVol = 0
 			except Exception as e:
-				print(e)
-				print('pm vol failed')
+				#print(e)
+				#print('pm vol failed')
 				pmDolVol = 0
 
 			return dolVol, adr, pmDolVol

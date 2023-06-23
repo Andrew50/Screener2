@@ -30,7 +30,7 @@ class modelTest:
 
         
         model = load_model('C:/Screener/sync/models/model_' + setuptype)
-        print(datetime.datetime.now() - time)
+       
         tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
         while True:
             try:
@@ -42,7 +42,8 @@ class modelTest:
                     date = date_list[random.randint(0,len(date_list) - 1)]
                     if(tickerdf.iloc[data.findex(tickerdf, date)]['volume'] > 250000):
                         df = create.test_data(ticker, date, setuptype)
-                    
+                      
+                      
                         sys.stdout = open(os.devnull, 'w')
                         god = model.predict(df)
 
@@ -202,23 +203,17 @@ class modelTest:
 if __name__ == "__main__":
 
     # EP 
-
-    setuptype = 'NF'
-    prcnt_setup = .1
-    epochs = 250
-
-
-
     thresh = .6
+    setuptype = 'EP'
+
+    epochs = 50
     new = True
+    prcnt_setup = .15
 
 
-    
+    modelTest.combine(new,setuptype)
 
-
-   # modelTest.combine(new,setuptype)
-
-   # create.run(setuptype,prcnt_setup,epochs)
+    create.run(setuptype,prcnt_setup,epochs)
 
     modelTest.runRandomTicker(setuptype,thresh)
    

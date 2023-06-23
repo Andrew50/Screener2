@@ -666,7 +666,7 @@ class UI:
 
 
                 last = df_traits[:win_rate_ma]
-                print(last['ticker'])
+                
 
                 wins = 0
 
@@ -712,11 +712,11 @@ class UI:
 
 
         currentday = data.findex(df,date)
-        print(df)
-        print(date)
+       
+       
         currentmin = data.findex(df_m,date)
 
-        print(currentday)
+    
 
         gap = round( (df.iat[currentday,0]/df.iat[currentday-1,3] - 1)*100,2)
 
@@ -823,8 +823,7 @@ class UI:
         time = i 
 
 
-
-        #print(datetime.datetime.now()-start)
+        
 
 
         return [gap,adr,vol,q,one,two,three,ten,time,vol1]
