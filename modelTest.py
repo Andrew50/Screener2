@@ -204,11 +204,11 @@ if __name__ == "__main__":
 
     # EP 
     thresh = .6
-    setuptype = 'EP'
+    setuptype = 'P'
 
-    epochs = 50
+    epochs = 250
     new = True
-    prcnt_setup = .15
+    prcnt_setup = .1
 
 
     modelTest.combine(new,setuptype)
