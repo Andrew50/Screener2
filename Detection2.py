@@ -24,8 +24,10 @@ class Detection:
    
 
 	def check(container):
-	#	setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
-		setuplist = []
+		setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+		#setuplist = ['EP','F','NF','NP','P']
+		#setuplist = ['F','NF','NP','P']
+		#setuplist = []
 		model_list = []
 
 		print('loading models')
@@ -106,20 +108,22 @@ class Detection:
 							dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 							if tf == 'd':
-								if dolVol > 1000000 and adr > 3:
+								if (dolVol > 1000000 or pmDolVol  > 1 * 1000000) and adr > 3:
 
-
+									sys.stdout = open(os.devnull, 'w')
 									for god in model_list:
-								
-										model = god[0]
-										typ = god[1]
+										try:
+											model = god[0]
+											typ = god[1]
 
-										typ += 'ML'
-										df2 = create.reform(df,typ,currentday)
-										sys.stdout = open(os.devnull, 'w')
-										z = model.predict(df2)[0][1]
-										sys.stdout = sys.__stdout__
-
+											typ += '  ml'
+											df2 = create.reform(df,typ,currentday)
+											#sys.stdout = open(os.devnull, 'w')
+											z = model.predict(df2)[0][1]
+										#	sys.stdout = sys.__stdout__
+										except:
+											continue
+											#print(typ)
 										#prin
 										thresh = .3
 
@@ -128,7 +132,7 @@ class Detection:
 											z = round(z*100)
 											print('logged')
 											log.log(df,currentday, tf, ticker, z, path , typ)  
-
+									sys.stdout = sys.__stdout__
 									if True:
 
 										if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
