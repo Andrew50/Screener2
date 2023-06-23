@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
     # EP 
     thresh = .6
-    setuptype = 'NEP'
+    setuptype = 'EP'
 
     epochs = 250
     new = True
