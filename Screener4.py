@@ -186,7 +186,7 @@ class Screener:
         
 
 if __name__ == '__main__':
-    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
 
         Screener.queue('0')
 
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     else:
 
 
-        Screener.queue(date = '2023-04-25')
+        Screener.queue()
         ui.loop(ui,True)
 
 
