@@ -66,8 +66,8 @@ class Pivot:
 
 		coef = (df.iat[current,0] - df.iat[current-1,3])/(df.iat[current-i,0] - df.iat[current-1,3])
 		setup  = None
-		if coef > coef_filter and z > z_filter and df.iat[current-2,3] > df.iat[current-1,3] and df.iat[current-2,3] - df.iat[current-2,0] < atr/3 and df.iat[current,0] > df.iat[current-1,0]:
-			setup = 'P'
+		#if coef > coef_filter and z > z_filter and df.iat[current-2,3] > df.iat[current-1,3] and df.iat[current-2,3] - df.iat[current-2,0] < atr/3 and df.iat[current,0] > df.iat[current-1,0]:
+		#	setup = 'P'
 
 		if coef > coef_filter and z < -z_filter and df.iat[current-2,3] < df.iat[current-1,3] and df.iat[current-2,0] - df.iat[current-2,3] < atr/3  and df.iat[current,0] < df.iat[current-1,0]:
 			setup = 'NP'

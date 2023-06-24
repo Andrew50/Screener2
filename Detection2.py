@@ -24,7 +24,8 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+	#	setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
+		setuplist = ['EP','NEP','P', 'NF', 'MR','F']
 		#setuplist = ['EP','F','NF','NP','P']
 		#setuplist = ['F','NF','NP','P']
 		#setuplist = []
@@ -108,6 +109,16 @@ class Detection:
 							dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 							if tf == 'd':
+
+
+								#runs all ml execpt for manual NP
+
+
+
+
+
+
+
 								if (dolVol > 1000000 or pmDolVol  > 1 * 1000000) and adr > 3:
 
 									sys.stdout = open(os.devnull, 'w')
@@ -133,18 +144,24 @@ class Detection:
 											print('logged')
 											log.log(df,currentday, tf, ticker, z, path , typ)  
 									sys.stdout = sys.__stdout__
-									if False:
+									if True:
 
-										if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
-											sEP = True
-											sMR = True
-											sPivot = True
-											sFlag = True
-										else:
-											sEP = False
-											sMR = False
-											sPivot = True
-											sFlag = False
+										#if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
+										#	sEP = True
+										#	sMR = True
+										#	sPivot = True
+										#	sFlag = True
+										#else:
+										#	sEP = False
+										#	sMR = False
+										#	sPivot = True
+										#	sFlag = False
+
+
+										sEP = False
+										sMR = False
+										sPivot = True
+										sFlag = False
 										dolVolFilter = 10000000
 								
 										if((dolVol > .2* dolVolFilter or pmDolVol  > 1 * 1000000)  and adr > 3.5 and sEP):
