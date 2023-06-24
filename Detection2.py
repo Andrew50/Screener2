@@ -24,8 +24,7 @@ class Detection:
    
 
 	def check(container):
-	#	setuplist = ['EP','NEP','P', 'NP', 'NF', 'MR']
-		setuplist = ['EP','NEP','P', 'NF', 'MR','F']
+		setuplist = ['EP','NEP','P', 'NP', 'AF', 'MR']
 		#setuplist = ['EP','F','NF','NP','P']
 		#setuplist = ['F','NF','NP','P']
 		#setuplist = []
