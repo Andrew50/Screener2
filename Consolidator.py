@@ -33,13 +33,15 @@ class consolidate:
                     df = pd.read_feather(path + f)
                     todays_setups = pd.concat([todays_setups,df])
                 else:
+                    
                     df = pd.read_feather(path + f)
                     setups = pd.concat([setups,df])
 
         
-            setups.reset_index(inplace = True,drop = True)
-        
-            setups.to_feather(r"C:\Screener\sync\setups.feather")
+            
+            if not setups.empty:
+                setups.reset_index(inplace = True,drop = True)
+                setups.to_feather(r"C:\Screener\sync\setups.feather")
 
           
             if not todays_setups.empty:

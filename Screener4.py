@@ -199,12 +199,30 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
+        i = 0
+        path = "C:/Screener/tmp/subtickerlists/"
+        while True:
+            print('enter cycle length')
+            cycles = int(input())
+            for _ in range(cycles):
+                dir_list = os.listdir(path)
+
+                direct = path + dir_list[0]
+
+                #tickers = pd.read_feather('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')['Ticker'].to_list()
+                tickers = pd.read_feather(direct)['Ticker'].to_list()
 
 
-        Screener.queue()
-        ui.loop(ui,True)
+                Screener.queue(ticker = tickers,fpath = 0)
+          
 
-
+            
+               # os.remove('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')
+                os.remove(direct)
+               # i += 1
+        
+            
+            
 
         '''
         browser = scan.startFirefoxSession()

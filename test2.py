@@ -10,18 +10,47 @@ from Plot import Plot as plot
 
 
 
-df1 = pd.read_feather('C:/Screener/setups/database/F2.feather')
-df2 = pd.read_feather('C:/Screener/setups/database/FB.feather')
-df3 = pd.read_feather('C:/Screener/setups/database/NF.feather')
-df4 = pd.read_feather('C:/Screener/setups/database/NFB.feather')
+###########dont delete
+df = pd.read_feather('C:/Screener/sync/full_ticker_list.feather')
 
-df = pd.DataFrame()
-df['ticker'] = df1['ticker']
-df['date'] = df1['date']
-df['setup'] = df1['setup']  + df3['setup'] + df2['setup'] + df4['setup']
+
+i = 0
+ii = 0
+
+size = 50
+while True:
+
+    df2 = df[i:i + size].reset_index(drop = True)
+    df2.to_feather('C:/Screener/tmp/subtickerlists/' + str(ii) + '.feather')
+
+    ii += 1
+    i += size
+
+
+    if i >= len(df):
+        break
+
+
+
+
+
+
+
+
+
+
+#df1 = pd.read_feather('C:/Screener/setups/database/F2.feather')
+#df2 = pd.read_feather('C:/Screener/setups/database/FB.feather')
+#df3 = pd.read_feather('C:/Screener/setups/database/NF.feather')
+#df4 = pd.read_feather('C:/Screener/setups/database/NFB.feather')
+
+#df = pd.DataFrame()
+#df['ticker'] = df1['ticker']
+#df['date'] = df1['date']
+#df['setup'] = df1['setup']  + df3['setup'] + df2['setup'] + df4['setup']
 
     
-df.to_feather('C:/Screener/setups/database/F.feather')
+#df.to_feather('C:/Screener/setups/database/F.feather')
 
 
 #df = data.get('yang')
