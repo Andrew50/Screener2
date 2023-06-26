@@ -83,6 +83,8 @@ class Scan:
 
     
     def runDailyScan(brows):
+
+        today = str(datetime.date.today())
         try:
             browser = brows
             if(browser == None):
@@ -100,13 +102,21 @@ class Scan:
             download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
             download_screener_data.click()
             time.sleep(1.5)
+            downloaded_file = r"C:\Downloads\america_" + today + ".csv"
         except:
             print('manual csv fetch required')
-            print('enter when done')
-            input()
-        today = str(datetime.date.today())
-        downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-        
+
+           # print('enter when done')
+           # input()
+            while True:
+                path = r"C:\Downloads"
+                dir_list = os.listdir(path)
+                for direct in dir_list:
+                    if today in direct:
+                        downloaded_file = path + direct
+                        print('found file')
+                        break
+
         time.sleep(3)
 
         screener_data = pd.read_csv(downloaded_file)

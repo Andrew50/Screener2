@@ -24,7 +24,7 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'NP', 'AF', 'MR']
+		setuplist = ['EP','NEP','P', 'F', 'MR']
 		#setuplist = ['EP','F','NF','NP','P']
 		#setuplist = ['F','NF','NP','P']
 		#setuplist = []
@@ -158,7 +158,7 @@ class Detection:
 
 
 										sEP = False
-										sMR = False
+										sMR = False 
 										sPivot = True
 										sFlag = False
 										dolVolFilter = 10000000

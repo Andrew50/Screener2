@@ -201,7 +201,7 @@ if __name__ == '__main__':
     else:
 
 
-        Screener.queue()
+        Screener.queue(date = '2022-10-21')
         ui.loop(ui,True)
 
 
