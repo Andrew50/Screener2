@@ -154,16 +154,18 @@ class Screener:
 
 #repackage as a list of 5 lists
 
-        
+        nodes = 4
         pbar.close()
         print('spliting')
         pbar = tqdm(total=len(container))
         ii = 0
-        package = [[],[],[],[],[]]
+        package = []
+        for _ in range(nodes):
+            package.append([])
         for bar in container:
             package[ii].append(bar)
             ii += 1
-            if ii == 5:
+            if ii == nodes:
                 ii = 0
 
             pbar.update(1)
@@ -172,7 +174,7 @@ class Screener:
      
         
       
-        data.pool(detection.check, package)
+        data.pool(detection.check, package,nodes = nodes)
 
        # pbar = tqdm(total=len(container))
      ##   for bar in container:
