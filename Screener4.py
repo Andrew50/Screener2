@@ -154,16 +154,18 @@ class Screener:
 
 #repackage as a list of 5 lists
 
-        
+        nodes = 4
         pbar.close()
         print('spliting')
         pbar = tqdm(total=len(container))
         ii = 0
-        package = [[],[],[],[],[]]
+        package = []
+        for _ in range(nodes):
+            package.append([])
         for bar in container:
             package[ii].append(bar)
             ii += 1
-            if ii == 5:
+            if ii == nodes:
                 ii = 0
 
             pbar.update(1)
@@ -172,7 +174,7 @@ class Screener:
      
         
       
-        data.pool(detection.check, package)
+        data.pool(detection.check, package,nodes = nodes)
 
        # pbar = tqdm(total=len(container))
      ##   for bar in container:
@@ -199,12 +201,30 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
+        i = 0
+        path = "C:/Screener/tmp/subtickerlists/"
+        while True:
+            print('enter cycle length')
+            cycles = int(input())
+            for _ in range(cycles):
+                dir_list = os.listdir(path)
+
+                direct = path + dir_list[0]
+
+                #tickers = pd.read_feather('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')['Ticker'].to_list()
+                tickers = pd.read_feather(direct)['Ticker'].to_list()
 
 
-        Screener.queue(date = '2022-10-21')
-        ui.loop(ui,True)
+                Screener.queue(ticker = tickers,fpath = 0)
+          
 
-
+            
+               # os.remove('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')
+                os.remove(direct)
+               # i += 1
+        
+            
+            
 
         '''
         browser = scan.startFirefoxSession()

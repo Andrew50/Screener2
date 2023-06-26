@@ -113,7 +113,7 @@ class Log:
 
             
             
-            cooldown = 10
+            cooldown = 3
 
             #gap percent
             #adr
