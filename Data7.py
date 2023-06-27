@@ -301,7 +301,8 @@ class Data:
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
         except:
-            print('random error')
+            pass
+            #print('random error')
     
     def runUpdate():
         tv = TvDatafeed()

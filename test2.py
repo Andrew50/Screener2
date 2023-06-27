@@ -11,6 +11,9 @@ from Plot import Plot as plot
 
 
 ###########dont delete
+
+
+'''
 df = pd.read_feather('C:/Screener/sync/full_ticker_list.feather')
 
 
@@ -32,9 +35,10 @@ while True:
 
 
 
+    '''
 
-
-
+df = data.get('NGL')
+print(df)
 
 
 
