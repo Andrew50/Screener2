@@ -166,7 +166,8 @@ class Data:
                     if ticker == "^VIX" or old:
                         df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                     else:
-                        df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                        #df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                        df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 else:
                     if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
                         tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
@@ -209,7 +210,7 @@ class Data:
                             df = df.between_time('09:30' , '15:59')
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = -30)
-            if tf != '1min':# and tf != 'd':
+            if tf != '1min' and tf != 'd':
                 logic = {'open'  : 'first',
                             'high'  : 'max',
                             'low'   : 'min',
