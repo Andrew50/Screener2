@@ -259,7 +259,7 @@ class Data:
                 if (lastDay == lastDStock):
                     return
             
-            except AttributeError: #df is empty
+            except: #df is empty or doesnt exist
                 exists = False
 
             if tf == 'daily':
@@ -301,8 +301,8 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except:
-            pass
+        except Exception as e:
+            print(e)
             #print('random error')
     
     def runUpdate():
