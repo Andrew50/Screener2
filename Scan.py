@@ -108,14 +108,18 @@ class Scan:
 
            # print('enter when done')
            # input()
+            found = False
             while True:
                 path = r"C:\Downloads"
                 dir_list = os.listdir(path)
                 for direct in dir_list:
                     if today in direct:
-                        downloaded_file = path + direct
+                        downloaded_file = path + "\\" + direct
                         print('found file')
+                        found = True
                         break
+                if found:
+                    break
 
         time.sleep(3)
 
