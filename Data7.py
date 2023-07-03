@@ -140,7 +140,10 @@ class Data:
 
 
             if account:
+               # if tf == 'd' or tf == 'w' or tf == 'm':
+             #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 #fetch file
+              #  else:
                 dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                 dff = dff.between_time('09:30' , '15:59')
 
@@ -210,7 +213,7 @@ class Data:
                             df = df.between_time('09:30' , '15:59')
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = -30)
-            if tf != '1min' and tf != 'd':
+            if (tf != '1min' and tf != 'd' ) or (account and tf == 'd' ):
                 logic = {'open'  : 'first',
                             'high'  : 'max',
                             'low'   : 'min',
