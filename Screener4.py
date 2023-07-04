@@ -153,8 +153,11 @@ class Screener:
         
 
 #repackage as a list of 5 lists
-
-        nodes = 4
+        if os.path.exists("C:/Screener/laptop.txt"):
+            nodes = 8
+        else:
+            
+            nodes = 4
         pbar.close()
         print('spliting')
         pbar = tqdm(total=len(container))
@@ -204,7 +207,7 @@ if __name__ == '__main__':
         i = 0
         path = "C:/Screener/tmp/subtickerlists/"
         while True:
-            print('enter cycle length')
+            print('enter cycle length (x50)')
             cycles = int(input())
             for _ in range(cycles):
                 dir_list = os.listdir(path)
@@ -220,6 +223,7 @@ if __name__ == '__main__':
 
             
                # os.remove('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')
+               
                 os.remove(direct)
                # i += 1
         

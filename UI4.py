@@ -78,9 +78,12 @@ class UI:
 
                 if event == 'Load':
                     red = values['input-redate']
-                    if red != "":
-                        self.redate(self,self.i,values['input-redate'])
-
+                    ret = values['input-retype']
+                    if red != "" or ret != "":
+                        if red != "":
+                            self.redate(self,self.i,values['input-redate'])
+                        if ret != "":
+                            self.retype(self,self.i,ret)
                         i = self.i
                         for thing in range(4):
 
@@ -97,11 +100,11 @@ class UI:
                         setup = values["input-setup"]
                         keyword = values["input-keyword"]
                         #previ = 0
-                        previ = self.i
+                        previ = self.setups_data.index[self.i]
                         self.i = 0
                         sortinput = ""
                         self.lookup(self,ticker,date,setup,keyword,sortinput,timeframe)
-                        self.update(self,False,values,previ)
+                        self.update(self,False,values,previ,True)
 
                 if event == 'Toggle':
                     previ = self.i
@@ -148,7 +151,7 @@ class UI:
         pool.map_async(self.plot,arglist)
 
     def redate(self,previ,new):
-        df = pd.read_feather(r"C:\Screener\tmp\setups.feather")
+        df = pd.read_feather(r"C:\Screener\sync\setups.feather")
         index = self.setups_data.index[previ]
         ap = data.get()
         date = (self.setups_data.iat[previ,0])
@@ -157,8 +160,19 @@ class UI:
         df.at[index, 'Date'] = newdate
         self.setups_data.at[index, 'Date'] = newdate
                 
-        df.to_feather(r"C:\Screener\tmp\setups.feather")
+        df.to_feather(r"C:\Screener\sync\setups.feather")
         
+
+    def retype(self,previ,new):
+
+        df = pd.read_feather(r"C:\Screener\sync\setups.feather")
+        index = self.setups_data.index[previ]
+        
+        df.at[index, 'Setup'] = new
+        self.setups_data.at[index, 'Setup'] = new
+                
+        df.to_feather(r"C:\Screener\sync\setups.feather")
+
         
     def lookup(self,ticker,date,setup,keyword,sortinput,timeframe):
 
@@ -375,7 +389,8 @@ class UI:
                     
                     
                 else:
-                    fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                    #fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                    fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{setup}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
                 ax = axlist[0]
                   
                 ax.set_yscale('log')
@@ -411,10 +426,12 @@ class UI:
                 df2 = df2[l2:r2]
                 
                 if data.isToday(date):
-                    fig, axlist = mpf.plot(df2, type='candle', volume=True,axisoff=True, title = str(tf2), style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    #fig, axlist = mpf.plot(df2, type='candle', volume=True,axisoff=True, title = str(tf2), style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    fig, axlist = mpf.plot(df2, type='candle', volume=True,axisoff=True,  style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     
                 else:
-                    fig, axlist =  mpf.plot(df2, type='candle', axisoff=True, volume=True, title=str(tf2), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
+                    #fig, axlist =  mpf.plot(df2, type='candle', axisoff=True, volume=True, title=str(tf2), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
+                    fig, axlist =  mpf.plot(df2, type='candle', axisoff=True, volume=True,  style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d2], alpha = .25))
                 ax = axlist[0]
                  
                 ax.set_yscale('log')
@@ -448,10 +465,12 @@ class UI:
                 df3 = df3[l3:r3]
                 
                 if data.isToday(date):
-                    fig, axlist = mpf.plot(df3, type='candle', volume=True, axisoff=True,title = str(tf3),style=s,  returnfig = True, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    #fig, axlist = mpf.plot(df3, type='candle', volume=True, axisoff=True,title = str(tf3),style=s,  returnfig = True, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    fig, axlist = mpf.plot(df3, type='candle', volume=True, axisoff=True,style=s,  returnfig = True, figratio =(fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     
                 else:
-                    fig, axlist = mpf.plot(df3, type='candle', axisoff=True,volume=True, title = str(tf3),style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
+                    #fig, axlist = mpf.plot(df3, type='candle', axisoff=True,volume=True, title = str(tf3),style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
+                    fig, axlist = mpf.plot(df3, type='candle', axisoff=True,volume=True, style=s,  returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True,vlines=dict(vlines=[d3], alpha = .25))
                     
                 ax = axlist[0]
                     
@@ -491,10 +510,12 @@ class UI:
                 
                 
                 if data.isToday(date) or tf4 == '1min':
-                    plot, axlist =  mpf.plot(df4, type='candle', volume=True,axisoff=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    #plot, axlist =  mpf.plot(df4, type='candle', volume=True,axisoff=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
+                    plot, axlist =  mpf.plot(df4, type='candle', volume=True,axisoff=True,style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                    
                 else:
-                    plot, axlist = mpf.plot(df4, type='candle', axisoff=True,volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
+                   # plot, axlist = mpf.plot(df4, type='candle', axisoff=True,volume=True, title = str(tf4),style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
+                    plot, axlist = mpf.plot(df4, type='candle', axisoff=True,volume=True, style=s, returnfig = True, figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d4], alpha = .25))
                 ax = axlist[0]
                     
                 ax.set_yscale('log')
@@ -506,7 +527,7 @@ class UI:
         
       
         
-    def update(self, init,values,previ):
+    def update(self, init,values,previ,baddf = False):
         image1 = None
         image2 = None
         image3 = None
@@ -595,12 +616,14 @@ class UI:
  
             if init:
                 
+
                 annotation = self.setups_data.iat[self.i,5]
                 scale = 2.5
                 sg.theme('DarkGrey')
-                layout = [  
+             #   layout = 
+                c1 = [  
                 [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
-                [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
+                [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')]]
                 
                 #[ (sg.Text("gap")),(sg.Text(gap, key = '-gap-')),
                 #(sg.Text("|   adr")),(sg.Text(adr, key = '-adr-')),
@@ -613,7 +636,7 @@ class UI:
                 #(sg.Text("|   10")),(sg.Text(ten, key = '-ten-')),
                 #(sg.Text("|   time")),(sg.Text(time, key = '-time-'))],
                 
-                [sg.Multiline(annotation,size=(150, 5), key='annotation')],
+                c2 = [[sg.Multiline(annotation,size=(150, 5), key='annotation')],
                 [(sg.Text("Timeframe")),sg.InputText(key = 'input-timeframe')],
                 [(sg.Text("Ticker       ")),sg.InputText(key = 'input-ticker')],
                 [(sg.Text("Date         ")),sg.InputText(key = 'input-date')],
@@ -621,17 +644,82 @@ class UI:
                 [(sg.Text("Keyword  ")),sg.InputText(key = 'input-keyword')],
               #  [(sg.Text("Trait        ")),sg.InputText(key = 'input-trait')],
                 [(sg.Text("Redate    ")),sg.InputText(key = 'input-redate')],
+                [(sg.Text("Retype    ")),sg.InputText(key = 'input-retype')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
                 [sg.Button('Prev'), sg.Button('Next'),sg.Button('Load')]]
+
+
+                g1 = [[sg.Text("true EP")],
+                      [sg.Text("range EP")],
+                      [sg.Text("pivot EP")],
+                      [sg.Text("low EP")]
+                      ]
+                g2 = [     [sg.Text("backside NEP")],
+                      [sg.Text("range NEP")],
+                      [sg.Text("pivot NEP")],
+                      [sg.Text("high NEP")]]
+
+                g3 = [    [sg.Text("strong P")],
+                      [sg.Text("weak P")],
+                      [sg.Text("range P")],
+                      [sg.Text("pocket P")]]
+
+                g4 = [ [sg.Text("strong NP")],
+                      [sg.Text("weak NP")],
+                      [sg.Text("range NP")]]
+                      
+
+
+                      
+                g5 =   [[sg.Text("nep MR")],
+                      [sg.Text("parabolic MR")],
+                      [sg.Text("straight MR")],
+                      [sg.Text("extended MR")]]
+
+                g6 = [     [sg.Text("bull F")],
+                      [sg.Text("bear F")],
+                      [sg.Text("breakdown F")],
+                      [sg.Text("breakout F")]]
+                      
+
+               
+                      
+
+
+
+                layout = [[c1],
+                [sg.Column(c2),
+                 sg.VSeperator(),
+            
+                 sg.Column(g1),
+                 sg.Column(g2)
+                      ,sg.Column(g3)
+                      ,sg.Column(g4)
+                      ,sg.Column(g5)
+                      ,sg.Column(g6)
+            
+                 ]]
+
+
+
+
                 self.window = sg.Window('Screener', layout,margins = (10,10),scaling=scale,finalize = True)
+
+                #self.window.bind("<]>", "Next")
+                #self.window.bind("<>", "Prev")
             else:
                 df = pd.read_feather(r"C:\Screener\sync\setups.feather")
-                index = self.setups_data.index[previ]
+                if baddf:
+                    index = previ
+                else:
+                    index = self.setups_data.index[previ]
+                    self.setups_data.at[index, 'annotation'] = values["annotation"] 
                 df.at[index, 'annotation'] = values["annotation"]
-                self.setups_data.at[index, 'annotation'] = values["annotation"]   
+                  
                 df.to_feather(r"C:\Screener\sync\setups.feather")
                 
                 annotation = self.setups_data.iat[self.i,5]
+             
                 self.window['-number-'].update(str(f"{self.i + 1} of {len(self.setups_data)}"))
 
                 #self.window["-gap-"].update(gap)
@@ -646,6 +734,7 @@ class UI:
                 #self.window["-time-"].update(time)
                 self.window["annotation"].update(annotation)
                 self.window["input-redate"].update("")
+                self.window["input-retype"].update("")
                 self.window["-IMAGE-"].update(data=bio1.getvalue())
                 self.window["-IMAGE2-"].update(data=bio2.getvalue())
                 self.window["-IMAGE3-"].update(data=bio3.getvalue())
@@ -832,6 +921,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 
 
