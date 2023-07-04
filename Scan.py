@@ -108,14 +108,18 @@ class Scan:
 
            # print('enter when done')
            # input()
+            found = False
             while True:
                 path = r"C:\Downloads"
                 dir_list = os.listdir(path)
                 for direct in dir_list:
                     if today in direct:
-                        downloaded_file = path + direct
+                        downloaded_file = path + "\\" + direct
                         print('found file')
+                        found = True
                         break
+                if found:
+                    break
 
         time.sleep(3)
 
@@ -204,7 +208,7 @@ class Scan:
 
 
 
-        options.headless = False
+        options.headless = True
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')

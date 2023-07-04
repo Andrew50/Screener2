@@ -35,9 +35,10 @@ while True:
 
 '''
 
+    '''
 
-
-
+df = data.get('NGL')
+print(df)
 
 
 

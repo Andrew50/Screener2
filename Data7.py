@@ -140,7 +140,10 @@ class Data:
 
 
             if account:
+               # if tf == 'd' or tf == 'w' or tf == 'm':
+             #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 #fetch file
+              #  else:
                 dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                 dff = dff.between_time('09:30' , '15:59')
 
@@ -166,7 +169,8 @@ class Data:
                     if ticker == "^VIX" or old:
                         df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                     else:
-                        df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                        #df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                        df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 else:
                     if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
                         tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
@@ -209,7 +213,7 @@ class Data:
                             df = df.between_time('09:30' , '15:59')
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = -30)
-            if tf != '1min':# and tf != 'd':
+            if (tf != '1min' and tf != 'd' ) or (account and tf == 'd' ):
                 logic = {'open'  : 'first',
                             'high'  : 'max',
                             'low'   : 'min',
@@ -258,7 +262,7 @@ class Data:
                 if (lastDay == lastDStock):
                     return
             
-            except AttributeError: #df is empty
+            except: #df is empty or doesnt exist
                 exists = False
 
             if tf == 'daily':
@@ -300,8 +304,9 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except:
-            print('random error')
+        except Exception as e:
+            print(e)
+            #print('random error')
     
     def runUpdate():
         tv = TvDatafeed()
