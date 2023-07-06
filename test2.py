@@ -11,8 +11,8 @@ from Plot import Plot as plot
 
 
 ###########dont delete
-
-
+df = pd.read_feather('C:/Screener/sync/setups.feather')
+print(df)
 '''
 df = pd.read_feather('C:/Screener/sync/full_ticker_list.feather')
 
@@ -33,7 +33,7 @@ while True:
     if i >= len(df):
         break
 
-
+'''
 
     '''
 
