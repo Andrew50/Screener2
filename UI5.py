@@ -71,7 +71,7 @@ class UI:
             
                 event, values = self.window.read()
                 if event == 'Next': 
-                    if self.i < len(self.setups_data) - 1:
+                    if self.i < len(self.setups_data) - 1 or ((self.i < len(self.setups_data) + .5) and not self.revealed):
                         previ = self.i
                         if self.revealed:
                             self.i += 1
@@ -225,9 +225,18 @@ class UI:
                 scan = scan[scan['Setup'] == setup]
       
             if keyword  != "":
-                lis = keyword.split(',')
-                for keyword in lis:
-                    scan = scan[scan['annotation'].str.contains(keyword)]   
+                if '|' in keyword:
+                    lis = keyword.split('|')
+                    full = pd.DataFrame()
+                    for keyword in lis:
+                        add = scan[scan['annotation'].str.contains(keyword)]
+                        full = pd.concat([add,full])
+
+                    scan = full.drop_duplicates()
+                else:
+                    lis = keyword.split(',')
+                    for keyword in lis:
+                        scan = scan[scan['annotation'].str.contains(keyword)]   
             else:
                 scan = scan[scan['annotation'] == "" ]
             
@@ -405,7 +414,12 @@ class UI:
                     dpi = 330
 
             except:
-                pass
+                for i in range (4):
+                    string = str(i + 1) + iss + ".png"
+                    p = pathlib.Path("C:/Screener/tmp/charts") / string
+                    shutil.copy(r"C:\Screener\tmp\blank.png",p)
+
+                return
 
 
             string4 = "4" + iss + ".png"
@@ -760,7 +774,8 @@ class UI:
                 g1 = [[sg.Text("true EP")],
                       [sg.Text("range EP")],
                       [sg.Text("pivot EP")],
-                      [sg.Text("low EP")]
+                      [sg.Text("low EP")],
+                      [sg.Text("volume EP")]
                       ]
                 g2 = [     [sg.Text("backside NEP")],
                       [sg.Text("range NEP")],
@@ -822,7 +837,7 @@ class UI:
 
                 annot = values["annotation"]
 
-                if int(previ) == previ and annot != "":
+                if int(previ) == previ and annot != "" and '///' not in annot:
                     annot += '   /////////////   '
                 previ = math.floor(previ)
                 if baddf:

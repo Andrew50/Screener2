@@ -140,29 +140,33 @@ class Data:
 
 
             if account:
-               # if tf == 'd' or tf == 'w' or tf == 'm':
-             #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
-                #fetch file
-              #  else:
-                dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
-                dff = dff.between_time('09:30' , '15:59')
 
-                tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
-                screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
-                screener_data.set_index('Ticker', inplace = True)
+                try:
+                   # if tf == 'd' or tf == 'w' or tf == 'm':
+                 #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+                    #fetch file
+                  #  else:
+                    dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                    dff = dff.between_time('09:30' , '15:59')
+
+                    tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
+                    screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
+                    screener_data.set_index('Ticker', inplace = True)
             
-                exchange = str(screener_data.loc[ticker]['Exchange'])
-                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
-                df.drop('symbol', axis = 1, inplace = True)
-                df.index = df.index + pd.Timedelta(hours=4)
-                lastday = dff.index[-1]   
-                scrapped_data_index = Data.findex(df,lastday) 
-                if scrapped_data_index == None:     
-                    pass     
-                else:    
+                    exchange = str(screener_data.loc[ticker]['Exchange'])
+                    df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
+                    df.drop('symbol', axis = 1, inplace = True)
+                    df.index = df.index + pd.Timedelta(hours=4)
+                    lastday = dff.index[-1]   
+                    scrapped_data_index = Data.findex(df,lastday) 
+                    if scrapped_data_index == None:     
+                        pass     
+                    else:    
                 
-                    df = df[scrapped_data_index + 1:]
-                    df = pd.concat([dff,df])
+                        df = df[scrapped_data_index + 1:]
+                        df = pd.concat([dff,df])
+                except:
+                    df = dff
                 
             else:
                 if tf == 'd' or tf == 'w' or tf == 'm':
@@ -211,9 +215,10 @@ class Data:
                         df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                         if not premarket:
                             df = df.between_time('09:30' , '15:59')
+        
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = -30)
-            if (tf != '1min' and tf != 'd' ) or (account and tf == 'd' ):
+            if (tf != '1min' and tf != 'd' ) or (account ):
                 logic = {'open'  : 'first',
                             'high'  : 'max',
                             'low'   : 'min',
