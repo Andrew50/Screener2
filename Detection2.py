@@ -118,7 +118,7 @@ class Detection:
 
 
 
-								if (dolVol > 1000000 or pmDolVol  > 1 * 1000000) and adr > 3:
+								if (dolVol > 5000000 or pmDolVol  > 1 * 1000000) and adr > 2.8:
 
 									sys.stdout = open(os.devnull, 'w')
 									for god in model_list:
@@ -135,7 +135,7 @@ class Detection:
 											continue
 											#print(typ)
 										#prin
-										thresh = .85
+										thresh = .75
 
 										
 										if z > thresh:
