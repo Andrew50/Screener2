@@ -70,6 +70,46 @@ class UI:
             while True:
             
                 event, values = self.window.read()
+
+
+                if event == 'Yes' or event == 'No':
+                    date = (self.setups_data.iloc[i][0])
+            
+         
+           
+                    ticker = self.setups_data.iloc[i][1]
+                    s = self.setups_data.iloc[i][2]
+                    if event == 'Yes':
+                        val = 1
+                    else:
+                        val = 0
+                    df2 = pd.DataFrame({
+
+
+                    'date':[date],
+                    'ticker':[ticker],
+                    'setup':[val]})
+
+                    if(data.isBen()):
+                        df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                    elif data.isLaptop():
+                        df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                    else:
+                        df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+
+                    df = pd.concat([df,df2]).reset_index(drop = True)
+                    '''
+                    if(data.isBen()):
+                        df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                    elif data.isLaptop():
+                        df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                
+                    else:
+                        df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+                    '''
+                    print(df2)
+                    event = 'Next'
+
                 if event == 'Next': 
                     if self.i < len(self.setups_data) - 1 or ((self.i < len(self.setups_data) + .5) and not self.revealed):
                         previ = self.i
@@ -905,7 +945,7 @@ class UI:
                 [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
-                [sg.Button('Prev'), sg.Button('Next')] ,
+                [sg.Button('Prev'), sg.Button('Next'), sg.Button('Yes'),sg.Button('No')] ,
                 [sg.Text(str(req) + ' star requirement')]
                 ]
                 self.window = sg.Window('Screener', layout,margins = (10,10),finalize = True)
