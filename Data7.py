@@ -360,7 +360,7 @@ class Data:
         for s in setup_list:
             modelTest.combine(new,s)
 
-            create.run(s,prcnt_setup,epochs)
+            create.run(s,prcnt_setup,epochs,False)
 
 
 

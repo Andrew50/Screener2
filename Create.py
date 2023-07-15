@@ -80,7 +80,7 @@ class Create:
     def nn_multi(bar):
         try:
 
-            print(bar)
+         
             setups = bar
             ticker = setups[0]
             date = setups[1]
@@ -309,7 +309,7 @@ class Create:
 
         if split:
 
-            pass
+           # pass
             Create.evaluate_training(model, x_test, y_test)
         
 
