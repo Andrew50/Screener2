@@ -79,11 +79,13 @@ class Create:
 
     def nn_multi(bar):
         try:
+
+            print(bar)
             setups = bar
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
-            setup_type = setups[3]
+            setup_type = setups[5]
             #setup_type = [3] god reallllly 
             sample_size = Create.setup_size(setup_type)
             

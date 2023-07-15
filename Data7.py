@@ -11,6 +11,8 @@ import datetime
 import numpy
 from multiprocessing  import Pool
 import warnings
+#from Create import Create as create
+
 import yfinance as yf
 import shutil
 warnings.filterwarnings("ignore")
@@ -344,7 +346,21 @@ class Data:
            batches.append([ticker, minute_last, 'minute'])
         
         
-        Data.pool(Data.update, batches)
+        #Data.pool(Data.update, batches)
+
+        from Create import Create as create
+        from modelTest import modelTest
+        
+        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
+
+        epochs = 200
+        new = True
+        prcnt_setup = .09
+        
+        for s in setup_list:
+            modelTest.combine(new,s)
+
+            create.run(s,prcnt_setup,epochs)
 
 
 

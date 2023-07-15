@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
     # EP 
     thresh = .6
-    setuptype = 'AF'
+    setuptype = 'EP'
 
     epochs = 250
     new = True
@@ -225,9 +225,9 @@ if __name__ == "__main__":
 
     modelTest.combine(new,setuptype)
 
-   # create.run(setuptype,prcnt_setup,epochs)
+    create.run(setuptype,prcnt_setup,epochs)
 
-    #modelTest.runRandomTicker(setuptype,thresh)
+    modelTest.runRandomTicker(setuptype,thresh)
    
 
 
