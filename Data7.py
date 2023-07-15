@@ -355,7 +355,7 @@ class Data:
 
         epochs = 200
         new = True
-        prcnt_setup = .09
+        prcnt_setup = .08
         
         for s in setup_list:
             modelTest.combine(new,s)
