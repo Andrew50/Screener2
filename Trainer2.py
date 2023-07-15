@@ -15,6 +15,7 @@ import matplotlib.ticker as mticker
 import shutil
 import os
 from Detection2 import Detection as detection
+from tensorflow.keras.models import load_model
 import math
 
 
@@ -77,31 +78,16 @@ class Trainer:
         
         df1 = self.dict[self.i][2]
         ticker = self.dict[self.i][0]
-
-
-
-
-
-
-
         ii = 0
+
         for s in self.setup_list:
-
-            
-
-
-
 
             df = pd.DataFrame()
             
             df['date'] = df1.index
             df['ticker'] = ticker
             df['setup'] = 0
-
-
-           
             for bar in self.current_setups:
-                
                 if bar[1] == s:
 
                     self.stats_list[ii] += 1
@@ -114,15 +100,11 @@ class Trainer:
                             'date':[df1.index[index]],
                             'ticker':[ticker],
                             'setup':[1]})
-
                         df = pd.concat([df,df2]).reset_index(drop = True)
-
             df = df[self.cutoff:]
             print(df)
-            
 
             add = df[['ticker','date','setup']]
-
             try:
                 if(data.isBen()):
                     df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
@@ -171,17 +153,11 @@ class Trainer:
                 self.index = 0
             if self.index >= len(df):
                 self.index = len(df) - 1
-        
             try:
 
                 self.date = df.index[self.index]
-
-       
             except:
                 return
-
-            
-
 
         else:
 
@@ -204,20 +180,17 @@ class Trainer:
 
 
             if self.menu == 0:
-
-
-
                 self.stats_list = []
-
-
                 for setup in self.setup_list:
 
 
                     modelTest.combine(True,setup)
-
-                    df = pd.read_feather("C:/Screener/setups/database/" + setup + ".feather")
-
-                    df = df[df['setup'] == 1]
+                    try:
+                        df = pd.read_feather("C:/Screener/setups/database/" + setup + ".feather")
+                        df = df[df['setup'] == 1]
+                    except:
+                        df = pd.DataFrame()
+                    
 
                     self.stats_list.append(len(df))
 
@@ -257,11 +230,16 @@ class Trainer:
                 self.window.bind("<Button-3>", "cl")
 
             else:
+                if self.menu == 1:
+                    god = 'Remove'
+                else:
+                    god = 'Add'
                 layout = [
                 [sg.Image(key = '-CHART-')],
                 [sg.Button(s) for s in self.setup_list],
                 [sg.Button('Prev'),sg.Button('Next'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
-                [sg.Button('Toggle')]
+                #[sg.Button(god)],
+                [sg.Button('Toggle'), sg.Button(god)]
                 ]
 
 
@@ -298,17 +276,9 @@ class Trainer:
 
             chart_size = self.x_size - 20
             round_x = int((self.cutoff)/(len(df)) * (chart_size)) + 10 - int((chart_size/len(df))/2)
-
-        
-
-
             self.window["-GRAPH-"].draw_line((round_x,0), (round_x,self.height), color='red', width=2)
 
             self.current_setups = []
-
-
-
-
             stat_string = ''
 
             for i  in range(len(self.setup_list)):
@@ -358,8 +328,9 @@ class Trainer:
                 shutil.rmtree("C:/Screener/setups/charts")
             os.mkdir("C:/Screener/setups/charts")
             sg.theme('DarkGrey')
-            #self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
-            self.setup_list = ['P','NP']
+            self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
+            #self.setup_list = ['P','NP']
+            #self.setup_list = ['L']
             self.scale = 4
             self.setup = []
             self.i = 0
@@ -395,6 +366,24 @@ class Trainer:
                             self.update(self)
                             self.preload(self)
 
+
+                elif self.event == 'Remove' or self.event == 'Add':
+                   # print(self.setups_df)
+                    i = self.setups_df.iloc[self.i]['sindex']
+                    setup = self.current_setup
+                    source = self.setups_df.iloc[self.i]['source']
+                   
+                    df = pd.read_feather('C:/Screener/sync/database/' + source + setup + '.feather')
+                    
+                    if self.menu == 1:
+                        df.iat[i,2] = 0
+                    elif self.menu == 2:
+                        df.iat[i,2] = 1
+                    
+                    df.to_feather('C:/Screener/sync/database/' + source + setup + '.feather')
+                    print(df.iloc[i])
+
+
                 elif self.event == 'Prev':
                     #self.menu therfore has to be 1
                     if self.i > 0:
@@ -419,18 +408,24 @@ class Trainer:
                     if os.path.exists("C:/Screener/setups/charts"):
                         shutil.rmtree("C:/Screener/setups/charts")
                     os.mkdir("C:/Screener/setups/charts")
-                    if self.menu == 0:
-                        self.menu = 1
+                    if self.menu == 2:
+                        self.menu = 0
                         
                     else:
-                        self.menu = 0
+                        self.menu += 1
+
 
                     self.init = True
-                    self.setups_df = pd.read_feather('C:/Screener/setups/EP.feather').sample(frac = 1).reset_index(drop = True)
-                    self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                    
+                    self.setups_df = pd.read_feather('C:/Screener/setups/database/EP.feather').sample(frac = 1).reset_index(drop = True)
+                    if self.menu == 1:
+                        self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                    else:
+                        self.setups_df = self.get_true(self)
+                        #self.setups_df[self.setups_df['setup'] == 0]
                     self.preload(self)
                     self.update(self)
-
+                    self.current_setup = 'EP'
                 elif self.event == 'right' or self.event == 'left':
                     self.click(self,False)
                     
@@ -439,15 +434,29 @@ class Trainer:
                         
                         self.log(self)
                     else:
-                        self.setups_df = pd.read_feather('C:/Screener/setups/' + self.event + '.feather').sample(frac = 1).reset_index(drop = True)
-                        self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                        self.setups_df = pd.read_feather('C:/Screener/setups/database/' + self.event + '.feather').sample(frac = 1).reset_index(drop = True)
+                        if self.menu == 1:
+                            self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
+                        else:
+                            self.setups_df = self.get_true(self)
+                        
                         if os.path.exists("C:/Screener/setups/charts"):
                             shutil.rmtree("C:/Screener/setups/charts")
                         os.mkdir("C:/Screener/setups/charts")
                         self.i = 0
                         self.preload(self)
                         self.update(self)
+                        self.current_setup = self.event
                         self.window['-text-'].update(self.event)
+    '''
+    def get_true(self):
+
+
+        model = load_model('C:/Screener/sync/models/model_' + str(self.current_setup))
+		df2 = create.reform(df,typ,currentday)
+											
+		z = model.predict(df2)[0][1]
+    '''
     def preload(self):
         arglist = []
         if self.i == 0:

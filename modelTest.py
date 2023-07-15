@@ -164,20 +164,32 @@ class modelTest:
             for setup in setups:
                 try:
                     df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
+                    df1['sindex'] = df1.index
+                    df1['source'] = 'ben_'
+
                 except:
                     df1 = pd.DataFrame()
                 try:
                     df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
+                    df2['sindex'] = df2.index
+                    df2['source'] = 'aj_'
                 except:
                     df2 = pd.DataFrame()
                 try:
 
                     df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
+                    df4['sindex'] = df4.index
+                    df4['source'] = 'laptop_'
                 except:
                     df4 = pd.DataFrame()
+
+                
+
                 df3 = pd.concat([df1, df2, df4]).reset_index(drop = True)
                 
                 df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
+
+                #print(df3)
         else:
             df = pd.read_feather(r"C:/Screener/sync/allsetups.feather").sample(frac = .2)
 
@@ -213,9 +225,9 @@ if __name__ == "__main__":
 
     modelTest.combine(new,setuptype)
 
-    create.run(setuptype,prcnt_setup,epochs)
+   # create.run(setuptype,prcnt_setup,epochs)
 
-    modelTest.runRandomTicker(setuptype,thresh)
+    #modelTest.runRandomTicker(setuptype,thresh)
    
 
 
