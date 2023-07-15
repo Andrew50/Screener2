@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
     modelTest.combine(new,setuptype)
 
-    create.run(setuptype,prcnt_setup,epochs,False)
+    create.run(setuptype,prcnt_setup,epochs,True)
 
     modelTest.runRandomTicker(setuptype,thresh)
    
