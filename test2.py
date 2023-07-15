@@ -8,11 +8,11 @@ from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
 
-
+df = data.get(date = '0')
+print(df)
 
 ###########dont delete
-df = pd.read_feather('C:/Screener/sync/setups.feather')
-print(df)
+
 '''
 df = pd.read_feather('C:/Screener/sync/full_ticker_list.feather')
 
@@ -35,7 +35,7 @@ while True:
 
 '''
 
-    '''
+'''
 
 df = data.get('NGL')
 print(df)
@@ -62,7 +62,7 @@ print(df)
 #print(df)
 
 
-'''
+
 setuptype = 'MR'
 ################dont delte!!!!!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setups = pd.read_feather('C:/Screener/sync/setups.feather')

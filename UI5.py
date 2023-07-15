@@ -54,8 +54,10 @@ class UI:
         self.preloadamount = 10
         self.traitlist = []
 
-
-        self.revealed = False
+        if not current:
+            self.revealed = False
+        else:
+            self.revealed = True
 
 
         if os.path.exists("C:/Screener/laptop.txt"):
@@ -72,43 +74,7 @@ class UI:
                 event, values = self.window.read()
 
 
-                if event == 'Yes' or event == 'No':
-                    date = (self.setups_data.iloc[i][0])
-            
-         
-           
-                    ticker = self.setups_data.iloc[i][1]
-                    s = self.setups_data.iloc[i][2]
-                    if event == 'Yes':
-                        val = 1
-                    else:
-                        val = 0
-                    df2 = pd.DataFrame({
-
-
-                    'date':[date],
-                    'ticker':[ticker],
-                    'setup':[val]})
-
-                    if(data.isBen()):
-                        df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
-                    elif data.isLaptop():
-                        df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
-                    else:
-                        df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
-
-                    df = pd.concat([df,df2]).reset_index(drop = True)
-                    '''
-                    if(data.isBen()):
-                        df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
-                    elif data.isLaptop():
-                        df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
                 
-                    else:
-                        df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
-                    '''
-                    print(df2)
-                    event = 'Next'
 
                 if event == 'Next': 
                     if self.i < len(self.setups_data) - 1 or ((self.i < len(self.setups_data) + .5) and not self.revealed):
@@ -214,7 +180,7 @@ class UI:
             i += k
         arglist = []
         for index in i:
-            arglist.append([self.setups_data,index])
+            arglist.append([self.setups_data,index,self.revealed])
 
         
         pool.map_async(self.plot,arglist)
@@ -339,6 +305,7 @@ class UI:
         
         i = slist[1]
         setups_data = slist[0]
+        force_revealed = slist[2]
 
         plt.rcParams.update({'font.size': 30})
         
@@ -350,6 +317,9 @@ class UI:
             revealed = True
         i = math.floor(i)
         
+
+        if force_revealed:
+            revealed = True
         if (os.path.exists("C:/Screener/tmp/charts/1" + iss + ".png") == False) or True:
 
             #print(f'preloading {iss}')
@@ -514,7 +484,7 @@ class UI:
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
                 plt.savefig(p4, bbox_inches='tight',dpi = dpi)
-            except:
+            except TimeoutError:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p4)
 
 
@@ -871,6 +841,9 @@ class UI:
                 #self.window.bind("<]>", "Next")
                 #self.window.bind("<>", "Prev")
             else:
+
+
+
                 
                 i_int = math.floor(self.i)
                 df = pd.read_feather(r"C:\Screener\sync\setups.feather")
@@ -916,6 +889,7 @@ class UI:
    
         else:
             if init:
+                self.revealed = True
                 sg.theme('DarkGrey')
 
                 # get star req
@@ -1095,7 +1069,7 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 
 
 

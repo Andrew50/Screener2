@@ -39,13 +39,7 @@ class UI:
                 self.setups_data =pd.read_feather(r"C:\Screener\tmp\setups.feather")
                 self.historical = True
 
-        except:
-            print('There were no setups')
-            exit()
-
-        if len(self.setups_data ) == 0: 
-            print('There were no setups')
-            exit()
+      
         '''
       
         self.historical = not current
@@ -60,6 +54,53 @@ class UI:
             while True:
             
                 event, values = self.window.read()
+
+                if event == 'Yes' or event == 'No':
+                    date = (self.setups_data.iloc[self.i][0])
+            
+         
+           
+                    ticker = self.setups_data.iloc[self.i][1]
+                    s = self.setups_data.iloc[self.i][2]
+                    if event == 'Yes':
+                        val = 1
+                    else:
+                        val = 0
+                    df2 = pd.DataFrame({
+
+
+                    'date':[date],
+                    'ticker':[ticker],
+                    'setup':[val]})
+
+                    if(data.isBen()):
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+                    elif data.isLaptop():
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+                    else:
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+
+                    df = pd.concat([df,df2]).reset_index(drop = True)
+                    '''
+                    if(data.isBen()):
+                        df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                    elif data.isLaptop():
+                        df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                
+                    else:
+                        df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+                    '''
+                
+                    event = 'Next'
                 if event == 'Next': 
                     if self.i < len(self.setups_data) - 1:
                         previ = self.i
@@ -259,16 +300,14 @@ class UI:
         
         if (os.path.exists("C:/Screener/tmp/charts/1" + iss + ".png") == False):
 
-            #print(f'preloading {i}')
+            
                
             mc = mpf.make_marketcolors(up='g',down='r')
             s  = mpf.make_mpf_style(marketcolors=mc)
             try:
 
-                #print(setups_data)
                 date = (setups_data.iloc[i][0])
             
-            #print(date)
            
                 ticker = setups_data.iloc[i][1]
                 setup = setups_data.iloc[i][2]
@@ -336,11 +375,11 @@ class UI:
 
 
                 dpi = 100
-
+          
                 if data.isToday(date):
-                    cm = sm - 5
-                    cd = sd - 5
-                    ch = sh - 5
+                    cm = sm - 10
+                    cd = sd - 10
+                    ch = sh - 10
                     fs = 1.08
                     fw = 15
                     fh = 7
@@ -377,6 +416,7 @@ class UI:
                     d1 = datedaily
                     s1 = sd
                 df1 = data.get(ticker,tf1,date)
+              
                 #df1 = data.get(ticker,tf1)
                 l1 = data.findex(df1,date) - c1
                 r1 = l1 + s1
@@ -384,7 +424,7 @@ class UI:
                     l1 = 0
                 df1 = df1[l1:r1]
                 
-                if data.isToday(date):
+                if data.isToday(date) or True:
                     fig, axlist  =  mpf.plot(df1, type='candle', volume=True, axisoff=True,title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'), style=s, returnfig = True, figratio = (fw,fh), mav=(10,20),figscale=fs, panel_ratios = (5,1), tight_layout = True)#, hlines=dict(hlines=[pmPrice], alpha = .25))
                     
                     
@@ -398,7 +438,7 @@ class UI:
                 plt.savefig(p1, bbox_inches='tight',dpi = dpi)
             except:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p1)
-                #print(ticker)
+                
                
                 
             string2 = "2" + iss + ".png"
@@ -504,7 +544,7 @@ class UI:
                 if l4 < 0:
                     l4 = 0
 
-                #print(f'{l4} , {r4} , {len(df4)}')
+         
                 df4 = df4[l4:r4]
                 
                 
@@ -771,7 +811,7 @@ class UI:
                 [sg.Image(bio1.getvalue(),key = '-IMAGE-'),sg.Image(bio2.getvalue(),key = '-IMAGE2-')],
                 [sg.Image(bio3.getvalue(),key = '-IMAGE3-'),sg.Image(bio4.getvalue(),key = '-IMAGE4-')],
                 [(sg.Text((str(f"{self.i + 1} of {len(self.setups_data)}")), key = '-number-'))],
-                [sg.Button('Prev'), sg.Button('Next')] ,
+                [sg.Button('Prev'), sg.Button('Next'), sg.Button('Yes'),sg.Button('No')] ,
                 [sg.Text(str(req) + ' star requirement')]
                 ]
                 self.window = sg.Window('Screener', layout,margins = (10,10),finalize = True)
@@ -921,6 +961,6 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 
 

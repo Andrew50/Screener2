@@ -69,7 +69,7 @@ class Detection:
 			except TimeoutError:
 				pass
 		
-
+			
 			except KeyError:
 				continue
 		
@@ -86,7 +86,7 @@ class Detection:
 					continue
 			except:
 				pass
-
+			
 		
 			if len(dff) > 10:
 		
@@ -104,7 +104,7 @@ class Detection:
 								start = 0
 							df = dff[start:currentday + 200]
 							currentday = data.findex(df,date)
-					
+							
 							dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 							if tf == 'd':
