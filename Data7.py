@@ -351,7 +351,7 @@ class Data:
         from Create import Create as create
         from modelTest import modelTest
         
-        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
+        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F']
 
         epochs = 200
         new = True

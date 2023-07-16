@@ -172,7 +172,7 @@ class Create:
     def sample(setuptype,use,split):
 
         buffer = 2
-        if setuptype == 'AF':
+        if setuptype == 'F':
             f = pd.read_feather('C:/Screener/setups/database/F.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
             nf = pd.read_feather('C:/Screener/setups/database/NF.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
             nf = nf[nf['setup'] == 1]
