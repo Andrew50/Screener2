@@ -237,7 +237,8 @@ class Create:
         elif setup_type == 'MR':
             sample_size = 40
         elif 'F' in setup_type:
-            sample_size = 120
+            sample_size = 75
+            #sample_size = 120
         else: #pivot
             sample_size = 40
 

@@ -74,8 +74,55 @@ class UI:
                 event, values = self.window.read()
 
 
-                
+                if event == 'Yes' or event == 'No':
+                    date = (self.setups_data.iloc[int(self.i)][0])
+            
+         
+           
+                    ticker = self.setups_data.iloc[int(self.i)][1]
+                    s = self.setups_data.iloc[int(self.i)][2]
+                    if event == 'Yes':
+                        val = 1
+                        print(f'added {ticker}')
+                    else:
+                        val = 0
+                        print(f'removed {ticker}')
+                    df2 = pd.DataFrame({
 
+
+                    'date':[date],
+                    'ticker':[ticker],
+                    'setup':[val]})
+
+                    if(data.isBen()):
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+                    elif data.isLaptop():
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+                    else:
+                        try:
+                            df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+                        except:
+                            df = pd.DataFrame()
+
+                    df = pd.concat([df,df2]).reset_index(drop = True)
+                    '''
+                    if(data.isBen()):
+                        df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+                    elif data.isLaptop():
+                        df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+                
+                    else:
+                        df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+                    '''
+                
+                    event = 'Next'
+                    
                 if event == 'Next': 
                     if self.i < len(self.setups_data) - 1 or ((self.i < len(self.setups_data) + .5) and not self.revealed):
                         previ = self.i
@@ -925,7 +972,7 @@ class UI:
                 self.window = sg.Window('Screener', layout,margins = (10,10),finalize = True)
             else:
                 try:
-
+                    
                     self.window["-IMAGE-"].update(data=bio1.getvalue())
                     self.window["-IMAGE2-"].update(data=bio2.getvalue())
                     self.window["-IMAGE3-"].update(data=bio3.getvalue())

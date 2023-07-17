@@ -346,7 +346,7 @@ class Data:
            batches.append([ticker, minute_last, 'minute'])
         
         
-        #Data.pool(Data.update, batches)
+        Data.pool(Data.update, batches)
 
         from Create import Create as create
         from modelTest import modelTest
