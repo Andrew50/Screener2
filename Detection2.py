@@ -24,7 +24,7 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'F', 'MR']
+		setuplist = ['EP','NEP','P', 'F', 'MR', 'NP']
 		#setuplist = ['EP','F','NF','NP','P']
 		#setuplist = ['F','NF','NP','P']
 		#setuplist = []
@@ -143,7 +143,7 @@ class Detection:
 											print('logged')
 											log.log(df,currentday, tf, ticker, z, path , typ)  
 									sys.stdout = sys.__stdout__
-									if True:
+									if False:
 
 										#if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 										#	sEP = True
