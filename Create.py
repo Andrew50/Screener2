@@ -233,13 +233,13 @@ class Create:
 
     def setup_size(setup_type):
         if 'EP' in setup_type:
-            sample_size = 10
+            sample_size = 40
         elif setup_type == 'MR':
-            sample_size = 15
+            sample_size = 40
         elif 'F' in setup_type:
-            sample_size = 75
+            sample_size = 120
         else: #pivot
-            sample_size = 15
+            sample_size = 40
 
         return sample_size
 

@@ -230,10 +230,13 @@ class Trainer:
                 self.window.bind("<Button-3>", "cl")
 
             else:
+                
                 if self.menu == 1:
                     god = 'Remove'
                 else:
                     god = 'Add'
+
+
                 layout = [
                 [sg.Image(key = '-CHART-')],
                 [sg.Button(s) for s in self.setup_list],
@@ -244,6 +247,10 @@ class Trainer:
 
 
                 self.window = sg.Window('Validator', layout,margins = (10,10),scaling=self.scale,finalize = True)
+
+                self.window.bind("<p>", "Next")
+                self.window.bind("<i>", "Prev")
+                self.window.bind("<o>", god)
             
             self.init = False
             self.window.maximize()
@@ -381,7 +388,13 @@ class Trainer:
                         df.iat[i,2] = 1
                     
                     df.to_feather('C:/Screener/sync/database/' + source + setup + '.feather')
-                    print(df.iloc[i])
+                    print(f'removed {df.iloc[i][1]} {df.iloc[i][0]}')
+
+                    if self.i + 1 < len(self.setups_df):
+                        self.i += 1
+                     
+                        self.update(self)
+                        self.preload(self)
 
 
                 elif self.event == 'Prev':
