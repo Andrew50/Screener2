@@ -141,8 +141,8 @@ class Data:
                 tf = '1min'
 
 
-            if account:
-
+            if account:# and 'd' not in tf and 'w' not in tf:
+                
                 try:
                    # if tf == 'd' or tf == 'w' or tf == 'm':
                  #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
@@ -357,16 +357,18 @@ class Data:
         new = True
         prcnt_setup = .08
         
-        for s in setup_list:
-            modelTest.combine(new,s)
 
-            create.run(s,prcnt_setup,epochs,False)
+        if os.path.exists("C:/Screener/desktop.txt"):
+            for s in setup_list:
+                modelTest.combine(new,s)
+
+                create.run(s,prcnt_setup,epochs,False)
 
 
 
 
-        if datetime.datetime.now().weekday() == 4:
-            Data.backup()
+            if datetime.datetime.now().weekday() == 4:
+                Data.backup()
         
 
 
