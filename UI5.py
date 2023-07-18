@@ -470,6 +470,13 @@ class UI:
                     fh = 18
                     dpi = 330
 
+                elif os.path.exists("C:/Screener/tae.txt"):
+                    fs = .2
+                    fw = 41
+                    fh = 18
+                    dpi = 330
+
+
             except:
                 for i in range (4):
                     string = str(i + 1) + iss + ".png"
