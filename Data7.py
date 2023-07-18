@@ -412,6 +412,12 @@ class Data:
             return True
         return False
 
+
+    def isTae():
+        if(os.path.exists("C:/Screener/tae.txt")):
+            return True
+        return False
+
 if __name__ == '__main__':
     #Data.backup()
   
