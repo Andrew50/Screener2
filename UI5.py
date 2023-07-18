@@ -74,7 +74,7 @@ class UI:
                 event, values = self.window.read()
 
 
-                if event == 'Yes' or event == 'No':
+                if event == 'Yes' or event == 'No' and not data.isTae():
                     date = (self.setups_data.iloc[int(self.i)][0])
             
          
@@ -341,7 +341,9 @@ class UI:
                         shutil.rmtree("C:/Screener/tmp/charts")
                         break
                     except:
+                       
                         pass
+
             os.mkdir("C:/Screener/tmp/charts")
             listt = [ float(x) for x in range(self.preloadamount)]
            
