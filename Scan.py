@@ -103,7 +103,8 @@ class Scan:
             download_screener_data.click()
             time.sleep(1.5)
             downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-        except:
+        except Exception as e:
+            print(e)
             print('manual csv fetch required')
 
            # print('enter when done')
