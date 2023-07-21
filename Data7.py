@@ -33,6 +33,7 @@ class Data:
 
 
     def pool(deff,arg,nodes = 5):
+          
             pool = Pool(processes = nodes)
             data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
             return(data)

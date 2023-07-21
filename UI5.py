@@ -25,29 +25,7 @@ import statistics
 class UI:
 
     def loop(self,current = False):
-        '''
-        if os.path.exists("C:/Screener/tmp/charts"):
-            shutil.rmtree("C:/Screener/tmp/charts")
-        os.mkdir("C:/Screener/tmp/charts")
-        self.i = 0
-        self.annotation = False
-        try:
-            if current:
-                self.setups_data =pd.read_feather(r"C:\Screener\tmp\todays_setups.feather")
-                self.historical = False
-    
-            else:
-                self.setups_data =pd.read_feather(r"C:\Screener\tmp\setups.feather")
-                self.historical = True
-
-        except:
-            print('There were no setups')
-            exit()
-
-        if len(self.setups_data ) == 0: 
-            print('There were no setups')
-            exit()
-        '''
+   
       
         self.historical = not current
        
@@ -74,7 +52,7 @@ class UI:
                 event, values = self.window.read()
 
 
-                if event == 'Yes' or event == 'No':
+                if event == 'Yes' or event == 'No' and not data.isTae():
                     date = (self.setups_data.iloc[int(self.i)][0])
             
          
@@ -344,8 +322,9 @@ class UI:
                         shutil.rmtree("C:/Screener/tmp/charts")
                         break
                     except:
-                        print('god')
-                        
+                       
+                        pass
+
             os.mkdir("C:/Screener/tmp/charts")
             listt = [ float(x) for x in range(self.preloadamount)]
            
