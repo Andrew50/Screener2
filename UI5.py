@@ -66,9 +66,9 @@ class UI:
             nodes = 6
         with Pool(nodes) as self.pool:
             self.lookup(self,"","","","","","")
-
+            
             self.update(self,True,None,0)
-
+         
             while True:
             
                 event, values = self.window.read()
@@ -226,11 +226,13 @@ class UI:
                 
             i += k
         arglist = []
+
+       
         for index in i:
             arglist.append([self.setups_data,index,self.revealed])
 
         
-        pool.map_async(self.plot,arglist)
+        pool.map(self.plot,arglist)
 
     def redate(self,previ,new):
         previ = math.floor(previ)
@@ -336,12 +338,14 @@ class UI:
             self.setups_data = scan
             if os.path.exists("C:/Screener/tmp/charts"):
                 while True:
+                   
                     try:
                     
                         shutil.rmtree("C:/Screener/tmp/charts")
                         break
                     except:
-                        pass
+                        print('god')
+                        
             os.mkdir("C:/Screener/tmp/charts")
             listt = [ float(x) for x in range(self.preloadamount)]
            
@@ -471,10 +475,15 @@ class UI:
                     dpi = 330
 
                 elif os.path.exists("C:/Screener/tae.txt"):
-                    fs = .2
-                    fw = 41
-                    fh = 18
-                    dpi = 330
+                    if data.isToday(date):
+                        fs = .75
+                        fw = 41
+                        fh = 18
+                        
+                    else:
+                        fs = .6
+                        fw = 41
+                        fh = 18
 
 
             except:
@@ -538,7 +547,7 @@ class UI:
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                    
                 plt.savefig(p4, bbox_inches='tight',dpi = dpi)
-            except TimeoutError:
+            except:
                 shutil.copy(r"C:\Screener\tmp\blank.png",p4)
 
 
@@ -594,9 +603,10 @@ class UI:
                 ax.set_yscale('log')
                 ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                 plt.savefig(p1, bbox_inches='tight',dpi = dpi)
-            except :
+            except:
+
                 shutil.copy(r"C:\Screener\tmp\blank.png",p1)
-                #print(ticker)
+             
                
                 
             string2 = "2" + iss + ".png"
@@ -887,7 +897,8 @@ class UI:
             
                  ]]
 
-
+                if os.path.exists("C:/Screener/tae.txt"):
+                    scale = 1.25
 
 
                 self.window = sg.Window('Screener', layout,margins = (10,10),scaling=scale,finalize = True)
@@ -1123,7 +1134,7 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,True)
+    UI.loop(UI,False)
 
 
 
