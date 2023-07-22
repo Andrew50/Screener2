@@ -118,9 +118,9 @@ class Detection:
 
 
 
-								if (dolVol > 5000000 or pmDolVol  > 1 * 1000000) and adr > 2.8:
+								if (dolVol > 8000000 or pmDolVol  > .5 * 1000000) and adr > 2.8:
 
-									sys.stdout = open(os.devnull, 'w')
+									#sys.stdout = open(os.devnull, 'w')
 									for god in model_list:
 										try:
 											model = god[0]
@@ -128,6 +128,7 @@ class Detection:
 
 											#typ += '  ml'
 											df2 = create.reform(df,typ,currentday)
+											print(df2)
 											#sys.stdout = open(os.devnull, 'w')
 											z = model.predict(df2)[0][1]
 										#	sys.stdout = sys.__stdout__
@@ -140,7 +141,7 @@ class Detection:
 										
 										if z > thresh:
 											z = round(z*100)
-											print('logged')
+									
 											log.log(df,currentday, tf, ticker, z, path , typ)  
 									sys.stdout = sys.__stdout__
 									if False:

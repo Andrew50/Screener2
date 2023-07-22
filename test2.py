@@ -7,11 +7,14 @@ import yfinance as yf
 from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
+from tensorflow.keras.models import load_model
 
-#df = data.get('SOXS',tf = '1min',date = '0')
-df = pd.read_feather('C:/Screener/sync/database/Laptop_EP.feather')
 
-print(df)
+
+god = datetime.datetime.now()
+setuptype = 'MR'
+load_model('C:/Screener/setups/models/model_'+ setuptype)
+print(datetime.datetime.now() - god)
 
 ###########dont delete
 
