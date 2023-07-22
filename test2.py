@@ -8,7 +8,9 @@ from Data7 import Data as data
 import datetime
 from Plot import Plot as plot
 
-df = data.get('SOXS',tf = '1min',date = '0')
+#df = data.get('SOXS',tf = '1min',date = '0')
+df = pd.read_feather('C:/Screener/sync/database/Laptop_EP.feather')
+
 print(df)
 
 ###########dont delete

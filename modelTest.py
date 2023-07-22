@@ -158,9 +158,9 @@ class modelTest:
 
             except (TypeError, ValueError, IndexError):
                 pass
-    def combine(new,setuptype): 
+    def combine(new,setuptype, setups = ['EP', 'NEP' , 'P','NP' , 'MR', 'PS' , 'F' , 'NF']): 
         if new:
-            setups = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F' , 'NF']
+            
             for setup in setups:
                 try:
                     df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
