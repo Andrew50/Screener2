@@ -526,7 +526,7 @@ class Trainer:
                 self.dict.append([ticker,date,df2])
                 arglist.append([i,df2])
 
-        else:
+        elif self.menu == 1:
 
             for i in l:
                 if i < len(self.setups_df):
@@ -547,6 +547,10 @@ class Trainer:
                      
                     arglist.append([i,df2])
                 
+        elif self.menu == 2:
+
+
+
 
         self.pool.map_async(self.plot,arglist)
 
