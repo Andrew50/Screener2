@@ -356,7 +356,7 @@ class Data:
 
         epochs = 200
         new = True
-        prcnt_setup = .08
+        prcnt_setup = .05
         
 
         if os.path.exists("C:/Screener/desktop.txt"):
