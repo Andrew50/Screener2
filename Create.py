@@ -88,9 +88,7 @@ class Create:
             setup_type = setups[5]
             #setup_type = [3] god reallllly 
             sample_size = Create.setup_size(setup_type)
-            
-
-            #sample_size = 50
+       
 
             df = data.get(ticker)
          
@@ -123,15 +121,17 @@ class Create:
 
           
          
-
+            
 
             df = Create.get_lagged_returns(df, sample_size)
             df = Create.get_classification(df,value)
-         
-            return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
+            
+            df = df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
+            
+            return  df
             
             #return Create.reform(df)
-        except TimeoutError:
+        except:
             pass
 
 
@@ -160,7 +160,12 @@ class Create:
             'volume':[0]}).set_index('datetime')
         df = pd.concat([df,add])
 
+        if len(df) < sample_size:
+            col = df.columns
+            add = pd.DataFrame(df.iat[-1,3], index=np.arange(sample_size - len(df) + 1), columns=col)
 
+            # add.Index = df.index[0] - datetime.timedelta(days = 1)
+            df = pd.concat([add,df])
       
        
 
@@ -253,8 +258,8 @@ class Create:
             sample_size = 40
         elif setup_type == 'MR':
             sample_size = 40
-        elif 'F' in setup_type:
-            sample_size = 75
+        elif setup_type == 'F':
+            sample_size = 90
             #sample_size = 120
         else: #pivot
             sample_size = 40

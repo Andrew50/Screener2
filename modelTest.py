@@ -101,46 +101,16 @@ class modelTest:
 		while True:
 			ticker = tickers[ii]
 			date = dates[ii]
-
 			try:
-			   # setup = setups.iloc[(random.randint(0,len(setups)-1))]
- 
-
-			   # ticker = setup['ticker'] 
-			   # date =  setup['date']
-				
-	
+			
 				df = create.test_data(ticker,date, setuptype)
 
-				print(df)
+			
 				sys.stdout = open(os.devnull, 'w')
 				god = model.predict(df)[0][1] * 100
 
-			 #   val = 0
-				
-				#if god[0][1] > god[0][0]:
-				#    val = 1
-
 				sys.stdout = sys.__stdout__
-			
-
-				#if typee == setuptype:
-				#    actual = 1
-				#else:
-				#    actual = 0
-
-
-				#if val == actual:
-				#    right += 1
-
-
-
-
-
-				#total += 1
-				#print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
-				#print(f"{val} Actual: {typee}")
-				#if val == 1 or typee == 1:
+		
 				if True:
 					df1 = data.get(ticker)
 
@@ -166,7 +136,7 @@ class modelTest:
 
 
 
-			except :#TimeoutError:#(TypeError, ValueError, IndexError):
+			except TimeoutError:#(TypeError, ValueError, IndexError):
 				pass
 
 
@@ -226,7 +196,7 @@ class modelTest:
 
 
 if __name__ == "__main__":
-
+	
 	setup = 'F'
 
 
@@ -251,31 +221,34 @@ if __name__ == "__main__":
 
 
 	elif setup == 'F':
-		dates = ['2022-07-28','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
+		dates = ['2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
 				 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
 				 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
 				 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
 				 '2023-08-03']
 
-		tickers = ['enph','dpst','riot','meli','tsla','tsla','elf',
+		tickers = ['dpst','riot','meli','tsla','tsla','elf',
 				   'mlco','mlco','aehr','cweb','tme',
 				   'nue','kold','orcl','amat','enph',
 				   'mdb','pump','oxy','mrna','celh',
 				   'rytm']
 
 	modelTest.runTestData(setup,tickers,dates)
+	
 	## EP 
 	#thresh = .6
-	#setuptype = 'EP'
 
-	#epochs = 250
-	#new = True
-	#prcnt_setup = .1
+	if False:
+		setuptype = 'F'
+
+		epochs = 1
+		new = True
+		prcnt_setup = .7
 
 
-	#modelTest.combine(new,setuptype)
+		modelTest.combine(new,setuptype)
 
-	#create.run(setuptype,prcnt_setup,epochs,True)
+		create.run(setuptype,prcnt_setup,epochs,False)
 
 	#modelTest.runRandomTicker(setuptype,thresh)
    
