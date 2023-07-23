@@ -93,11 +93,13 @@ class Create:
             #sample_size = 50
 
             df = data.get(ticker)
-
-
-
+         
+            
             index = data.findex(df,date)
-            df2 = df[index-sample_size:index]
+            left = index-sample_size
+            if left < 0:
+                left = 0
+            df2 = df[left:index]
         
             o = df.iat[index,0]
             add = pd.DataFrame({
@@ -109,16 +111,27 @@ class Create:
                 'volume':[0]}).set_index('datetime')
             df2 = pd.concat([df2,add])
 
+            df = df2
+          
+            if len(df) < sample_size:
+                col = df.columns
+                add = pd.DataFrame(df.iat[-1,3], index=np.arange(sample_size - len(df) + 1), columns=col)
+
+               # add.Index = df.index[0] - datetime.timedelta(days = 1)
+                df = pd.concat([add,df])
+              
+
           
          
-            df = df2
+
 
             df = Create.get_lagged_returns(df, sample_size)
             df = Create.get_classification(df,value)
-
+         
             return df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
+            
             #return Create.reform(df)
-        except:
+        except TimeoutError:
             pass
 
 
@@ -295,7 +308,7 @@ class Create:
 
     def test_data(ticker,date,setup_type):
 
-        bar = [ticker,date,1,setup_type]
+        bar = [ticker,date,1,"" ,"",setup_type]
         x = Create.nn_multi(bar).values
 
         sample_size = Create.setup_size(setup_type)

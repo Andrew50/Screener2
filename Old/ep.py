@@ -21,7 +21,7 @@ date_list = ['2023-03-29','2022-11-10','2022-09-13','2022-08-10','2022-07-27',
 			 '2022-11-10','2023-01-06','2023-01-20']
 
 ticker_list = ['qqq','qqq','qqq','qqq','qqq',
-			   'mgni','aehr','nflx'.'coin']
+			   'mgni','aehr','nflx','coin']
 
 
 tickers = scan.get().index.to_list()
