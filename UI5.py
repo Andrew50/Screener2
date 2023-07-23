@@ -213,7 +213,7 @@ class UI:
             arglist.append([self.setups_data,index,self.revealed])
 
         
-        pool.map(self.plot,arglist)
+        pool.map_async(self.plot,arglist)
 
     def redate(self,previ,new):
         previ = math.floor(previ)
@@ -1116,7 +1116,7 @@ class UI:
 
 
 if __name__ == "__main__":
-    UI.loop(UI,False)
+    UI.loop(UI,True)
 
 
 

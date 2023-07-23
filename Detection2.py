@@ -2,8 +2,7 @@
 import statistics
 from Log3 import Log as log
 
-from flag import Flag as flag
-from pivot import Pivot as pivot
+
 
 import datetime
 
@@ -88,7 +87,7 @@ class Detection:
 				pass
 			
 		
-			if len(dff) > 10:
+			if len(dff) > 5:
 		
 				for date in date_list:
 					try:
