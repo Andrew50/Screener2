@@ -102,7 +102,7 @@ class Trainer:
 	def tune(self,val):
 		s = self.current_setup
 		ticker = self.setup_string.split('+')[1]
-		date = self.setup_string.split('+')[2]
+		date = pd.to_datetime(self.setup_string.split('+')[2])
 		if val == 1:
 			req = 0
 		else:
@@ -125,14 +125,14 @@ class Trainer:
 
 		df = pd.concat([df,add]).reset_index(drop = True)
 		print(df)
-		'''
+		
 		if(data.isBen()):
 			df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
 		elif data.isLaptop():
 			df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
 		else:
 			df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
-		'''
+		
 	def click(self,clicked = True):
 
 		df = self.dict[self.i][2]
@@ -218,7 +218,7 @@ class Trainer:
 				layout = [
 				[sg.Image(key = '-CHART-')],
 				[sg.Button(s) for s in self.setup_list],
-				[sg.Button('No'),sg.Button('Skip'),sg.Button('Yes'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
+				[sg.Button('No'),sg.Button('Skip'),sg.Button('Yes'), sg.Text(self.current_setup, key = '-text-'), sg.Text(key = '-counter-')],
 				[sg.Button('Toggle')]
 				]
 				self.window = sg.Window('Tuner', layout,margins = (10,10),scaling=self.scale,finalize = True)
@@ -366,8 +366,8 @@ class Trainer:
 
 					self.i += 1
 					self.update(self)
-					self.preload(self)
-					pass
+					#self.preload(self)
+					
 				elif self.event == 'Prev':
 					if self.i > 0:
 						self.i -= 1
