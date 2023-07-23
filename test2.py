@@ -9,13 +9,14 @@ import datetime
 from Plot import Plot as plot
 from tensorflow.keras.models import load_model
 
-
-
-god = datetime.datetime.now()
-setuptype = 'MR'
-load_model('C:/Screener/setups/models/model_'+ setuptype)
-print(datetime.datetime.now() - god)
-
+import os
+path = 'C:/Screener/sync/database/'
+lis = os.listdir(path)
+for p in lis:
+    df = pd.read_feather(path + p)
+    df['req'] = 0
+    print(df)
+    df.to_feather(path+p)
 ###########dont delete
 
 '''

@@ -8,7 +8,10 @@ import mplfinance as mpf
 import pandas as pd
 import PySimpleGUI as sg
 from multiprocessing.pool import Pool
+
 from PIL import Image
+import time
+import sys
 import pathlib
 import io
 import matplotlib.ticker as mticker
@@ -75,7 +78,7 @@ class Trainer:
 			df = df[self.cutoff:]
 			add = df[['ticker','date','setup']]
 			add = add[df['setup'] == 1]
-			print(add)
+			
 			try:
 				if(data.isBen()):
 					df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
@@ -94,6 +97,36 @@ class Trainer:
 				df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
 			ii += 1
 	
+
+	def tune(self,val):
+		s = self.current_setup
+		ticker = self.setup_string.split('+')[1]
+		date = self.setup_string.split('+')[2]
+		add = pd.DataFrame({
+			'ticker':[ticker],
+			'date':[date],
+			'setup':[val]
+		})
+		try:
+			if(data.isBen()):
+				df = pd.read_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+			elif data.isLaptop():
+				df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+			else:
+				df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+		except TimeoutError:
+			df = pd.DataFrame()
+
+		df = pd.concat([df,add]).reset_index(drop = True)
+		print(df)
+		'''
+		if(data.isBen()):
+			df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
+		elif data.isLaptop():
+			df.to_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
+		else:
+			df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
+		'''
 	def click(self,clicked = True):
 
 		df = self.dict[self.i][2]
@@ -188,14 +221,42 @@ class Trainer:
 				self.window.bind("<o>", "Skip")
 			self.init = False
 			self.window.maximize()
-		while True:
-			try:
-				image1 = Image.open(r'C:/Screener/setups/charts/' + str(self.i) + '.png')
-				break
-			except:
-				pass
-		bio1 = io.BytesIO()
-		image1.save(bio1, format="PNG")
+		done = False
+		
+		if self.menu == 2:
+			path = "C:/Screener/setups//charts/"
+			keyword = f'_{self.i}_'
+			wait = False
+			while True:
+				try:
+					dir_list = os.listdir(path)
+					for d in dir_list:
+						if keyword in d:
+							if wait:
+								time.sleep(2)
+							gush = path + d
+							image1 = Image.open(gush)
+							bio1 = io.BytesIO()
+							image1.save(bio1, format="PNG")
+							self.setup_string = d
+							done = True
+							break
+					wait = True
+					if done:
+						break
+					
+				except TimeoutError:
+					pass
+		else:
+			while True:
+				try:
+					image1 = Image.open(r'C:/Screener/setups/charts/' + str(self.i) + '.png')
+					bio1 = io.BytesIO()
+					image1.save(bio1, format="PNG")
+					break
+				except:
+					pass
+		
 		if self.menu == 0:
 			self.x_size = image1.size[0]
 			self.window['-GRAPH-'].erase()
@@ -215,7 +276,10 @@ class Trainer:
 			stat_string = stat_string[:-1]
 			self.window['-stats-'].update(stat_string)
 		else:
-			string = f'{self.i + 1} of {len(self.setups_df)}'
+			if self.menu == 1:
+				string = f'{self.i + 1} of {len(self.setups_df)}'
+			else:
+				string = ''
 			self.window['-counter-'].update(string)
 			self.window["-CHART-"].update(data=bio1.getvalue())
 
@@ -241,7 +305,7 @@ class Trainer:
 			self.scale = 4
 			self.setup = []
 			self.i = 0
-			self.menu = 2
+			self.menu = 0
 			self.current_setup = 'EP'
 
 
@@ -281,6 +345,23 @@ class Trainer:
 						self.i += 1
 						self.update(self)
 						self.preload(self)
+
+				elif self.event == 'Yes' or self.event == 'No' or self.event == 'Skip':
+					if self.event == 'Skip':
+						pass
+
+					else:
+						if self.event == 'No':
+							v = 0
+						else:
+							v = 1
+
+						self.tune(self,v)
+
+					self.i += 1
+					self.update(self)
+					self.preload(self)
+					pass
 				elif self.event == 'Prev':
 					if self.i > 0:
 						self.i -= 1
@@ -295,11 +376,18 @@ class Trainer:
 				elif self.event == '-GRAPH-':
 					self.click(self)
 				elif self.event == 'Toggle':
+					#self.pool.terminate()
 					self.window.close()
 					self.i = 0
-					if os.path.exists("C:/Screener/setups/charts"):
-						shutil.rmtree("C:/Screener/setups/charts")
-					os.mkdir("C:/Screener/setups/charts")
+					while True:
+
+						try:
+							if os.path.exists("C:/Screener/setups/charts"):
+								shutil.rmtree("C:/Screener/setups/charts")
+							os.mkdir("C:/Screener/setups/charts")
+							break
+						except:
+							pass
 					if self.menu == 2:
 						self.menu = 0
 					else:
@@ -308,12 +396,13 @@ class Trainer:
 					self.setups_df = pd.read_feather('C:/Screener/setups/database/EP.feather').sample(frac = 1).reset_index(drop = True)
 					if self.menu == 1:
 						self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
-					self.current_setup = 'EP'
+					#self.current_setup = 'EP'
 					self.preload(self)
 					self.update(self)
 				elif self.event == 'right' or self.event == 'left':
 					self.click(self,False)
 				else:
+					#self.pool.terminate()
 					if self.menu == 0:
 						self.log(self)
 					else:
@@ -322,9 +411,15 @@ class Trainer:
 							self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
 						else:
 							pass
-						if os.path.exists("C:/Screener/setups/charts"):
-							shutil.rmtree("C:/Screener/setups/charts")
-						os.mkdir("C:/Screener/setups/charts")
+						while True:
+
+							try:
+								if os.path.exists("C:/Screener/setups/charts"):
+									shutil.rmtree("C:/Screener/setups/charts")
+								os.mkdir("C:/Screener/setups/charts")
+								break
+							except:
+								pass
 						self.i = 0
 						self.current_setup = self.event
 						self.preload(self)
@@ -333,10 +428,13 @@ class Trainer:
 
 	def preload(self):
 		arglist = []
+		amount = 10
+		if self.menu == 2:
+			amount = 40
 		if self.i == 0:
-			l = list(range(10))
+			l = list(range(amount))
 		else:
-			l = [9 + self.i]
+			l = [amount + self.i - 1]
 		if self.menu == 0:
 			for i in l:
 				while True:
@@ -373,20 +471,77 @@ class Trainer:
 					arglist.append([i,df2])
 		elif self.menu == 2:
 			tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
-			for i in l:
-				arglist.append([i,self.current_setup,tickers])
+			for i in range(8):
+				arglist.append([self.current_setup,tickers])
 
 				
-		self.pool.map(self.plot,arglist)
+		self.pool.map_async(self.plot,arglist)
 
 	def plot(bar):
+
+
+		def save(df,strubg,fucked = False):
+			
+			
+			try:
+				if os.path.exists("C:/Screener/laptop.txt"): #if laptop
+					fw = 22
+					fh = 12
+					fs = 4.1
+				elif os.path.exists("C:/Screener/ben.txt"):
+					fw = 27
+					fh = 12
+					fs = 1.6
+				else:
+					fw = 50
+					fh = 23
+					fs = 2.28
+				mc = mpf.make_marketcolors(up='g',down='r')
+				s  = mpf.make_mpf_style(marketcolors=mc)
+				fig, axlist = mpf.plot(df, type='candle', volume=True  ,                          
+				style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
+				figscale=fs, panel_ratios = (5,1), title = tit,
+				tight_layout = True,axisoff=True)
+				ax = axlist[0]
+				ax.set_yscale('log')
+				ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+
+
+				if fucked:
+					path = "C:/Screener/setups//charts/"
+					i = 0
+					while True:
+						done = True
+						for god in os.listdir(path):
+							if f'_{i}_' in god:
+								i += 1
+								done = False
+								break
+						if done:
+							break
+
+					strubg = '_' + str(i) + '_' + strubg + ".png"
+
+				
+				p = pathlib.Path("C:/Screener/setups/charts") / strubg
+
+				plt.savefig(p, bbox_inches='tight')
+			except:
+				shutil.copy(r"C:\Screener\tmp\blank.png",p)
+
+
+
 		i = bar[0]
 		
-		if isinstance(bar[1], str):
-			setuptype = bar[1]
-			tickers = bar[2]
-			model = load_model('C:/Screener/setups/models/model_'+ setuptype)
+		if isinstance(bar[0], str):
+			setuptype = bar[0]
+			tickers = bar[1]
+			
+			model = load_model('C:/Screener/sync/models/model_'+ setuptype)
+			
+			sys.stdout = open(os.devnull, 'w')
 			while True:
+				
 				try:
 
 
@@ -394,31 +549,63 @@ class Trainer:
 					df = data.get(ticker)
 					if len(df) > 10:
 						size = len(df)
-						for i in range((int(size/5))):
+						
+						for _ in range((int(size/2))):
 							currentday = random.randint(0,size - 1)
 				
-							if(df.iloc[currentday]['volume'] > 2500):
-				
+							dolVol, adr, pmDolVol = detection.requirements(df,currentday,0,ticker)
+							if (dolVol > 8000000 or pmDolVol  > .5 * 1000000) and adr > 2.8:
+
+
+
 								df2 = create.reform(df,setuptype,currentday)
 								#print(df2)
-								z = model.predict(df2)[0][1]
-							
-								print(z)
-								if z > .01:
-									break
+								
 
+								z = model.predict(df2)[0][1]
+								
+							
+								
+								if z > .2:
+									tit = str(round(z*100))
+									god = currentday - 100
+									if god < 0:
+										god = 0
+									df = df[god:currentday + 1]
+									date = df.index[-1].date()
+									tickerdate = f'+{ticker}+{date}+'
+
+
+									
+
+
+									save(df,tickerdate,True)
+
+			
 				except Exception as e:
 					pass
+					#sys.stdout = sys.__stdout__
 					#print(e)
+			sys.stdout = sys.__stdout__
 		else:
 			df = bar[1]
+			strubg = str(i) + ".png"
+			tit = ''
+			save(df,strubg)
 
 
 
 
 
-		strubg = str(i) + ".png"
+
+
+
+
+
+
+		
 		p = pathlib.Path("C:/Screener/setups/charts") / strubg
+
 		try:
 			if os.path.exists("C:/Screener/laptop.txt"): #if laptop
 				fw = 22
@@ -436,7 +623,7 @@ class Trainer:
 			s  = mpf.make_mpf_style(marketcolors=mc)
 			fig, axlist = mpf.plot(df, type='candle', volume=True  ,                          
 			style=s, warn_too_much_data=100000,returnfig = True,figratio = (fw,fh),
-			figscale=fs, panel_ratios = (5,1), 
+			figscale=fs, panel_ratios = (5,1), title = tit,
 			tight_layout = True,axisoff=True)
 			ax = axlist[0]
 			ax.set_yscale('log')

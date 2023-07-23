@@ -120,7 +120,7 @@ class Detection:
 
 								if (dolVol > 8000000 or pmDolVol  > .5 * 1000000) and adr > 2.8:
 
-									#sys.stdout = open(os.devnull, 'w')
+									sys.stdout = open(os.devnull, 'w')
 									for god in model_list:
 										try:
 											model = god[0]
