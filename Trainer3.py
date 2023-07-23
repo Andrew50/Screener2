@@ -78,6 +78,7 @@ class Trainer:
 			df = df[self.cutoff:]
 			add = df[['ticker','date','setup']]
 			add = add[df['setup'] == 1]
+			add['req'] = 0
 			
 			try:
 				if(data.isBen()):
@@ -102,10 +103,15 @@ class Trainer:
 		s = self.current_setup
 		ticker = self.setup_string.split('+')[1]
 		date = self.setup_string.split('+')[2]
+		if val == 1:
+			req = 0
+		else:
+			req = 1
 		add = pd.DataFrame({
 			'ticker':[ticker],
 			'date':[date],
-			'setup':[val]
+			'setup':[val],
+			'req':[req]
 		})
 		try:
 			if(data.isBen()):
