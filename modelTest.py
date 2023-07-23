@@ -196,59 +196,64 @@ class modelTest:
 
 
 if __name__ == "__main__":
-	
+
+
 	setup = 'F'
 
+	if True:
+		setuptype = setup
 
-	if setup == 'EP':
-
-
-		tickers = ['IOT','SMCI','ONON'   ,'SE','DUOL','FSLR','XPEV','SHLS','CELH','CALX','qqq','qqq','qqq','qqq','qqq',
-			   'mgni','aehr','nflx','coin'        ]
-		dates = ['2023-06-02','2023-05-03','2023-03-21','2023-03-07','2023-03-01','2023-03-01','2022-11-30','2022-11-15','2022-11-10','2022-10-25','2023-03-29','2022-11-10','2022-09-13','2022-08-10','2022-07-27',
-			 '2022-11-10','2023-01-06','2023-01-20']     
-		
-
-	elif setup == 'NEP':
-		pass
-	elif setup =='P':
-		
-		dates = ['2021-05-20','2023-03-29','2022-11-10','2022-08-10','2022-07-27',
-					 '2022-11-10','2023-01-06','2023-01-20','2023-01-09']
-
-		tickers = ['coin','qqq','qqq','qqq','qqq',
-					   'mgni','aehr','nflx','coin']
-
-
-	elif setup == 'F':
-		dates = ['2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
-				 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
-				 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
-				 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
-				 '2023-08-03']
-
-		tickers = ['dpst','riot','meli','tsla','tsla','elf',
-				   'mlco','mlco','aehr','cweb','tme',
-				   'nue','kold','orcl','amat','enph',
-				   'mdb','pump','oxy','mrna','celh',
-				   'rytm']
-
-	modelTest.runTestData(setup,tickers,dates)
-	
-	## EP 
-	#thresh = .6
-
-	if False:
-		setuptype = 'F'
-
-		epochs = 1
+		epochs = 200
 		new = True
-		prcnt_setup = .7
+		prcnt_setup = .05
 
 
 		modelTest.combine(new,setuptype)
 
 		create.run(setuptype,prcnt_setup,epochs,False)
+	
+	
+
+	if False:
+		if setup == 'EP':
+
+
+			tickers = ['IOT','SMCI','ONON'   ,'SE','DUOL','FSLR','XPEV','SHLS','CELH','CALX','qqq','qqq','qqq','qqq','qqq',
+				   'mgni','aehr','nflx','coin'        ]
+			dates = ['2023-06-02','2023-05-03','2023-03-21','2023-03-07','2023-03-01','2023-03-01','2022-11-30','2022-11-15','2022-11-10','2022-10-25','2023-03-29','2022-11-10','2022-09-13','2022-08-10','2022-07-27',
+				 '2022-11-10','2023-01-06','2023-01-20']     
+		
+
+		elif setup == 'NEP':
+			pass
+		elif setup =='P':
+		
+			dates = ['2021-05-20','2023-03-29','2022-11-10','2022-08-10','2022-07-27',
+						 '2022-11-10','2023-01-06','2023-01-20','2023-01-09']
+
+			tickers = ['coin','qqq','qqq','qqq','qqq',
+						   'mgni','aehr','nflx','coin']
+
+
+		elif setup == 'F':
+			dates = ['2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
+					 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
+					 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
+					 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
+					 '2023-08-03']
+
+			tickers = ['dpst','riot','meli','tsla','tsla','elf',
+					   'mlco','mlco','aehr','cweb','tme',
+					   'nue','kold','orcl','amat','enph',
+					   'mdb','pump','oxy','mrna','celh',
+					   'rytm']
+
+		modelTest.runTestData(setup,tickers,dates)
+	
+	## EP 
+	#thresh = .6
+
+	
 
 	#modelTest.runRandomTicker(setuptype,thresh)
    

@@ -71,10 +71,14 @@ class Create:
         
       #  num_feats = x.shape[1]//FEAT_LENGTH
         num_feats = x.shape[1]//FEAT_LENGTH
-        
+        #print(num_feats)
+        #num_feats = 4
         x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
         for n in range(0, num_feats):
             x_reshaped[:, :, n] = x[:, n*FEAT_LENGTH:(n+1)*FEAT_LENGTH]
+
+
+       
         return x_reshaped
 
     def nn_multi(bar):
@@ -85,7 +89,8 @@ class Create:
             ticker = setups[0]
             date = setups[1]
             value = setups[2]
-            setup_type = setups[5]
+            setup_type = setups[6]
+            
             #setup_type = [3] god reallllly 
             sample_size = Create.setup_size(setup_type)
        
@@ -166,29 +171,15 @@ class Create:
 
             # add.Index = df.index[0] - datetime.timedelta(days = 1)
             df = pd.concat([add,df])
-      
-       
-
 
         df = Create.get_lagged_returns(df, sample_size)
         df = Create.get_classification(df,1)
-
-      
-
         df =  df.replace([np.inf, -np.inf], np.nan).dropna()[[col for col in df.columns if 'feat_' in col] + ['classification']]
-
         df = df.values
-      
-        
-    
         df = Create.reshape_x(df[0:, :-1],sample_size)
-
-        
-
         return df
 
     def sample(setuptype,use,split):
-
         buffer = 2
         if setuptype == 'F':
             f = pd.read_feather('C:/Screener/setups/database/F.feather').sort_values(by='date', ascending = False).reset_index(drop = True)
@@ -207,7 +198,6 @@ class Create:
         yes = []
         no = []
         req_no = []
-
         g = allsetups.groupby(pd.Grouper(key='ticker'))
         dfs = [group for _,group in g]
         for df in dfs:
@@ -229,7 +219,6 @@ class Create:
                     if rem > 0:
                         req_no.append(bar)
                         rem -= 1
-
                     else:
                         #needs to be fixes because if setup occurs it will ad to no and to no_req because it adds to no req on a 1
                         no.append(bar)
@@ -241,13 +230,11 @@ class Create:
         required_no = required_no[required_no['setup'] == 0]
         req_no = pd.concat([req_no,required_no])
         length = ((len(yes) / use) - len(yes)) - len(req_no)
-
         use = length / len(no)
         if use > 1:
             use = 1
         if use < 0:
             use = 0
-
         no = no.sample(frac = use)
         allsetups = pd.concat([yes,no,req_no]).sample(frac = 1).reset_index(drop = True)
         setups = allsetups
@@ -259,14 +246,11 @@ class Create:
         elif setup_type == 'MR':
             sample_size = 40
         elif setup_type == 'F':
-            sample_size = 90
-            #sample_size = 120
+            sample_size = 80
+           
         else: #pivot
             sample_size = 40
-
         return sample_size
-
-
 
     def get_nn_data(setuptype,use,split):
         setups = Create.sample(setuptype,use,split)
@@ -277,26 +261,22 @@ class Create:
             arglist.append(bar)
         dfs = data.pool(Create.nn_multi,arglist)
         nn_values = pd.concat(dfs)
-
         nn_values = nn_values.values
         np.random.shuffle(nn_values)
-
         sample_size = Create.setup_size(setuptype)
-
         split_idx = 0
         np.save('C:/Screener/tmp/training data/x_test.npy', Create.reshape_x(nn_values[split_idx:, :-1],sample_size))
         np.save('C:/Screener/tmp/training data/y_test.npy', nn_values[split_idx:, -1],sample_size)
         split_idx = -1
         np.save('C:/Screener/tmp/training data/x_train.npy', Create.reshape_x(nn_values[0:split_idx, :-1],sample_size))
         np.save('C:/Screener/tmp/training data/y_train.npy', nn_values[0:split_idx:, -1],sample_size)
-        
         return
    
     def load_data() -> Tuple[np.array, np.array, np.array, np.array]:
         return (np.load('C:/Screener/tmp/training data/x_train.npy'),np.load('C:/Screener/tmp/training data/y_train.npy'),np.load('C:/Screener/tmp/training data/x_test.npy'),np.load('C:/Screener/tmp/training data/y_test.npy'),)
 
     def get_model(x_train: np.array) -> Sequential:
- 
+        
         return Sequential([
             Bidirectional(
                 LSTM(
@@ -313,7 +293,7 @@ class Create:
 
     def test_data(ticker,date,setup_type):
 
-        bar = [ticker,date,1,"" ,"",setup_type]
+        bar = [ticker,date,1,"" ,"","",setup_type]
         x = Create.nn_multi(bar).values
 
         sample_size = Create.setup_size(setup_type)
