@@ -171,7 +171,8 @@ class Log:
                     os.mkdir("C:/Screener/tmp/pnl/charts")
                     #self.df_log.
                     #self.df_log.to_feather(r"C:\Screener\sync\log.feather")
-                except Exception as e:
+                except TimeoutError:
+                #except Exception as e:
                     sg.Popup(str(e))
                 
         if self.event == "Delete":

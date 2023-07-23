@@ -260,7 +260,8 @@ class Traits:
                 df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
             except:
                 df = pd.DataFrame()
-    
+        else:
+            df = pd.DataFrame()
         return df
 
 
