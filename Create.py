@@ -189,6 +189,7 @@ class Create:
         yes = []
         no = []
         req_no = []
+
         g = allsetups.groupby(pd.Grouper(key='ticker'))
         dfs = [group for _,group in g]
         for df in dfs:
@@ -218,6 +219,9 @@ class Create:
         print(f'{len(yes)} setups')
         no = pd.DataFrame(no)
         req_no = pd.DataFrame(req_no)
+        required_no = allsetups[allsetups['req'] == 1]
+        required_no = required_no[required_no['setup'] == 0]
+        req_no = pd.concat([req_no,required_no])
         length = ((len(yes) / use) - len(yes)) - len(req_no)
 
         use = length / len(no)

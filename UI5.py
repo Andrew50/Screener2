@@ -70,7 +70,10 @@ class UI:
 
                     'date':[date],
                     'ticker':[ticker],
-                    'setup':[val]})
+                    'setup':[val],
+                    'req':[1]
+                    
+                    })
 
                     if(data.isBen()):
                         try:
@@ -89,7 +92,7 @@ class UI:
                             df = pd.DataFrame()
 
                     df = pd.concat([df,df2]).reset_index(drop = True)
-                    '''
+                    
                     if(data.isBen()):
                         df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
                     elif data.isLaptop():
@@ -97,7 +100,7 @@ class UI:
                 
                     else:
                         df.to_feather('C:/Screener/sync/database/aj_' + s + '.feather')
-                    '''
+                    
                 
                     event = 'Next'
                     
