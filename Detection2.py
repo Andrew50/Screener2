@@ -136,7 +136,7 @@ class Detection:
 											continue
 											#print(typ)
 										#prin
-										thresh = .75
+										thresh = .82
 
 										
 										if z > thresh:

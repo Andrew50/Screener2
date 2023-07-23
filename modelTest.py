@@ -83,24 +83,27 @@ class modelTest:
 
 
 
-    def runTestData(setuptype):
+    def runTestData(setuptype,tickers, dates):
 
-        model = load_model('C:/Screener/setups/models/model_'+ setuptype)
-        setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
+        model = load_model('C:/Screener/sync/models/model_'+ setuptype)
+        #setups = pd.read_feather('C:/Screener/setups/database/Testdata_' + setuptype + '.feather')
        
         right = 0
         total = 0
 
-        while True:
+        ii = 0
 
+        while True:
+            ticker = tickers[ii]
+            date = dates[ii]
 
             try:
-                setup = setups.iloc[(random.randint(0,len(setups)-1))]
+               # setup = setups.iloc[(random.randint(0,len(setups)-1))]
  
 
-                ticker = setup['ticker'] 
-                date =  setup['date']
-                typee = setup["setup"]
+               # ticker = setup['ticker'] 
+               # date =  setup['date']
+                
     
                 df = create.test_data(ticker,date, setuptype)
 
@@ -108,30 +111,30 @@ class modelTest:
                 sys.stdout = open(os.devnull, 'w')
                 god = model.predict(df)
 
-                val = 0
+             #   val = 0
                 
-                if god[0][1] > god[0][0]:
-                    val = 1
+                #if god[0][1] > god[0][0]:
+                #    val = 1
 
                 sys.stdout = sys.__stdout__
             
 
-                if typee == setuptype:
-                    actual = 1
-                else:
-                    actual = 0
+                #if typee == setuptype:
+                #    actual = 1
+                #else:
+                #    actual = 0
 
 
-                if val == actual:
-                    right += 1
+                #if val == actual:
+                #    right += 1
 
 
 
 
 
-                total += 1
-                print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
-                print(f"{val} Actual: {typee}")
+                #total += 1
+                #print(f'God 0: {str(god[0][0])} God 1: {str(god[0][1])}')
+                #print(f"{val} Actual: {typee}")
                 #if val == 1 or typee == 1:
                 if True:
                     df1 = data.get(ticker)
@@ -144,7 +147,7 @@ class modelTest:
                     s  = mpf.make_mpf_style(marketcolors=mc)
             
                     mpf.plot(df1, type='candle', volume=True  , 
- 
+                    title = str(god),
                     style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
                     tight_layout = True
                      #  vlines=dict(vlines=[date])
@@ -158,6 +161,9 @@ class modelTest:
 
             except (TypeError, ValueError, IndexError):
                 pass
+
+
+            ii += 1
     def combine(new,setuptype, setups = ['EP', 'NEP' , 'P','NP' , 'MR', 'PS' , 'F' , 'NF']): 
         if new:
             
@@ -214,20 +220,29 @@ class modelTest:
 
 if __name__ == "__main__":
 
-    # EP 
-    thresh = .6
-    setuptype = 'EP'
-
-    epochs = 250
-    new = True
-    prcnt_setup = .1
+    setup = 'EP'
 
 
-    modelTest.combine(new,setuptype)
+    if setup == 'EP':
 
-    create.run(setuptype,prcnt_setup,epochs,True)
+        tickers = ['IOT','SMCI','ONON'           ]
+        dates = ['2023-06-02','2023-05-03','2023-03-23'       ]    
 
-    modelTest.runRandomTicker(setuptype,thresh)
+    modelTest.runTestData(setup,tickers,dates)
+    ## EP 
+    #thresh = .6
+    #setuptype = 'EP'
+
+    #epochs = 250
+    #new = True
+    #prcnt_setup = .1
+
+
+    #modelTest.combine(new,setuptype)
+
+    #create.run(setuptype,prcnt_setup,epochs,True)
+
+    #modelTest.runRandomTicker(setuptype,thresh)
    
 
 

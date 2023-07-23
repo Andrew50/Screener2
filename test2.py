@@ -9,6 +9,16 @@ import datetime
 from Plot import Plot as plot
 from tensorflow.keras.models import load_model
 
+
+
+
+
+
+
+
+
+
+'''
 import os
 path = 'C:/Screener/sync/database/'
 lis = os.listdir(path)
@@ -18,7 +28,7 @@ for p in lis:
     print(df)
     df.to_feather(path+p)
 ###########dont delete
-
+'''
 '''
 df = pd.read_feather('C:/Screener/sync/full_ticker_list.feather')
 
