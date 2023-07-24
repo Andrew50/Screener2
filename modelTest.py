@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
 	setup = 'F'
 
-	if True:
+	if False:
 		setuptype = setup
 
 		epochs = 200
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 	
 	
 
-	if False:
+	if True:
 		if setup == 'EP':
 
 

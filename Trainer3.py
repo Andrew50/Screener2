@@ -120,7 +120,7 @@ class Trainer:
 				df = pd.read_feather('C:/Screener/sync/database/laptop_' + s + '.feather')
 			else:
 				df = pd.read_feather('C:/Screener/sync/database/aj_' + s + '.feather')
-		except TimeoutError:
+		except:
 			df = pd.DataFrame()
 
 		df = pd.concat([df,add]).reset_index(drop = True)
