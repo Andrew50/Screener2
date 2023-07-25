@@ -37,12 +37,12 @@ class modelTest:
 				ticker = tickers[random.randint(0,len(tickers)-1)]
 
 				tickerdf = data.get(ticker)
-				if(len(tickerdf) > 200):
+				if(len(tickerdf) > 10):
 					date_list = tickerdf.index.to_list()
 					date = date_list[random.randint(0,len(date_list) - 1)]
 					if(tickerdf.iloc[data.findex(tickerdf, date)]['volume'] > 250000):
 						df = create.test_data(ticker, date, setuptype)
-						print(df)
+						
 					   
 						sys.stdout = open(os.devnull, 'w')
 						god = model.predict(df)
@@ -72,7 +72,7 @@ class modelTest:
 							s  = mpf.make_mpf_style(marketcolors=mc)
 							print(god[0][1])
 							mpf.plot(df1, type='candle', volume=True  , 
- 
+							title = str(god[0][1]),
 							style=s, warn_too_much_data=100000,returnfig = True, panel_ratios = (5,1), 
 							tight_layout = True,
 							vlines=dict(vlines = [date])
@@ -213,9 +213,10 @@ if __name__ == "__main__":
 
 		create.run(setuptype,prcnt_setup,epochs,False)
 	
-	
-
 	if True:
+		modelTest.runRandomTicker('MR',.5)
+
+	if False:
 		if setup == 'EP':
 
 

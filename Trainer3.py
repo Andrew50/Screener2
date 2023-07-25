@@ -77,7 +77,15 @@ class Trainer:
 						df = pd.concat([df,df2]).reset_index(drop = True)
 			df = df[self.cutoff:]
 			add = df[['ticker','date','setup']]
-			add = add[df['setup'] == 1]
+
+
+
+			if not self.use_no:
+				add = add[df['setup'] == 1]
+
+
+
+
 			add['req'] = 0
 			
 			try:
@@ -185,7 +193,7 @@ class Trainer:
 				layout = [
 				[graph],
 				[sg.Text(key = '-stats-')],
-				[sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip')],
+				[sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip'), sg.Text('Use No ' + str(self.use_no))],
 				[sg.Button('Toggle')]]
 				self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
 				self.window.bind("<q>", "1")
@@ -302,6 +310,8 @@ class Trainer:
 			self.width = 2500
 		self.cutoff = 75
 		self.size = 300
+
+		self.use_no = False
 		with Pool(6) as self.pool:
 			if os.path.exists("C:/Screener/setups/charts"):
 				shutil.rmtree("C:/Screener/setups/charts")
@@ -465,16 +475,24 @@ class Trainer:
 		elif self.menu == 1:
 			for i in l:
 				if i < len(self.setups_df):
-					bar = self.setups_df.iloc[i]
-					ticker = bar[0]
-					date = bar[1]
-					df = data.get(ticker)
-					index = data.findex(df,date)
-					left = index-self.size
-					if left < 0:
-						left = 0
-					df2 = df[left:index + 1]
-					arglist.append([i,df2])
+					try:
+						bar = self.setups_df.iloc[i]
+						ticker = bar[0]
+						date = bar[1]
+						df = data.get(ticker)
+						index = data.findex(df,date)
+					
+						left = index-self.size
+						if left < 0:
+							left = 0
+
+						df2 = df[left:index + 1]
+						arglist.append([i,df2])
+					except Exception as e:
+						print(e)
+						arglist.append([i,pd.DataFrame()])
+					
+					
 		elif self.menu == 2:
 			tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
 			for i in range(8):
@@ -533,6 +551,7 @@ class Trainer:
 
 				plt.savefig(p, bbox_inches='tight')
 			except:
+				p = pathlib.Path("C:/Screener/setups/charts") / strubg
 				shutil.copy(r"C:\Screener\tmp\blank.png",p)
 
 
