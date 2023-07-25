@@ -115,7 +115,7 @@ class modelTest:
 					df1 = data.get(ticker,date = date)
 
 					
-					ind= data.findex(df1,date) +2
+					ind= data.findex(df1,date) 
 					left = ind - 100
 					if left < 0:
 						left = 0
