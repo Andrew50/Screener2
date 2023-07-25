@@ -306,10 +306,11 @@ class UI:
                     sg.Popup('Not A Trait')
 
             else:
-                scan = scan.sample(frac=1)
+                #scan = scan.sample(frac=1)
+                scan = scan.sort_values(by=['Z'], ascending=False)
 
         else:
-            scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather")
+            scan = pd.read_feather(r"C:\Screener\sync\todays_setups.feather").sort_values(by=['Z'], ascending=False)
 
         if len(scan) < 1:
             sg.Popup('No Setups Found')
@@ -576,7 +577,7 @@ class UI:
                 else:
                     if revealed:
                     #fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{ticker}   {setup}   {round(zs,2)}   {tf1}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
-                        fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{setup}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
+                        fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{setup}  {round(zs,2)}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True,vlines=dict(vlines=[d1], alpha = .25))
                         ax = axlist[0]
                     else:
                         fig, axlist = mpf.plot(df1, type='candle', axisoff=True, title=str(f'{setup}'),  volume=True,  style=s, returnfig = True,figratio = (fw,fh),figscale=fs, panel_ratios = (5,1), mav=(10,20), tight_layout = True)

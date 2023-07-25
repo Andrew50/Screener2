@@ -199,14 +199,14 @@ class modelTest:
 if __name__ == "__main__":
 
 
-	setup = 'P'
+	setup = 'PS'
 
 	if False:
 		setuptype = setup
 
 		epochs = 200
 		new = True
-		prcnt_setup = .05
+		prcnt_setup = .1
 
 
 		modelTest.combine(new,setuptype)
@@ -214,7 +214,8 @@ if __name__ == "__main__":
 		create.run(setuptype,prcnt_setup,epochs,False)
 	
 	if True:
-		modelTest.runRandomTicker('MR',.5)
+		s = setup
+		modelTest.runRandomTicker(s,.25)
 
 	if False:
 		if setup == 'EP':

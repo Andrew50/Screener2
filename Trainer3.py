@@ -317,12 +317,13 @@ class Trainer:
 				shutil.rmtree("C:/Screener/setups/charts")
 			os.mkdir("C:/Screener/setups/charts")
 			sg.theme('DarkGrey')
-			self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' ,'PS', 'F' , 'NF']
+			#self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' ,'PS', 'F' , 'NF']
+			self.setup_list = ['PS']
 			self.scale = 4
 			self.setup = []
 			self.i = 0
 			self.menu = 0
-			self.current_setup = 'EP'
+			self.current_setup = self.setup_list[0]
 
 
 			self.init = True
