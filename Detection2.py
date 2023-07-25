@@ -23,10 +23,9 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'F', 'MR', 'NP','NF']
-		#setuplist = ['EP','F','NF','NP','P']
-		#setuplist = ['F','NF','NP','P']
-		#setuplist = []
+		setuplist = ['EP','NEP','P', 'F', 'MR', 'NP']
+		#setuplist = ['EP','NEP','P', 'F', 'MR', 'NP','NF']
+		
 		model_list = []
 
 		print('loading models')

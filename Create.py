@@ -136,7 +136,7 @@ class Create:
             return  df
             
             #return Create.reform(df)
-        except TimeoutError:
+        except:
             pass
 
 

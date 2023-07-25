@@ -16,7 +16,8 @@ from tensorflow.keras.models import load_model
 
 
 
-df = pd.read_feather('C:/Screener/sync/database/laptop_F.feather')
+df = data.get()
+#pd.read_feather('C:/Screener/sync/database/laptop_F.feather')
 print(df)
 
 '''
