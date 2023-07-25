@@ -42,11 +42,11 @@ class modelTest:
 					date = date_list[random.randint(0,len(date_list) - 1)]
 					if(tickerdf.iloc[data.findex(tickerdf, date)]['volume'] > 250000):
 						df = create.test_data(ticker, date, setuptype)
-					  
-					  
+						print(df)
+					   
 						sys.stdout = open(os.devnull, 'w')
 						god = model.predict(df)
-
+						
 						val = 0
 						if god[0][1] > thresh:
 							val = 1
@@ -64,7 +64,7 @@ class modelTest:
 							left = ind - 50
 							if left < 0:
 								left = 0
-							df1 = df1[left:ind + 1]
+							df1 = df1[left:ind + 2]
 							
 
 				   
@@ -112,14 +112,15 @@ class modelTest:
 				sys.stdout = sys.__stdout__
 		
 				if True:
-					df1 = data.get(ticker)
+					df1 = data.get(ticker,date = date)
 
-
-					ind= data.findex(df1,date)
+					
+					ind= data.findex(df1,date) +2
 					left = ind - 100
 					if left < 0:
 						left = 0
 					df1 = df1[left:ind + 1]
+					print(df1)
 					mc = mpf.make_marketcolors(up='g',down='r')
 					s  = mpf.make_mpf_style(marketcolors=mc)
 			
@@ -236,13 +237,13 @@ if __name__ == "__main__":
 
 
 		elif setup == 'F':
-			dates = ['2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
+			dates = ['2023-07-24','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05',
 					 '2023-01-04','2023-02-16','2023-03-22','2023-01-04','2023-01-04',
 					 '2022-01-05','2022-10-18','2023-01-03','2022-12-09','2022-09-06',
 					 '2023-03-31','2022-04-11','2022-04-11','2022-08-04','2022-09-22',
 					 '2023-08-03']
 
-			tickers = ['dpst','riot','meli','tsla','tsla','elf',
+			tickers = ['XPEV' ,'dpst','riot','meli','tsla','tsla','elf',
 					   'mlco','mlco','aehr','cweb','tme',
 					   'nue','kold','orcl','amat','enph',
 					   'mdb','pump','oxy','mrna','celh',

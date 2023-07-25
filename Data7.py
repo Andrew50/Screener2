@@ -63,6 +63,7 @@ class Data:
 
 
     def isToday(dt):
+       
         if dt == 'now':
             return True
         if dt == None:
@@ -73,6 +74,7 @@ class Data:
         today = datetime.date.today()
         today = datetime.datetime.combine(today,time)
         dt = Data.convert_date(dt)
+       
         if dt >= today:
             return True
         return False
@@ -134,7 +136,7 @@ class Data:
                 date = 'now'
 
             current = Data.isToday(date)
-
+            print(current)
 
             if tf == 'daily':
                 tf = 'd'
@@ -231,7 +233,8 @@ class Data:
                 df = df.resample(tf).apply(logic)
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = 30)
-            if current: #and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+            if current:# and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+                
                 screenbar = Scan.Scan.get('0','d').loc[ticker]
                 pmchange =  screenbar['Pre-market Change']
                 if numpy.isnan(pmchange):
@@ -246,7 +249,9 @@ class Data:
                            'close': [pm],
                            'volume': [0]}).set_index("datetime")
                     df = pd.concat([df, row])
+                    
                 except IndexError:
+                    
                     pass
             df.dropna(inplace = True)
             return (df)

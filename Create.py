@@ -95,7 +95,7 @@ class Create:
             sample_size = Create.setup_size(setup_type)
        
 
-            df = data.get(ticker)
+            df = data.get(ticker,date = date )
          
             
             index = data.findex(df,date)
@@ -103,7 +103,7 @@ class Create:
             if left < 0:
                 left = 0
             df2 = df[left:index]
-        
+            
             o = df.iat[index,0]
             add = pd.DataFrame({
                 'datetime':[date],
@@ -125,7 +125,7 @@ class Create:
               
 
           
-         
+           
             
 
             df = Create.get_lagged_returns(df, sample_size)
@@ -136,7 +136,7 @@ class Create:
             return  df
             
             #return Create.reform(df)
-        except:
+        except TimeoutError:
             pass
 
 
