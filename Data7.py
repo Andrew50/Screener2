@@ -136,7 +136,7 @@ class Data:
                 date = 'now'
 
             current = Data.isToday(date)
-            print(current)
+          
 
             if tf == 'daily':
                 tf = 'd'
@@ -320,7 +320,7 @@ class Data:
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
         except Exception as e:
             print(e)
-            #print('random error')
+            
     
     def runUpdate():
         tv = TvDatafeed()
@@ -357,7 +357,7 @@ class Data:
         from Create import Create as create
         from modelTest import modelTest
         
-        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F']
+        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F','NF']
 
         epochs = 200
         new = True

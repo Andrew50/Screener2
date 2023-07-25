@@ -23,7 +23,7 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'F', 'MR', 'NP']
+		setuplist = ['EP','NEP','P', 'F', 'MR', 'NP','NF']
 		#setuplist = ['EP','F','NF','NP','P']
 		#setuplist = ['F','NF','NP','P']
 		#setuplist = []
@@ -135,7 +135,7 @@ class Detection:
 											continue
 											#print(typ)
 										#prin
-										thresh = .82
+										thresh = .5
 
 										
 										if z > thresh:
