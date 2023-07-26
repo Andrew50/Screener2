@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
 	setup = 'PS'
 
-	if False:
+	if True:
 		setuptype = setup
 
 		epochs = 200
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
 		create.run(setuptype,prcnt_setup,epochs,False)
 	
-	if True:
+	if False:
 		s = setup
 		modelTest.runRandomTicker(s,.25)
 

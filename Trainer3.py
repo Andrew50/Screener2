@@ -246,15 +246,18 @@ class Trainer:
 					dir_list = os.listdir(path)
 					for d in dir_list:
 						if keyword in d:
-							if wait:
-								time.sleep(2)
-							gush = path + d
-							image1 = Image.open(gush)
-							bio1 = io.BytesIO()
-							image1.save(bio1, format="PNG")
-							self.setup_string = d
-							done = True
-							break
+							try:
+								if wait:
+									time.sleep(2)
+								gush = path + d
+								image1 = Image.open(gush)
+								bio1 = io.BytesIO()
+								image1.save(bio1, format="PNG")
+								self.setup_string = d
+								done = True
+								break
+							except:
+								pass
 					wait = True
 					if done:
 						break
@@ -592,7 +595,7 @@ class Trainer:
 								
 							
 								
-								if z > .2:
+								if z > .3:
 									tit = str(round(z*100))
 									god = currentday - 100
 									if god < 0:

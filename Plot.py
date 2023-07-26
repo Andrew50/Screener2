@@ -277,6 +277,7 @@ class Plot:
 
 
                     df1 = data.get(ticker,tf,account = True)
+                    
                     startdate = dfall.iloc[0]['Datetime']
                     enddate = dfall.iloc[-1]['Datetime']
                     try:
@@ -296,10 +297,17 @@ class Plot:
                     minmax = 300
                 #    if tf == '1min' and r1 - l1 > minmax:
                    #     r1 = l1 + minmax
+                    
+                    if l1 < 0:
+                        l1 = 0
                     df1 = df1[l1:r1]
-
+                    #if ticker == 'FNGU' and tf == 'h':
+                    #    print(df1)
+                       # print(l1)
+                      #  print(r1)
                     times = df1.index.to_list()
                     timesdf = []
+                    
                     for _ in range(len(df1)):
                         nextTime = pd.DataFrame({ 
                             'Datetime':[df1.index[_]]
@@ -416,9 +424,8 @@ class Plot:
                     
                     plt.savefig(p1, bbox_inches='tight') 
                 except Exception as e:
-                    if tf == 'd':
-                        print(ticker)
-                        print(startdate)
+                #except TimeoutError as e:
+                    
                 
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    

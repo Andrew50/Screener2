@@ -233,7 +233,7 @@ class Data:
                 df = df.resample(tf).apply(logic)
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = 30)
-            if current:# and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+            if current and not account:# and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
                 
                 screenbar = Scan.Scan.get('0','d').loc[ticker]
                 pmchange =  screenbar['Pre-market Change']
