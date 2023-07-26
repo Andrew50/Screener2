@@ -13,6 +13,7 @@ from PIL import Image
 import time
 import sys
 import pathlib
+import datetime
 import io
 import matplotlib.ticker as mticker
 import shutil
@@ -132,7 +133,7 @@ class Trainer:
 			df = pd.DataFrame()
 
 		df = pd.concat([df,add]).reset_index(drop = True)
-		print(df)
+		
 		
 		if(data.isBen()):
 			df.to_feather('C:/Screener/sync/database/ben_' + s + '.feather')
@@ -194,7 +195,8 @@ class Trainer:
 				[graph],
 				[sg.Text(key = '-stats-')],
 				[sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip'), sg.Text('Use No ' + str(self.use_no))],
-				[sg.Button('Toggle')]]
+				[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
+				]
 				self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
 				self.window.bind("<q>", "1")
 				self.window.bind("<w>", "2")
@@ -210,29 +212,39 @@ class Trainer:
 				self.window.bind("<o>", "cl")
 				self.window.bind("<Button-3>", "cl")
 			elif self.menu == 1:
-				god = 'Remove'
+				
 				layout = [
 				[sg.Image(key = '-CHART-')],
 				[sg.Button(s) for s in self.setup_list],
-				[sg.Button('Prev'),sg.Button('Next'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
-				[sg.Button('Toggle'), sg.Button(god)]
+				[sg.Button('Prev'),sg.Button('Remove'), sg.Button('Next'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
+				[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
 				]
 				self.window = sg.Window('Validator', layout,margins = (10,10),scaling=self.scale,finalize = True)
 				self.window.bind("<p>", "Next")
 				self.window.bind("<i>", "Prev")
-				self.window.bind("<o>", god)
+				self.window.bind("<o>", 'Remove')
 			
 			elif self.menu == 2:
 				layout = [
 				[sg.Image(key = '-CHART-')],
 				[sg.Button(s) for s in self.setup_list],
 				[sg.Button('No'),sg.Button('Skip'),sg.Button('Yes'), sg.Text(self.current_setup, key = '-text-'), sg.Text(key = '-counter-')],
-				[sg.Button('Toggle')]
+				[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
 				]
 				self.window = sg.Window('Tuner', layout,margins = (10,10),scaling=self.scale,finalize = True)
 				self.window.bind("<p>", "Yes")
 				self.window.bind("<i>", "No")
 				self.window.bind("<o>", "Skip")
+			elif self.menu == 3:
+				layout = [
+					[sg.Text('Ticker'),sg.InputText(key = '-input_ticker-')],
+					[sg.Text('Date'),sg.InputText(key = '-input_date-')],
+					[sg.Text('Setup'),sg.InputText(key = '-input_setup-')],
+					[sg.Button('Enter')],
+					[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
+					]
+				self.window = sg.Window('Manual', layout,margins = (10,10),scaling=self.scale,finalize = True)
+
 			self.init = False
 			self.window.maximize()
 		done = False
@@ -264,7 +276,7 @@ class Trainer:
 					
 				except TimeoutError:
 					pass
-		else:
+		elif self.menu == 1 or self.menu == 0:
 			while True:
 				try:
 					image1 = Image.open(r'C:/Screener/setups/charts/' + str(self.i) + '.png')
@@ -292,7 +304,7 @@ class Trainer:
 				stat_string += f'  {num} {setup}  |'
 			stat_string = stat_string[:-1]
 			self.window['-stats-'].update(stat_string)
-		else:
+		elif self.menu == 1 or self.menu == 2:
 			if self.menu == 1:
 				string = f'{self.i + 1} of {len(self.setups_df)}'
 			else:
@@ -300,6 +312,54 @@ class Trainer:
 			self.window['-counter-'].update(string)
 			self.window["-CHART-"].update(data=bio1.getvalue())
 
+
+	def manual_log(self):
+		try:
+			ticker = self.values['-input_ticker-']
+			date = self.values['-input_date-']
+			try:
+				date = datetime.datetime.strptime(date, '%Y-%m-%d')
+			except:
+				date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+			setup = self.values['-input_setup-']
+
+			try:
+				if(data.isBen()):
+					df = pd.read_feather('C:/Screener/sync/database/ben_' + setup + '.feather')
+				elif data.isLaptop():
+					df = pd.read_feather('C:/Screener/sync/database/laptop_' + setup + '.feather')
+				else:
+					df = pd.read_feather('C:/Screener/sync/database/aj_' + setup + '.feather')
+
+				s = df
+				s = s[s['ticker'] == ticker]
+				s = s[s['date'] == date]
+			except:
+				df = pd.DataFrame()
+				s = df
+
+			df2 = pd.DataFrame({
+			'date':[date],
+			'ticker':[ticker],
+			'setup':[1],
+			'req':[0]})
+			df = pd.concat([df,df2]).reset_index(drop = True)
+				
+
+			if s.empty:
+				if(data.isBen()):
+					df.to_feather('C:/Screener/sync/database/ben_' + setup + '.feather')
+				elif data.isLaptop():
+					#print('C:/Screener/sync/database/laptop_' + s + '.feather')
+					print(df)
+					df.to_feather('C:/Screener/sync/database/laptop_' + setup + '.feather')
+				else:
+					df.to_feather('C:/Screener/sync/database/aj_' + setup + '.feather')
+
+			else:
+				sg.Popup('Setup Already Logged')
+		except TimeoutError as e:
+			sg.Popup(e)
 	def loop(self):
 
 		if os.path.exists("C:/Screener/ben.txt"):
@@ -321,11 +381,11 @@ class Trainer:
 			os.mkdir("C:/Screener/setups/charts")
 			sg.theme('DarkGrey')
 			#self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' ,'PS', 'F' , 'NF']
-			self.setup_list = ['PS']
+			self.setup_list = create.get_setups_list()
 			self.scale = 4
 			self.setup = []
 			self.i = 0
-			self.menu = 0
+			self.menu = 3
 			self.current_setup = self.setup_list[0]
 
 
@@ -333,6 +393,7 @@ class Trainer:
 			self.dict = []
 			self.tickers = pd.read_feather(r"C:\Screener\sync\full_ticker_list.feather")['Ticker'].to_list()
 			self.index = -1
+		
 			self.preload(self)
 			self.update(self)
 			while True:
@@ -393,10 +454,25 @@ class Trainer:
 					self.preload(self)
 					self.current_setups = []
 					self.index = 0
+
+				elif self.event == 'Enter':
+					self.manual_log(self)
+
+
+
 				elif self.event == '-GRAPH-':
 					self.click(self)
-				elif self.event == 'Toggle':
+				elif self.event == 'Trainer' or self.event == 'Validator' or self.event == 'Tuner' or self.event == 'Manual':
 					#self.pool.terminate()
+					if self.event == 'Trainer':
+						self.menu = 0
+					elif self.event == 'Validator':
+						self.menu = 1
+					elif self.event == 'Tuner':
+						self.menu = 2
+
+					elif self.event == 'Manual':
+						self.menu = 3
 					self.window.close()
 					self.i = 0
 					while True:
@@ -408,16 +484,17 @@ class Trainer:
 							break
 						except:
 							pass
-					if self.menu == 2:
-						self.menu = 0
-					else:
-						self.menu += 1
+					#if self.menu == 2:
+					#	self.menu = 0
+					#else:
+					#	self.menu += 1
 					self.init = True
 					self.setups_df = pd.read_feather('C:/Screener/setups/database/EP.feather').sample(frac = 1).reset_index(drop = True)
 					if self.menu == 1:
 						self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
 					#self.current_setup = 'EP'
-					self.preload(self)
+					if self.menu != 3:
+						self.preload(self)
 					self.update(self)
 				elif self.event == 'right' or self.event == 'left':
 					self.click(self,False)

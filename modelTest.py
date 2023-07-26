@@ -142,8 +142,17 @@ class modelTest:
 
 
 			ii += 1
-	def combine(new,setuptype, setups = ['EP', 'NEP' , 'P','NP' , 'MR', 'PS' , 'F' , 'NF']): 
+	def combine(new,setuptype): 
 		if new:
+
+
+			#setups = ['EP', 'NEP' , 'P','NP' , 'MR', 'PS' , 'F' , 'NF']
+
+			setups = create.get_setups_list()
+
+
+
+
 			
 			for setup in setups:
 				try:

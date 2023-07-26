@@ -667,7 +667,10 @@ class Traits:
             m50 = pd.NA
                 
                 
-
+        try:
+            gudddd = risk
+        except:
+            risk = pd.NA
       
 
         #final df row

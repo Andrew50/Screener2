@@ -9,6 +9,7 @@ from tvDatafeed import TvDatafeed, Interval
 import os 
 import datetime
 import numpy
+
 from multiprocessing  import Pool
 import warnings
 #from Create import Create as create
@@ -357,7 +358,8 @@ class Data:
         from Create import Create as create
         from modelTest import modelTest
         
-        setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F','NF']
+        #setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F','NF']
+        setup_list = create.get_setups_list()
 
         epochs = 200
         new = True
@@ -366,11 +368,12 @@ class Data:
 
         if os.path.exists("C:/Screener/desktop.txt"):
             for s in setup_list:
-                modelTest.combine(new,s)
+                try:
+                    modelTest.combine(new,s)
 
-                create.run(s,prcnt_setup,epochs,False)
-
-
+                    create.run(s,prcnt_setup,epochs,False)
+                except:
+                    print(s + ' failed')
 
 
             if datetime.datetime.now().weekday() == 4:
@@ -386,6 +389,17 @@ class Data:
 
 
         shutil.copytree(src, dst)
+
+
+
+        path = "D:/Screener Backups/"
+
+        dir_list = os.listdir(path)
+
+        for b in dir_list:
+            dt = datetime.datetime.strptime(b, '%Y-%m-%d')
+            if (datetime.datetime.now() - dt).days > 30:
+                shutil.rmtree((path + b))
 
 
 
