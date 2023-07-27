@@ -31,7 +31,7 @@ class Detection:
 
 
 		setuplist = ['d_EP','d_NEP','d_P', 'd_F', 'd_MR', 'd_NP','d_NF']
-		SS
+		
 
 
 		model_list = []

@@ -143,62 +143,61 @@ class modelTest:
 
 			ii += 1
 	def combine(new,setuptype): 
-		if new:
+	
 
 
 			#setups = ['EP', 'NEP' , 'P','NP' , 'MR', 'PS' , 'F' , 'NF']
 
-			setups = create.get_setups_list()
-
-
+		setups = create.get_setups_list()
 
 
 			
-			for setup in setups:
-				try:
-					df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
-					df1['sindex'] = df1.index
-					df1['source'] = 'ben_'
+		for setup in setups:
+			try:
+				df1 = pd.read_feather(f"C:/Screener/sync/database/ben_{setup}.feather")
+				df1['sindex'] = df1.index
+				df1['source'] = 'ben_'
 
-				except:
-					df1 = pd.DataFrame()
-				try:
-					df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
-					df2['sindex'] = df2.index
-					df2['source'] = 'aj_'
-				except:
-					df2 = pd.DataFrame()
-				try:
+			except:
+				df1 = pd.DataFrame()
+			try:
+				df2 = pd.read_feather(f"C:/Screener/sync/database/aj_{setup}.feather")
+				df2['sindex'] = df2.index
+				df2['source'] = 'aj_'
+			except:
+				df2 = pd.DataFrame()
+			try:
 
-					df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
-					df4['sindex'] = df4.index
-					df4['source'] = 'laptop_'
-				except:
-					df4 = pd.DataFrame()
+				df4 = pd.read_feather(f"C:/Screener/sync/database/laptop_{setup}.feather")
+				df4['sindex'] = df4.index
+				df4['source'] = 'laptop_'
+			except:
+				df4 = pd.DataFrame()
 
 				
 
-				df3 = pd.concat([df1, df2, df4]).reset_index(drop = True)
-				
+			df3 = pd.concat([df1, df2, df4]).reset_index(drop = True)
+			try:
 				df3.to_feather(f"C:/Screener/setups/database/{setup}.feather")
-
+			except:
+				print(setup + ' failed')
 				#print(df3)
-		else:
-			df = pd.read_feather(r"C:/Screener/sync/allsetups.feather").sample(frac = .2)
+		#else:
+		#	df = pd.read_feather(r"C:/Screener/sync/allsetups.feather").sample(frac = .2)
 
-			new_df = df.drop(axis=1, labels=["Z", "timeframe", "annotation"])
-			for i in range(len(df)):
-				new_df.at[i, 'ticker'] = df.iloc[i]['Ticker']
-				new_df.at[i, 'date'] = df.iloc[i]['Date']
-				if(df.iloc[i]['Setup'] == setuptype):
-					new_df.at[i, 'setup'] = 1
-				else:
-					new_df.at[i, 'setup'] = 0
-			new_df = new_df.drop(axis=1, labels=['Ticker', 'Date', 'Setup']).reset_index(drop = True)
+		#	new_df = df.drop(axis=1, labels=["Z", "timeframe", "annotation"])
+		#	for i in range(len(df)):
+		#		new_df.at[i, 'ticker'] = df.iloc[i]['Ticker']
+		#		new_df.at[i, 'date'] = df.iloc[i]['Date']
+		#		if(df.iloc[i]['Setup'] == setuptype):
+		#			new_df.at[i, 'setup'] = 1
+		#		else:
+		#			new_df.at[i, 'setup'] = 0
+		#	new_df = new_df.drop(axis=1, labels=['Ticker', 'Date', 'Setup']).reset_index(drop = True)
 			
 		
 
-			new_df.to_feather('C:/Screener/setups/database/' + setuptype + '.feather')
+		#	new_df.to_feather('C:/Screener/setups/database/' + setuptype + '.feather')
 
 		
 
@@ -208,9 +207,9 @@ class modelTest:
 if __name__ == "__main__":
 
 
-	setup = 'F'
-
-	if False:
+	setup = 'h_F'
+	#modelTest.combine(True,True)
+	if True:
 		setuptype = setup
 
 		epochs = 200
@@ -226,7 +225,7 @@ if __name__ == "__main__":
 		s = setup
 		modelTest.runRandomTicker(s,.25)
 
-	if True:
+	if False:
 		if setup == 'EP':
 
 

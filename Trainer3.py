@@ -173,10 +173,18 @@ class Trainer:
 
 	def update(self):
 		if self.init:
+
+			modelTest.combine(True,'')
+			self.full_setup_list = create.get_setups_list()
+
 			if self.menu == 0:
 				self.stats_list = []
+				self.setup_list = []
+				for s in self.full_setup_list:
+					if self.current_tf in s:
+						self.setup_list.append(s)
 				for setup in self.setup_list:
-					modelTest.combine(True,setup)
+					
 					try:
 						df = pd.read_feather("C:/Screener/setups/database/" + setup + ".feather")
 						df = df[df['setup'] == 1]
@@ -194,7 +202,7 @@ class Trainer:
 				layout = [
 				[graph],
 				[sg.Text(key = '-stats-')],
-				[sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip'), sg.Text('Use No ' + str(self.use_no))],
+				[sg.Button('Next'), sg.Button('Clear'), sg.Button('Skip'), sg.Button('Toggle'),sg.Text('use no ' + str(self.use_no), key = '-use_no-'), sg.Button('d'), sg.Button('w'), sg.Button('h'), sg.Button('1min') , sg.Text(self.current_tf)],
 				[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
 				]
 				self.window = sg.Window('Trainer', layout,margins = (10,10),scaling=self.scale,finalize = True)
@@ -212,11 +220,11 @@ class Trainer:
 				self.window.bind("<o>", "cl")
 				self.window.bind("<Button-3>", "cl")
 			elif self.menu == 1:
-				
+				self.setup_list = self.full_setup_list
 				layout = [
 				[sg.Image(key = '-CHART-')],
 				[sg.Button(s) for s in self.setup_list],
-				[sg.Button('Prev'),sg.Button('Remove'), sg.Button('Next'), sg.Text('EP', key = '-text-'), sg.Text(key = '-counter-')],
+				[sg.Button('Prev'),sg.Button('Remove'), sg.Button('Next'), sg.Text(self.current_setup, key = '-text-'), sg.Text(key = '-counter-')],
 				[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
 				]
 				self.window = sg.Window('Validator', layout,margins = (10,10),scaling=self.scale,finalize = True)
@@ -225,6 +233,7 @@ class Trainer:
 				self.window.bind("<o>", 'Remove')
 			
 			elif self.menu == 2:
+				self.setup_list = self.full_setup_list
 				layout = [
 				[sg.Image(key = '-CHART-')],
 				[sg.Button(s) for s in self.setup_list],
@@ -236,10 +245,12 @@ class Trainer:
 				self.window.bind("<i>", "No")
 				self.window.bind("<o>", "Skip")
 			elif self.menu == 3:
+				self.setup_list = self.full_setup_list
 				layout = [
 					[sg.Text('Ticker'),sg.InputText(key = '-input_ticker-')],
 					[sg.Text('Date'),sg.InputText(key = '-input_date-')],
 					[sg.Text('Setup'),sg.InputText(key = '-input_setup-')],
+					[sg.Text('Timeframe'),sg.InputText(key = '-input_timeframe-')],
 					[sg.Button('Enter')],
 					[sg.Button('Trainer'), sg.Button('Validator'), sg.Button('Tuner'), sg.Button('Manual')]
 					]
@@ -301,7 +312,7 @@ class Trainer:
 			for i  in range(len(self.setup_list)):
 				setup = self.setup_list[i]
 				num = self.stats_list[i]
-				stat_string += f'  {num} {setup}  |'
+				stat_string += f'  {num} {setup.split("_")[1]}  |'
 			stat_string = stat_string[:-1]
 			self.window['-stats-'].update(stat_string)
 		elif self.menu == 1 or self.menu == 2:
@@ -317,11 +328,12 @@ class Trainer:
 		try:
 			ticker = self.values['-input_ticker-']
 			date = self.values['-input_date-']
+			tf = self.values['-input_timeframe-']
 			try:
 				date = datetime.datetime.strptime(date, '%Y-%m-%d')
 			except:
 				date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-			setup = self.values['-input_setup-']
+			setup = tf + '_' + self.values['-input_setup-']
 
 			try:
 				if(data.isBen()):
@@ -331,33 +343,29 @@ class Trainer:
 				else:
 					df = pd.read_feather('C:/Screener/sync/database/aj_' + setup + '.feather')
 
-				s = df
-				s = s[s['ticker'] == ticker]
-				s = s[s['date'] == date]
+				
 			except:
 				df = pd.DataFrame()
-				s = df
+				
 
+			
 			df2 = pd.DataFrame({
-			'date':[date],
 			'ticker':[ticker],
+			'date':[date],
 			'setup':[1],
 			'req':[0]})
 			df = pd.concat([df,df2]).reset_index(drop = True)
 				
 
-			if s.empty:
-				if(data.isBen()):
-					df.to_feather('C:/Screener/sync/database/ben_' + setup + '.feather')
-				elif data.isLaptop():
-					#print('C:/Screener/sync/database/laptop_' + s + '.feather')
-					print(df)
-					df.to_feather('C:/Screener/sync/database/laptop_' + setup + '.feather')
-				else:
-					df.to_feather('C:/Screener/sync/database/aj_' + setup + '.feather')
-
+			
+			if(data.isBen()):
+				df.to_feather('C:/Screener/sync/database/ben_' + setup + '.feather')
+			elif data.isLaptop():
+				df.to_feather('C:/Screener/sync/database/laptop_' + setup + '.feather')
 			else:
-				sg.Popup('Setup Already Logged')
+				df.to_feather('C:/Screener/sync/database/aj_' + setup + '.feather')
+
+		
 		except TimeoutError as e:
 			sg.Popup(e)
 	def loop(self):
@@ -374,19 +382,21 @@ class Trainer:
 		self.cutoff = 75
 		self.size = 300
 
-		self.use_no = False
+		self.use_no = True
 		with Pool(6) as self.pool:
 			if os.path.exists("C:/Screener/setups/charts"):
 				shutil.rmtree("C:/Screener/setups/charts")
 			os.mkdir("C:/Screener/setups/charts")
 			sg.theme('DarkGrey')
 			#self.setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' ,'PS', 'F' , 'NF']
-			self.setup_list = create.get_setups_list()
+			self.full_setup_list = create.get_setups_list()
+			self.setup_list = self.full_setup_list
 			self.scale = 4
 			self.setup = []
 			self.i = 0
 			self.menu = 3
 			self.current_setup = self.setup_list[0]
+			self.current_tf = 'd'
 
 
 			self.init = True
@@ -411,6 +421,27 @@ class Trainer:
 							self.i += 1
 							self.update(self)
 							self.preload(self)
+
+
+				elif self.event == '1min' or self.event == 'h' or self.event == 'd' or self.event == 'w':
+					self.current_tf = self.event
+					self.window.close()
+					self.init = True
+					self.i = 0
+					while True:
+
+						try:
+							if os.path.exists("C:/Screener/setups/charts"):
+								shutil.rmtree("C:/Screener/setups/charts")
+							os.mkdir("C:/Screener/setups/charts")
+							break
+						except:
+							pass
+					self.preload(self)
+
+					self.update(self)
+
+
 				elif self.event == 'Remove':
 					i = self.setups_df.iloc[self.i]['sindex']
 					setup = self.current_setup
@@ -458,6 +489,13 @@ class Trainer:
 				elif self.event == 'Enter':
 					self.manual_log(self)
 
+				elif self.event == 'Toggle':
+					if self.use_no:
+						self.use_no = False
+					else:
+						self.use_no = True
+
+					self.window['-use_no-'].update('use no ' + str(self.use_no))
 
 
 				elif self.event == '-GRAPH-':
@@ -473,6 +511,8 @@ class Trainer:
 
 					elif self.event == 'Manual':
 						self.menu = 3
+
+
 					self.window.close()
 					self.i = 0
 					while True:
@@ -489,7 +529,8 @@ class Trainer:
 					#else:
 					#	self.menu += 1
 					self.init = True
-					self.setups_df = pd.read_feather('C:/Screener/setups/database/EP.feather').sample(frac = 1).reset_index(drop = True)
+
+					self.setups_df = pd.read_feather('C:/Screener/setups/database/' + self.current_setup + '.feather').sample(frac = 1).reset_index(drop = True)
 					if self.menu == 1:
 						self.setups_df = self.setups_df[self.setups_df['setup'] == 1]
 					#self.current_setup = 'EP'
@@ -537,7 +578,8 @@ class Trainer:
 				while True:
 					try:
 						ticker = self.tickers[random.randint(0,len(self.tickers)-1)]
-						df = data.get(ticker)
+						df = data.get(ticker,tf = self.current_tf)
+
 						date_list = df.index.to_list()
 						date = date_list[random.randint(0,len(date_list) - 1)]
 						index = data.findex(df,date)
@@ -547,9 +589,15 @@ class Trainer:
 						df2 = df[left:index + 1]
 						if len(df2) > 30:
 							dolVol, adr, pmvol = detection.requirements(df2,len(df2) - 1,2,ticker)
-							if dolVol > 2000000 and adr > 2:
-								break
-					except:
+							if self.current_tf == 'h':
+								if dolVol > 2000000 and adr > 5:
+									break
+							else:
+								if dolVol > 2000000 and adr > 2:
+									break
+					except Exception as e:
+						if self.current_tf == 'h':
+							print(e)
 						pass
 				self.dict.append([ticker,date,df2])
 				arglist.append([i,df2])
@@ -558,9 +606,12 @@ class Trainer:
 				if i < len(self.setups_df):
 					try:
 						bar = self.setups_df.iloc[i]
+						
 						ticker = bar[0]
+						
 						date = bar[1]
-						df = data.get(ticker)
+					
+						df = data.get(ticker,self.current_setup.split('_')[0])
 						index = data.findex(df,date)
 					
 						left = index-self.size
@@ -569,7 +620,7 @@ class Trainer:
 
 						df2 = df[left:index + 1]
 						arglist.append([i,df2])
-					except Exception as e:
+					except TimeoutError as e:
 						print(e)
 						arglist.append([i,pd.DataFrame()])
 					
@@ -631,7 +682,8 @@ class Trainer:
 				p = pathlib.Path("C:/Screener/setups/charts") / strubg
 
 				plt.savefig(p, bbox_inches='tight')
-			except:
+			except Exception as e:
+				print(e)
 				p = pathlib.Path("C:/Screener/setups/charts") / strubg
 				shutil.copy(r"C:\Screener\tmp\blank.png",p)
 
@@ -652,7 +704,7 @@ class Trainer:
 
 
 					ticker = tickers[random.randint(0,len(tickers)-1)]
-					df = data.get(ticker)
+					df = data.get(ticker,tf = setuptype.split('_')[0])
 					if len(df) > 10:
 						size = len(df)
 						
