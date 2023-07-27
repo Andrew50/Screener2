@@ -96,6 +96,7 @@ class Log:
             df_log = pd.concat([self.df_log,new])
 
             df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
+            
             self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
             #self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
             self.df_traits = traits.update(new.values.tolist(), df_log,self.df_traits,self.df_pnl)
@@ -160,11 +161,15 @@ class Log:
                         if old_date < dt:
                             dt = old_date
                     df_log = df_log.sort_values(by='datetime', ascending = True).reset_index(drop = True)
+                    #if ticker != 'Deposit':
                     self.df_pnl = account.calcaccount(self.df_pnl,df_log,dt)
                     #self.df_pnl.reset_index().to_feather(r"C:\Screener\sync\pnl.feather")
                     #self.df_traits = traits.update(add.values.tolist()[0], df_log,self.df_traits,self.df_pnl)
-                    self.df_traits = traits.update(add.values.tolist(), df_log,self.df_traits,self.df_pnl)
-
+                    if ticker != 'Deposit':
+                        self.df_traits = traits.update(add.values.tolist(), df_log,self.df_traits,self.df_pnl)
+                    else:
+                        self.df_traits = traits.update([],df_log,pd.DataFrame(),self.df_pnl)
+                        self.df_traits.to_feather(r"C:\Screener\sync\traits.feather")
                     self.df_log = df_log
                     if os.path.exists("C:/Screener/tmp/pnl/charts"):
                         shutil.rmtree("C:/Screener/tmp/pnl/charts")

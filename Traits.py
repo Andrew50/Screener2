@@ -66,9 +66,6 @@ class Traits:
         old_traits = df_traits
 
     
-
-        
-
         new = pd.concat([old_traits,new_traits]).drop_duplicates('datetime',keep=False)
 
         new = new.sort_values(by='datetime', ascending = False)
