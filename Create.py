@@ -190,7 +190,7 @@ class Create:
 		for p in dir_list:
 				 
 			s = p.split('_')
-			s = s[1] + s[2]
+			s = s[1] + '_' + s[2].split('.')[0]
 			use = True
 			for h in setups:
 				if s == h:
@@ -270,7 +270,7 @@ class Create:
 			sample_size = 40
 		elif setup_type == 'MR':
 			sample_size = 40
-		elif setup_type == 'F':
+		elif 'F' in setup_type:
 			sample_size = 80
 		   
 		else: #pivot
