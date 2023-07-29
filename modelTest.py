@@ -3,6 +3,7 @@ import random
 import pandas as pd
 from Create import Create as create
 import time
+import numpy as np
 import sys, os
 from tensorflow.keras.models import load_model
 import mplfinance as mpf
@@ -104,13 +105,12 @@ class modelTest:
 			try:
 			
 				df = create.test_data(ticker,date, setuptype)
-
 			
 				sys.stdout = open(os.devnull, 'w')
-				god = model.predict(df)[0][1] * 100
-
+				god = model.predict(df)
+				
 				sys.stdout = sys.__stdout__
-		
+				god = god[0][1] * 100
 				if True:
 					df1 = data.get(ticker,date = date)
 
@@ -207,9 +207,9 @@ class modelTest:
 if __name__ == "__main__":
 
 
-	setup = 'h_F'
+	setup = 'd_F'
 	#modelTest.combine(True,True)
-	if True:
+	if False:
 		setuptype = setup
 
 		epochs = 200
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 		s = setup
 		modelTest.runRandomTicker(s,.25)
 
-	if False:
+	if True:
 		if setup == 'EP':
 
 
@@ -259,7 +259,7 @@ if __name__ == "__main__":
 		elif setup == 'NF':
 			dates = ['2022-12-02','2023-05-24']
 			tickers = ['open','pton',]
-		elif setup == 'F':
+		elif setup == 'd_F':
 			dates = ['2023-07-24','2023-07-24','2023-03-31','2023-03-10','2023-03-30','2020-08-13','2020-11-10','2023-01-05']
 			#dates = ['2023-03-02','2023-01-26','2023-07-12','2023-06-28','2023-07-20','2023-07-12','2023-07-13','2023-04-17','2023-07-12','2023-04-03','2023-03-09','2023-03-29','2023-06-13']
 			#,'2020-08-13','2020-11-10','2023-01-05',

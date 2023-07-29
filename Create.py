@@ -125,7 +125,7 @@ class Create:
 			  
 
 		  
-		   
+			print(len(df))
 			
 
 			df = Create.get_lagged_returns(df, sample_size)
@@ -319,8 +319,9 @@ class Create:
 	def test_data(ticker,date,setup_type):
 
 		bar = [ticker,date,1,"" ,"","",setup_type]
-		x = Create.nn_multi(bar).values
-
+		x = Create.nn_multi(bar)
+		print(x)
+		x = x.values
 		sample_size = Create.setup_size(setup_type)
 	 
 		x = Create.reshape_x(x[0:, :-1],sample_size)
