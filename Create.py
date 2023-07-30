@@ -71,7 +71,7 @@ class Create:
 		
 	  #  num_feats = x.shape[1]//FEAT_LENGTH
 		num_feats = x.shape[1]//FEAT_LENGTH
-		#print(num_feats)
+	
 		#num_feats = 4
 		x_reshaped = np.zeros((x.shape[0], FEAT_LENGTH, num_feats))
 		for n in range(0, num_feats):
@@ -125,7 +125,7 @@ class Create:
 			  
 
 		  
-			print(len(df))
+			
 			
 
 			df = Create.get_lagged_returns(df, sample_size)
@@ -320,7 +320,7 @@ class Create:
 
 		bar = [ticker,date,1,"" ,"","",setup_type]
 		x = Create.nn_multi(bar)
-		print(x)
+	
 		x = x.values
 		sample_size = Create.setup_size(setup_type)
 	 
