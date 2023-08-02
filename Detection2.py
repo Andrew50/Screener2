@@ -2,8 +2,7 @@
 import statistics
 from Log3 import Log as log
 
-from flag import Flag as flag
-from pivot import Pivot as pivot
+
 
 import datetime
 
@@ -24,10 +23,17 @@ class Detection:
    
 
 	def check(container):
-		setuplist = ['EP','NEP','P', 'NP', 'AF', 'MR']
-		#setuplist = ['EP','F','NF','NP','P']
-		#setuplist = ['F','NF','NP','P']
-		#setuplist = []
+		#setuplist = ['EP','NEP','P', 'F', 'MR', 'NP']
+
+
+
+
+
+
+		setuplist = ['d_EP','d_NEP','d_P', 'd_F', 'd_MR', 'd_NP','d_NF']
+		
+
+
 		model_list = []
 
 		print('loading models')
@@ -69,7 +75,7 @@ class Detection:
 			except TimeoutError:
 				pass
 		
-
+			
 			except KeyError:
 				continue
 		
@@ -86,9 +92,9 @@ class Detection:
 					continue
 			except:
 				pass
-
+			
 		
-			if len(dff) > 10:
+			if len(dff) > 5:
 		
 				for date in date_list:
 					try:
@@ -104,7 +110,7 @@ class Detection:
 								start = 0
 							df = dff[start:currentday + 200]
 							currentday = data.findex(df,date)
-					
+							
 							dolVol, adr, pmDolVol = Detection.requirements(df,currentday,path,ticker)
 	
 							if tf == 'd':
@@ -118,7 +124,7 @@ class Detection:
 
 
 
-								if (dolVol > 1000000 or pmDolVol  > 1 * 1000000) and adr > 3:
+								if (dolVol > 8000000 or pmDolVol  > .5 * 1000000) and adr > 2.8:
 
 									sys.stdout = open(os.devnull, 'w')
 									for god in model_list:
@@ -128,6 +134,7 @@ class Detection:
 
 											#typ += '  ml'
 											df2 = create.reform(df,typ,currentday)
+											print(df2)
 											#sys.stdout = open(os.devnull, 'w')
 											z = model.predict(df2)[0][1]
 										#	sys.stdout = sys.__stdout__
@@ -135,15 +142,15 @@ class Detection:
 											continue
 											#print(typ)
 										#prin
-										thresh = .85
+										thresh = .25
 
 										
 										if z > thresh:
 											z = round(z*100)
-											print('logged')
+									
 											log.log(df,currentday, tf, ticker, z, path , typ)  
 									sys.stdout = sys.__stdout__
-									if True:
+									if False:
 
 										#if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or True:
 										#	sEP = True
@@ -158,7 +165,7 @@ class Detection:
 
 
 										sEP = False
-										sMR = False
+										sMR = False 
 										sPivot = True
 										sFlag = False
 										dolVolFilter = 10000000

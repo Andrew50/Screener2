@@ -66,9 +66,6 @@ class Traits:
         old_traits = df_traits
 
     
-
-        
-
         new = pd.concat([old_traits,new_traits]).drop_duplicates('datetime',keep=False)
 
         new = new.sort_values(by='datetime', ascending = False)
@@ -260,7 +257,8 @@ class Traits:
                 df = df.reset_index(drop = True).sort_values(by='datetime',ascending = False)
             except:
                 df = pd.DataFrame()
-    
+        else:
+            df = pd.DataFrame()
         return df
 
 
@@ -540,42 +538,46 @@ class Traits:
             for i in range(50):
                 prices.append(hourly.iat[i + start - 50,3])
             i = 0
-            while True:
-                close = hourly.iat[start+i,3]
-                cdate = hourly.index[start + i] + datetime.timedelta(hours = 1)
+            try:
+                while True:
+                    close = hourly.iat[start+i,3]
+                    cdate = hourly.index[start + i] + datetime.timedelta(hours = 1)
 
-                if cdate > stopdate:
-                    if pd.isna(h10):
-                        h10 = maxloss
-                        h10time = ( cdate- date).total_seconds() / 3600
-                    if pd.isna(h20):
-                        h20 = maxloss
-                        h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
-                    if pd.isna(h50):
-                        h50 = maxloss
-                        h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                    if cdate > stopdate:
+                        if pd.isna(h10):
+                            h10 = maxloss
+                            h10time = ( cdate- date).total_seconds() / 3600
+                        if pd.isna(h20):
+                            h20 = maxloss
+                            h20time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
+                        if pd.isna(h50):
+                            h50 = maxloss
+                            h50time = (hourly.index[start + i + 1] - date).total_seconds() / 3600
 
-                if (not pd.isna(h20) and not pd.isna(h10) and pd.isna(h50)):
-                    break
+                    if (not pd.isna(h20) and not pd.isna(h10) and pd.isna(h50)):
+                        break
 
-                if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(h10):
-                    h10 = direction*(close/openprice - 1)*100
-                    h10time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
-                    arrow_list.append([str(cdate),str(close),'m',str(symbol)])
-                if direction * close < direction * statistics.mean(prices[-20:]) and pd.isna(h20):
-                    h20 = direction*(close/openprice - 1)*100
-                    h20time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
-                    arrow_list.append([str(cdate),str(close),'b',str(symbol)])
-                if direction * close < direction * statistics.mean(prices[-50:]) and pd.isna(h50):
-                    h50 = direction*(close/openprice - 1)*100
-                    h50time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
-                    arrow_list.append([str(cdate),str(close),'c',str(symbol)]) 
+                    if direction * close < direction * statistics.mean(prices[-10:]) and pd.isna(h10):
+                        h10 = direction*(close/openprice - 1)*100
+                        h10time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
+                        arrow_list.append([str(cdate),str(close),'m',str(symbol)])
+                    if direction * close < direction * statistics.mean(prices[-20:]) and pd.isna(h20):
+                        h20 = direction*(close/openprice - 1)*100
+                        h20time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
+                        arrow_list.append([str(cdate),str(close),'b',str(symbol)])
+                    if direction * close < direction * statistics.mean(prices[-50:]) and pd.isna(h50):
+                        h50 = direction*(close/openprice - 1)*100
+                        h50time = ((hourly.index[start + i] - date)+datetime.timedelta(hours=1)).total_seconds() / 3600
+                        arrow_list.append([str(cdate),str(close),'c',str(symbol)]) 
 
-                i += 1
-                if i + start >= len(hourly):
-                    break
-                prices.append(hourly.iat[start + i,3])
-   
+                    i += 1
+                    if i + start >= len(hourly):
+                        break
+                    prices.append(hourly.iat[start + i,3])
+            
+            except:
+                pass
+
             #daily exit calculator
             start = startd 
             prices = []
@@ -662,7 +664,10 @@ class Traits:
             m50 = pd.NA
                 
                 
-
+        try:
+            gudddd = risk
+        except:
+            risk = pd.NA
       
 
         #final df row

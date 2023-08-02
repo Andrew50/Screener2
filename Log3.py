@@ -113,7 +113,7 @@ class Log:
 
             
             
-            cooldown = 10
+            cooldown = 0
 
             #gap percent
             #adr
@@ -130,51 +130,51 @@ class Log:
 
             file_path = "C:/Screener/tmp/subsetups/" + str(os.getpid()) + ".feather"
 
-            
-
-            try:
-                full = pd.read_feather(file_path)
+            exlude = False
+            if cooldown > 0:
+                try:
+                    full = pd.read_feather(file_path)
                     
-                scan = full
+                    scan = full
                    
 
             
-                scanholder = pd.DataFrame()
-                for k in range(len(scan)):
-                    if scan.iat[k,1] == ticker:
-                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
-                scan = scanholder
+                    scanholder = pd.DataFrame()
+                    for k in range(len(scan)):
+                        if scan.iat[k,1] == ticker:
+                            scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+                    scan = scanholder
 
               
-                scanholder = pd.DataFrame()
-                for k in range(len(scan)):
-                    if scan.iat[k,2] == st:
-                        scanholder = pd.concat([scanholder,scan.iloc[[k]]])
-                scan = scanholder
+                    scanholder = pd.DataFrame()
+                    for k in range(len(scan)):
+                        if scan.iat[k,2] == st:
+                            scanholder = pd.concat([scanholder,scan.iloc[[k]]])
+                    scan = scanholder
                 
             
-                if len(scan) > 0:
+                    if len(scan) > 0:
                     
-                    recent_date = scan.iloc[-1]['Date']
-                    delta = (date - recent_date).days
-                    if abs(delta) <= cooldown:
-                        exclude = True
+                        recent_date = scan.iloc[-1]['Date']
+                        delta = (date - recent_date).days
+                        if abs(delta) <= cooldown:
+                            exclude = True
                     
+                        else:
+                            exclude = False
                     else:
                         exclude = False
-                else:
+                except FileNotFoundError:
+                    full = pd.DataFrame()
                     exclude = False
-            except FileNotFoundError:
-                full = pd.DataFrame()
-                exclude = False
-            except IndexError:
-                exclude = False
-            except pyarrow.lib.ArrowInvalid:
+                except IndexError:
+                    exclude = False
+                except pyarrow.lib.ArrowInvalid:
 
-                #full = pd.DataFrame()
-                exclude = True
-            except OSError:
-                exclude = True
+                    #full = pd.DataFrame()
+                    exclude = True
+                except OSError:
+                    exclude = True
                 
             
             if not exclude:

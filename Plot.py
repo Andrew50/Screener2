@@ -101,9 +101,12 @@ class Plot:
 
         image1 = None
         image2 = None
+        image3 = None
 
-
-        while image1 == None or image2 == None:
+        start = datetime.datetime.now()
+        while image1 == None or image2 == None or image3 == None:
+            if (datetime.datetime.now() - start).seconds > 8:
+                pool.map_async(Plot.create,[[self.i,self.df_traits]])
             try:
                 image1 = Image.open(r"C:\Screener\tmp\pnl\charts" + f"\{self.i}" + "1min.png")
                 image2 = Image.open(r"C:\Screener\tmp\pnl\charts" + f"\{self.i}" + "d.png")
@@ -274,9 +277,18 @@ class Plot:
 
 
                     df1 = data.get(ticker,tf,account = True)
+                    
                     startdate = dfall.iloc[0]['Datetime']
                     enddate = dfall.iloc[-1]['Datetime']
-                    l1 = data.findex(df1,startdate) - 50
+                    try:
+
+                        l1 = data.findex(df1,startdate) - 50
+                    except:
+                        if 'd' in tf or 'w' in tf:
+                            df1 = df1 = data.get(ticker,tf,account = False)
+                            l1 = data.findex(df1,startdate) - 50
+                        else:
+                            raise Exception()
                     closed = df.iloc[i]['closed']
                     if closed:
                         r1 = data.findex(df1,enddate) + 50
@@ -285,10 +297,17 @@ class Plot:
                     minmax = 300
                 #    if tf == '1min' and r1 - l1 > minmax:
                    #     r1 = l1 + minmax
+                    
+                    if l1 < 0:
+                        l1 = 0
                     df1 = df1[l1:r1]
-
+                    #if ticker == 'FNGU' and tf == 'h':
+                    #    print(df1)
+                       # print(l1)
+                      #  print(r1)
                     times = df1.index.to_list()
                     timesdf = []
+                    
                     for _ in range(len(df1)):
                         nextTime = pd.DataFrame({ 
                             'Datetime':[df1.index[_]]
@@ -403,9 +422,11 @@ class Plot:
                     ax.set_yscale('log')
                     ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
                     
-                    plt.savefig(p1, bbox_inches='tight')
-                except TimeoutError as e:
-                    print(e)
+                    plt.savefig(p1, bbox_inches='tight') 
+                except Exception as e:
+                #except TimeoutError as e:
+                    
+                
                     shutil.copy(r"C:\Screener\tmp\blank.png",p1)
                    
                     

@@ -9,8 +9,11 @@ from tvDatafeed import TvDatafeed, Interval
 import os 
 import datetime
 import numpy
+
 from multiprocessing  import Pool
 import warnings
+#from Create import Create as create
+
 import yfinance as yf
 import shutil
 warnings.filterwarnings("ignore")
@@ -31,6 +34,7 @@ class Data:
 
 
     def pool(deff,arg,nodes = 5):
+          
             pool = Pool(processes = nodes)
             data = list(tqdm(pool.imap(deff, arg), total=len(arg)))
             return(data)
@@ -60,6 +64,7 @@ class Data:
 
 
     def isToday(dt):
+       
         if dt == 'now':
             return True
         if dt == None:
@@ -70,6 +75,7 @@ class Data:
         today = datetime.date.today()
         today = datetime.datetime.combine(today,time)
         dt = Data.convert_date(dt)
+       
         if dt >= today:
             return True
         return False
@@ -131,7 +137,7 @@ class Data:
                 date = 'now'
 
             current = Data.isToday(date)
-
+          
 
             if tf == 'daily':
                 tf = 'd'
@@ -139,36 +145,46 @@ class Data:
                 tf = '1min'
 
 
-            if account:
-                #fetch file
-                dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
-                dff = dff.between_time('09:30' , '15:59')
-
-                tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
-                screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
-                screener_data.set_index('Ticker', inplace = True)
-            
-                exchange = str(screener_data.loc[ticker]['Exchange'])
-                df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
-                df.drop('symbol', axis = 1, inplace = True)
-                df.index = df.index + pd.Timedelta(hours=4)
-                lastday = dff.index[-1]   
-                scrapped_data_index = Data.findex(df,lastday) 
-                if scrapped_data_index == None:     
-                    pass     
-                else:    
+            if account:# and 'd' not in tf and 'w' not in tf:
                 
-                    df = df[scrapped_data_index + 1:]
-                    df = pd.concat([dff,df])
+                try:
+                   # if tf == 'd' or tf == 'w' or tf == 'm':
+                 #       dff = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
+                    #fetch file
+                  #  else:
+                    dff = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                    dff = dff.between_time('09:30' , '15:59')
+
+                    tvr = TvDatafeed(username="billingsandrewjohn@gmail.com",password="Steprapt04")
+                    screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
+                    screener_data.set_index('Ticker', inplace = True)
+            
+                    exchange = str(screener_data.loc[ticker]['Exchange'])
+                    df = tvr.get_hist(ticker, exchange, interval=Interval.in_1_minute, n_bars=10000, extended_session = premarket)
+                    df.drop('symbol', axis = 1, inplace = True)
+                    df.index = df.index + pd.Timedelta(hours=4)
+                    lastday = dff.index[-1]   
+                    scrapped_data_index = Data.findex(df,lastday) 
+                    if scrapped_data_index == None:     
+                        pass     
+                    else:    
+                
+                        df = df[scrapped_data_index + 1:]
+                        df = pd.concat([dff,df])
+                except:
+                    df = dff
                 
             else:
                 if tf == 'd' or tf == 'w' or tf == 'm':
                     if ticker == "^VIX" or old:
                         df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                     else:
-                        df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                        #df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
+                   
+                        df = feather.read_feather(r"" + path + "/daily/" + ticker + ".feather")
                 else:
                     if current and not (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+                        
                         tvr = TvDatafeed(username="cs.benliu@gmail.com",password="tltShort!1")
                         screener_data = feather.read_feather(r"C:\Screener\sync\full_ticker_list.feather")
                         screener_data.set_index('Ticker', inplace = True)
@@ -207,9 +223,10 @@ class Data:
                         df = feather.read_feather(r"" + path + "/minute/" + ticker + ".feather")
                         if not premarket:
                             df = df.between_time('09:30' , '15:59')
+        
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = -30)
-            if tf != '1min':# and tf != 'd':
+            if (tf != '1min' and tf != 'd' ) or (account ):
                 logic = {'open'  : 'first',
                             'high'  : 'max',
                             'low'   : 'min',
@@ -218,7 +235,8 @@ class Data:
                 df = df.resample(tf).apply(logic)
             if 'h' in tf:
                 df.index = df.index + pd.Timedelta(minutes = 30)
-            if current and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+            if current and not account:# and (datetime.datetime.now().hour < 5 or (datetime.datetime.now().hour < 6 and datetime.datetime.now().minute < 30)):
+                
                 screenbar = Scan.Scan.get('0','d').loc[ticker]
                 pmchange =  screenbar['Pre-market Change']
                 if numpy.isnan(pmchange):
@@ -233,7 +251,9 @@ class Data:
                            'close': [pm],
                            'volume': [0]}).set_index("datetime")
                     df = pd.concat([df, row])
+                    
                 except IndexError:
+                    
                     pass
             df.dropna(inplace = True)
             return (df)
@@ -258,7 +278,7 @@ class Data:
                 if (lastDay == lastDStock):
                     return
             
-            except AttributeError: #df is empty
+            except: #df is empty or doesnt exist
                 exists = False
 
             if tf == 'daily':
@@ -300,8 +320,9 @@ class Data:
             #testing function //////////
             #df.to_csv("C:/Screener/data_test/" + ticker + tf+".csv")
             feather.write_feather(df, path + "/"+tf+"/" + ticker + ".feather")
-        except:
-            print('random error')
+        except Exception as e:
+            print(e)
+            
     
     def runUpdate():
         tv = TvDatafeed()
@@ -335,11 +356,29 @@ class Data:
         
         Data.pool(Data.update, batches)
 
+        from Create import Create as create
+        from modelTest import modelTest
+        
+        #setup_list = ['EP', 'NEP' , 'P','NP' , 'MR' , 'F','NF']
+        setup_list = create.get_setups_list()
+
+        epochs = 200
+        new = True
+        prcnt_setup = .05
+        
+
+        if os.path.exists("C:/Screener/desktop.txt"):
+            for s in setup_list:
+                try:
+                    modelTest.combine(new,s)
+
+                    create.run(s,prcnt_setup,epochs,False)
+                except:
+                    print(s + ' failed')
 
 
-
-        if datetime.datetime.now().weekday() == 4:
-            Data.backup()
+            if datetime.datetime.now().weekday() == 4:
+                Data.backup()
         
 
 
@@ -351,6 +390,17 @@ class Data:
 
 
         shutil.copytree(src, dst)
+
+
+
+        path = "D:/Screener Backups/"
+
+        dir_list = os.listdir(path)
+
+        for b in dir_list:
+            dt = datetime.datetime.strptime(b, '%Y-%m-%d')
+            if (datetime.datetime.now() - dt).days > 30:
+                shutil.rmtree((path + b))
 
 
 
@@ -380,6 +430,12 @@ class Data:
 
     def isLaptop():
         if(os.path.exists("C:/Screener/laptop.txt")):
+            return True
+        return False
+
+
+    def isTae():
+        if(os.path.exists("C:/Screener/tae.txt")):
             return True
         return False
 

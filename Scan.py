@@ -83,6 +83,8 @@ class Scan:
 
     
     def runDailyScan(brows):
+
+        today = str(datetime.date.today())
         try:
             browser = brows
             if(browser == None):
@@ -100,13 +102,26 @@ class Scan:
             download_screener_data = browser.find_element(By.XPATH, '//div[@data-name="screener-export-data"]')
             download_screener_data.click()
             time.sleep(1.5)
-        except:
+            downloaded_file = r"C:\Downloads\america_" + today + ".csv"
+        except Exception as e:
+            print(e)
             print('manual csv fetch required')
-            print('enter when done')
-            input()
-        today = str(datetime.date.today())
-        downloaded_file = r"C:\Downloads\america_" + today + ".csv"
-        
+
+           # print('enter when done')
+           # input()
+            found = False
+            while True:
+                path = r"C:\Downloads"
+                dir_list = os.listdir(path)
+                for direct in dir_list:
+                    if today in direct:
+                        downloaded_file = path + "\\" + direct
+                        print('found file')
+                        found = True
+                        break
+                if found:
+                    break
+
         time.sleep(3)
 
         screener_data = pd.read_csv(downloaded_file)
@@ -194,7 +209,7 @@ class Scan:
 
 
 
-        options.headless = False
+        options.headless = True
 
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
         FireFoxDriverPath = os.path.join(os.getcwd(), 'Drivers', 'geckodriver.exe')

@@ -12,7 +12,7 @@ from Detection2 import Detection as detection
 
 from Scan import Scan as scan
 
-from UI4 import UI as ui
+from UI5 import UI as ui
 
 from Consolidator import consolidate
 
@@ -153,17 +153,22 @@ class Screener:
         
 
 #repackage as a list of 5 lists
-
-        
+        if os.path.exists("C:/Screener/laptop.txt"):
+            nodes = 8
+        else:
+            
+            nodes = 4
         pbar.close()
         print('spliting')
         pbar = tqdm(total=len(container))
         ii = 0
-        package = [[],[],[],[],[]]
+        package = []
+        for _ in range(nodes):
+            package.append([])
         for bar in container:
             package[ii].append(bar)
             ii += 1
-            if ii == 5:
+            if ii == nodes:
                 ii = 0
 
             pbar.update(1)
@@ -172,7 +177,7 @@ class Screener:
      
         
       
-        data.pool(detection.check, package)
+        data.pool(detection.check, package,nodes = nodes)
 
        # pbar = tqdm(total=len(container))
      ##   for bar in container:
@@ -186,8 +191,9 @@ class Screener:
         
 
 if __name__ == '__main__':
-    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)):
-
+    #if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) and not os.path.exists("C:/Screener/laptop.txt"):
+    if   ((datetime.datetime.now().hour) < 5 or (datetime.datetime.now().hour == 5 and datetime.datetime.now().minute < 40)) or not os.path.exists("C:/Screener/laptop.txt"):
+    
         Screener.queue('0')
 
          
@@ -199,13 +205,34 @@ if __name__ == '__main__':
             Screener.queue(tf = '1min', date = '0',browser = browser)
 
     else:
+        if False:
+            i = 0
+            path = "C:/Screener/tmp/subtickerlists/"
+            while True:
+                print('enter cycle length (x50)')
+                cycles = int(input())
+                for _ in range(cycles):
+                    dir_list = os.listdir(path)
+
+                    direct = path + dir_list[0]
+
+                    #tickers = pd.read_feather('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')['Ticker'].to_list()
+                    tickers = pd.read_feather(direct)['Ticker'].to_list()
 
 
-        Screener.queue()
-        ui.loop(ui,True)
+                    Screener.queue(ticker = tickers,fpath = 0)
+          
 
+            
+                   # os.remove('C:/Screener/tmp/subtickerlists/' + str(i) + '.feather')
+               
+                    os.remove(direct)
+                   # i += 1
+        
+            
+        else:
 
-
+            Screener.queue(fpath = 1)
         '''
         browser = scan.startFirefoxSession()
         while datetime.datetime.now().hour < 13:
